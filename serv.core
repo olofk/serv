@@ -1,0 +1,55 @@
+CAPI=2:
+
+name : ::serv:0
+
+filesets:
+  core:
+    files:
+      - rtl/shift_reg.v
+      - rtl/ser_add.v
+      - rtl/serv_alu.v
+      - rtl/serv_decode.v
+      - rtl/serv_ctrl.v
+      - rtl/serv_regfile.v
+      - rtl/serv_top.v
+    file_type : verilogSource
+
+  ser_add_tb:
+    files:
+      - ser_add_tb.v
+    file_type : verilogSource
+    depend : [vlog_tb_utils]
+
+  serv_ctrl_tb:
+    files:
+      - bench/serv_ctrl_tb.v : {file_type : verilogSource}
+    depend : [vlog_tb_utils]
+
+  serv_top_tb:
+    files:
+      - firmware.hex : {copyto : firmware.hex, file_type : user}
+      - decode.mem : {copyto : decode.mem, file_type : user}
+      - serv_top_tb.v
+    file_type : verilogSource
+    depend : [vlog_tb_utils]
+
+targets:
+  default:
+    default_tool : icarus
+    filesets : [core, tb]
+    toplevel : serv_top_tb
+
+  ser_add_tb:
+    default_tool : icarus
+    filesets: [core, ser_add_tb]
+    toplevel: ser_add_tb
+
+  serv_ctrl_tb:
+    default_tool: icarus
+    filesets : [core, serv_ctrl_tb]
+    toplevel : serv_ctrl_tb
+
+  serv_top_tb:
+    default_tool: icarus
+    filesets : [core, serv_top_tb]
+    toplevel : serv_top_tb
