@@ -5,14 +5,18 @@ name : ::serv:0
 filesets:
   core:
     files:
+      - rtl/camd_ram.v
+      - rtl/serv_params.vh : {is_include_file : true}
       - rtl/shift_reg.v
       - rtl/ser_add.v
       - rtl/serv_alu.v
-      - rtl/serv_decode.v
       - rtl/serv_ctrl.v
+      - rtl/serv_decode.v
+      - rtl/serv_mem_if.v
       - rtl/serv_regfile.v
       - rtl/serv_top.v
     file_type : verilogSource
+    depend : [wb_ram]
 
   ser_add_tb:
     files:
@@ -25,20 +29,35 @@ filesets:
       - bench/serv_ctrl_tb.v : {file_type : verilogSource}
     depend : [vlog_tb_utils]
 
+  serv_decode_tb:
+    files: [bench/serv_decode_tb.v : {file_type : verilogSource}]
+    depend : [vlog_tb_utils]
   serv_top_tb:
     files:
       - firmware.hex : {copyto : firmware.hex, file_type : user}
-      - decode.mem : {copyto : decode.mem, file_type : user}
-      - serv_top_tb.v
+      - bench/serv_top_tb.v
     file_type : verilogSource
-    depend : [vlog_tb_utils]
+    depend : [vlog_tb_utils, "yosys:techlibs:ice40"]
 
+  pcf:
+    files: [data/dummy.pcf : {file_type : PCF}]
 targets:
   default:
     default_tool : icarus
     filesets : [core, tb]
     toplevel : serv_top_tb
 
+  synth:
+    default_tool : icestorm
+    filesets : [core, pcf]
+    toplevel : serv_top
+  lint:
+    default_tool : verilator
+    filesets : [core]
+    tools:
+      verilator:
+        mode : lint-only
+    toplevel : serv_top
   ser_add_tb:
     default_tool : icarus
     filesets: [core, ser_add_tb]
@@ -48,6 +67,11 @@ targets:
     default_tool: icarus
     filesets : [core, serv_ctrl_tb]
     toplevel : serv_ctrl_tb
+
+  serv_decode_tb:
+    default_tool: icarus
+    filesets : [core, serv_decode_tb]
+    toplevel : serv_decode_tb
 
   serv_top_tb:
     default_tool: icarus

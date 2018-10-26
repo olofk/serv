@@ -3,9 +3,9 @@ module serv_ctrl_tb;
    reg clk = 1'b1;
 
    reg go;
-   reg instr;
-   reg jal;
-
+   wire en;
+   wire jump;
+   
    wire [31:0] pc_data;
    wire        pc_valid;
    reg         pc_ready = 1'b1;
@@ -24,20 +24,26 @@ module serv_ctrl_tb;
 
    vlog_tb_utils vtu();
    
+   serv_decode decode
+     (
+      .clk (clk),
+      .i_go (go),
+      .i_instr        (instruction),
+      .o_ctrl_jump    (jump),
+      .o_ctrl_en      (en),
+      .o_imm          (offset),
+      .o_rd_from_ctrl ());
+
    serv_ctrl
      #(.RESET_PC (32'h464))
    dut
      (
-      .clk (clk),
-      .i_go (go),
-      .i_instr (instr),
-      .i_jal (jal),
-      .i_reg11 (reg11),
-      .i_reg2012 (reg2012[0]),
-      .o_reg2012_en (reg2012_en),
-      .o_rd         (rd),
-      .o_rd_valid   (rd_valid),
-      .o_pc_data (pc_data),
+      .clk        (clk),
+      .i_en       (en),
+      .i_jump     (jump),
+      .i_offset   (offset),
+      .o_rd       (rd),
+      .o_i_dat    (pc_data),
       .o_pc_valid (pc_valid),
       .i_pc_ready (pc_ready));
 
@@ -48,17 +54,16 @@ module serv_ctrl_tb;
    
    initial begin
       instruction = 32'h3d80006f;
-      instruction = 32'h0080706f;
-      reg11 = instruction[20];
-      reg2012 = {instruction[31],instruction[19:12]};
+      //instruction = 32'h0080706f;
       offset = {instruction[31],
                 instruction[19:12],
                 instruction[20],
                 instruction[30:21],1'b0};
       
       $display("Reconstructured offset %08x", offset);
+      en <= 1'b1;
       for (idx=0;idx < 31;idx=idx+1) begin
-         go <= (idx == 19); //Check this
+         go <= (idx == 20); //Check this
          instr <= instruction[idx];
          jal <= (idx > 7);
          if (reg2012_en) reg2012 <= (reg2012 >> 1);

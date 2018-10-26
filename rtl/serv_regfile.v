@@ -1,34 +1,20 @@
 `default_nettype none
 module serv_regfile
   (
-   input  clk,
-   input  i_d,
-   input  i_field_rs1,
-   input  i_field_rs2,
-   input  i_field_rd,
-   input  i_rs_en,
-   output o_rs1,
-   output o_rs2,
-   input  i_rd,
-   input  i_rd_valid);
+   input       i_clk,
+   input       i_rd_en,
+   input [4:0] i_rd_addr,
+   input       i_rd,
+   input [4:0] i_rs1_addr,
+   input [4:0] i_rs2_addr,
+   input       i_rs_en,
+   output      o_rs1,
+   output      o_rs2);
 
-   reg [31:0] rf [0:31];
+   //reg [31:0]  rf [0:31];
 
-   function automatic [31:0] xreg;
-      input [4:0] regnum;
-      begin
-         xreg = {rf[31][regnum],rf[30][regnum],rf[29][regnum],rf[28][regnum],
-                 rf[27][regnum],rf[26][regnum],rf[25][regnum],rf[24][regnum],
-                 rf[23][regnum],rf[22][regnum],rf[21][regnum],rf[20][regnum],
-                 rf[19][regnum],rf[18][regnum],rf[17][regnum],rf[16][regnum],
-                 rf[15][regnum],rf[14][regnum],rf[13][regnum],rf[12][regnum],
-                 rf[11][regnum],rf[10][regnum],rf[9][regnum] ,rf[8][regnum],
-                 rf[7][regnum] ,rf[6][regnum] ,rf[5][regnum] ,rf[4][regnum],
-                 rf[3][regnum] ,rf[2][regnum] ,rf[1][regnum] ,rf[0][regnum]};
-      end
-   endfunction // xreg
-
-   always @(*)
+`ifndef SYNTHESIS
+/*   always @(*)
      for (i=0;i<32;i=i+1) begin
         dbg_x1[i] = rf[i][1];
         dbg_x2[i] = rf[i][2];
@@ -62,7 +48,7 @@ module serv_regfile
         dbg_x30[i] = rf[i][30];
         dbg_x31[i] = rf[i][31];
      end
-      
+  */    
    reg [31:0] dbg_x0 ;
    reg [31:0] dbg_x1 ;
    reg [31:0] dbg_x2 ;
@@ -96,52 +82,62 @@ module serv_regfile
    reg [31:0] dbg_x30;
    reg [31:0] dbg_x31;
    
-   
-
-   reg [4:0]   raddr = 5'd0;
-   reg [4:0]   waddr = 5'd0;
-   reg [31:0]  rs = 32'd0;
-   
    integer     i;
-   initial for (i=0; i<32; i=i+1) rf[i] = 0;
+//   initial for (i=0; i<32; i=i+1) rf[i] = 0;
+   `endif
       
-   always @(posedge clk) begin
-      if (i_rd_valid) begin
+   reg [4:0]   raddr = 5'd1;
+   reg [4:0]   waddr = 5'd0;
+//   reg [31:0]  rs = 32'd0;
+   wire [31:0]  rs;
+
+   reg [31:0] mask;
+ 
+   always @(i_rd_addr)
+     mask = ~(1 << i_rd_addr);
+   
+   SB_RAM40_4K rf0
+     (
+      .RDATA (rs[15:0]),
+      .RCLK (i_clk),
+      .RCLKE (1'b1),
+      .RE (1'b1),
+      .RADDR ({6'd0,raddr2}),
+      .WCLK  (i_clk),
+      .WCLKE (1'b1),
+      .WE (i_rd_en),
+      .WADDR ({6'd0,waddr}),
+      .MASK  (mask[15:0]),
+      .WDATA ({16{i_rd}})
+      );
+
+   SB_RAM40_4K rf1
+     (
+      .RDATA (rs[31:16]),
+      .RCLK (i_clk),
+      .RCLKE (1'b1),
+      .RE (1'b1),
+      .RADDR ({6'd0,raddr2}),
+      .WCLK  (i_clk),
+      .WCLKE (1'b1),
+      .WE (i_rd_en),
+      .WADDR ({6'd0,waddr}),
+      .MASK  (mask[31:16]),
+      .WDATA ({16{i_rd}})
+      );
+   always @(posedge i_clk) begin
+      if (i_rd_en) begin
          waddr <= waddr + 1;
-         rf[waddr][rd_addr] <= i_rd;
+         //rf[waddr][i_rd_addr] <= i_rd;
       end
 
       if (i_rs_en)
-        rs <= rf[raddr];
-
+        raddr <= raddr + 1;
+      //rs <= rf[raddr2];
    end
-
-   wire [4:0] rs1_addr;
-   wire [4:0] rs2_addr;
-   wire [4:0] rd_addr;
+   wire [4:0] raddr2 = raddr & {5{i_rs_en}};
    
-   shift_reg #(5) shift_reg_rs1_addr
-     (.clk   (clk),
-      .i_en  (i_field_rs1),
-      .i_d   (i_d),
-      .o_q   (rs1_addr[0]),
-      .o_par (rs1_addr[4:1]));
-   
-   shift_reg #(5) shift_reg_rs2_addr
-     (.clk   (clk),
-      .i_en  (i_field_rs2),
-      .i_d   (i_d),
-      .o_q   (rs2_addr[0]),
-      .o_par (rs2_addr[4:1]));
-
-   shift_reg #(5) shift_reg_rd_addr
-     (.clk   (clk),
-      .i_en  (i_field_rd),
-      .i_d   (i_d),
-      .o_q   (rd_addr[0]),
-      .o_par (rd_addr[4:1]));
-
-   assign o_rs1 = (|rs1_addr) ? rs[rs1_addr] : 1'b0;
-   assign o_rs2 = (|rs2_addr) ? rs[rs2_addr] : 1'b0;
+   assign o_rs1 = (|i_rs1_addr) ? rs[i_rs1_addr] : 1'b0;
+   assign o_rs2 = (|i_rs2_addr) ? rs[i_rs2_addr] : 1'b0;
    
 endmodule

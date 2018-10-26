@@ -1,17 +1,15 @@
 module ser_add
   (
-   input      clk,
-   input      a,
-   input      b,
-   input      clear,
-   output reg q = 1'b0);
+   input  clk,
+   input  a,
+   input  b,
+   input  clr,
+   output q);
 
-   reg    carry = 1'b0;
-   wire   c = carry & ~clear;
+   reg    c = 1'b0;
    
-   always @(posedge clk) begin
-      q     <= a ^ b ^ c;
-      carry <= a&b | a&c | b&c;
-   end
+   assign q   = a ^ b ^ c;
+   always @(posedge clk)
+     c <= !clr & (a&b | a&c | b&c);
 
 endmodule
