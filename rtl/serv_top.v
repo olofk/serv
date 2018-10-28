@@ -1,24 +1,54 @@
 `default_nettype none
+
+`define RISCV_FORMAL
+`define RISCV_FORMAL_NRET 1
+`define RISCV_FORMAL_XLEN 32
+`define RISCV_FORMAL_ILEN 32
+//`define RISCV_FORMAL_COMPRESSED
+`define RISCV_FORMAL_ALIGNED_MEM
+
 module serv_top
   (
-   input         clk,
-   output [31:0] o_i_ca_adr, 
-   output        o_i_ca_vld,
-   input         i_i_ca_rdy,
-   input [31:0]  i_i_rd_dat,
-   input         i_i_rd_vld,
-   output        o_i_rd_rdy,
-   output        o_d_ca_cmd,
-   output [31:0] o_d_ca_adr,
-   output        o_d_ca_vld,
-   input         i_d_ca_rdy,
-   output [31:0] o_d_dm_dat,
-   output [3:0]  o_d_dm_msk,
-   output        o_d_dm_vld,
-   input         i_d_dm_rdy,
-   input [31:0]  i_d_rd_dat,
-   input         i_d_rd_vld,
-   output        o_d_rd_rdy);
+   input             clk,
+`ifdef RISCV_FORMAL
+   output reg        rvfi_valid = 1'b0,
+   output reg [63:0] rvfi_order = 64'd0,
+   output reg [31:0] rvfi_insn = 32'd0,
+   output reg        rvfi_trap = 1'b0,
+   output reg        rvfi_halt = 1'b0,
+   output reg        rvfi_intr = 1'b0,
+   output reg [1:0]  rvfi_mode = 2'b11,
+   output reg [4:0]  rvfi_rs1_addr,
+   output reg [4:0]  rvfi_rs2_addr,
+   output reg [31:0] rvfi_rs1_rdata,
+   output reg [31:0] rvfi_rs2_rdata,
+   output reg [4:0]  rvfi_rd_addr,
+   output reg [31:0] rvfi_rd_wdata,
+   output reg [31:0] rvfi_pc_rdata,
+   output reg [31:0] rvfi_pc_wdata,
+   output reg [31:0] rvfi_mem_addr,
+   output reg [3:0]  rvfi_mem_rmask,
+   output reg [3:0]  rvfi_mem_wmask,
+   output reg [31:0] rvfi_mem_rdata,
+   output reg [31:0] rvfi_mem_wdata,
+`endif 
+   output [31:0]     o_i_ca_adr, 
+   output            o_i_ca_vld,
+   input             i_i_ca_rdy,
+   input [31:0]      i_i_rd_dat,
+   input             i_i_rd_vld,
+   output            o_i_rd_rdy,
+   output            o_d_ca_cmd,
+   output [31:0]     o_d_ca_adr,
+   output            o_d_ca_vld,
+   input             i_d_ca_rdy,
+   output [31:0]     o_d_dm_dat,
+   output [3:0]      o_d_dm_msk,
+   output            o_d_dm_vld,
+   input             i_d_dm_rdy,
+   input [31:0]      i_d_rd_dat,
+   input             i_d_rd_vld,
+   output            o_d_rd_rdy);
 
 `include "serv_params.vh"
 
@@ -39,6 +69,9 @@ module serv_top
    wire          imm;
 
    wire [2:0]    funct3;
+
+   wire          alu_cmp_en;
+   wire          alu_cmp;
    
    wire          rs1;
    wire          rs2;
@@ -50,7 +83,7 @@ module serv_top
 
    wire          mem_en;
    
-   wire          mem_cmd = 1'b0 /*FIXME*/;
+   wire          mem_cmd;
    wire          mem_dat_valid;
    
    wire          mem_init;
@@ -67,12 +100,15 @@ module serv_top
       .o_ctrl_en      (ctrl_en),
       .o_ctrl_jump    (jump),
       .o_funct3       (funct3),
+      .o_alu_cmp_en   (alu_cmp_en),
+      .i_alu_cmp      (alu_cmp),
       .o_rf_rd_en     (rd_en),
       .o_rf_rd_addr   (rd_addr),
       .o_rf_rs_en     (rs_en),
       .o_rf_rs1_addr  (rs1_addr),
       .o_rf_rs2_addr  (rs2_addr),
       .o_mem_en       (mem_en),
+      .o_mem_cmd      (mem_cmd),
       .o_mem_init     (mem_init),
       .o_mem_dat_valid (mem_dat_valid),
       .i_mem_busy     (mem_busy),
@@ -108,8 +144,10 @@ module serv_top
    serv_alu alu
      (
       .clk (clk),
-      .i_en (ctrl_en), /*FIXME: Is this true?*/
+      .i_en (ctrl_en),
       .i_funct3 (funct3),
+      .i_cmp_en (alu_cmp_en),
+      .o_cmp    (alu_cmp),
       .i_rs1 (rs1),
       .i_op_b (op_b),
       .o_rd (alu_rd));
@@ -139,7 +177,7 @@ module serv_top
       .i_imm    (imm),
       .o_rd     (mem_rd),
       .o_busy   (mem_busy),
-   //External interface
+      //External interface
       .o_d_ca_cmd (o_d_ca_cmd),
       .o_d_ca_adr (o_d_ca_adr),
       .o_d_ca_vld (o_d_ca_vld),
@@ -152,4 +190,45 @@ module serv_top
       .i_d_rd_vld (i_d_rd_vld),
       .o_d_rd_rdy (o_d_rd_rdy));
 
+`ifdef RISCV_FORMAL
+   reg [31:0]    rs1_fv, rs2_fv, rd_fv;
+   reg [31:0]    pc = RESET_PC;
+   reg           ctrl_en_r = 1'b0;
+   
+   always @(posedge clk) begin
+      ctrl_en_r <= ctrl_en;
+      if (rs_en) begin
+         rs1_fv <= {rs1,rs1_fv[31:1]};
+         rs2_fv <= {rs2,rs2_fv[31:1]};
+      end
+      if (rd_en) begin
+         rd_fv <= {rd,rd_fv[31:1]};
+      end
+      rvfi_valid <= 1'b0;
+      if (ctrl_en_r & !ctrl_en) begin
+         pc <= o_i_ca_adr;
+         rvfi_valid <= 1'b1;
+         rvfi_order <= rvfi_order + 1;
+         rvfi_insn  <= i_i_rd_dat;
+         rvfi_trap <= 1'b0;
+         rvfi_halt <= 1'b0;
+         rvfi_intr <= 1'b0;
+         rvfi_mode <= 2'd3;
+         rvfi_rs1_addr <= rs1_addr;
+         rvfi_rs2_addr <= rs2_addr;
+         rvfi_rs1_rdata <= rs1_fv;
+         rvfi_rs2_rdata <= rs2_fv;
+         rvfi_rd_addr <= rd_addr;
+         rvfi_rd_wdata <= rd_fv;
+         rvfi_pc_rdata <= pc;
+         rvfi_pc_wdata <= o_i_ca_adr;
+         rvfi_mem_addr <= o_d_ca_adr;
+         rvfi_mem_rmask <= 4'bxxxx;
+         rvfi_mem_wmask <= o_d_dm_msk;
+         rvfi_mem_rdata <= i_d_rd_dat;
+         rvfi_mem_wdata <= o_d_dm_dat;
+      end
+   end
+`endif   
+      
 endmodule

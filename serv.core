@@ -9,6 +9,7 @@ filesets:
       - rtl/serv_params.vh : {is_include_file : true}
       - rtl/shift_reg.v
       - rtl/ser_add.v
+      - rtl/ser_eq.v
       - rtl/serv_alu.v
       - rtl/serv_ctrl.v
       - rtl/serv_decode.v
@@ -16,7 +17,7 @@ filesets:
       - rtl/serv_regfile.v
       - rtl/serv_top.v
     file_type : verilogSource
-    depend : [wb_ram]
+    depend : [wb_ram, "yosys:techlibs:ice40"]
 
   ser_add_tb:
     files:

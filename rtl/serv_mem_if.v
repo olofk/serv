@@ -19,12 +19,16 @@ module serv_mem_if
    input         i_d_ca_rdy,
    output [31:0] o_d_dm_dat,
    output [3:0]  o_d_dm_msk,
-   output        o_d_dm_vld,
+   output reg    o_d_dm_vld = 1'b0,
    input         i_d_dm_rdy,
    input [31:0]  i_d_rd_dat,
    input         i_d_rd_vld,
    output        o_d_rd_rdy);
 
+   wire          ca_en = o_d_ca_vld & i_d_ca_rdy;
+   wire          dm_en = o_d_dm_vld & i_d_dm_rdy;
+   wire          rd_en = i_d_rd_vld & o_d_rd_rdy;
+   
    reg           en_r;
    wire          adr;
    reg [31:0]    dat = 32'd0;
@@ -54,17 +58,26 @@ module serv_mem_if
 
    assign o_d_rd_rdy = !i_en; //Likely bug, but probably doesn't matter
 
-   wire is_half = i_funct3[1];
+   wire is_word = i_funct3[1];
+   wire is_half = i_funct3[0];
    wire is_byte = !(|i_funct3[1:0]);
    wire [1:0] bytepos = o_d_ca_adr[3:2];
    wire       upper_half = bytepos[1];
-   
+
+   assign o_d_dm_dat = dat;
+   assign o_d_dm_msk = is_word ? 4'b1111 :
+                       is_half ? {{2{upper_half}}, ~{2{upper_half}}} :
+                       1'b1 << bytepos;
+
    always @(posedge i_clk) begin
       signbit <= dat[0];
 
       if (i_en & i_init)
         o_busy <= 1'b1;
-      else if (i_d_rd_vld & o_d_rd_rdy) begin
+      else if (rd_en | dm_en)
+        o_busy <= 1'b0;
+
+      if (rd_en) begin
          dat[31:16] <= i_d_rd_dat[31:16];
          dat[15:8]  <= (is_half & upper_half) ? i_d_rd_dat[31:24] : i_d_rd_dat[15:8];
          dat[7:0]   <= (is_byte & (bytepos == 2'b11)) ? i_d_rd_dat[31:24] :
@@ -72,15 +85,20 @@ module serv_mem_if
                        (is_half & upper_half)         ? i_d_rd_dat[23:16] :
                        (is_byte & (bytepos == 2'b01)) ? i_d_rd_dat[15:8] :
                        i_d_rd_dat[7:0];
-         o_busy <= 1'b0;
       end
 
       en_r <= i_en;
-      if (o_d_ca_vld & i_d_ca_rdy)
+      if (ca_en)
         o_d_ca_vld <= 1'b0;
-      else if (en_r & !i_en)
-        o_d_ca_vld <= 1'b1;
+      else if (en_r & !i_en) begin
+         o_d_ca_vld <= 1'b1;
+      end
 
+      if (dm_en)
+        o_d_dm_vld <= 1'b0;
+      else if (en_r & !i_en)
+        o_d_dm_vld <= i_cmd;
+      
       if (i_en)
         dat <= {i_rs2,dat[31:1]};
    end
