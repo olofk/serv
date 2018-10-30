@@ -5,6 +5,7 @@ module serv_ctrl
    input         i_en,
    input         i_jump,
    input         i_offset,
+   input         i_auipc,
    output        o_rd,
    output [31:0] o_i_ca_adr,
    output reg    o_i_ca_vld = 1'b0,
@@ -47,7 +48,7 @@ module serv_ctrl
       );
 
    assign new_pc = i_jump ? pc_plus_offset : pc_plus_4;
-   assign o_rd = pc_plus_4;
+   assign o_rd  = i_auipc ? pc_plus_offset : pc_plus_4;
    
    ser_add ser_add_pc_plus_offset
      (

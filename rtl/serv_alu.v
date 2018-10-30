@@ -24,6 +24,8 @@ module serv_alu
    
    wire [4:0] shamt;
    
+   reg        en_r;
+
    shift_reg #(.LEN (5)) shamt_reg
      (.clk (clk),
       .i_en (i_shamt_en),
@@ -39,12 +41,26 @@ module serv_alu
       .i_sr (/*FIXME*/),
       .i_d (i_rs1),
       .o_q (result_sh));
-     
+
+   wire       plus_1 = i_en & !en_r;
+   wire       b_inv_plus_1;
+
+   ser_add ser_add_inv_plus_1
+     (
+      .clk (clk),
+      .a   (~i_op_b),
+      .b   (plus_1),
+      .clr (!i_en),
+      .q   (b_inv_plus_1));
+
+   wire       add_b = sub ? b_inv_plus_1 : i_op_b;
+   wire       sub = i_op[1];
+   
    ser_add ser_add
      (
       .clk (clk),
       .a   (i_rs1),
-      .b   (i_op_b),
+      .b   (add_b),
       .clr (!i_en),
       .q   (result_add));
 
@@ -60,8 +76,12 @@ module serv_alu
                   (i_funct3 == BNE) ? ~result_eq : 1'bx;
 
    assign o_rd = (i_op == ALU_OP_ADD) ? result_add :
+                 (i_op == ALU_OP_SUB) ? result_add :
                  (i_op == ALU_OP_SR)  ? result_sh :
                  1'bx;
+
+   always @(posedge clk)
+     en_r <= i_en;
    
 endmodule
    

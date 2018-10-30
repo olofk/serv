@@ -63,6 +63,7 @@ module serv_top
 
    wire          ctrl_en;
    wire          jump;
+   wire          auipc;
    wire          offset;
    wire          offset_source;
    wire          imm;
@@ -101,6 +102,7 @@ module serv_top
       .o_i_rd_rdy     (o_i_rd_rdy),
       .o_ctrl_en      (ctrl_en),
       .o_ctrl_jump    (jump),
+      .o_ctrl_auipc   (auipc),
       .o_funct3       (funct3),
       .o_alu_en       (alu_en),
       .o_alu_op       (alu_op),
@@ -130,6 +132,7 @@ module serv_top
       .i_en       (ctrl_en),
       .i_jump     (jump),
       .i_offset   (offset),
+      .i_auipc    (auipc),
       .o_rd       (ctrl_rd),
       .o_i_ca_adr (o_i_ca_adr),
       .o_i_ca_vld (o_i_ca_vld),
