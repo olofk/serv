@@ -10,6 +10,7 @@ filesets:
       - rtl/shift_reg.v
       - rtl/ser_add.v
       - rtl/ser_eq.v
+      - rtl/ser_shift.v
       - rtl/serv_alu.v
       - rtl/serv_ctrl.v
       - rtl/serv_decode.v
@@ -77,4 +78,10 @@ targets:
   serv_top_tb:
     default_tool: icarus
     filesets : [core, serv_top_tb]
+    parameters : [RISCV_FORMAL=true]
     toplevel : serv_top_tb
+
+parameters:
+  RISCV_FORMAL:
+    datatype  : bool
+    paramtype : vlogdefine

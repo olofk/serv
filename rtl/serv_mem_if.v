@@ -29,6 +29,7 @@ module serv_mem_if
    wire          dm_en = o_d_dm_vld & i_d_dm_rdy;
    wire          rd_en = i_d_rd_vld & o_d_rd_rdy;
    
+   reg           init_r;
    reg           en_r;
    wire          adr;
    reg [31:0]    dat = 32'd0;
@@ -61,7 +62,7 @@ module serv_mem_if
    wire is_word = i_funct3[1];
    wire is_half = i_funct3[0];
    wire is_byte = !(|i_funct3[1:0]);
-   wire [1:0] bytepos = o_d_ca_adr[3:2];
+   wire [1:0] bytepos = o_d_ca_adr[1:0];
    wire       upper_half = bytepos[1];
 
    assign o_d_dm_dat = dat;
@@ -88,15 +89,16 @@ module serv_mem_if
       end
 
       en_r <= i_en;
+      init_r <= i_init;
       if (ca_en)
         o_d_ca_vld <= 1'b0;
-      else if (en_r & !i_en) begin
+      else if (init_r & !i_init) begin //Optimize?
          o_d_ca_vld <= 1'b1;
       end
 
       if (dm_en)
         o_d_dm_vld <= 1'b0;
-      else if (en_r & !i_en)
+      else if (init_r & !i_init)
         o_d_dm_vld <= i_cmd;
       
       if (i_en)

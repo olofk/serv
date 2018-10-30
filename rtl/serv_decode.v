@@ -11,8 +11,11 @@ module serv_decode
    output       o_rf_rs_en,
    output [4:0] o_rf_rs1_addr,
    output [4:0] o_rf_rs2_addr,
-   output       o_alu_cmp_en,
+   output       o_alu_en,
+   output [2:0] o_alu_op,
+   output       o_alu_init,
    input        i_alu_cmp,
+   output       o_alu_shamt_en,
    output       o_mem_en,
    output       o_mem_cmd,
    output       o_mem_init,
@@ -26,13 +29,13 @@ module serv_decode
 
 `include "serv_params.vh"
 
-
    localparam [2:0]
      IDLE     = 3'd0,
      COMPARE  = 3'd1,
-     MEM_INIT = 3'd2,
-     MEM_WAIT = 3'd3,
-     RUN      = 3'd4;
+     SH_INIT  = 3'd2,
+     MEM_INIT = 3'd3,
+     MEM_WAIT = 3'd4,
+     RUN      = 3'd5;
    
    localparam [4:0]
      OP_LOAD   = 5'b00000,
@@ -48,19 +51,33 @@ module serv_decode
 
    wire      running;
    wire      mem_op;
+   wire      shift_op;
+   
    assign mem_op = (opcode == OP_LOAD) | (opcode == OP_STORE);
+   assign shift_op = (opcode == OP_OPIMM) & (o_funct3[1:0] == 2'b01);
 
    assign o_ctrl_en  = running;
    assign o_ctrl_jump = (opcode == OP_JAL) |
                         ((opcode == OP_BRANCH) & i_alu_cmp);
 
-   assign o_rf_rd_en = running & ((opcode == OP_JAL)   |
-                                  (opcode == OP_OPIMM) |
-                                  (opcode == OP_LUI));
-   assign o_rf_rs_en = (running & (opcode == OP_OPIMM)) |
-                       (state == MEM_INIT);
-   assign o_alu_cmp_en = (state == COMPARE);
-   
+   assign o_rf_rd_en = running &
+                       (opcode != OP_STORE) &
+                       (opcode != OP_BRANCH);
+
+   assign o_rf_rs_en = cnt_en /*(running & (opcode == OP_OPIMM)) |
+                       (state == SH_INIT) |
+                       (state == MEM_INIT)*/;
+   wire      sub = 1'b0; //FIXME
+
+   assign o_alu_en = cnt_en;
+   assign o_alu_op = (o_funct3 == 3'b000) ? {1'b0, sub, 1'b0} :
+                     (o_funct3 == 3'b101) ? ALU_OP_SR :
+                     3'bxxx;
+
+   assign o_alu_init = (state == COMPARE) |
+                       (state == SH_INIT);
+   assign o_alu_shamt_en = (state == SH_INIT) & (cnt < 5);
+
    assign o_mem_en   = mem_op & cnt_en;
    assign o_mem_cmd  = (opcode == OP_STORE);
 
@@ -83,9 +100,10 @@ module serv_decode
 
    assign o_rd_source = (opcode == OP_JAL)   ? RD_SOURCE_CTRL :
                         (opcode == OP_OPIMM) ? RD_SOURCE_ALU  :
-                        (opcode == OP_LUI)   ? RD_SOURCE_IMM  : 2'b00;
+                        (opcode == OP_LUI)   ? RD_SOURCE_IMM  :
+                        (opcode == OP_LOAD)  ? RD_SOURCE_MEM  : 2'bxx;
    
-   always @(cnt, opcode) begin
+   always @(cnt, opcode, i_i_rd_dat) begin
       o_imm = 1'bx;
       if (opcode == OP_JAL)
         if      (cnt > 19) o_imm = i_i_rd_dat[31];
@@ -119,6 +137,7 @@ module serv_decode
    wire cnt_en =
         (state == RUN) |
         (state == COMPARE) |
+        (state == SH_INIT) |
         (state == MEM_INIT);
 
    wire cnt_done = cnt == 31;
@@ -129,8 +148,13 @@ module serv_decode
       case (state)
         IDLE : begin
            if (go)
-             state <= (opcode == OP_BRANCH) ? COMPARE :
-                      mem_op ? MEM_INIT : RUN;
+             state <= (opcode == OP_BRANCH) ? COMPARE  :
+                      mem_op                ? MEM_INIT :
+                      shift_op              ? SH_INIT  : RUN;
+        end
+        SH_INIT : begin
+           if (cnt_done)
+             state <= RUN;
         end
         COMPARE : begin
            if (cnt_done)

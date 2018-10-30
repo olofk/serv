@@ -63,9 +63,28 @@ module serv_top_tb;
       .rd_dat_o (d_rd_dat),
       .rd_vld_o (d_rd_vld),
       .rd_rdy_i (d_rd_rdy));
+
+   reg        catch_write = 1'b0;
+
+   reg        dbg = 1'b0;
+
+   wire       d_ca_en = d_ca_vld & d_ca_rdy;
+   wire       d_dm_en = d_dm_vld & d_dm_rdy;
    
+   always @(posedge clk) begin
+      dbg <= 1'b0;
+      
+      if (d_ca_en & d_ca_cmd & (d_ca_adr == 32'h10000000))
+        catch_write <= 1'b1;
+      if (catch_write & d_dm_en & d_dm_msk[0]) begin
+         dbg <= 1'b1;
+         $write("%c", d_dm_dat[7:0]);
+         $fflush();
+         catch_write = 1'b0;
+      end
+   end
    vlog_tb_utils vtu();
-   
+
    serv_top
      #(.RESET_PC (32'd8))
    dut

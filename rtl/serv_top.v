@@ -1,6 +1,5 @@
 `default_nettype none
 
-`define RISCV_FORMAL
 `define RISCV_FORMAL_NRET 1
 `define RISCV_FORMAL_XLEN 32
 `define RISCV_FORMAL_ILEN 32
@@ -70,8 +69,11 @@ module serv_top
 
    wire [2:0]    funct3;
 
-   wire          alu_cmp_en;
+   wire          alu_en;
+   wire [2:0]    alu_op;
+   wire          alu_init;
    wire          alu_cmp;
+   wire          alu_shamt_en;
    
    wire          rs1;
    wire          rs2;
@@ -100,8 +102,11 @@ module serv_top
       .o_ctrl_en      (ctrl_en),
       .o_ctrl_jump    (jump),
       .o_funct3       (funct3),
-      .o_alu_cmp_en   (alu_cmp_en),
+      .o_alu_en       (alu_en),
+      .o_alu_op       (alu_op),
+      .o_alu_init     (alu_init),
       .i_alu_cmp      (alu_cmp),
+      .o_alu_shamt_en (alu_shamt_en),
       .o_rf_rd_en     (rd_en),
       .o_rf_rd_addr   (rd_addr),
       .o_rf_rs_en     (rs_en),
@@ -133,24 +138,27 @@ module serv_top
    assign offset = (offset_source == OFFSET_SOURCE_IMM) ? imm : rs1;
 
    assign rd = (rd_source == RD_SOURCE_CTRL) ? ctrl_rd :
-               (rd_source == RD_SOURCE_ALU)  ? alu_rd :
-               (rd_source == RD_SOURCE_IMM)  ? imm :
-               (rd_source == RD_SOURCE_MEM)  ? mem_rd : 1'b0;
+               (rd_source == RD_SOURCE_ALU)  ? alu_rd  :
+               (rd_source == RD_SOURCE_IMM)  ? imm     :
+               (rd_source == RD_SOURCE_MEM)  ? mem_rd  : 1'bx;
    
 
    assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm :
-                 1'b0;
+                 (op_b_source == OP_B_SOURCE_RS2) ? rs2 :
+                 1'bx;
    
    serv_alu alu
      (
-      .clk (clk),
-      .i_en (ctrl_en),
-      .i_funct3 (funct3),
-      .i_cmp_en (alu_cmp_en),
-      .o_cmp    (alu_cmp),
-      .i_rs1 (rs1),
-      .i_op_b (op_b),
-      .o_rd (alu_rd));
+      .clk        (clk),
+      .i_en       (alu_en),
+      .i_op       (alu_op),
+      .i_funct3   (funct3),
+      .i_init     (alu_init),
+      .o_cmp      (alu_cmp),
+      .i_shamt_en (alu_shamt_en),
+      .i_rs1      (rs1),
+      .i_op_b     (op_b),
+      .o_rd       (alu_rd));
 
    serv_regfile regfile
      (
