@@ -41,7 +41,8 @@ module serv_mem_if
       .a   (i_rs1),
       .b   (i_imm),
       .clr (!i_en),
-      .q   (adr));
+      .q   (adr),
+      .o_v ());
 
    shift_reg #(32) shift_reg_adr
      (
@@ -68,7 +69,7 @@ module serv_mem_if
    assign o_d_dm_dat = dat;
    assign o_d_dm_msk = is_word ? 4'b1111 :
                        is_half ? {{2{upper_half}}, ~{2{upper_half}}} :
-                       1'b1 << bytepos;
+                       4'd1 << bytepos;
 
    always @(posedge i_clk) begin
       signbit <= dat[0];

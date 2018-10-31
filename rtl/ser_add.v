@@ -4,12 +4,15 @@ module ser_add
    input  a,
    input  b,
    input  clr,
-   output q);
+   output q,
+   output o_v);
 
-   reg    c = 1'b0;
+   assign o_v = (a&b | a&c_r | b&c_r);
    
-   assign q   = a ^ b ^ c;
+   reg    c_r = 1'b0;
+   
+   assign q   = a ^ b ^ c_r;
    always @(posedge clk)
-     c <= !clr & (a&b | a&c | b&c);
+     c_r <= !clr & o_v;
 
 endmodule

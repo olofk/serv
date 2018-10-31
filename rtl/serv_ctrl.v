@@ -5,6 +5,8 @@ module serv_ctrl
    input         i_en,
    input         i_jump,
    input         i_offset,
+   input         i_rs1,
+   input         i_jalr,
    input         i_auipc,
    output        o_rd,
    output [31:0] o_i_ca_adr,
@@ -21,6 +23,8 @@ module serv_ctrl
    wire       pc;
    
    wire       new_pc;
+
+   wire       offset_a;
    
    assign plus_4        = en_2r & !en_3r;
 
@@ -32,7 +36,8 @@ module serv_ctrl
       .a   (pc),
       .b   (plus_4),
       .clr (!i_en),
-      .q   (pc_plus_4));
+      .q   (pc_plus_4),
+      .o_v ());
 
    shift_reg
      #(
@@ -49,14 +54,17 @@ module serv_ctrl
 
    assign new_pc = i_jump ? pc_plus_offset : pc_plus_4;
    assign o_rd  = i_auipc ? pc_plus_offset : pc_plus_4;
+
+   assign offset_a = i_jalr ? i_rs1 : pc;
    
    ser_add ser_add_pc_plus_offset
      (
       .clk (clk),
-      .a   (pc),
+      .a   (offset_a),
       .b   (i_offset),
       .clr (!i_en),
-      .q   (pc_plus_offset));
+      .q   (pc_plus_offset),
+      .o_v ());
 
    reg        en_r  = 1'b1;
    reg        en_2r = 1'b0;

@@ -63,6 +63,7 @@ module serv_top
 
    wire          ctrl_en;
    wire          jump;
+   wire          jalr;
    wire          auipc;
    wire          offset;
    wire          offset_source;
@@ -71,10 +72,13 @@ module serv_top
    wire [2:0]    funct3;
 
    wire          alu_en;
-   wire [2:0]    alu_op;
    wire          alu_init;
+   wire          alu_sub;
+   wire          alu_cmp_sel;
+   wire          alu_cmp_neg;
    wire          alu_cmp;
    wire          alu_shamt_en;
+   wire [1:0]    alu_rd_sel;
    
    wire          rs1;
    wire          rs2;
@@ -102,13 +106,17 @@ module serv_top
       .o_i_rd_rdy     (o_i_rd_rdy),
       .o_ctrl_en      (ctrl_en),
       .o_ctrl_jump    (jump),
+      .o_ctrl_jalr    (jalr),
       .o_ctrl_auipc   (auipc),
       .o_funct3       (funct3),
       .o_alu_en       (alu_en),
-      .o_alu_op       (alu_op),
       .o_alu_init     (alu_init),
+      .o_alu_sub      (alu_sub),
+      .o_alu_cmp_sel  (alu_cmp_sel),
+      .o_alu_cmp_neg  (alu_cmp_neg),
       .i_alu_cmp      (alu_cmp),
       .o_alu_shamt_en (alu_shamt_en),
+      .o_alu_rd_sel   (alu_rd_sel),
       .o_rf_rd_en     (rd_en),
       .o_rf_rd_addr   (rd_addr),
       .o_rf_rs_en     (rs_en),
@@ -132,13 +140,16 @@ module serv_top
       .i_en       (ctrl_en),
       .i_jump     (jump),
       .i_offset   (offset),
+      .i_rs1      (rs1),
+      .i_jalr     (jalr),
       .i_auipc    (auipc),
       .o_rd       (ctrl_rd),
       .o_i_ca_adr (o_i_ca_adr),
       .o_i_ca_vld (o_i_ca_vld),
       .i_i_ca_rdy (i_i_ca_rdy));
 
-   assign offset = (offset_source == OFFSET_SOURCE_IMM) ? imm : rs1;
+   assign offset = (offset_source == OFFSET_SOURCE_IMM) ? imm :
+                   (offset_source == OFFSET_SOURCE_RS1) ? rs1 : 1'bx;
 
    assign rd = (rd_source == RD_SOURCE_CTRL) ? ctrl_rd :
                (rd_source == RD_SOURCE_ALU)  ? alu_rd  :
@@ -154,13 +165,15 @@ module serv_top
      (
       .clk        (clk),
       .i_en       (alu_en),
-      .i_op       (alu_op),
-      .i_funct3   (funct3),
-      .i_init     (alu_init),
-      .o_cmp      (alu_cmp),
-      .i_shamt_en (alu_shamt_en),
       .i_rs1      (rs1),
       .i_op_b     (op_b),
+      .i_init     (alu_init),
+      .i_sub      (alu_sub),
+      .i_cmp_sel  (alu_cmp_sel),
+      .i_cmp_neg  (alu_cmp_neg),
+      .o_cmp      (alu_cmp),
+      .i_shamt_en (alu_shamt_en),
+      .i_rd_sel   (alu_rd_sel),
       .o_rd       (alu_rd));
 
    serv_regfile regfile

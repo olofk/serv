@@ -6,20 +6,27 @@ localparam [1:0]
 
 localparam [0:0]
   OFFSET_SOURCE_IMM = 1'd0,
-  OFFSET_SOURCE_RD  = 1'd1;
+  OFFSET_SOURCE_RS1 = 1'd1;
 
 localparam [0:0]
   OP_B_SOURCE_IMM = 1'd0,
   OP_B_SOURCE_RS2 = 1'd1;
   
-localparam[2:0]
-  ALU_OP_ADD = 3'd0,
-  ALU_OP_SL  = 3'd1,
-  ALU_OP_SUB = 3'd2,
-  ALU_OP_SLT = 3'd3,
-  ALU_OP_XOR = 3'd4,
-  ALU_OP_SR  = 3'd5,
-  ALU_OP_OR  = 3'd6,
-  ALU_OP_AND = 3'd7;
+localparam[1:0]
+  ALU_RESULT_ADD = 2'd0,
+  ALU_RESULT_SR  = 2'd1,
+  ALU_RESULT_LT  = 2'd2;
 
-  
+localparam [0:0]
+  ALU_CMP_LT = 1'b0,
+  ALU_CMP_EQ = 1'b1;
+
+/*
+ source
+ ADD, SUB
+ SL,SR
+ SLT
+ XOR,
+ OR
+ AND
+*/
