@@ -27,6 +27,7 @@ module serv_alu
    reg         en_r;
    wire        v;
    reg         msb_lt = 1'b0;
+   reg         init_r;
    
    
    shift_reg #(.LEN (5)) shamt_reg
@@ -92,6 +93,7 @@ module serv_alu
 
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
                  (i_rd_sel == ALU_RESULT_SR)  ? result_sh :
+                 (i_rd_sel == ALU_RESULT_LT)  ? (result_lt2 & init_r & ~i_init):
                  1'bx;
 
    always @(posedge clk) begin
@@ -100,9 +102,9 @@ module serv_alu
          msb_lt <= i_cmp_uns ? (~i_rs1 & i_op_b) : (i_rs1 & ~i_op_b);
       end
       
-//        result_lt <= /*v^*/result_add;
-
       en_r <= i_en;
+      init_r <= i_init;
+      
    end
 endmodule
    

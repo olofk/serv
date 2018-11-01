@@ -76,11 +76,11 @@ module serv_top_tb;
       
       if (d_ca_en & d_ca_cmd & (d_ca_adr == 32'h10000000))
         catch_write <= 1'b1;
-      if (catch_write & d_dm_en & d_dm_msk[0]) begin
+      if (((d_ca_en & d_ca_cmd & (d_ca_adr == 32'h10000000)) |catch_write) & d_dm_en & d_dm_msk[0]) begin
          dbg <= 1'b1;
          $write("%c", d_dm_dat[7:0]);
          $fflush();
-         catch_write = 1'b0;
+         catch_write <= 1'b0;
       end
    end
    vlog_tb_utils vtu();

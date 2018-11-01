@@ -25,7 +25,7 @@ module serv_decode
    output       o_mem_en,
    output       o_mem_cmd,
    output       o_mem_init,
-   output       o_mem_dat_valid, 
+   output reg   o_mem_dat_valid, 
    input        i_mem_busy,
    output [2:0] o_funct3,
    output reg   o_imm,
@@ -116,9 +116,9 @@ module serv_decode
    end
    assign o_alu_shamt_en = (state == SH_INIT) & (cnt < 5);
 
-   assign o_alu_rd_sel = (o_funct3 == 3'b000) ? ALU_RESULT_ADD :
+   assign o_alu_rd_sel = (o_funct3 == 3'b000)     ? ALU_RESULT_ADD :
                          (o_funct3[2:1] == 2'b01) ? ALU_RESULT_LT :
-                         (o_funct3 == 3'b101) ? ALU_RESULT_SR :
+                         (o_funct3 == 3'b101)     ? ALU_RESULT_SR :
 2'bxx;
    
    assign o_mem_en   = mem_op & cnt_en;
@@ -141,9 +141,17 @@ module serv_decode
                           (opcode == OP_OP)     ? OP_B_SOURCE_RS2 :
                           1'bx;
 
-   assign o_mem_dat_valid = (o_funct3[1:0] == 2'b00) ? cnt < 8 : 
-                            (o_funct3[1:0] == 2'b01) ? cnt < 16 : 1'b1;
-   
+   always @(o_funct3, cnt)
+     if (o_mem_init)
+       o_mem_dat_valid = 1'bx;
+     else
+       casez(o_funct3[1:0])
+         2'b00 : o_mem_dat_valid = (cnt < 8);
+         2'b01 : o_mem_dat_valid = (cnt < 16);
+         2'b10 : o_mem_dat_valid = 1'b1;
+         default: o_mem_dat_valid = 1'bx;
+       endcase
+
    wire [4:0] opcode = i_i_rd_dat[6:2];
 
 
@@ -201,6 +209,7 @@ module serv_decode
         IDLE : begin
            if (go)
              state <= (opcode == OP_BRANCH) ? COMPARE  :
+                      ((opcode == OP_OPIMM) & (o_funct3[2:1] == 2'b01)) ? COMPARE :
                       mem_op                ? MEM_INIT :
                       shift_op              ? SH_INIT  : RUN;
         end
