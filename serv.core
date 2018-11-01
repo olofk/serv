@@ -10,6 +10,7 @@ filesets:
       - rtl/shift_reg.v
       - rtl/ser_add.v
       - rtl/ser_eq.v
+      - rtl/ser_lt.v
       - rtl/ser_shift.v
       - rtl/serv_alu.v
       - rtl/serv_ctrl.v

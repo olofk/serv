@@ -16,8 +16,9 @@ module serv_decode
    output       o_alu_en,
    output       o_alu_init,
    output       o_alu_sub,
-   output       o_alu_cmp_sel,
+   output reg   o_alu_cmp_sel,
    output       o_alu_cmp_neg,
+   output reg   o_alu_cmp_uns,
    input        i_alu_cmp,
    output       o_alu_shamt_en,
    output [1:0] o_alu_rd_sel,
@@ -89,15 +90,30 @@ module serv_decode
 
    assign o_alu_sub = ((opcode == OP_OP) & i_i_rd_dat[30])     ? 1'b1 :
                       ((opcode == OP_BRANCH) & (o_funct3 == 3'b100)) ? 1'b1 :
+                      ((opcode == OP_BRANCH) & (o_funct3 == 3'b101)) ? 1'b1 :
+                      ((opcode == OP_BRANCH) & (o_funct3 == 3'b110)) ? 1'b1 :
                       ((opcode == OP_OPIMM)  & (o_funct3 == 3'b000)) ? 1'b0 :
                       1'bx;
 
-   assign o_alu_cmp_sel = (o_funct3[2:1] == 2'b00) ? ALU_CMP_EQ :
-                          (o_funct3[2] == 1'b1)    ? ALU_CMP_LT :
-                          (o_funct3[2:1] == 2'b01) ? ALU_CMP_LT : 1'bx;
 
    assign o_alu_cmp_neg = (opcode == OP_BRANCH) & o_funct3[0];
-
+   always @(o_funct3) begin
+      casez (o_funct3)
+        3'b00?  : o_alu_cmp_sel = ALU_CMP_EQ;
+        3'b01?  : o_alu_cmp_sel = ALU_CMP_LT;
+        3'b1??  : o_alu_cmp_sel = ALU_CMP_LT;
+        default : o_alu_cmp_sel = 1'bx;
+      endcase
+      
+      casez (o_funct3)
+        3'b00?  : o_alu_cmp_uns = 1'b0;
+        3'b010  : o_alu_cmp_uns = 1'b0;
+        3'b011  : o_alu_cmp_uns = 1'b1;
+        3'b10?  : o_alu_cmp_uns = 1'b0;
+        3'b11?  : o_alu_cmp_uns = 1'b1;
+        default : o_alu_cmp_uns = 1'bx;
+      endcase
+   end
    assign o_alu_shamt_en = (state == SH_INIT) & (cnt < 5);
 
    assign o_alu_rd_sel = (o_funct3 == 3'b000) ? ALU_RESULT_ADD :

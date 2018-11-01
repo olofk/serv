@@ -9,6 +9,7 @@ module serv_alu
    input       i_sub,
    input       i_cmp_sel,
    input       i_cmp_neg, 
+   input       i_cmp_uns,
    output      o_cmp,
    input       i_shamt_en,
    input [1:0] i_rd_sel,
@@ -18,13 +19,15 @@ module serv_alu
 
    wire        result_add;
    wire        result_eq;
-   reg         result_lt = 1'b0;
+   wire        result_lt;
    wire        result_sh;
    
    wire [4:0]  shamt;
    
    reg         en_r;
    wire        v;
+   reg         msb_lt = 1'b0;
+   
    
    shift_reg #(.LEN (5)) shamt_reg
      (.clk (clk),
@@ -73,15 +76,31 @@ module serv_alu
       .clr (!i_init),
       .o_q (result_eq));
 
-   assign o_cmp = i_cmp_neg^(i_cmp_sel ? result_eq : result_lt);
+   ser_lt ser_lt
+     (
+      .i_clk (clk),
+      .i_a   (i_rs1),
+      .i_b   (i_op_b),
+      .i_clr (!i_init),
+      .o_q   (result_lt));
+
+   reg last_eq;
+   
+   wire       result_lt2 = last_eq ? result_lt : msb_lt;
+   
+   assign o_cmp = i_cmp_neg^((i_cmp_sel == ALU_CMP_EQ) ? result_eq : result_lt2);
 
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
                  (i_rd_sel == ALU_RESULT_SR)  ? result_sh :
                  1'bx;
 
    always @(posedge clk) begin
-      if (i_init)
-        result_lt <= /*v^*/result_add;
+      if (i_init) begin
+         last_eq <= i_rs1 == i_op_b;
+         msb_lt <= i_cmp_uns ? (~i_rs1 & i_op_b) : (i_rs1 & ~i_op_b);
+      end
+      
+//        result_lt <= /*v^*/result_add;
 
       en_r <= i_en;
    end
