@@ -12,7 +12,9 @@ module serv_alu
    input       i_cmp_uns,
    output      o_cmp,
    input       i_shamt_en,
-   input [1:0] i_rd_sel,
+   input       i_sh_right,
+   input       i_sh_signed,
+   input [2:0] i_rd_sel,
    output      o_rd);
 
 `include "serv_params.vh"
@@ -28,12 +30,24 @@ module serv_alu
    wire        v;
    reg         msb_lt = 1'b0;
    reg         init_r;
+   wire        shamt_l;
+   wire        shamt_ser;
    
-   
+   ser_add ser_add_inv_shamt_plus1
+     (
+      .clk (clk),
+      .a   (~i_op_b),
+      .b   (plus_1),
+      .clr (!i_en),
+      .q   (shamt_l),
+      .o_v ());
+
+   assign shamt_ser = i_sh_right ? i_op_b : shamt_l;
+
    shift_reg #(.LEN (5)) shamt_reg
      (.clk (clk),
       .i_en (i_shamt_en),
-      .i_d  (i_op_b),
+      .i_d  (shamt_ser),
       .o_q  (shamt[0]),
       .o_par (shamt[4:1]));
 
@@ -42,7 +56,8 @@ module serv_alu
       .i_clk (clk),
       .i_load (i_init),
       .i_shamt (shamt),
-      .i_sr (/*FIXME*/),
+      .i_signed (i_sh_signed),
+      .i_right  (i_sh_right),
       .i_d (i_rs1),
       .o_q (result_sh));
 
@@ -93,7 +108,10 @@ module serv_alu
 
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
                  (i_rd_sel == ALU_RESULT_SR)  ? result_sh :
-                 (i_rd_sel == ALU_RESULT_LT)  ? (result_lt2 & init_r & ~i_init):
+                 (i_rd_sel == ALU_RESULT_LT)  ? (result_lt2 & init_r & ~i_init) :
+                 (i_rd_sel == ALU_RESULT_XOR) ? i_rs1^i_op_b :
+                 (i_rd_sel == ALU_RESULT_OR)  ? i_rs1|i_op_b :
+                 (i_rd_sel == ALU_RESULT_AND) ? i_rs1&i_op_b :
                  1'bx;
 
    always @(posedge clk) begin

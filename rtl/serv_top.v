@@ -79,7 +79,9 @@ module serv_top
    wire          alu_cmp_uns;
    wire          alu_cmp;
    wire          alu_shamt_en;
-   wire [1:0]    alu_rd_sel;
+   wire          alu_sh_signed;
+   wire          alu_sh_right;
+   wire [2:0]    alu_rd_sel;
    
    wire          rs1;
    wire          rs2;
@@ -118,6 +120,8 @@ module serv_top
       .o_alu_cmp_uns  (alu_cmp_uns),
       .i_alu_cmp      (alu_cmp),
       .o_alu_shamt_en (alu_shamt_en),
+      .o_alu_sh_signed (alu_sh_signed),
+      .o_alu_sh_right (alu_sh_right),
       .o_alu_rd_sel   (alu_rd_sel),
       .o_rf_rd_en     (rd_en),
       .o_rf_rd_addr   (rd_addr),
@@ -176,6 +180,8 @@ module serv_top
       .i_cmp_uns  (alu_cmp_uns),
       .o_cmp      (alu_cmp),
       .i_shamt_en (alu_shamt_en),
+      .i_sh_right (alu_sh_right),
+      .i_sh_signed (alu_sh_signed),
       .i_rd_sel   (alu_rd_sel),
       .o_rd       (alu_rd));
 

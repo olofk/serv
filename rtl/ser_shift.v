@@ -4,7 +4,8 @@ module ser_shift
    input       i_clk,
    input       i_load,
    input [4:0] i_shamt,
-   input       i_sr,
+   input       i_signed,
+   input       i_right,
    input       i_d,
    output      o_q);
 
@@ -23,19 +24,20 @@ module ser_shift
 
    always @(posedge i_clk) begin
       cnt <= cnt + 1;
+      if (cnt == 31) begin
+         signbit <= shiftreg[cnt];
+         wrapped <= 1'b1;
+      end
       if (i_load) begin
          cnt <= i_shamt;
          wrapped <= 1'b0;
       end
 
-      if (cnt == 31) begin
-         signbit <= shiftreg[cnt];
-         wrapped <= 1'b1;
-      end
          
    end
 
-   assign o_q = wrapped ? signbit : shiftreg[cnt];
+   wire shiftreg_valid = (i_shamt == 0) | (wrapped^i_right);
+   assign o_q = shiftreg_valid ? shiftreg[cnt] : signbit & i_signed;
    
 endmodule
 

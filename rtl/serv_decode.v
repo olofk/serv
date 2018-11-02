@@ -1,37 +1,39 @@
 module serv_decode
   (
-   input        clk,
-   input [31:0] i_i_rd_dat,
-   input        i_i_rd_vld,
-   output reg   o_i_rd_rdy = 1'b1,
-   output       o_ctrl_en,
-   output       o_ctrl_jump,
-   output       o_ctrl_jalr,
-   output       o_ctrl_auipc, 
-   output       o_rf_rd_en,
-   output [4:0] o_rf_rd_addr,
-   output       o_rf_rs_en,
-   output [4:0] o_rf_rs1_addr,
-   output [4:0] o_rf_rs2_addr,
-   output       o_alu_en,
-   output       o_alu_init,
-   output       o_alu_sub,
-   output reg   o_alu_cmp_sel,
-   output       o_alu_cmp_neg,
-   output reg   o_alu_cmp_uns,
-   input        i_alu_cmp,
-   output       o_alu_shamt_en,
-   output [1:0] o_alu_rd_sel,
-   output       o_mem_en,
-   output       o_mem_cmd,
-   output       o_mem_init,
-   output reg   o_mem_dat_valid, 
-   input        i_mem_busy,
-   output [2:0] o_funct3,
-   output reg   o_imm,
-   output       o_offset_source,
-   output       o_op_b_source,
-   output [1:0] o_rd_source);
+   input            clk,
+   input [31:0]     i_i_rd_dat,
+   input            i_i_rd_vld,
+   output reg       o_i_rd_rdy = 1'b1,
+   output           o_ctrl_en,
+   output           o_ctrl_jump,
+   output           o_ctrl_jalr,
+   output           o_ctrl_auipc, 
+   output           o_rf_rd_en,
+   output [4:0]     o_rf_rd_addr,
+   output           o_rf_rs_en,
+   output [4:0]     o_rf_rs1_addr,
+   output [4:0]     o_rf_rs2_addr,
+   output           o_alu_en,
+   output           o_alu_init,
+   output           o_alu_sub,
+   output reg       o_alu_cmp_sel,
+   output           o_alu_cmp_neg,
+   output reg       o_alu_cmp_uns,
+   input            i_alu_cmp,
+   output           o_alu_shamt_en,
+   output           o_alu_sh_signed,
+   output           o_alu_sh_right,
+   output reg [2:0] o_alu_rd_sel,
+   output           o_mem_en,
+   output           o_mem_cmd,
+   output           o_mem_init,
+   output reg       o_mem_dat_valid, 
+   input            i_mem_busy,
+   output [2:0]     o_funct3,
+   output reg       o_imm,
+   output           o_offset_source,
+   output           o_op_b_source,
+   output [1:0]     o_rd_source);
 
 `include "serv_params.vh"
 
@@ -63,7 +65,8 @@ module serv_decode
    wire      shift_op;
    
    assign mem_op = (opcode == OP_LOAD) | (opcode == OP_STORE);
-   assign shift_op = (opcode == OP_OPIMM) & (o_funct3[1:0] == 2'b01);
+   assign shift_op = ((opcode == OP_OPIMM) & (o_funct3[1:0] == 2'b01)) |
+                     ((opcode == OP_OP   ) & (o_funct3[1:0] == 2'b01));
 
    assign o_ctrl_en  = running;
    assign o_ctrl_jump = (opcode == OP_JAL) |
@@ -88,7 +91,7 @@ module serv_decode
    assign o_alu_init = (state == COMPARE) |
                        (state == SH_INIT);
 
-   assign o_alu_sub = ((opcode == OP_OP) & i_i_rd_dat[30])     ? 1'b1 :
+   assign o_alu_sub = (opcode == OP_OP) ? i_i_rd_dat[30] /*    ? 1'b1*/ :
                       ((opcode == OP_BRANCH) & (o_funct3 == 3'b100)) ? 1'b1 :
                       ((opcode == OP_BRANCH) & (o_funct3 == 3'b101)) ? 1'b1 :
                       ((opcode == OP_BRANCH) & (o_funct3 == 3'b110)) ? 1'b1 :
@@ -113,13 +116,21 @@ module serv_decode
         3'b11?  : o_alu_cmp_uns = 1'b1;
         default : o_alu_cmp_uns = 1'bx;
       endcase
+
+      casez(o_funct3)
+        3'b000  : o_alu_rd_sel = ALU_RESULT_ADD;
+        3'b001  : o_alu_rd_sel = ALU_RESULT_SR;
+        3'b01?  : o_alu_rd_sel = ALU_RESULT_LT;
+        3'b100  : o_alu_rd_sel = ALU_RESULT_XOR;
+        3'b101  : o_alu_rd_sel = ALU_RESULT_SR;
+        3'b110  : o_alu_rd_sel = ALU_RESULT_OR;
+        3'b111  : o_alu_rd_sel = ALU_RESULT_AND;
+        default : o_alu_rd_sel = 3'bxx;
+      endcase
    end
    assign o_alu_shamt_en = (state == SH_INIT) & (cnt < 5);
-
-   assign o_alu_rd_sel = (o_funct3 == 3'b000)     ? ALU_RESULT_ADD :
-                         (o_funct3[2:1] == 2'b01) ? ALU_RESULT_LT :
-                         (o_funct3 == 3'b101)     ? ALU_RESULT_SR :
-2'bxx;
+   assign o_alu_sh_signed = i_i_rd_dat[30];
+   assign o_alu_sh_right = o_funct3[2];
    
    assign o_mem_en   = mem_op & cnt_en;
    assign o_mem_cmd  = (opcode == OP_STORE);
@@ -209,7 +220,7 @@ module serv_decode
         IDLE : begin
            if (go)
              state <= (opcode == OP_BRANCH) ? COMPARE  :
-                      ((opcode == OP_OPIMM) & (o_funct3[2:1] == 2'b01)) ? COMPARE :
+                      (((opcode == OP_OPIMM) | (opcode == OP_OP))& (o_funct3[2:1] == 2'b01)) ? COMPARE :
                       mem_op                ? MEM_INIT :
                       shift_op              ? SH_INIT  : RUN;
         end
