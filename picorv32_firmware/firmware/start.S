@@ -8,7 +8,7 @@
 #define ENABLE_QREGS
 #define ENABLE_RVTST
 #define ENABLE_SIEVE
-#define ENABLE_MULTST
+//#define ENABLE_MULTST
 #define ENABLE_STATS
 
 #ifndef ENABLE_QREGS
@@ -430,15 +430,15 @@ start:
 	TEST(or)
 	TEST(and)
 
-	TEST(mulh)
-	TEST(mulhsu)
-	TEST(mulhu)
-	TEST(mul)
+//	TEST(mulh)
+//	TEST(mulhsu)
+//	TEST(mulhu)
+//	TEST(mul)
 
-	TEST(div)
-	TEST(divu)
-	TEST(rem)
-	TEST(remu)
+//	TEST(div)
+//	TEST(divu)
+//	TEST(rem)
+//	TEST(remu)
 
 	TEST(simple)
 
@@ -489,19 +489,19 @@ start:
 /* Hard mul functions for multest.c
  **********************************/
 
-hard_mul:
-	mul a0, a0, a1
-	ret
-
-hard_mulh:
-	mulh a0, a0, a1
-	ret
-
-hard_mulhsu:
-	mulhsu a0, a0, a1
-	ret
-
-hard_mulhu:
-	mulhu a0, a0, a1
-	ret
+//hard_mul:
+//	mul a0, a0, a1
+//	ret
+//
+//hard_mulh:
+//	mulh a0, a0, a1
+//	ret
+//
+//hard_mulhsu:
+//	mulhsu a0, a0, a1
+//	ret
+//
+//hard_mulhu:
+//	mulhu a0, a0, a1
+//	ret
 
