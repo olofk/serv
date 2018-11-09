@@ -19,7 +19,7 @@ filesets:
       - rtl/serv_regfile.v
       - rtl/serv_top.v
     file_type : verilogSource
-    depend : [wb_ram, "yosys:techlibs:ice40"]
+    depend : [wb_ram]
 
   ser_add_tb:
     files:
@@ -38,16 +38,16 @@ filesets:
   serv_top_tb:
     files:
       - firmware.hex : {copyto : firmware.hex, file_type : user}
+      - testprint.v
       - bench/serv_top_tb.v
     file_type : verilogSource
-    depend : [vlog_tb_utils, "yosys:techlibs:ice40"]
+    depend : [vlog_tb_utils, wb_intercon, "yosys:techlibs:ice40"]
 
   pcf:
     files: [data/dummy.pcf : {file_type : PCF}]
 targets:
   default:
-    default_tool : icarus
-    filesets : [core, tb]
+    filesets : [core]
     toplevel : serv_top_tb
 
   synth:
@@ -79,6 +79,7 @@ targets:
   serv_top_tb:
     default_tool: icarus
     filesets : [core, serv_top_tb]
+    generate : [wb_intercon]
     parameters : [RISCV_FORMAL=true]
     toplevel : serv_top_tb
 
@@ -86,3 +87,24 @@ parameters:
   RISCV_FORMAL:
     datatype  : bool
     paramtype : vlogdefine
+
+generate:
+  wb_intercon:
+    generator: wb_intercon_gen
+    parameters:
+      masters:
+        cpu_ibus:
+          slaves : [mem]
+        cpu_dbus:
+          slaves : [mem, testprint, testpassed]
+      slaves:
+        mem:
+          offset : 0
+          size   : 65536
+        testprint:
+          offset : 0x10000000
+          size   : 4
+        testpassed:
+          offset : 0x20000000
+          size   : 4
+    

@@ -1,18 +1,18 @@
 module serv_decode
   (
    input            clk,
-   input [31:0]     i_i_rd_dat,
-   input            i_i_rd_vld,
-   output reg       o_i_rd_rdy = 1'b1,
+   input [31:0]     i_wb_rdt,
+   input            i_wb_en,
+   output           o_ibus_active,
    output           o_ctrl_en,
    output           o_ctrl_jump,
    output           o_ctrl_jalr,
    output           o_ctrl_auipc, 
    output           o_rf_rd_en,
-   output [4:0]     o_rf_rd_addr,
+   output reg [4:0] o_rf_rd_addr,
    output           o_rf_rs_en,
-   output [4:0]     o_rf_rs1_addr,
-   output [4:0]     o_rf_rs2_addr,
+   output reg [4:0] o_rf_rs1_addr,
+   output reg [4:0] o_rf_rs2_addr,
    output           o_alu_en,
    output           o_alu_init,
    output           o_alu_sub,
@@ -29,7 +29,7 @@ module serv_decode
    output           o_mem_init,
    output reg       o_mem_dat_valid, 
    input            i_mem_busy,
-   output [2:0]     o_funct3,
+   output reg [2:0] o_funct3,
    output reg       o_imm,
    output           o_offset_source,
    output           o_op_b_source,
@@ -56,13 +56,17 @@ module serv_decode
      OP_JALR   = 5'b11001,
      OP_JAL    = 5'b11011;
 
-   reg [2:0]    state = 3'd0;
+   reg [2:0]    state = IDLE;
 
    reg [4:0] cnt     = 5'd0;
 
    wire      running;
    wire      mem_op;
    wire      shift_op;
+
+   reg       signbit;
+   
+   assign o_ibus_active = (state == IDLE);
    
    assign mem_op = (opcode == OP_LOAD) | (opcode == OP_STORE);
    assign shift_op = ((opcode == OP_OPIMM) & (o_funct3[1:0] == 2'b01)) |
@@ -91,7 +95,7 @@ module serv_decode
    assign o_alu_init = (state == COMPARE) |
                        (state == SH_INIT);
 
-   assign o_alu_sub = (opcode == OP_OP) ? i_i_rd_dat[30] /*    ? 1'b1*/ :
+   assign o_alu_sub = (opcode == OP_OP) ? signbit /*    ? 1'b1*/ :
                       ((opcode == OP_BRANCH) & (o_funct3 == 3'b100)) ? 1'b1 :
                       ((opcode == OP_BRANCH) & (o_funct3 == 3'b101)) ? 1'b1 :
                       ((opcode == OP_BRANCH) & (o_funct3 == 3'b110)) ? 1'b1 :
@@ -129,7 +133,7 @@ module serv_decode
       endcase
    end
    assign o_alu_shamt_en = (state == SH_INIT) & (cnt < 5);
-   assign o_alu_sh_signed = i_i_rd_dat[30];
+   assign o_alu_sh_signed = signbit;
    assign o_alu_sh_right = o_funct3[2];
    
    assign o_mem_en   = mem_op & cnt_en;
@@ -137,10 +141,22 @@ module serv_decode
 
    assign o_mem_init = (state == MEM_INIT);
 
-   assign o_rf_rd_addr  = i_i_rd_dat[11:7];
-   assign o_funct3  = i_i_rd_dat[14:12];
-   assign o_rf_rs1_addr = i_i_rd_dat[19:15];
-   assign o_rf_rs2_addr = i_i_rd_dat[24:20];
+   reg [4:0] opcode;
+   reg [31:0] imm;
+   
+   always @(posedge clk) begin
+      if (i_wb_en) begin
+         o_rf_rd_addr  <= i_wb_rdt[11:7];
+         o_rf_rs1_addr <= i_wb_rdt[19:15];
+         o_rf_rs2_addr <= i_wb_rdt[24:20];
+         o_funct3      <= i_wb_rdt[14:12];
+         signbit       <= i_wb_rdt[30];
+         opcode        <= i_wb_rdt[6:2];
+         imm           <= i_wb_rdt;
+         
+      end
+   end
+
    assign o_offset_source = (opcode == OP_JAL)    ? OFFSET_SOURCE_IMM :
                             (opcode == OP_AUIPC)  ? OFFSET_SOURCE_IMM :
                             (opcode == OP_BRANCH) ? OFFSET_SOURCE_IMM :
@@ -152,7 +168,7 @@ module serv_decode
                           (opcode == OP_OP)     ? OP_B_SOURCE_RS2 :
                           1'bx;
 
-   always @(o_funct3, cnt)
+   always @(o_funct3, cnt, o_mem_init)
      if (o_mem_init)
        o_mem_dat_valid = 1'bx;
      else
@@ -163,7 +179,6 @@ module serv_decode
          default: o_mem_dat_valid = 1'bx;
        endcase
 
-   wire [4:0] opcode = i_i_rd_dat[6:2];
 
 
    assign o_rd_source = (opcode == OP_JAL)   ? RD_SOURCE_CTRL :
@@ -174,36 +189,38 @@ module serv_decode
                         (opcode == OP_JALR)  ? RD_SOURCE_CTRL :
                         (opcode == OP_LOAD)  ? RD_SOURCE_MEM  : 2'bxx;
    
-   always @(cnt, opcode, i_i_rd_dat) begin
+   always @(cnt, opcode, imm) begin
       o_imm = 1'bx;
       if (opcode == OP_JAL)
-        if      (cnt > 19) o_imm = i_i_rd_dat[31];
-        else if (cnt > 11) o_imm = i_i_rd_dat[cnt];
-        else if (cnt > 10) o_imm = i_i_rd_dat[20];
-        else if (cnt > 0)  o_imm = i_i_rd_dat[cnt+20];
+        if      (cnt > 19) o_imm = imm[31];
+        else if (cnt > 11) o_imm = imm[cnt];
+        else if (cnt > 10) o_imm = imm[20];
+        else if (cnt > 0)  o_imm = imm[cnt+20];
         else               o_imm = 1'b0;
       else if ((opcode == OP_OPIMM) | (opcode == OP_JALR))
-        if      (cnt > 10) o_imm = i_i_rd_dat[31];
-        else               o_imm = i_i_rd_dat[cnt+20];
+        if      (cnt > 10) o_imm = imm[31];
+        else               o_imm = imm[cnt+20];
       else if ((opcode == OP_LUI) | (opcode == OP_AUIPC))
-        if      (cnt > 11) o_imm = i_i_rd_dat[cnt];
+        if      (cnt > 11) o_imm = imm[cnt];
         else               o_imm = 1'b0;
       else if (opcode == OP_LOAD)
-        if (cnt > 10)      o_imm = i_i_rd_dat[31];
-        else               o_imm = i_i_rd_dat[cnt+20];
+        if (cnt > 10)      o_imm = imm[31];
+        else               o_imm = imm[cnt+20];
       else if (opcode == OP_BRANCH)
-        if      (cnt > 11) o_imm = i_i_rd_dat[31];
-        else if (cnt > 10) o_imm = i_i_rd_dat[7];
-        else if (cnt > 4) o_imm = i_i_rd_dat[cnt+20];
-        else if (cnt > 0) o_imm = i_i_rd_dat[cnt+7];
+        if      (cnt > 11) o_imm = imm[31];
+        else if (cnt > 10) o_imm = imm[7];
+        else if (cnt > 4) o_imm = imm[cnt+20];
+        else if (cnt > 0) o_imm = imm[cnt+7];
         else               o_imm = 1'b0;
       else if (opcode == OP_STORE)
-        if (cnt > 10)     o_imm = i_i_rd_dat[31];
-        else if (cnt > 4) o_imm = i_i_rd_dat[cnt+20];
-        else              o_imm = i_i_rd_dat[cnt+7];
+        if (cnt > 10)     o_imm = imm[31];
+        else if (cnt > 4) o_imm = imm[cnt+20];
+        else              o_imm = imm[cnt+7];
    end
 
-   wire go = i_i_rd_vld & o_i_rd_rdy;
+   reg go = 1'b0;
+   always @(posedge clk)
+     go <= i_wb_en;
 
    wire cnt_en =
         (state == RUN) |
@@ -247,11 +264,6 @@ module serv_decode
 
       cnt <= cnt + {4'd0,cnt_en};
 
-      if (go) begin
-        o_i_rd_rdy <= 1'b0;
-      end else if (cnt_done & (state == RUN)) begin
-         o_i_rd_rdy <= 1'b1;
-      end
    end
 
 endmodule

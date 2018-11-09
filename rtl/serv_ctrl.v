@@ -9,9 +9,9 @@ module serv_ctrl
    input         i_jalr,
    input         i_auipc,
    output        o_rd,
-   output [31:0] o_i_ca_adr,
-   output reg    o_i_ca_vld = 1'b0,
-   input         i_i_ca_rdy);
+   output [31:0] o_ibus_adr,
+   output reg    o_ibus_cyc = 1'b0,
+   input         i_ibus_ack);
 
    parameter RESET_PC = 32'd8;
    
@@ -28,7 +28,7 @@ module serv_ctrl
    
    assign plus_4        = en_2r & !en_3r;
 
-   assign o_i_ca_adr[0] = pc;
+   assign o_ibus_adr[0] = pc;
    
    ser_add ser_add_pc_plus_4
      (
@@ -49,7 +49,7 @@ module serv_ctrl
       .i_en (i_en),
       .i_d  (new_pc),
       .o_q  (pc),
-      .o_par (o_i_ca_adr[31:1])
+      .o_par (o_ibus_adr[31:1])
       );
 
    assign new_pc = i_jump ? pc_plus_offset : pc_plus_4;
@@ -76,9 +76,9 @@ module serv_ctrl
       en_3r <= en_2r;
 
       if (en_r & !i_en)
-        o_i_ca_vld <= 1'b1;
-      else if (o_i_ca_vld & i_i_ca_rdy)
-        o_i_ca_vld <= 1'b0;
+        o_ibus_cyc <= 1'b1;
+      else if (o_ibus_cyc & i_ibus_ack)
+        o_ibus_cyc <= 1'b0;
    end
    
 endmodule

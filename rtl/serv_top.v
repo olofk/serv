@@ -30,25 +30,23 @@ module serv_top
    output reg [3:0]  rvfi_mem_wmask,
    output reg [31:0] rvfi_mem_rdata,
    output reg [31:0] rvfi_mem_wdata,
-`endif 
-   output [31:0]     o_i_ca_adr, 
-   output            o_i_ca_vld,
-   input             i_i_ca_rdy,
-   input [31:0]      i_i_rd_dat,
-   input             i_i_rd_vld,
-   output            o_i_rd_rdy,
-   output            o_d_ca_cmd,
-   output [31:0]     o_d_ca_adr,
-   output            o_d_ca_vld,
-   input             i_d_ca_rdy,
-   output [31:0]     o_d_dm_dat,
-   output [3:0]      o_d_dm_msk,
-   output            o_d_dm_vld,
-   input             i_d_dm_rdy,
-   input [31:0]      i_d_rd_dat,
-   input             i_d_rd_vld,
-   output            o_d_rd_rdy);
+`endif
+   output [31:0]     o_ibus_adr,
+   output            o_ibus_cyc,
+   output            o_ibus_stb,
+   input [31:0]      i_ibus_rdt,
+   input             i_ibus_ack,
+   output [31:0]     o_dbus_adr,
+   output [31:0]     o_dbus_dat,
+   output [3:0]      o_dbus_sel,
+   output            o_dbus_we ,
+   output            o_dbus_cyc,
+   output            o_dbus_stb,
+   input [31:0]      i_dbus_rdt,
+   input             i_dbus_ack);
 
+   assign o_ibus_stb = o_ibus_cyc;
+   
 `include "serv_params.vh"
 
    wire [4:0]    rd_addr;
@@ -98,15 +96,16 @@ module serv_top
    
    wire          mem_init;
    wire          mem_busy;
+
    
    parameter RESET_PC = 32'd8;
 
    serv_decode decode
      (
       .clk (clk),
-      .i_i_rd_dat     (i_i_rd_dat),
-      .i_i_rd_vld     (i_i_rd_vld),
-      .o_i_rd_rdy     (o_i_rd_rdy),
+      .i_wb_rdt       (i_ibus_rdt),
+      .i_wb_en        (o_ibus_cyc & i_ibus_ack),
+      .o_ibus_active  (),
       .o_ctrl_en      (ctrl_en),
       .o_ctrl_jump    (jump),
       .o_ctrl_jalr    (jalr),
@@ -150,9 +149,9 @@ module serv_top
       .i_jalr     (jalr),
       .i_auipc    (auipc),
       .o_rd       (ctrl_rd),
-      .o_i_ca_adr (o_i_ca_adr),
-      .o_i_ca_vld (o_i_ca_vld),
-      .i_i_ca_rdy (i_i_ca_rdy));
+      .o_ibus_adr (o_ibus_adr),
+      .o_ibus_cyc (o_ibus_cyc),
+      .i_ibus_ack (i_ibus_ack));
 
    assign offset = (offset_source == OFFSET_SOURCE_IMM) ? imm :
                    (offset_source == OFFSET_SOURCE_RS1) ? rs1 : 1'bx;
@@ -161,12 +160,11 @@ module serv_top
                (rd_source == RD_SOURCE_ALU)  ? alu_rd  :
                (rd_source == RD_SOURCE_IMM)  ? imm     :
                (rd_source == RD_SOURCE_MEM)  ? mem_rd  : 1'bx;
-   
 
    assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm :
                  (op_b_source == OP_B_SOURCE_RS2) ? rs2 :
                  1'bx;
-   
+
    serv_alu alu
      (
       .clk        (clk),
@@ -196,14 +194,14 @@ module serv_top
       .i_rs_en    (rs_en),
       .o_rs1      (rs1),
       .o_rs2      (rs2));
-   
+
    serv_mem_if mem_if
      (
-      .i_clk (clk),
-      .i_en  (mem_en),
-      .i_init (mem_init),
+      .i_clk    (clk),
+      .i_en     (mem_en),
+      .i_init   (mem_init),
       .i_dat_valid (mem_dat_valid),
-      .i_cmd (mem_cmd),
+      .i_cmd    (mem_cmd),
       .i_funct3 (funct3),
       .i_rs1    (rs1),
       .i_rs2    (rs2),
@@ -211,23 +209,20 @@ module serv_top
       .o_rd     (mem_rd),
       .o_busy   (mem_busy),
       //External interface
-      .o_d_ca_cmd (o_d_ca_cmd),
-      .o_d_ca_adr (o_d_ca_adr),
-      .o_d_ca_vld (o_d_ca_vld),
-      .i_d_ca_rdy (i_d_ca_rdy),
-      .o_d_dm_dat (o_d_dm_dat),
-      .o_d_dm_msk (o_d_dm_msk),
-      .o_d_dm_vld (o_d_dm_vld),
-      .i_d_dm_rdy (i_d_dm_rdy),
-      .i_d_rd_dat (i_d_rd_dat),
-      .i_d_rd_vld (i_d_rd_vld),
-      .o_d_rd_rdy (o_d_rd_rdy));
+      .o_wb_adr   (o_dbus_adr),
+      .o_wb_dat   (o_dbus_dat),
+      .o_wb_sel   (o_dbus_sel),
+      .o_wb_we    (o_dbus_we ),
+      .o_wb_cyc   (o_dbus_cyc),
+      .o_wb_stb   (o_dbus_stb),
+      .i_wb_rdt   (i_dbus_rdt),
+      .i_wb_ack   (i_dbus_ack));
 
 `ifdef RISCV_FORMAL
    reg [31:0]    rs1_fv, rs2_fv, rd_fv;
    reg [31:0]    pc = RESET_PC;
    reg           ctrl_en_r = 1'b0;
-   
+
    always @(posedge clk) begin
       ctrl_en_r <= ctrl_en;
       if (rs_en) begin
@@ -239,10 +234,10 @@ module serv_top
       end
       rvfi_valid <= 1'b0;
       if (ctrl_en_r & !ctrl_en) begin
-         pc <= o_i_ca_adr;
+         pc <= o_ibus_adr;
          rvfi_valid <= 1'b1;
          rvfi_order <= rvfi_order + 1;
-         rvfi_insn  <= i_i_rd_dat;
+         rvfi_insn  <= i_ibus_rdt;
          rvfi_trap <= 1'b0;
          rvfi_halt <= 1'b0;
          rvfi_intr <= 1'b0;
@@ -254,14 +249,14 @@ module serv_top
          rvfi_rd_addr <= rd_addr;
          rvfi_rd_wdata <= rd_fv;
          rvfi_pc_rdata <= pc;
-         rvfi_pc_wdata <= o_i_ca_adr;
-         rvfi_mem_addr <= o_d_ca_adr;
+         rvfi_pc_wdata <= o_ibus_adr;
+         rvfi_mem_addr <= o_dbus_adr;
          rvfi_mem_rmask <= 4'bxxxx;
-         rvfi_mem_wmask <= o_d_dm_msk;
-         rvfi_mem_rdata <= i_d_rd_dat;
-         rvfi_mem_wdata <= o_d_dm_dat;
+         rvfi_mem_wmask <= o_dbus_sel;
+         rvfi_mem_rdata <= i_dbus_rdt;
+         rvfi_mem_wdata <= o_dbus_dat;
       end
    end
-`endif   
-      
+`endif
+
 endmodule
