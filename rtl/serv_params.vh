@@ -1,8 +1,9 @@
-localparam [1:0]
-  RD_SOURCE_CTRL = 2'd0,
-  RD_SOURCE_ALU  = 2'd1,
-  RD_SOURCE_IMM  = 2'd2,
-  RD_SOURCE_MEM = 2'd3;
+localparam [2:0]
+  RD_SOURCE_CTRL = 3'd0,
+  RD_SOURCE_ALU  = 3'd1,
+  RD_SOURCE_IMM  = 3'd2,
+  RD_SOURCE_MEM  = 3'd3,
+  RD_SOURCE_CSR  = 3'd4;
 
 localparam [0:0]
   OFFSET_SOURCE_IMM = 1'd0,
@@ -11,7 +12,7 @@ localparam [0:0]
 localparam [0:0]
   OP_B_SOURCE_IMM = 1'd0,
   OP_B_SOURCE_RS2 = 1'd1;
-  
+
 localparam[2:0]
   ALU_RESULT_ADD = 3'd0,
   ALU_RESULT_SR  = 3'd1,
@@ -33,3 +34,16 @@ localparam [0:0]
  OR
  AND
 */
+
+localparam [2:0]
+  CSR_SEL_MTVEC   = 3'd0,
+  CSR_SEL_MEPC    = 3'd1,
+  CSR_SEL_MTVAL   = 3'd2,
+  CSR_SEL_MCAUSE  = 3'd3
+;
+
+localparam [1:0]
+  CSR_SOURCE_CSR = 2'b00,
+  CSR_SOURCE_EXT = 2'b01,
+  CSR_SOURCE_SET = 2'b10,
+  CSR_SOURCE_CLR = 2'b11;

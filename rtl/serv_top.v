@@ -46,26 +46,29 @@ module serv_top
    input             i_dbus_ack);
 
    assign o_ibus_stb = o_ibus_cyc;
-   
+
 `include "serv_params.vh"
 
    wire [4:0]    rd_addr;
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
-   
-   wire [1:0]    rd_source;
+
+   wire [2:0]    rd_source;
    wire          ctrl_rd;
    wire          alu_rd;
    wire          mem_rd;
+   wire          csr_rd;
    wire          rd;
 
    wire          ctrl_en;
    wire          jump;
    wire          jalr;
    wire          auipc;
+   wire 	 mret;
    wire          offset;
    wire          offset_source;
    wire          imm;
+   wire 	 trap;
 
    wire [2:0]    funct3;
 
@@ -80,7 +83,7 @@ module serv_top
    wire          alu_sh_signed;
    wire          alu_sh_right;
    wire [2:0]    alu_rd_sel;
-   
+
    wire          rs1;
    wire          rs2;
    wire          rs_en;
@@ -90,14 +93,18 @@ module serv_top
    wire          op_b;
 
    wire          mem_en;
-   
+
    wire          mem_cmd;
    wire          mem_dat_valid;
-   
+
    wire          mem_init;
    wire          mem_busy;
+   wire 	 mem_misalign;
 
-   
+   wire 	 csr_en;
+   wire [2:0] 	 csr_sel;
+   wire [1:0]	 csr_source;
+
    parameter RESET_PC = 32'd8;
 
    serv_decode decode
@@ -110,6 +117,8 @@ module serv_top
       .o_ctrl_jump    (jump),
       .o_ctrl_jalr    (jalr),
       .o_ctrl_auipc   (auipc),
+      .o_ctrl_trap    (trap),
+      .o_ctrl_mret    (mret),
       .o_funct3       (funct3),
       .o_alu_en       (alu_en),
       .o_alu_init     (alu_init),
@@ -132,6 +141,10 @@ module serv_top
       .o_mem_init     (mem_init),
       .o_mem_dat_valid (mem_dat_valid),
       .i_mem_busy     (mem_busy),
+      .i_mem_misalign (mem_misalign),
+      .o_csr_en       (csr_en),
+      .o_csr_sel      (csr_sel),
+      .o_csr_source   (csr_source),
       .o_imm          (imm),
       .o_offset_source (offset_source),
       .o_op_b_source  (op_b_source),
@@ -148,6 +161,8 @@ module serv_top
       .i_rs1      (rs1),
       .i_jalr     (jalr),
       .i_auipc    (auipc),
+      .i_trap     (trap | mret),
+      .i_csr_pc   (csr_rd),
       .o_rd       (ctrl_rd),
       .o_ibus_adr (o_ibus_adr),
       .o_ibus_cyc (o_ibus_cyc),
@@ -156,10 +171,12 @@ module serv_top
    assign offset = (offset_source == OFFSET_SOURCE_IMM) ? imm :
                    (offset_source == OFFSET_SOURCE_RS1) ? rs1 : 1'bx;
 
+   //TODO: Pass imm through alu to avoid 5-way mux
    assign rd = (rd_source == RD_SOURCE_CTRL) ? ctrl_rd :
                (rd_source == RD_SOURCE_ALU)  ? alu_rd  :
                (rd_source == RD_SOURCE_IMM)  ? imm     :
-               (rd_source == RD_SOURCE_MEM)  ? mem_rd  : 1'bx;
+               (rd_source == RD_SOURCE_MEM)  ? mem_rd  :
+               (rd_source == RD_SOURCE_CSR)  ? csr_rd  : 1'bx;
 
    assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm :
                  (op_b_source == OP_B_SOURCE_RS2) ? rs2 :
@@ -208,6 +225,8 @@ module serv_top
       .i_imm    (imm),
       .o_rd     (mem_rd),
       .o_busy   (mem_busy),
+      .o_misalign (mem_misalign),
+      .i_trap   (trap),
       //External interface
       .o_wb_adr   (o_dbus_adr),
       .o_wb_dat   (o_dbus_dat),
@@ -217,6 +236,20 @@ module serv_top
       .o_wb_stb   (o_dbus_stb),
       .i_wb_rdt   (i_dbus_rdt),
       .i_wb_ack   (i_dbus_ack));
+
+   serv_csr csr
+     (
+      .i_clk        (clk),
+      .i_en         (csr_en),
+      .i_csr_sel    (csr_sel),
+      .i_csr_source (csr_source),
+      .i_trap       (trap),
+      .i_pc         (o_ibus_adr[0]),
+      .i_mtval      (o_dbus_adr[0]),
+      .i_load_misaligned (mem_misalign & !mem_cmd),
+      .i_store_misaligned (mem_misalign & mem_cmd),
+      .i_d          (rs1/* FIXME csr_d*/),
+      .o_q          (csr_rd));
 
 `ifdef RISCV_FORMAL
    reg [31:0]    rs1_fv, rs2_fv, rd_fv;
