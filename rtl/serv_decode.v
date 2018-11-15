@@ -45,8 +45,7 @@ module serv_decode
 
    localparam [2:0]
      IDLE     = 3'd0,
-     COMPARE  = 3'd1,
-     SH_INIT  = 3'd2,
+     INIT     = 3'd1,
      MEM_INIT = 3'd3,
      MEM_WAIT = 3'd4,
      RUN      = 3'd5;
@@ -101,8 +100,8 @@ module serv_decode
 
    assign o_alu_en = cnt_en;
 
-   assign o_alu_init = (state == COMPARE) |
-                       (state == SH_INIT);
+   assign o_alu_init = (state == INIT) |
+                       (state == MEM_INIT);
 
    assign o_alu_sub = (opcode == OP_OP) ? signbit /*    ? 1'b1*/ :
                       ((opcode == OP_BRANCH) & (o_funct3 == 3'b100)) ? 1'b1 :
@@ -172,7 +171,8 @@ module serv_decode
       if (o_ctrl_mret)
 	o_csr_sel = CSR_SEL_MEPC;
    end
-   assign o_alu_shamt_en = (state == SH_INIT) & (cnt < 5);
+   assign o_alu_shamt_en = (cnt < 5) & ((state == INIT) |
+					(state == MEM_INIT));
    assign o_alu_sh_signed = signbit;
    assign o_alu_sh_right = o_funct3[2];
 
@@ -267,8 +267,7 @@ module serv_decode
 
    wire cnt_en =
         (state == RUN) |
-        (state == COMPARE) |
-        (state == SH_INIT) |
+        (state == INIT) |
         (state == MEM_INIT);
 
    wire cnt_done = cnt == 31;
@@ -283,16 +282,12 @@ module serv_decode
       case (state)
         IDLE : begin
            if (go)
-             state <= (opcode == OP_BRANCH) ? COMPARE  :
-                      (((opcode == OP_OPIMM) | (opcode == OP_OP))& (o_funct3[2:1] == 2'b01)) ? COMPARE :
+             state <= (opcode == OP_BRANCH) ? INIT  :
+                      (((opcode == OP_OPIMM) | (opcode == OP_OP))& (o_funct3[2:1] == 2'b01)) ? INIT :
                       mem_op                ? MEM_INIT :
-                      shift_op              ? SH_INIT  : RUN;
+                      shift_op              ? INIT  : RUN;
         end
-        SH_INIT : begin
-           if (cnt_done)
-             state <= RUN;
-        end
-        COMPARE : begin
+        INIT : begin
            if (cnt_done)
              state <= RUN;
         end
