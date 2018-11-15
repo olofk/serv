@@ -30,7 +30,7 @@ module serv_decode
    output 	    o_mem_cmd,
    output 	    o_mem_init,
    output reg 	    o_mem_dat_valid,
-   input 	    i_mem_busy,
+   input 	    i_mem_dbus_ack,
    input 	    i_mem_misalign,
    output 	    o_csr_en,
    output reg [2:0] o_csr_sel,
@@ -43,12 +43,10 @@ module serv_decode
 
 `include "serv_params.vh"
 
-   localparam [2:0]
-     IDLE     = 3'd0,
-     INIT     = 3'd1,
-     MEM_INIT = 3'd3,
-     MEM_WAIT = 3'd4,
-     RUN      = 3'd5;
+   localparam [1:0]
+     IDLE     = 2'd0,
+     INIT     = 2'd1,
+     RUN      = 2'd2;
 
    localparam [4:0]
      OP_LOAD   = 5'b00000,
@@ -100,8 +98,7 @@ module serv_decode
 
    assign o_alu_en = cnt_en;
 
-   assign o_alu_init = (state == INIT) |
-                       (state == MEM_INIT);
+   assign o_alu_init = (state == INIT);
 
    assign o_alu_sub = (opcode == OP_OP) ? signbit /*    ? 1'b1*/ :
                       ((opcode == OP_BRANCH) & (o_funct3 == 3'b100)) ? 1'b1 :
@@ -171,15 +168,14 @@ module serv_decode
       if (o_ctrl_mret)
 	o_csr_sel = CSR_SEL_MEPC;
    end
-   assign o_alu_shamt_en = (cnt < 5) & ((state == INIT) |
-					(state == MEM_INIT));
+   assign o_alu_shamt_en = (cnt < 5) & (state == INIT);
    assign o_alu_sh_signed = signbit;
    assign o_alu_sh_right = o_funct3[2];
 
    assign o_mem_en   = mem_op & cnt_en;
    assign o_mem_cmd  = (opcode == OP_STORE);
 
-   assign o_mem_init = (state == MEM_INIT);
+   assign o_mem_init = mem_op & (state == INIT);
 
    assign jal_misalign  = imm[21] & (opcode == OP_JAL);
 
@@ -267,8 +263,7 @@ module serv_decode
 
    wire cnt_en =
         (state == RUN) |
-        (state == INIT) |
-        (state == MEM_INIT);
+        (state == INIT);
 
    wire cnt_done = cnt == 31;
    assign running = (state == RUN);
@@ -281,22 +276,21 @@ module serv_decode
       state <= state;
       case (state)
         IDLE : begin
-           if (go)
-             state <= (opcode == OP_BRANCH) ? INIT  :
-                      (((opcode == OP_OPIMM) | (opcode == OP_OP))& (o_funct3[2:1] == 2'b01)) ? INIT :
-                      mem_op                ? MEM_INIT :
-                      shift_op              ? INIT  : RUN;
+           if (go) begin
+	      state <= RUN;
+              if ((opcode == OP_BRANCH) |
+                  (((opcode == OP_OPIMM) | (opcode == OP_OP)) &
+		   (o_funct3[2:1] == 2'b01)) |
+                  mem_op | shift_op)
+		state <= INIT;
+	   end
+	   if (i_mem_dbus_ack | i_mem_misalign)
+	     state <= RUN;
         end
         INIT : begin
            if (cnt_done)
-             state <= RUN;
+             state <= mem_op ? IDLE : RUN;
         end
-        MEM_INIT :
-          if (cnt_done)
-            state <= MEM_WAIT;
-        MEM_WAIT :
-          if (!i_mem_busy)
-            state <= RUN;
         RUN : begin
            if (cnt_done)
              state <= IDLE;

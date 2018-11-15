@@ -98,7 +98,6 @@ module serv_top
    wire          mem_dat_valid;
 
    wire          mem_init;
-   wire          mem_busy;
    wire 	 mem_misalign;
 
    wire 	 bad_pc;
@@ -142,7 +141,7 @@ module serv_top
       .o_mem_cmd      (mem_cmd),
       .o_mem_init     (mem_init),
       .o_mem_dat_valid (mem_dat_valid),
-      .i_mem_busy     (mem_busy),
+      .i_mem_dbus_ack (i_dbus_ack),
       .i_mem_misalign (mem_misalign),
       .o_csr_en       (csr_en),
       .o_csr_sel      (csr_sel),
@@ -227,7 +226,6 @@ module serv_top
       .i_rs2    (rs2),
       .i_imm    (imm),
       .o_rd     (mem_rd),
-      .o_busy   (mem_busy),
       .o_misalign (mem_misalign),
       .i_trap   (trap),
       //External interface

@@ -11,7 +11,6 @@ module serv_mem_if
    input 	 i_rs2,
    input 	 i_imm,
    output 	 o_rd,
-   output reg 	 o_busy = 1'b0,
    output 	 o_misalign,
    input         i_trap,
    //External interface
@@ -107,11 +106,6 @@ module serv_mem_if
 
       if (i_dat_valid)
         signbit <= dat[0];
-
-      if (i_en & i_init)
-        o_busy <= 1'b1;
-      else if (wb_en | i_trap)
-        o_busy <= 1'b0;
 
       if (wb_en & !o_wb_we) begin
          dat[31:16] <= i_wb_rdt[31:16];
