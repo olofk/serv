@@ -1,15 +1,19 @@
+`default_nettype none
 module serv_decode
   (
    input 	    clk,
    input [31:0]     i_wb_rdt,
    input 	    i_wb_en,
+   output 	    o_cnt_done,
    output 	    o_ibus_active,
    output 	    o_ctrl_en,
+   output 	    o_ctrl_pc_en,
    output 	    o_ctrl_jump,
    output 	    o_ctrl_jalr,
    output 	    o_ctrl_auipc,
-   output reg 	    o_ctrl_trap = 1'b0,
+   output 	    o_ctrl_trap,
    output 	    o_ctrl_mret,
+   input 	    i_ctrl_misalign,
    output 	    o_rf_rd_en,
    output reg [4:0] o_rf_rd_addr,
    output 	    o_rf_rs_en,
@@ -46,7 +50,8 @@ module serv_decode
    localparam [1:0]
      IDLE     = 2'd0,
      INIT     = 2'd1,
-     RUN      = 2'd2;
+     RUN      = 2'd2,
+     TRAP     = 2'd3;
 
    localparam [4:0]
      OP_LOAD   = 5'b00000,
@@ -68,10 +73,14 @@ module serv_decode
    wire      mem_op;
    wire      shift_op;
    wire      csr_op;
+   wire      slt_op;
+   wire      branch_op;
 
    wire      jump_misaligned;
 
    reg       signbit;
+
+   assign o_cnt_done = cnt_done;
 
    assign o_ibus_active = (state == IDLE);
 
@@ -79,10 +88,15 @@ module serv_decode
    assign shift_op = ((opcode == OP_OPIMM) & (o_funct3[1:0] == 2'b01)) |
                      ((opcode == OP_OP   ) & (o_funct3[1:0] == 2'b01));
 
-   assign o_ctrl_en  = running;
+   assign slt_op = (((opcode == OP_OPIMM) | (opcode == OP_OP)) &
+		    (o_funct3[2:1] == 2'b01));
+
+   assign branch_op = (opcode == OP_BRANCH);
+
+   assign o_ctrl_pc_en  = running | o_ctrl_trap;
    assign o_ctrl_jump = (opcode == OP_JAL) |
                         (opcode == OP_JALR) |
-                        ((opcode == OP_BRANCH) & i_alu_cmp);
+                        (branch_op & i_alu_cmp);
 
    assign o_ctrl_jalr = (opcode == OP_JALR);
 
@@ -92,25 +106,27 @@ module serv_decode
 
    assign o_rf_rd_en = running & !o_ctrl_trap &
                        (opcode != OP_STORE) &
-                       (opcode != OP_BRANCH);
+                       !branch_op;
 
    assign o_rf_rs_en = cnt_en;
 
    assign o_alu_en = cnt_en;
 
+   assign o_ctrl_en = cnt_en;
+
    assign o_alu_init = (state == INIT);
 
    assign o_alu_sub = (opcode == OP_OP) ? signbit /*    ? 1'b1*/ :
-                      ((opcode == OP_BRANCH) & (o_funct3 == 3'b100)) ? 1'b1 :
-                      ((opcode == OP_BRANCH) & (o_funct3 == 3'b101)) ? 1'b1 :
-                      ((opcode == OP_BRANCH) & (o_funct3 == 3'b110)) ? 1'b1 :
+                      (branch_op & (o_funct3 == 3'b100)) ? 1'b1 :
+                      (branch_op & (o_funct3 == 3'b101)) ? 1'b1 :
+                      (branch_op & (o_funct3 == 3'b110)) ? 1'b1 :
                       ((opcode == OP_OPIMM)  & (o_funct3 == 3'b000)) ? 1'b0 :
                       1'bx;
 
 
-   assign o_alu_cmp_neg = (opcode == OP_BRANCH) & o_funct3[0];
+   assign o_alu_cmp_neg = branch_op & o_funct3[0];
 
-   assign o_csr_en = ((opcode == OP_SYSTEM) & (|o_funct3) | o_ctrl_mret | o_ctrl_trap) & running;
+   assign o_csr_en = ((opcode == OP_SYSTEM) & (|o_funct3) | o_ctrl_mret | o_ctrl_trap) & (running | o_ctrl_trap);
 
    always @(o_funct3) begin
       casez (o_funct3)
@@ -177,7 +193,7 @@ module serv_decode
 
    assign o_mem_init = mem_op & (state == INIT);
 
-   assign jal_misalign  = imm[21] & (opcode == OP_JAL);
+   wire jal_misalign  = imm[21] & (opcode == OP_JAL);
 
    reg [4:0] opcode;
    reg [31:0] imm;
@@ -261,41 +277,41 @@ module serv_decode
    always @(posedge clk)
      go <= i_wb_en;
 
-   wire cnt_en =
-        (state == RUN) |
-        (state == INIT);
+   wire cnt_en = (state != IDLE);
 
    wire cnt_done = cnt == 31;
    assign running = (state == RUN);
 
+   assign o_ctrl_trap = (state == TRAP);
+
    always @(posedge clk) begin
-      if (cnt_done)
-	o_ctrl_trap <= i_mem_misalign;
-      if (go)
-	o_ctrl_trap <= jal_misalign;
       state <= state;
       case (state)
         IDLE : begin
            if (go) begin
 	      state <= RUN;
-              if ((opcode == OP_BRANCH) |
-                  (((opcode == OP_OPIMM) | (opcode == OP_OP)) &
-		   (o_funct3[2:1] == 2'b01)) |
+              if (branch_op |
+                  slt_op | (opcode == OP_JAL) | (opcode == OP_JALR) |
                   mem_op | shift_op)
 		state <= INIT;
 	   end
-	   if (i_mem_dbus_ack | i_mem_misalign)
+	   if (i_mem_dbus_ack)
 	     state <= RUN;
         end
         INIT : begin
            if (cnt_done)
-             state <= mem_op ? IDLE : RUN;
+             state <= (i_mem_misalign | (o_ctrl_jump & i_ctrl_misalign) /*| jal_misalign*/) ? TRAP :
+		      mem_op ? IDLE : RUN;
         end
         RUN : begin
            if (cnt_done)
              state <= IDLE;
         end
-        default : state <= 3'bxxx;
+	TRAP : begin
+           if (cnt_done)
+             state <= IDLE;
+	end
+        default : state <= 2'bxx;
       endcase
 
       cnt <= cnt + {4'd0,cnt_en};

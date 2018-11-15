@@ -61,6 +61,8 @@ module serv_top
    wire          rd;
 
    wire          ctrl_en;
+   wire          ctrl_pc_en;
+   wire 	 ctrl_misalign;
    wire          jump;
    wire          jalr;
    wire          auipc;
@@ -70,6 +72,7 @@ module serv_top
    wire          imm;
    wire 	 trap;
 
+   wire 	 cnt_done;
    wire [2:0]    funct3;
 
    wire          alu_en;
@@ -113,13 +116,16 @@ module serv_top
       .clk (clk),
       .i_wb_rdt       (i_ibus_rdt),
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
+      .o_cnt_done     (cnt_done),
       .o_ibus_active  (),
       .o_ctrl_en      (ctrl_en),
+      .o_ctrl_pc_en   (ctrl_pc_en),
       .o_ctrl_jump    (jump),
       .o_ctrl_jalr    (jalr),
       .o_ctrl_auipc   (auipc),
       .o_ctrl_trap    (trap),
       .o_ctrl_mret    (mret),
+      .i_ctrl_misalign(ctrl_misalign),
       .o_funct3       (funct3),
       .o_alu_en       (alu_en),
       .o_alu_init     (alu_init),
@@ -157,6 +163,8 @@ module serv_top
      (
       .clk        (clk),
       .i_en       (ctrl_en),
+      .i_pc_en    (ctrl_pc_en),
+      .i_cnt_done (cnt_done),
       .i_jump     (jump),
       .i_offset   (offset),
       .i_rs1      (rs1),
@@ -166,6 +174,7 @@ module serv_top
       .i_csr_pc   (csr_rd),
       .o_rd       (ctrl_rd),
       .o_bad_pc   (bad_pc),
+      .o_misalign (ctrl_misalign),
       .o_ibus_adr (o_ibus_adr),
       .o_ibus_cyc (o_ibus_cyc),
       .i_ibus_ack (i_ibus_ack));
@@ -255,10 +264,10 @@ module serv_top
 `ifdef RISCV_FORMAL
    reg [31:0]    rs1_fv, rs2_fv, rd_fv;
    reg [31:0]    pc = RESET_PC;
-   reg           ctrl_en_r = 1'b0;
+   reg           ctrl_pc_en_r = 1'b0;
 
    always @(posedge clk) begin
-      ctrl_en_r <= ctrl_en;
+      ctrl_pc_en_r <= ctrl_pc_en;
       if (rs_en) begin
          rs1_fv <= {rs1,rs1_fv[31:1]};
          rs2_fv <= {rs2,rs2_fv[31:1]};
@@ -267,7 +276,7 @@ module serv_top
          rd_fv <= {rd,rd_fv[31:1]};
       end
       rvfi_valid <= 1'b0;
-      if (ctrl_en_r & !ctrl_en) begin
+      if (ctrl_pc_en_r & !ctrl_pc_en) begin
          pc <= o_ibus_adr;
          rvfi_valid <= 1'b1;
          rvfi_order <= rvfi_order + 1;
