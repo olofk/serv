@@ -101,6 +101,8 @@ module serv_top
    wire          mem_busy;
    wire 	 mem_misalign;
 
+   wire 	 bad_pc;
+
    wire 	 csr_en;
    wire [2:0] 	 csr_sel;
    wire [1:0]	 csr_source;
@@ -164,6 +166,7 @@ module serv_top
       .i_trap     (trap | mret),
       .i_csr_pc   (csr_rd),
       .o_rd       (ctrl_rd),
+      .o_bad_pc   (bad_pc),
       .o_ibus_adr (o_ibus_adr),
       .o_ibus_cyc (o_ibus_cyc),
       .i_ibus_ack (i_ibus_ack));
@@ -245,7 +248,7 @@ module serv_top
       .i_csr_source (csr_source),
       .i_trap       (trap),
       .i_pc         (o_ibus_adr[0]),
-      .i_mtval      (o_dbus_adr[0]),
+      .i_mtval      (mem_misalign ? o_dbus_adr[0] : bad_pc),
       .i_load_misaligned (mem_misalign & !mem_cmd),
       .i_store_misaligned (mem_misalign & mem_cmd),
       .i_d          (rs1/* FIXME csr_d*/),

@@ -11,6 +11,7 @@ module serv_ctrl
    input 	 i_trap,
    input 	 i_csr_pc,
    output 	 o_rd,
+   output 	 o_bad_pc,
    output [31:0] o_ibus_adr,
    output reg 	 o_ibus_cyc = 1'b0,
    input 	 i_ibus_ack);
@@ -31,6 +32,7 @@ module serv_ctrl
    assign plus_4        = en_2r & !en_3r;
 
    assign o_ibus_adr[0] = pc;
+   assign o_bad_pc = pc_plus_offset;
 
    ser_add ser_add_pc_plus_4
      (

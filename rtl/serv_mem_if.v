@@ -16,7 +16,7 @@ module serv_mem_if
    input         i_trap,
    //External interface
    output [31:0] o_wb_adr,
-   output [31:0] o_wb_dat,
+   output reg [31:0] o_wb_dat = 32'd0,
    output [3:0]  o_wb_sel,
    output 	 o_wb_we ,
    output reg 	 o_wb_cyc = 1'b0,
@@ -63,7 +63,6 @@ module serv_mem_if
 
    wire       upper_half = bytepos[1];
 
-   assign o_wb_dat = dat;
    assign o_wb_sel = (is_word ? 4'b1111 :
                       is_half ? {{2{upper_half}}, ~{2{upper_half}}} :
                       4'd1 << bytepos);
@@ -85,6 +84,15 @@ module serv_mem_if
    reg [1:0]  misalign = 2'b00;
 
    always @(posedge i_clk) begin
+      //Async?
+      if (init_r) begin
+	 o_wb_dat[7:0]   <= dat[7:0];
+	 o_wb_dat[15:8]  <= (is_word | is_half) ? dat[15:8] : dat[7:0];
+	 o_wb_dat[23:16] <= is_word ? dat[23:16] : dat[7:0];
+	 o_wb_dat[31:24] <= is_word ? dat[31:24] : is_half ? dat[15:8] : dat[7:0];
+      end
+
+
       if (i_init & !init_r)
 	misalign[0] <= (!is_byte & adr);
       if (init_r & !init_2r)

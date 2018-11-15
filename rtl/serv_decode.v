@@ -72,6 +72,8 @@ module serv_decode
    wire      shift_op;
    wire      csr_op;
 
+   wire      jump_misaligned;
+
    reg       signbit;
 
    assign o_ibus_active = (state == IDLE);
@@ -95,10 +97,7 @@ module serv_decode
                        (opcode != OP_STORE) &
                        (opcode != OP_BRANCH);
 
-   assign o_rf_rs_en = cnt_en /*(running & (opcode == OP_OPIMM)) |
-                       (state == SH_INIT) |
-                       (state == MEM_INIT)*/;
- //FIXME: Change for addi?
+   assign o_rf_rs_en = cnt_en;
 
    assign o_alu_en = cnt_en;
 
@@ -182,6 +181,8 @@ module serv_decode
 
    assign o_mem_init = (state == MEM_INIT);
 
+   assign jal_misalign  = imm[21] & (opcode == OP_JAL);
+
    reg [4:0] opcode;
    reg [31:0] imm;
 
@@ -194,7 +195,6 @@ module serv_decode
          signbit       <= i_wb_rdt[30];
          opcode        <= i_wb_rdt[6:2];
          imm           <= i_wb_rdt;
-
       end
    end
 
@@ -277,6 +277,8 @@ module serv_decode
    always @(posedge clk) begin
       if (cnt_done)
 	o_ctrl_trap <= i_mem_misalign;
+      if (go)
+	o_ctrl_trap <= jal_misalign;
       state <= state;
       case (state)
         IDLE : begin
