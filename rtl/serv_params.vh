@@ -36,11 +36,11 @@ localparam [0:0]
 */
 
 localparam [2:0]
-  CSR_SEL_MTVEC   = 3'd0,
-  CSR_SEL_MEPC    = 3'd1,
-  CSR_SEL_MTVAL   = 3'd2,
-  CSR_SEL_MCAUSE  = 3'd3
-;
+  CSR_SEL_MSCRATCH = 3'd0,
+  CSR_SEL_MEPC     = 3'd1,
+  CSR_SEL_MCAUSE   = 3'd2,
+  CSR_SEL_MTVAL    = 3'd3,
+  CSR_SEL_MTVEC    = 3'd4;
 
 localparam [1:0]
   CSR_SOURCE_CSR = 2'b00,

@@ -108,6 +108,10 @@ module serv_top
    wire 	 csr_en;
    wire [2:0] 	 csr_sel;
    wire [1:0]	 csr_source;
+   wire 	 csr_imm;
+   wire 	 csr_d_sel;
+
+   wire [3:0] 	 mcause;
 
    parameter RESET_PC = 32'd8;
 
@@ -152,6 +156,9 @@ module serv_top
       .o_csr_en       (csr_en),
       .o_csr_sel      (csr_sel),
       .o_csr_source   (csr_source),
+      .o_csr_mcause   (mcause),
+      .o_csr_imm      (csr_imm),
+      .o_csr_d_sel    (csr_d_sel),
       .o_imm          (imm),
       .o_offset_source (offset_source),
       .o_op_b_source  (op_b_source),
@@ -256,9 +263,8 @@ module serv_top
       .i_trap       (trap),
       .i_pc         (o_ibus_adr[0]),
       .i_mtval      (mem_misalign ? o_dbus_adr[0] : bad_pc),
-      .i_load_misaligned (mem_misalign & !mem_cmd),
-      .i_store_misaligned (mem_misalign & mem_cmd),
-      .i_d          (rs1/* FIXME csr_d*/),
+      .i_mcause     (mcause),
+      .i_d          (csr_d_sel ? csr_imm : rs1),
       .o_q          (csr_rd));
 
 `ifdef RISCV_FORMAL

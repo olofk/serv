@@ -39,6 +39,9 @@ module serv_decode
    output 	    o_csr_en,
    output reg [2:0] o_csr_sel,
    output reg [1:0] o_csr_source,
+   output reg [3:0] o_csr_mcause,
+   output 	    o_csr_imm,
+   output 	    o_csr_d_sel,
    output reg [2:0] o_funct3,
    output reg 	    o_imm,
    output 	    o_offset_source,
@@ -75,7 +78,7 @@ module serv_decode
    wire      csr_op;
    wire      slt_op;
    wire      branch_op;
-
+   wire      e_op;
    wire      jump_misaligned;
 
    reg       signbit;
@@ -92,6 +95,8 @@ module serv_decode
 		    (o_funct3[2:1] == 2'b01));
 
    assign branch_op = (opcode == OP_BRANCH);
+
+   assign e_op = (opcode == OP_SYSTEM) & !(|o_funct3);
 
    assign o_ctrl_pc_en  = running | o_ctrl_trap;
    assign o_ctrl_jump = (opcode == OP_JAL) |
@@ -126,7 +131,8 @@ module serv_decode
 
    assign o_alu_cmp_neg = branch_op & o_funct3[0];
 
-   assign o_csr_en = ((opcode == OP_SYSTEM) & (|o_funct3) | o_ctrl_mret | o_ctrl_trap) & (running | o_ctrl_trap);
+   assign o_csr_en = ((((opcode == OP_SYSTEM) & (|o_funct3)) |
+		     o_ctrl_mret) & running) | o_ctrl_trap;
 
    always @(o_funct3) begin
       casez (o_funct3)
@@ -162,11 +168,12 @@ module serv_decode
 	2'b11   : o_csr_source = CSR_SOURCE_CLR;
 	default : o_csr_source = 2'bxx;
       endcase
-      if ((o_rf_rs1_addr == 5'd0) | o_ctrl_trap | o_ctrl_mret)
+      if (((o_rf_rs1_addr == 5'd0) & o_funct3[1]) | o_ctrl_trap | o_ctrl_mret)
 	o_csr_source = CSR_SOURCE_CSR;
 
       casez(imm[31:20])
 	12'h305 : o_csr_sel = CSR_SEL_MTVEC;
+	12'h340 : o_csr_sel = CSR_SEL_MSCRATCH;
 	12'h341 : o_csr_sel = CSR_SEL_MEPC;
 	12'h342 : o_csr_sel = CSR_SEL_MCAUSE;
 	12'h343 : o_csr_sel = CSR_SEL_MTVAL;
@@ -184,6 +191,10 @@ module serv_decode
       if (o_ctrl_mret)
 	o_csr_sel = CSR_SEL_MEPC;
    end
+
+   assign o_csr_imm = (cnt < 5) ? o_rf_rs1_addr[cnt] : 1'b0;
+   assign o_csr_d_sel = o_funct3[2];
+
    assign o_alu_shamt_en = (cnt < 5) & (state == INIT);
    assign o_alu_sh_signed = signbit;
    assign o_alu_sh_right = o_funct3[2];
@@ -284,6 +295,19 @@ module serv_decode
 
    assign o_ctrl_trap = (state == TRAP);
 
+   always @(i_mem_misalign, o_mem_cmd, e_op, imm) begin
+      o_csr_mcause[3:0] <= 4'd0;
+      if (i_mem_misalign & !o_mem_cmd)
+	o_csr_mcause[3:0] <= 4'd4;
+      if (i_mem_misalign & o_mem_cmd)
+	o_csr_mcause[3:0] <= 4'd6;
+      if (e_op & !imm[20])
+	o_csr_mcause[3:0] <= 4'd11;
+      if (e_op & imm[20])
+	o_csr_mcause[3:0] <= 4'd3;
+      //if (o_ctrl_jump & i_ctrl_misalign)
+   end
+
    always @(posedge clk) begin
       state <= state;
       case (state)
@@ -294,13 +318,15 @@ module serv_decode
                   slt_op | (opcode == OP_JAL) | (opcode == OP_JALR) |
                   mem_op | shift_op)
 		state <= INIT;
+	      if (e_op)
+		state <= TRAP;
 	   end
 	   if (i_mem_dbus_ack)
 	     state <= RUN;
         end
         INIT : begin
            if (cnt_done)
-             state <= (i_mem_misalign | (o_ctrl_jump & i_ctrl_misalign) /*| jal_misalign*/) ? TRAP :
+             state <= (i_mem_misalign | (o_ctrl_jump & i_ctrl_misalign)) ? TRAP :
 		      mem_op ? IDLE : RUN;
         end
         RUN : begin

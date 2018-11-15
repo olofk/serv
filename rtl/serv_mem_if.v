@@ -96,7 +96,7 @@ module serv_mem_if
 	misalign[0] <= (!is_byte & adr);
       if (init_r & !init_2r)
 	misalign[1] <= (is_word & adr);
-      if (i_trap)
+      if (!i_en)
 	misalign <= 2'b00;
 
       if (i_en & !en_r)
