@@ -42,15 +42,12 @@ int main(int argc, char **argv, char **env)
 	signal(SIGINT, INThandler);
 
 	top->wb_clk = 1;
-	top->wb_rst = 1;
 
 	while (!(done || Verilated::gotFinish())) {
 	  top->eval();
 	  tfp->dump(main_time);
 	  top->wb_clk = !top->wb_clk;
 	  main_time+=5;
-	  if (main_time > 100)
-	    top->wb_rst = false;
 	}
 	tfp->close();
 	exit(0);
