@@ -1,20 +1,20 @@
 `default_nettype none
 module ser_shift
   (
-   input       i_clk,
-   input       i_load,
-   input [4:0] i_shamt,
-   input       i_signed,
-   input       i_right,
-   input       i_d,
-   output      o_q);
+   input wire 	    i_clk,
+   input wire 	    i_load,
+   input wire [4:0] i_shamt,
+   input wire 	    i_signed,
+   input wire 	    i_right,
+   input wire 	    i_d,
+   output wire 	    o_q);
 
-   wire [31:0] shiftreg;
+   wire [31:0] 	    shiftreg;
 
-   reg         signbit = 1'b0;
-   reg         wrapped = 1'b0;
-   reg [4:0]   cnt = 5'd0;
-   
+   reg 		    signbit = 1'b0;
+   reg 		    wrapped = 1'b0;
+   reg [4:0] 	    cnt = 5'd0;
+
    shift_reg #(.LEN (32)) sh_reg
      (.clk (i_clk),
       .i_en (i_load),
@@ -33,13 +33,10 @@ module ser_shift
          wrapped <= 1'b0;
       end
 
-         
+
    end
 
    wire shiftreg_valid = (i_shamt == 0) | (wrapped^i_right);
    assign o_q = shiftreg_valid ? shiftreg[cnt] : signbit & i_signed;
-   
-endmodule
 
-   
-   
+endmodule

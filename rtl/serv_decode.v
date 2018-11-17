@@ -1,52 +1,52 @@
 `default_nettype none
 module serv_decode
   (
-   input 	    clk,
-   input [31:0]     i_wb_rdt,
-   input 	    i_wb_en,
-   output 	    o_cnt_done,
-   output 	    o_ibus_active,
-   output 	    o_ctrl_en,
-   output 	    o_ctrl_pc_en,
-   output 	    o_ctrl_jump,
-   output 	    o_ctrl_jalr,
-   output 	    o_ctrl_auipc,
-   output 	    o_ctrl_trap,
-   output 	    o_ctrl_mret,
-   input 	    i_ctrl_misalign,
-   output 	    o_rf_rd_en,
-   output reg [4:0] o_rf_rd_addr,
-   output 	    o_rf_rs_en,
-   output reg [4:0] o_rf_rs1_addr,
-   output reg [4:0] o_rf_rs2_addr,
-   output 	    o_alu_en,
-   output 	    o_alu_init,
-   output 	    o_alu_sub,
-   output reg 	    o_alu_cmp_sel,
-   output 	    o_alu_cmp_neg,
-   output reg 	    o_alu_cmp_uns,
-   input 	    i_alu_cmp,
-   output 	    o_alu_shamt_en,
-   output 	    o_alu_sh_signed,
-   output 	    o_alu_sh_right,
-   output reg [2:0] o_alu_rd_sel,
-   output 	    o_mem_en,
-   output 	    o_mem_cmd,
-   output 	    o_mem_init,
-   output reg 	    o_mem_dat_valid,
-   input 	    i_mem_dbus_ack,
-   input 	    i_mem_misalign,
-   output 	    o_csr_en,
-   output reg [2:0] o_csr_sel,
-   output reg [1:0] o_csr_source,
-   output reg [3:0] o_csr_mcause,
-   output 	    o_csr_imm,
-   output 	    o_csr_d_sel,
-   output reg [2:0] o_funct3,
-   output reg 	    o_imm,
-   output 	    o_offset_source,
-   output 	    o_op_b_source,
-   output [2:0]     o_rd_source);
+   input wire 	     clk,
+   input wire [31:0] i_wb_rdt,
+   input wire 	     i_wb_en,
+   output wire 	     o_cnt_done,
+   output wire 	     o_ibus_active,
+   output wire 	     o_ctrl_en,
+   output wire 	     o_ctrl_pc_en,
+   output wire 	     o_ctrl_jump,
+   output wire 	     o_ctrl_jalr,
+   output wire 	     o_ctrl_auipc,
+   output wire 	     o_ctrl_trap,
+   output wire 	     o_ctrl_mret,
+   input wire 	     i_ctrl_misalign,
+   output wire 	     o_rf_rd_en,
+   output reg [4:0]  o_rf_rd_addr,
+   output wire 	     o_rf_rs_en,
+   output reg [4:0]  o_rf_rs1_addr,
+   output reg [4:0]  o_rf_rs2_addr,
+   output wire 	     o_alu_en,
+   output wire 	     o_alu_init,
+   output wire 	     o_alu_sub,
+   output reg 	     o_alu_cmp_sel,
+   output wire 	     o_alu_cmp_neg,
+   output reg 	     o_alu_cmp_uns,
+   input wire 	     i_alu_cmp,
+   output wire 	     o_alu_shamt_en,
+   output wire 	     o_alu_sh_signed,
+   output wire 	     o_alu_sh_right,
+   output reg [2:0]  o_alu_rd_sel,
+   output wire 	     o_mem_en,
+   output wire 	     o_mem_cmd,
+   output wire 	     o_mem_init,
+   output reg 	     o_mem_dat_valid,
+   input wire 	     i_mem_dbus_ack,
+   input wire 	     i_mem_misalign,
+   output wire 	     o_csr_en,
+   output reg [2:0]  o_csr_sel,
+   output reg [1:0]  o_csr_source,
+   output reg [3:0]  o_csr_mcause,
+   output wire 	     o_csr_imm,
+   output wire 	     o_csr_d_sel,
+   output reg [2:0]  o_funct3,
+   output reg 	     o_imm,
+   output wire 	     o_offset_source,
+   output wire 	     o_op_b_source,
+   output wire [2:0] o_rd_source);
 
 `include "serv_params.vh"
 
@@ -68,7 +68,7 @@ module serv_decode
      OP_JAL    = 5'b11011,
      OP_SYSTEM = 5'b11100;
 
-   reg [2:0]    state = IDLE;
+   reg [1:0]    state = IDLE;
 
    reg [4:0] cnt     = 5'd0;
 
@@ -180,10 +180,10 @@ module serv_decode
 	//12'hf14 : o_csr_sel = CSR_SEL_MHARTID;
 	default : begin
 	   o_csr_sel = 3'bxxx;
-	   if (o_csr_en) begin
+	   /*if (o_csr_en) begin
 	      $display("%0t: CSR %03h not implemented", $time, imm[31:20]);
 	      //#100 $finish;
-	   end
+	   end*/
 	end
       endcase
       if (o_ctrl_trap)
@@ -192,7 +192,7 @@ module serv_decode
 	o_csr_sel = CSR_SEL_MEPC;
    end
 
-   assign o_csr_imm = (cnt < 5) ? o_rf_rs1_addr[cnt] : 1'b0;
+   assign o_csr_imm = (cnt < 5) ? o_rf_rs1_addr[cnt[2:0]] : 1'b0;
    assign o_csr_d_sel = o_funct3[2];
 
    assign o_alu_shamt_en = (cnt < 5) & (state == INIT);
@@ -296,16 +296,15 @@ module serv_decode
    assign o_ctrl_trap = (state == TRAP);
 
    always @(i_mem_misalign, o_mem_cmd, e_op, imm) begin
-      o_csr_mcause[3:0] <= 4'd0;
+      o_csr_mcause[3:0] = 4'd0;
       if (i_mem_misalign & !o_mem_cmd)
-	o_csr_mcause[3:0] <= 4'd4;
+	o_csr_mcause[3:0] = 4'd4;
       if (i_mem_misalign & o_mem_cmd)
-	o_csr_mcause[3:0] <= 4'd6;
+	o_csr_mcause[3:0] = 4'd6;
       if (e_op & !imm[20])
-	o_csr_mcause[3:0] <= 4'd11;
+	o_csr_mcause[3:0] = 4'd11;
       if (e_op & imm[20])
-	o_csr_mcause[3:0] <= 4'd3;
-      //if (o_ctrl_jump & i_ctrl_misalign)
+	o_csr_mcause[3:0] = 4'd3;
    end
 
    always @(posedge clk) begin
@@ -343,7 +342,7 @@ module serv_decode
       cnt <= cnt + {4'd0,cnt_en};
 
    end
-`define SERV_DECODE_CHECKS
+//`define SERV_DECODE_CHECKS
 `ifdef SERV_DECODE_CHECKS
    reg unknown_op = 1'b0;
 

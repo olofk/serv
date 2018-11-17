@@ -1,16 +1,16 @@
 `default_nettype none
 module serv_csr
   (
-   input       i_clk,
-   input       i_en,
-   input [2:0] i_csr_sel,
-   input [1:0] i_csr_source,
-   input       i_trap,
-   input       i_pc,
-   input       i_mtval,
-   input [3:0] i_mcause,
-   input       i_d,
-   output      o_q);
+   input wire 	    i_clk,
+   input wire 	    i_en,
+   input wire [2:0] i_csr_sel,
+   input wire [1:0] i_csr_source,
+   input wire 	    i_trap,
+   input wire 	    i_pc,
+   input wire 	    i_mtval,
+   input wire [3:0] i_mcause,
+   input wire 	    i_d,
+   output wire 	    o_q);
 
 `include "serv_params.vh"
    /*

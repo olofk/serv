@@ -1,27 +1,27 @@
 `default_nettype none
 module serv_mem_if
   (
-   input 	 i_clk,
-   input 	 i_en,
-   input 	 i_init,
-   input 	 i_dat_valid,
-   input 	 i_cmd,
-   input [2:0] 	 i_funct3,
-   input 	 i_rs1,
-   input 	 i_rs2,
-   input 	 i_imm,
-   output 	 o_rd,
-   output 	 o_misalign,
-   input         i_trap,
+   input wire 	      i_clk,
+   input wire 	      i_en,
+   input wire 	      i_init,
+   input wire 	      i_dat_valid,
+   input wire 	      i_cmd,
+   input wire [2:0]   i_funct3,
+   input wire 	      i_rs1,
+   input wire 	      i_rs2,
+   input wire 	      i_imm,
+   output wire 	      o_rd,
+   output wire 	      o_misalign,
+   input wire 	      i_trap,
    //External interface
-   output [31:0] o_wb_adr,
-   output reg [31:0] o_wb_dat = 32'd0,
-   output [3:0]  o_wb_sel,
-   output 	 o_wb_we ,
-   output reg 	 o_wb_cyc = 1'b0,
-   output 	 o_wb_stb,
-   input [31:0]  i_wb_rdt,
-   input 	 i_wb_ack);
+   output wire [31:0] o_wb_adr,
+   output reg [31:0]  o_wb_dat = 32'd0,
+   output wire [3:0]  o_wb_sel,
+   output wire 	      o_wb_we ,
+   output reg 	      o_wb_cyc = 1'b0,
+   output wire 	      o_wb_stb,
+   input wire [31:0]  i_wb_rdt,
+   input wire 	      i_wb_ack);
 
    wire          wb_en = o_wb_cyc & i_wb_ack;
    assign o_wb_stb = o_wb_cyc;

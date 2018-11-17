@@ -1,18 +1,18 @@
 `default_nettype none
 module riscv_timer
-  (input 	 i_clk,
+  (input wire 	     i_clk,
    output reg 	     o_irq = 1'b0,
-   input [31:0]      i_wb_adr,
-   input [31:0]      i_wb_dat,
-   input [3:0] 	     i_wb_sel,
-   input 	     i_wb_we,
-   input 	     i_wb_cyc,
-   input 	     i_wb_stb,
+   input wire [31:0] i_wb_adr,
+   input wire [31:0] i_wb_dat,
+   input wire [3:0]  i_wb_sel,
+   input wire 	     i_wb_we,
+   input wire 	     i_wb_cyc,
+   input wire 	     i_wb_stb,
    output reg [31:0] o_wb_dat,
    output reg 	     o_wb_ack = 1'b0);
 
-   reg [63:0] 	 mtime = 64'd0;
-   reg [63:0]  mtimecmp = 64'd0;
+   reg [63:0] 	     mtime = 64'd0;
+   reg [63:0] 	     mtimecmp = 64'd0;
 
    localparam [1:0]
      REG_MTIMELO    = 2'd0,
@@ -20,7 +20,7 @@ module riscv_timer
      REG_MTIMECMPLO = 2'd2,
      REG_MTIMECMPHI = 2'd3;
 
-   always @(i_wb_adr)
+   always @(i_wb_adr, mtime, mtimecmp)
      case (i_wb_adr[3:2])
        REG_MTIMELO    : o_wb_dat = mtime[31:0];
        REG_MTIMEHI    : o_wb_dat = mtime[63:32];

@@ -1,14 +1,14 @@
 `default_nettype none
 module ser_eq
   (
-   input  clk,
-   input  a,
-   input  b,
-   input  clr,
+   input wire clk,
+   input wire a,
+   input wire b,
+   input wire clr,
    output reg o_q);
 
    reg    eq = 1'b1;
-   
+
    wire   q   = eq & (a == b);
    always @(posedge clk) begin
       eq <= q | clr;

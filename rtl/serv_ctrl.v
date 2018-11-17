@@ -1,23 +1,23 @@
 `default_nettype none
 module serv_ctrl
   (
-   input 	 clk,
-   input 	 i_en,
-   input 	 i_pc_en,
-   input 	 i_cnt_done,
-   input 	 i_jump,
-   input 	 i_offset,
-   input 	 i_rs1,
-   input 	 i_jalr,
-   input 	 i_auipc,
-   input 	 i_trap,
-   input 	 i_csr_pc,
-   output 	 o_rd,
-   output 	 o_bad_pc,
-   output reg 	 o_misalign = 1'b0,
-   output [31:0] o_ibus_adr,
-   output reg 	 o_ibus_cyc = 1'b0,
-   input 	 i_ibus_ack);
+   input wire 	      clk,
+   input wire 	      i_en,
+   input wire 	      i_pc_en,
+   input wire 	      i_cnt_done,
+   input wire 	      i_jump,
+   input wire 	      i_offset,
+   input wire 	      i_rs1,
+   input wire 	      i_jalr,
+   input wire 	      i_auipc,
+   input wire 	      i_trap,
+   input wire 	      i_csr_pc,
+   output wire 	      o_rd,
+   output wire 	      o_bad_pc,
+   output reg 	      o_misalign = 1'b0,
+   output wire [31:0] o_ibus_adr,
+   output reg 	      o_ibus_cyc = 1'b0,
+   input wire 	      i_ibus_ack);
 
    parameter RESET_PC = 32'd8;
 

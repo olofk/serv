@@ -1,21 +1,21 @@
 `default_nettype none
 module serv_alu
   (
-   input       clk,
-   input       i_en,
-   input       i_rs1,
-   input       i_op_b,
-   input       i_init,
-   input       i_sub,
-   input       i_cmp_sel,
-   input       i_cmp_neg, 
-   input       i_cmp_uns,
-   output      o_cmp,
-   input       i_shamt_en,
-   input       i_sh_right,
-   input       i_sh_signed,
-   input [2:0] i_rd_sel,
-   output      o_rd);
+   input wire 	    clk,
+   input wire 	    i_en,
+   input wire 	    i_rs1,
+   input wire 	    i_op_b,
+   input wire 	    i_init,
+   input wire 	    i_sub,
+   input wire 	    i_cmp_sel,
+   input wire 	    i_cmp_neg,
+   input wire 	    i_cmp_uns,
+   output wire 	    o_cmp,
+   input wire 	    i_shamt_en,
+   input wire 	    i_sh_right,
+   input wire 	    i_sh_signed,
+   input wire [2:0] i_rd_sel,
+   output wire 	    o_rd);
 
 `include "serv_params.vh"
 
@@ -23,16 +23,16 @@ module serv_alu
    wire        result_eq;
    wire        result_lt;
    wire        result_sh;
-   
+
    wire [4:0]  shamt;
-   
+
    reg         en_r;
    wire        v;
    reg         msb_lt = 1'b0;
    reg         init_r;
    wire        shamt_l;
    wire        shamt_ser;
-   
+
    ser_add ser_add_inv_shamt_plus1
      (
       .clk (clk),
@@ -74,7 +74,7 @@ module serv_alu
       .o_v ());
 
    wire       add_b = i_sub ? b_inv_plus_1 : i_op_b;
-   
+
    ser_add ser_add
      (
       .clk (clk),
@@ -101,9 +101,9 @@ module serv_alu
       .o_q   (result_lt));
 
    reg last_eq;
-   
+
    wire       result_lt2 = last_eq ? result_lt : msb_lt;
-   
+
    assign o_cmp = i_cmp_neg^((i_cmp_sel == ALU_CMP_EQ) ? result_eq : result_lt2);
 
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
@@ -119,10 +119,9 @@ module serv_alu
          last_eq <= i_rs1 == i_op_b;
          msb_lt <= i_cmp_uns ? (~i_rs1 & i_op_b) : (i_rs1 & ~i_op_b);
       end
-      
+
       en_r <= i_en;
       init_r <= i_init;
-      
+
    end
 endmodule
-   

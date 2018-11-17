@@ -1,10 +1,10 @@
 `default_nettype none
 module ser_lt
   (
-   input      i_clk,
-   input      i_a,
-   input      i_b,
-   input      i_clr,
+   input wire i_clk,
+   input wire i_a,
+   input wire i_b,
+   input wire i_clr,
    output reg o_q);
 
    reg        lt_r = 1'b0;

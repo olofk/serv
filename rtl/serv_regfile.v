@@ -1,15 +1,15 @@
 `default_nettype none
 module serv_regfile
   (
-   input       i_clk,
-   input       i_rd_en,
-   input [4:0] i_rd_addr,
-   input       i_rd,
-   input [4:0] i_rs1_addr,
-   input [4:0] i_rs2_addr,
-   input       i_rs_en,
-   output      o_rs1,
-   output      o_rs2);
+   input wire 	    i_clk,
+   input wire 	    i_rd_en,
+   input wire [4:0] i_rd_addr,
+   input wire 	    i_rd,
+   input wire [4:0] i_rs1_addr,
+   input wire [4:0] i_rs2_addr,
+   input wire 	    i_rs_en,
+   output wire 	    o_rs1,
+   output wire 	    o_rs2);
 
    //reg [31:0]  rf [0:31];
 
@@ -48,7 +48,7 @@ module serv_regfile
         dbg_x30[i] = rf[i][30];
         dbg_x31[i] = rf[i][31];
      end
-  */    
+  */
    reg [31:0] dbg_x0 ;
    reg [31:0] dbg_x1 ;
    reg [31:0] dbg_x2 ;
@@ -81,21 +81,21 @@ module serv_regfile
    reg [31:0] dbg_x29;
    reg [31:0] dbg_x30;
    reg [31:0] dbg_x31;
-   
+
    integer     i;
 //   initial for (i=0; i<32; i=i+1) rf[i] = 0;
    `endif
-      
+
    reg [4:0]   raddr = 5'd1;
    reg [4:0]   waddr = 5'd0;
 //   reg [31:0]  rs = 32'd0;
    wire [31:0]  rs;
 
    reg [31:0] mask;
- 
+
    always @(i_rd_addr)
      mask = ~(1 << i_rd_addr);
-   
+
    SB_RAM40_4K rf0
      (
       .RDATA (rs[15:0]),
@@ -136,8 +136,8 @@ module serv_regfile
       //rs <= rf[raddr2];
    end
    wire [4:0] raddr2 = raddr & {5{i_rs_en}};
-   
+
    assign o_rs1 = (|i_rs1_addr) ? rs[i_rs1_addr] : 1'b0;
    assign o_rs2 = (|i_rs2_addr) ? rs[i_rs2_addr] : 1'b0;
-   
+
 endmodule

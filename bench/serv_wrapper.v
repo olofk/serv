@@ -1,8 +1,8 @@
 `default_nettype none
 module serv_wrapper
 (
- input wb_clk,
- input wb_rst);
+ input wire wb_clk,
+ input wire wb_rst);
 
    parameter firmware = "firmware.hex";
 
