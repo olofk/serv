@@ -1,10 +1,18 @@
 `default_nettype none
 module serv_wrapper
 (
- input wire wb_clk,
- input wire wb_rst);
+ input wire wb_clk);
 
-   parameter firmware = "firmware.hex";
+//   parameter memfile = "hellomin.hex";
+   parameter memfile = "bitbang.hex";
+
+
+   reg [4:0] rst_reg = 5'b11111;
+
+   always @(posedge wb_clk)
+     rst_reg <= {1'b0, rst_reg[4:1]};
+
+   wire      wb_rst = rst_reg[0];
 
    wire 	timer_irq;
 
@@ -12,16 +20,22 @@ module serv_wrapper
 
    localparam MEMORY_SIZE = 16384*4;
 
+`ifndef SYNTHESIS
+//synthesis translate_off
    reg [1023:0] firmware_file;
    initial
      if ($value$plusargs("firmware=%s", firmware_file)) begin
 	$display("Loading RAM from %0s", firmware_file);
 	$readmemh(firmware_file, ram.ram0.mem);
      end
-
+//synthesis translate_on
+`endif
 
    wb_ram
-     #(/*.memfile (firmware),*/
+     #(
+`ifdef SYNTHESIS
+.memfile (memfile),
+`endif
        .depth (MEMORY_SIZE))
    ram
      (// Wishbone interface
@@ -48,6 +62,8 @@ module serv_wrapper
       .i_wb_stb   (wb_m2s_testprint_stb),
       .o_wb_ack   (wb_s2m_testprint_ack));
 
+   assign wb_s2m_testprint_dat = 32'h0;
+   
    testhalt testhalt
      (
       .i_wb_clk   (wb_clk),
@@ -56,6 +72,8 @@ module serv_wrapper
       .i_wb_cyc   (wb_m2s_testhalt_cyc),
       .i_wb_stb   (wb_m2s_testhalt_stb),
       .o_wb_ack   (wb_s2m_testhalt_ack));
+
+   assign wb_s2m_testhalt_dat = 32'h0;
 
    riscv_timer riscv_timer
      (.i_clk    (wb_clk),
