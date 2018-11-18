@@ -66,13 +66,13 @@ targets:
 
   synth:
     default_tool : icestorm
-    filesets : [core, wrapper, pcf]
+    filesets : [core, mem_files, wrapper, pcf]
     generate : [wb_intercon]
     toplevel : serv_wrapper
 
   tinyfpga_bx:
     default_tool : icestorm
-    filesets : [core, wrapper, tinyfpga_bx]
+    filesets : [core, mem_files, wrapper, tinyfpga_bx]
     generate : [wb_intercon]
     tools:
       icestorm:

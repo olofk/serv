@@ -89,10 +89,24 @@ module serv_wrapper
 
    wb_gpio gpio
      (.i_wb_clk (wb_clk),
+      .i_wb_rst (wb_rst),
       .i_wb_dat (wb_m2s_gpio_dat[0]),
       .i_wb_cyc (wb_m2s_gpio_cyc),
       .o_wb_ack (wb_s2m_gpio_ack),
-      .o_gpio   (q));
+      .o_gpio   (/*q*/));
+
+   reg canary;
+
+   always @(posedge wb_clk)
+     if (wb_rst)
+       canary <= 1'b0;
+     /*else if (wb_m2s_cpu_ibus_cyc &
+	      wb_s2m_cpu_ibus_ack &
+	      (wb_m2s_cpu_ibus_adr == 32'h00000020))*/
+     else if (wb_m2s_cpu_dbus_cyc & wb_s2m_cpu_dbus_ack)
+       canary <= ~canary;
+
+   assign q = canary;
 
    assign wb_s2m_gpio_dat = 32'h0;
 
