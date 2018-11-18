@@ -1,0 +1,34 @@
+CAPI=1
+[main]
+name = ::wb_ram:1.1
+description = Wishbone RAM with selectable backends
+
+simulators = icarus modelsim
+depend = wb_common
+
+[fileset rtl]
+files =
+ rtl/verilog/wb_ram.v
+ rtl/verilog/wb_ram_generic.v
+file_type = verilogSource
+
+[fileset tb]
+files = bench/wb_ram_tb.v
+file_type = verilogSource
+scope = private
+usage = sim
+
+[simulator]
+toplevel = wb_ram_tb
+
+[icarus]
+depend = >=vlog_tb_utils-1.0 >=wb_bfm-1.0
+
+[modelsim]
+depend = >=vlog_tb_utils-1.0 >=wb_bfm-1.0
+
+[parameter transactions]
+datatype    = int
+description = Number of wishbone transactions to run in test bench
+paramtype   = plusarg
+scope       = private

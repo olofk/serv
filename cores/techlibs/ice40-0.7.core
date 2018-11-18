@@ -1,0 +1,12 @@
+CAPI=2:
+
+name : yosys:techlibs:ice40fork:0.7
+
+filesets:
+  ice40_cells:
+    files:
+      - cells_sim.v : {file_type : verilogSource}
+
+targets:
+  default:
+    filesets : [ice40_cells]
