@@ -48,10 +48,10 @@ int main(int argc, char **argv, char **env)
 	while (!(done || Verilated::gotFinish())) {
 	  top->eval();
 	  tfp->dump(main_time);
-	  if (q != top->q) {
+	  /*if (q != top->q) {
 	    q = top->q;
 	    printf("%lu output is %s\n", main_time, q ? "ON" : "OFF");
-	  }
+	    }*/
 	  top->wb_clk = !top->wb_clk;
 	  main_time+=31.25;
 	}
