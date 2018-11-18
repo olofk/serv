@@ -28,11 +28,13 @@ int main(int argc, char **argv, char **env)
 	uint32_t insn = 0;
 	uint32_t ex_pc = 0;
 
+	int uart_state = 0;
+	char uart_ch = 0;
 	Verilated::commandArgs(argc, argv);
 
 	Vserv_wrapper* top = new Vserv_wrapper;
 
-	//const char *vcd = Verilated::commandArgsPlusMatch("vcd=");
+	const char *vcd = Verilated::commandArgsPlusMatch("vcd=");
 	//if (vcd[0]) == '\0' || atoi(arg + 11) != 0)
 	Verilated::traceEverOn(true);
         VerilatedVcdC* tfp = new VerilatedVcdC;
@@ -42,12 +44,16 @@ int main(int argc, char **argv, char **env)
 	signal(SIGINT, INThandler);
 
 	top->wb_clk = 1;
-
+	bool q = top->q;
 	while (!(done || Verilated::gotFinish())) {
 	  top->eval();
 	  tfp->dump(main_time);
+	  if (q != top->q) {
+	    q = top->q;
+	    printf("%lu output is %s\n", main_time, q ? "ON" : "OFF");
+	  }
 	  top->wb_clk = !top->wb_clk;
-	  main_time+=5;
+	  main_time+=31.25;
 	}
 	tfp->close();
 	exit(0);

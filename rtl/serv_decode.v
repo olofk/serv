@@ -2,6 +2,7 @@
 module serv_decode
   (
    input wire 	     clk,
+   input wire 	     i_rst,
    input wire [31:0] i_wb_rdt,
    input wire 	     i_wb_en,
    output wire 	     o_cnt_done,
@@ -69,6 +70,7 @@ module serv_decode
      OP_SYSTEM = 5'b11100;
 
    reg [1:0]    state = IDLE;
+   reg 		go;
 
    reg [4:0] cnt     = 5'd0;
 
@@ -134,7 +136,7 @@ module serv_decode
    assign o_csr_en = ((((opcode == OP_SYSTEM) & (|o_funct3)) |
 		     o_ctrl_mret) & running) | o_ctrl_trap;
 
-   always @(o_funct3) begin
+   always @(o_funct3, imm) begin
       casez (o_funct3)
         3'b00?  : o_alu_cmp_sel = ALU_CMP_EQ;
         3'b01?  : o_alu_cmp_sel = ALU_CMP_LT;
@@ -284,9 +286,11 @@ module serv_decode
         else              o_imm = imm[cnt+7];
    end
 
-   reg go = 1'b0;
-   always @(posedge clk)
-     go <= i_wb_en;
+   always @(posedge clk) begin
+      go <= i_wb_en;
+      if (i_rst)
+	go <= 1'b0;
+   end
 
    wire cnt_en = (state != IDLE);
 
@@ -341,6 +345,15 @@ module serv_decode
 
       cnt <= cnt + {4'd0,cnt_en};
 
+      if (i_rst) begin
+	 //output reg [2:0]  o_funct3,
+	 //output reg 	     o_imm,
+	 state <= IDLE;
+	 cnt   <= 5'd0;
+	 //reg       signbit;
+	 //reg [4:0] opcode;
+	 //reg [31:0] imm;
+      end
    end
 //`define SERV_DECODE_CHECKS
 `ifdef SERV_DECODE_CHECKS

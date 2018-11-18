@@ -9,6 +9,7 @@
 module serv_top
   (
    input wire 	      clk,
+   input wire 	      i_rst,
 `ifdef RISCV_FORMAL
    output reg 	      rvfi_valid = 1'b0,
    output reg [63:0]  rvfi_order = 64'd0,
@@ -118,6 +119,7 @@ module serv_top
    serv_decode decode
      (
       .clk (clk),
+      .i_rst          (i_rst),
       .i_wb_rdt       (i_ibus_rdt),
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
       .o_cnt_done     (cnt_done),
@@ -169,6 +171,7 @@ module serv_top
    ctrl
      (
       .clk        (clk),
+      .i_rst      (i_rst),
       .i_en       (ctrl_en),
       .i_pc_en    (ctrl_pc_en),
       .i_cnt_done (cnt_done),

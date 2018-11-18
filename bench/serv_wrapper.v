@@ -1,11 +1,11 @@
 `default_nettype none
 module serv_wrapper
 (
- input wire wb_clk);
+ input wire  wb_clk,
+ output wire q);
 
 //   parameter memfile = "hellomin.hex";
    parameter memfile = "bitbang.hex";
-
 
    reg [4:0] rst_reg = 5'b11111;
 
@@ -18,7 +18,7 @@ module serv_wrapper
 
 `include "wb_intercon.vh"
 
-   localparam MEMORY_SIZE = 16384*4;
+   localparam MEMORY_SIZE = 2048*4;
 
 `ifndef SYNTHESIS
 //synthesis translate_off
@@ -63,7 +63,7 @@ module serv_wrapper
       .o_wb_ack   (wb_s2m_testprint_ack));
 
    assign wb_s2m_testprint_dat = 32'h0;
-   
+
    testhalt testhalt
      (
       .i_wb_clk   (wb_clk),
@@ -87,11 +87,21 @@ module serv_wrapper
       .o_wb_dat (wb_s2m_timer_dat),
       .o_wb_ack (wb_s2m_timer_ack));
 
+   wb_gpio gpio
+     (.i_wb_clk (wb_clk),
+      .i_wb_dat (wb_m2s_gpio_dat[0]),
+      .i_wb_cyc (wb_m2s_gpio_cyc),
+      .o_wb_ack (wb_s2m_gpio_ack),
+      .o_gpio   (q));
+
+   assign wb_s2m_gpio_dat = 32'h0;
+
    serv_top
-     #(.RESET_PC (32'h8000_0000))
+     #(.RESET_PC (32'h0000_0000))
    cpu
      (
       .clk      (wb_clk),
+      .i_rst    (wb_rst),
       .o_ibus_adr   (wb_m2s_cpu_ibus_adr),
       .o_ibus_cyc   (wb_m2s_cpu_ibus_cyc),
       .o_ibus_stb   (wb_m2s_cpu_ibus_stb),

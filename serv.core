@@ -20,23 +20,39 @@ filesets:
       - rtl/serv_top.v
     file_type : verilogSource
 
+  mem_files:
+    files:
+      - bitbang.hex  : {copyto : bitbang.hex}
+      - hellomin.hex : {copyto : hellomin.hex}
+    file_type : user
+      
+  pcf:
+    files:
+      - data/dummy.pcf : {file_type : PCF}
   serv_top_tb:
     files:
       - bench/serv_top_tb.v
     file_type : verilogSource
     depend : [vlog_tb_utils, "yosys:techlibs:ice40"]
 
+  techlib:
+    depend : ["yosys:techlibs:ice40fork"]
   wrapper:
     files:
       - testhalt.v
       - testprint.v
       - rtl/riscv_timer.v
+      - rtl/wb_gpio.v
       - bench/serv_wrapper.v
     file_type : verilogSource
     depend : [wb_intercon, wb_ram]
 
-  pcf:
-    files: [data/dummy.pcf : {file_type : PCF}]
+  netlist:
+    files: [synth.v : {file_type : verilogSource}]
+
+  tinyfpga_bx:
+    files:
+      - data/tinyfpga_bx.pcf : {file_type : PCF}
 
   verilator_tb:
     files:
@@ -50,12 +66,23 @@ targets:
 
   synth:
     default_tool : icestorm
-    filesets : [core, pcf]
-    toplevel : serv_top
+    filesets : [core, wrapper, pcf]
+    generate : [wb_intercon]
+    toplevel : serv_wrapper
+
+  tinyfpga_bx:
+    default_tool : icestorm
+    filesets : [core, wrapper, tinyfpga_bx]
+    generate : [wb_intercon]
+    tools:
+      icestorm:
+        nextpnr_options : [--lp8k, --package, cm81, --freq, 16]
+        pnr: next
+    toplevel : serv_wrapper
 
   lint:
     default_tool : verilator
-    filesets : [core]
+    filesets : [core, techlib]
     tools:
       verilator:
         mode : lint-only
@@ -66,6 +93,11 @@ targets:
     filesets : [core, wrapper, serv_top_tb]
     generate : [wb_intercon]
     parameters : [RISCV_FORMAL=true, firmware]
+    toplevel : serv_top_tb
+
+  synth_tb:
+    default_tool: icarus
+    filesets : [netlist, serv_top_tb]
     toplevel : serv_top_tb
 
   verilator_tb:
@@ -99,16 +131,19 @@ generate:
         cpu_ibus:
           slaves : [mem]
         cpu_dbus:
-          slaves : [mem, testprint, testhalt, timer]
+          slaves : [mem, testprint, testhalt, gpio, timer]
       slaves:
         mem:
-          offset : 0x80000000
+          offset : 0x00000000
           size   : 65536
         testprint:
           offset : 0x10000000
           size   : 4
         testhalt:
           offset : 0x20000000
+          size   : 4
+        gpio:
+          offset : 0x30000000
           size   : 4
         timer:
           offset : 0xf00fff40
