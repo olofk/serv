@@ -93,7 +93,7 @@ module serv_wrapper
       .i_wb_dat (wb_m2s_gpio_dat[0]),
       .i_wb_cyc (wb_m2s_gpio_cyc),
       .o_wb_ack (wb_s2m_gpio_ack),
-      .o_gpio   (/*q*/));
+      .o_gpio   (q));
 
    reg canary;
 
@@ -106,7 +106,7 @@ module serv_wrapper
      else if (wb_m2s_cpu_dbus_cyc & wb_s2m_cpu_dbus_ack)
        canary <= ~canary;
 
-   assign q = canary;
+//   assign q = canary;
 
    assign wb_s2m_gpio_dat = 32'h0;
 

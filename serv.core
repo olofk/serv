@@ -104,7 +104,7 @@ targets:
     default_tool: verilator
     filesets : [core, wrapper, verilator_tb]
     generate : [wb_intercon]
-    parameters : [RISCV_FORMAL=true, firmware, signature]
+    parameters : [RISCV_FORMAL=true, firmware, signature, uart_baudrate, vcd]
     tools:
       verilator:
         verilator_options : [-Wno-fatal, --trace]
@@ -121,6 +121,14 @@ parameters:
 
   signature:
     datatype : file
+    paramtype : plusarg
+  uart_baudrate:
+    datatype : int
+    description : Treat q output as an UART with the specified baudrate (0 or omitted parameter disables UART decoding)
+    paramtype : plusarg
+
+  vcd:
+    datatype : bool
     paramtype : plusarg
 
 generate:
