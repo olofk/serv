@@ -54,7 +54,7 @@ module serv_top
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
 
-   wire [2:0]    rd_source;
+   wire [1:0]    rd_source;
    wire          ctrl_rd;
    wire          alu_rd;
    wire          mem_rd;
@@ -68,8 +68,6 @@ module serv_top
    wire          jalr;
    wire          auipc;
    wire 	 mret;
-   wire          offset;
-   wire          offset_source;
    wire          imm;
    wire 	 trap;
 
@@ -116,6 +114,8 @@ module serv_top
 
    parameter RESET_PC = 32'd8;
 
+   wire 	 lui;
+
    serv_decode decode
      (
       .clk (clk),
@@ -129,6 +129,7 @@ module serv_top
       .o_ctrl_jump    (jump),
       .o_ctrl_jalr    (jalr),
       .o_ctrl_auipc   (auipc),
+      .o_ctrl_lui     (lui),
       .o_ctrl_trap    (trap),
       .o_ctrl_mret    (mret),
       .i_ctrl_misalign(ctrl_misalign),
@@ -162,7 +163,6 @@ module serv_top
       .o_csr_imm      (csr_imm),
       .o_csr_d_sel    (csr_d_sel),
       .o_imm          (imm),
-      .o_offset_source (offset_source),
       .o_op_b_source  (op_b_source),
       .o_rd_source    (rd_source));
 
@@ -176,10 +176,11 @@ module serv_top
       .i_pc_en    (ctrl_pc_en),
       .i_cnt_done (cnt_done),
       .i_jump     (jump),
-      .i_offset   (offset),
+      .i_offset   (imm),
       .i_rs1      (rs1),
       .i_jalr     (jalr),
       .i_auipc    (auipc),
+      .i_lui      (lui),
       .i_trap     (trap | mret),
       .i_csr_pc   (csr_rd),
       .o_rd       (ctrl_rd),
@@ -189,23 +190,17 @@ module serv_top
       .o_ibus_cyc (o_ibus_cyc),
       .i_ibus_ack (i_ibus_ack));
 
-   assign offset = (offset_source == OFFSET_SOURCE_IMM) ? imm :
-                   (offset_source == OFFSET_SOURCE_RS1) ? rs1 : 1'bx;
-
    //TODO: Pass imm through alu to avoid 5-way mux
    assign rd = (rd_source == RD_SOURCE_CTRL) ? ctrl_rd :
                (rd_source == RD_SOURCE_ALU)  ? alu_rd  :
-               (rd_source == RD_SOURCE_IMM)  ? imm     :
-               (rd_source == RD_SOURCE_MEM)  ? mem_rd  :
-               (rd_source == RD_SOURCE_CSR)  ? csr_rd  : 1'bx;
+               (rd_source == RD_SOURCE_MEM)  ? mem_rd  : csr_rd;
 
-   assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm :
-                 (op_b_source == OP_B_SOURCE_RS2) ? rs2 :
-                 1'bx;
+   assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm : rs2;
 
    serv_alu alu
      (
       .clk        (clk),
+      .i_rst      (i_rst),
       .i_en       (alu_en),
       .i_rs1      (rs1),
       .i_op_b     (op_b),
@@ -236,6 +231,7 @@ module serv_top
    serv_mem_if mem_if
      (
       .i_clk    (clk),
+      .i_rst    (i_rst),
       .i_en     (mem_en),
       .i_init   (mem_init),
       .i_dat_valid (mem_dat_valid),

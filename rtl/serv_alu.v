@@ -2,6 +2,7 @@
 module serv_alu
   (
    input wire 	    clk,
+   input wire 	    i_rst,
    input wire 	    i_en,
    input wire 	    i_rs1,
    input wire 	    i_op_b,
@@ -36,6 +37,7 @@ module serv_alu
    ser_add ser_add_inv_shamt_plus1
      (
       .clk (clk),
+      .rst (i_rst),
       .a   (~i_op_b),
       .b   (plus_1),
       .clr (!i_en),
@@ -67,6 +69,7 @@ module serv_alu
    ser_add ser_add_inv_plus_1
      (
       .clk (clk),
+      .rst (i_rst),
       .a   (~i_op_b),
       .b   (plus_1),
       .clr (!i_en),
@@ -78,6 +81,7 @@ module serv_alu
    ser_add ser_add
      (
       .clk (clk),
+      .rst (i_rst),
       .a   (i_rs1),
       .b   (add_b),
       .clr (!i_en),

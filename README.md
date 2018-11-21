@@ -27,15 +27,6 @@ Register the serv repo as a core library
 
 `cd $SERV/workspace && fusesoc library add serv ../serv`
 
-Override wb_intercon with a custom version
-
-    cd $SERV
-    git clone https://olofk/wb_intercon
-    cd wb_intercon
-    git checkout generator
-    cd $SERV/workspace
-    fusesoc library add wb_intercon ../wb_intercon
-
 Running test software
 ---------------------
 

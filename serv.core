@@ -24,6 +24,7 @@ filesets:
     files:
       - bitbang.hex  : {copyto : bitbang.hex}
       - hellomin.hex : {copyto : hellomin.hex}
+      - helloservice4000.hex : {copyto : helloservice4000.hex}
     file_type : user
       
   pcf:
@@ -39,13 +40,13 @@ filesets:
     depend : ["yosys:techlibs:ice40fork"]
   wrapper:
     files:
-      - testhalt.v
-      - testprint.v
       - rtl/riscv_timer.v
       - rtl/wb_gpio.v
+      - bench/serv_arbiter.v
+      - bench/serv_mux.v
       - bench/serv_wrapper.v
     file_type : verilogSource
-    depend : [wb_intercon, wb_ram]
+    depend : [wb_ram]
 
   netlist:
     files: [synth.v : {file_type : verilogSource}]
@@ -67,13 +68,11 @@ targets:
   synth:
     default_tool : icestorm
     filesets : [core, mem_files, wrapper, pcf]
-    generate : [wb_intercon]
     toplevel : serv_wrapper
 
   tinyfpga_bx:
     default_tool : icestorm
     filesets : [core, mem_files, wrapper, tinyfpga_bx]
-    generate : [wb_intercon]
     tools:
       icestorm:
         nextpnr_options : [--lp8k, --package, cm81, --freq, 16]
@@ -91,7 +90,6 @@ targets:
   serv_top_tb:
     default_tool: icarus
     filesets : [core, wrapper, serv_top_tb]
-    generate : [wb_intercon]
     parameters : [RISCV_FORMAL=true, firmware]
     toplevel : serv_top_tb
 
@@ -103,8 +101,7 @@ targets:
   verilator_tb:
     default_tool: verilator
     filesets : [core, wrapper, verilator_tb]
-    generate : [wb_intercon]
-    parameters : [RISCV_FORMAL=true, firmware, signature, uart_baudrate, vcd]
+    parameters : [firmware, signature, uart_baudrate, vcd]
     tools:
       verilator:
         verilator_options : [-Wno-fatal, --trace]
@@ -130,29 +127,3 @@ parameters:
   vcd:
     datatype : bool
     paramtype : plusarg
-
-generate:
-  wb_intercon:
-    generator: wb_intercon_gen
-    parameters:
-      masters:
-        cpu_ibus:
-          slaves : [mem]
-        cpu_dbus:
-          slaves : [mem, testprint, testhalt, gpio, timer]
-      slaves:
-        mem:
-          offset : 0x00000000
-          size   : 65536
-        testprint:
-          offset : 0x10000000
-          size   : 4
-        testhalt:
-          offset : 0x20000000
-          size   : 4
-        gpio:
-          offset : 0x30000000
-          size   : 4
-        timer:
-          offset : 0xf00fff40
-          size   : 16

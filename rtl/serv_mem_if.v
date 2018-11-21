@@ -2,6 +2,7 @@
 module serv_mem_if
   (
    input wire 	      i_clk,
+   input wire 	      i_rst,
    input wire 	      i_en,
    input wire 	      i_init,
    input wire 	      i_dat_valid,
@@ -35,6 +36,7 @@ module serv_mem_if
    ser_add ser_add_rs1_plus_imm
      (
       .clk (i_clk),
+      .rst (i_rst),
       .a   (i_rs1),
       .b   (i_imm),
       .clr (!i_en),

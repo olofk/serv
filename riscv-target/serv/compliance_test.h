@@ -14,7 +14,7 @@
 #define RV_COMPLIANCE_HALT              \
 la a0, data_begin;	 \
         la a1, data_end; \
-        li a2, 0x10000000; \
+        li a2, 0x80000000; \
 complience_halt_loop: \
         beq a0, a1, complience_halt_break; \
         addi a3, a0, 16; \
@@ -47,7 +47,7 @@ notLetter2: \
         j complience_halt_loop; \
   j complience_halt_break;		\
 complience_halt_break:; \
-	lui	a0,0x20000000>>12;	\
+	lui	a0,0x90000000>>12;	\
 	sw	a3,0(a0);		
 
 #define RV_COMPLIANCE_RV32M
