@@ -23,7 +23,6 @@ filesets:
   mem_files:
     files:
       - bitbang.hex  : {copyto : bitbang.hex}
-      - hellomin.hex : {copyto : hellomin.hex}
       - helloservice4000.hex : {copyto : helloservice4000.hex}
     file_type : user
       
