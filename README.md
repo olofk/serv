@@ -27,6 +27,10 @@ Register the serv repo as a core library
 
 `cd $SERV/workspace && fusesoc library add serv ../serv`
 
+Check that the CPU passes the linter
+
+`cd $SERV/workspace && fusesoc run --target=lint serv`
+
 Running test software
 ---------------------
 
