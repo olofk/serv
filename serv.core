@@ -51,6 +51,10 @@ filesets:
     files:
       - data/tinyfpga_bx.pcf : {file_type : PCF}
 
+  icebreaker:
+    files:
+      - data/icebreaker.pcf : {file_type : PCF}
+
   verilator_tb:
     files:
       - bench/serv_soc_tb.cpp : {file_type : verilogSource}
@@ -60,6 +64,15 @@ targets:
   default:
     filesets : [core]
     toplevel : serv_top_tb
+
+  icebreaker:
+    default_tool : icestorm
+    filesets : [core, mem_files, wrapper, icebreaker]
+    tools:
+      icestorm:
+        nextpnr_options: [--up5k, --freq, 12]
+        pnr: next
+    toplevel : serv_wrapper
 
   synth:
     default_tool : icestorm
@@ -97,7 +110,7 @@ targets:
   verilator_tb:
     default_tool: verilator
     filesets : [core, wrapper, verilator_tb]
-    parameters : [firmware, signature, uart_baudrate, vcd]
+    parameters : [RISCV_FORMAL, firmware, signature, uart_baudrate, vcd]
     tools:
       verilator:
         verilator_options : [-Wno-fatal, --trace]
