@@ -17,7 +17,7 @@ la a0, data_begin;	 \
         li a2, 0x80000000; \
 complience_halt_loop: \
         beq a0, a1, complience_halt_break; \
-        addi a3, a0, 16; \
+        addi a3, a0, 4; \
 complience_halt_loop2: \
         addi a3, a3, -1; \
 	\
@@ -40,7 +40,7 @@ notLetter2: \
         addi a5, a5, 0x30; \
         sw a5, 0 (a2); \
         bne a0, a3,complience_halt_loop2;  \
-        addi a0, a0, 16; \
+        addi a0, a0, 4; \
 	\
         li a4, '\n'; \
         sw a4, 0 (a2); \

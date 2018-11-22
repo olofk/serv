@@ -50,7 +50,7 @@ Build the verilator model (if not already done)
 
 Download the tests repo
 
-`cd $SERV && git clone https://github.com/olofk/riscv-compliance`
+`cd $SERV && git clone https://github.com/riscv/riscv-compliance`
 
 Run the compliance tests
 
@@ -59,7 +59,9 @@ Run the compliance tests
 Run on hardware
 ---------------
 
-Only supported so far is a LED blink hack for TinyFPGA BX
+Only supported so far is a single threaded hello world on TinyFPGA BX
+
+Pin B3 is used for UART output with 57600 baud rate.
 
     cd $SERV/workspace
     fusesoc run --target=tinyfpga_bx serv
