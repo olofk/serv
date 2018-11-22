@@ -33,6 +33,7 @@ module serv_alu
    reg         init_r;
    wire        shamt_l;
    wire        shamt_ser;
+   wire        plus_1;
 
    ser_add ser_add_inv_shamt_plus1
      (
@@ -63,7 +64,6 @@ module serv_alu
       .i_d (i_rs1),
       .o_q (result_sh));
 
-   wire       plus_1 = i_en & !en_r;
    wire       b_inv_plus_1;
 
    ser_add ser_add_inv_plus_1
@@ -107,7 +107,7 @@ module serv_alu
    reg last_eq;
 
    wire       result_lt2 = last_eq ? result_lt : msb_lt;
-
+   assign plus_1 = i_en & !en_r;
    assign o_cmp = i_cmp_neg^((i_cmp_sel == ALU_CMP_EQ) ? result_eq : result_lt2);
 
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :

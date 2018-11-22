@@ -6,30 +6,30 @@
  */
 module serv_mux
   (
-   input 	 i_clk,
-   input 	 i_rst,
-   input [31:0]  i_wb_cpu_adr,
-   input [31:0]  i_wb_cpu_dat,
-   input [3:0] 	 i_wb_cpu_sel,
-   input 	 i_wb_cpu_we,
-   input 	 i_wb_cpu_cyc,
-   output [31:0] o_wb_cpu_rdt,
-   output reg 	 o_wb_cpu_ack,
+   input wire 	      i_clk,
+   input wire 	      i_rst,
+   input wire [31:0]  i_wb_cpu_adr,
+   input wire [31:0]  i_wb_cpu_dat,
+   input wire [3:0]   i_wb_cpu_sel,
+   input wire 	      i_wb_cpu_we,
+   input wire 	      i_wb_cpu_cyc,
+   output wire [31:0] o_wb_cpu_rdt,
+   output reg 	      o_wb_cpu_ack,
 
-   output [31:0] o_wb_mem_adr,
-   output [31:0] o_wb_mem_dat,
-   output [3:0]  o_wb_mem_sel,
-   output 	 o_wb_mem_we,
-   output 	 o_wb_mem_cyc,
-   input [31:0]  i_wb_mem_rdt,
+   output wire [31:0] o_wb_mem_adr,
+   output wire [31:0] o_wb_mem_dat,
+   output wire [3:0]  o_wb_mem_sel,
+   output wire 	      o_wb_mem_we,
+   output wire 	      o_wb_mem_cyc,
+   input wire [31:0]  i_wb_mem_rdt,
 
-   output 	 o_wb_gpio_dat,
-   output 	 o_wb_gpio_cyc,
+   output wire 	      o_wb_gpio_dat,
+   output wire 	      o_wb_gpio_cyc,
 
-   output [31:0] o_wb_timer_dat,
-   output 	 o_wb_timer_we,
-   output 	 o_wb_timer_cyc,
-   input [31:0]  i_wb_timer_rdt);
+   output wire [31:0] o_wb_timer_dat,
+   output wire 	      o_wb_timer_we,
+   output wire 	      o_wb_timer_cyc,
+   input wire [31:0]  i_wb_timer_rdt);
 
    parameter sim = 0;
 

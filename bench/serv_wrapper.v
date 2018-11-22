@@ -131,16 +131,12 @@ serv_arbiter serv_arbiter
       .wb_clk_i (wb_clk),
       .wb_rst_i (wb_rst),
       .wb_adr_i (wb_mem_adr[$clog2(MEMORY_SIZE)-1:0]),
-      .wb_stb_i (1'b1),
       .wb_cyc_i (wb_mem_cyc),
-      .wb_cti_i (3'b000),
-      .wb_bte_i (2'b00),
       .wb_we_i  (wb_mem_we) ,
       .wb_sel_i (wb_mem_sel),
       .wb_dat_i (wb_mem_dat),
       .wb_dat_o (wb_mem_rdt),
-      .wb_ack_o (),
-      .wb_err_o ());
+      .wb_ack_o ());
 
    riscv_timer riscv_timer
      (.i_clk    (wb_clk),
@@ -165,7 +161,6 @@ serv_arbiter serv_arbiter
 
       .o_ibus_adr   (wb_cpu_ibus_adr),
       .o_ibus_cyc   (wb_cpu_ibus_cyc),
-      .o_ibus_stb   (),
       .i_ibus_rdt   (wb_cpu_ibus_rdt),
       .i_ibus_ack   (wb_cpu_ibus_ack),
 
@@ -174,7 +169,6 @@ serv_arbiter serv_arbiter
       .o_dbus_sel   (wb_cpu_dbus_sel),
       .o_dbus_we    (wb_cpu_dbus_we),
       .o_dbus_cyc   (wb_cpu_dbus_cyc),
-      .o_dbus_stb   (),
       .i_dbus_rdt   (wb_cpu_dbus_rdt),
       .i_dbus_ack   (wb_cpu_dbus_ack));
 

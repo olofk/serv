@@ -16,6 +16,7 @@ module serv_regfile
 
    wire [31:0]  rs;
 
+   wire [4:0] 	raddr2 = raddr & {5{i_rs_en}};
    reg [31:0] mask;
 
    always @(i_rd_addr)
@@ -58,7 +59,6 @@ module serv_regfile
       if (i_rs_en)
         raddr <= raddr + 1;
    end
-   wire [4:0] raddr2 = raddr & {5{i_rs_en}};
 
    assign o_rs1 = (|i_rs1_addr) ? rs[i_rs1_addr] : 1'b0;
    assign o_rs2 = (|i_rs2_addr) ? rs[i_rs2_addr] : 1'b0;

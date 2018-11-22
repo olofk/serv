@@ -20,12 +20,10 @@ module serv_mem_if
    output wire [3:0]  o_wb_sel,
    output wire 	      o_wb_we ,
    output reg 	      o_wb_cyc = 1'b0,
-   output wire 	      o_wb_stb,
    input wire [31:0]  i_wb_rdt,
    input wire 	      i_wb_ack);
 
    wire          wb_en = o_wb_cyc & i_wb_ack;
-   assign o_wb_stb = o_wb_cyc;
    reg           init_r;
    reg           en_r;
    reg           en_2r;

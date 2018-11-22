@@ -26,12 +26,12 @@
 module wb_ram_generic
   #(parameter depth=256,
     parameter memfile = "")
-  (input clk,
-   input [3:0]	 we,
-   input [31:0]  din,
-   input [$clog2(depth)-1:0] 	 waddr,
-   input [$clog2(depth)-1:0] 	 raddr,
-   output reg [31:0] dout);
+  (input wire clk,
+   input wire [3:0] 		  we,
+   input wire [31:0] 		  din,
+   input wire [$clog2(depth)-1:0] waddr,
+   input wire [$clog2(depth)-1:0] raddr,
+   output reg [31:0] 		  dout);
 
    reg [31:0] 	 mem [0:depth-1] /* verilator public */;
 
@@ -52,3 +52,4 @@ module wb_ram_generic
    endgenerate
 
 endmodule
+`default_nettype wire

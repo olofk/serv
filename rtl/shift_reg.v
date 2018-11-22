@@ -1,4 +1,5 @@
 module shift_reg
+  #(parameter LEN = 0)
   (
    input wire 		 clk,
    input wire 		 i_en,
@@ -6,7 +7,6 @@ module shift_reg
    output wire 		 o_q,
    output wire [LEN-2:0] o_par);
 
-   parameter LEN = 0;
    parameter INIT = 0;
 
    reg [LEN-1:0] 	 data = INIT;

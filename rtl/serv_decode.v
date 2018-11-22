@@ -261,7 +261,7 @@ module serv_decode
    wire gate1  = (cnt == 0) & ((opcode == OP_BRANCH) | (opcode == OP_JAL));
    wire gate12 = (cnt < 12) & utype;
 
-   wire o_imm = (!(gate1 | gate12) & (cnt_done ? signbit : m1 ? imm11_7[0] : imm24_20[0]));
+   assign o_imm = (!(gate1 | gate12) & (cnt_done ? signbit : m1 ? imm11_7[0] : imm24_20[0]));
 
    assign o_op_b_source = (opcode == OP_OPIMM)  ? OP_B_SOURCE_IMM :
                           (opcode == OP_BRANCH) ? OP_B_SOURCE_RS2 :

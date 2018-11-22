@@ -34,7 +34,6 @@ module serv_top
 `endif
    output wire [31:0] o_ibus_adr,
    output wire 	      o_ibus_cyc,
-   output wire 	      o_ibus_stb,
    input wire [31:0]  i_ibus_rdt,
    input wire 	      i_ibus_ack,
    output wire [31:0] o_dbus_adr,
@@ -42,11 +41,8 @@ module serv_top
    output wire [3:0]  o_dbus_sel,
    output wire 	      o_dbus_we ,
    output wire 	      o_dbus_cyc,
-   output wire 	      o_dbus_stb,
    input wire [31:0]  i_dbus_rdt,
    input wire 	      i_dbus_ack);
-
-   assign o_ibus_stb = o_ibus_cyc;
 
 `include "serv_params.vh"
 
@@ -190,7 +186,6 @@ module serv_top
       .o_ibus_cyc (o_ibus_cyc),
       .i_ibus_ack (i_ibus_ack));
 
-   //TODO: Pass imm through alu to avoid 5-way mux
    assign rd = (rd_source == RD_SOURCE_CTRL) ? ctrl_rd :
                (rd_source == RD_SOURCE_ALU)  ? alu_rd  :
                (rd_source == RD_SOURCE_MEM)  ? mem_rd  : csr_rd;
@@ -249,7 +244,6 @@ module serv_top
       .o_wb_sel   (o_dbus_sel),
       .o_wb_we    (o_dbus_we ),
       .o_wb_cyc   (o_dbus_cyc),
-      .o_wb_stb   (o_dbus_stb),
       .i_wb_rdt   (i_dbus_rdt),
       .i_wb_ack   (i_dbus_ack));
 
