@@ -73,7 +73,7 @@ module serv_ctrl
       .rst (i_rst),
       .a   (offset_a),
       .b   (i_offset),
-      .clr (i_cnt_done),
+      .clr (!i_en | (i_cnt_done & !i_pc_en)),
       .q   (pc_plus_offset),
       .o_v ());
 

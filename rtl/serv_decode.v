@@ -213,6 +213,12 @@ module serv_decode
    reg [31:0] imm;
    reg 	      signbit;
 
+   reg [8:0]  imm19_12_20;
+   reg 	      imm7;
+   reg [5:0]  imm30_25;
+   reg [4:0]  imm24_20;
+   reg [4:0]  imm11_7;
+
    always @(posedge clk) begin
       if (i_wb_en) begin
          o_rf_rd_addr  <= i_wb_rdt[11:7];
@@ -222,10 +228,40 @@ module serv_decode
          imm30         <= i_wb_rdt[30];
          opcode        <= i_wb_rdt[6:2];
          imm           <= i_wb_rdt;
-	 signbit       <= imm[31];
+	 signbit       <= i_wb_rdt[31];
+      end
+      if (cnt_done | go | i_mem_dbus_ack) begin
+	 imm19_12_20 <= {imm[19:12],imm[20]};
+	 imm7 <= imm[7];
+	 imm30_25 <= imm[30:25];
+	 imm24_20 <= imm[24:20];
+	 imm11_7  <= imm[11:7];
 
+      end else begin
+	 imm19_12_20 <= {m3 ? signbit : imm24_20[0], imm19_12_20[8:1]};
+	 imm7        <= signbit;
+	 imm30_25    <= {m2[1] ? imm7 : m2[0] ? signbit : imm19_12_20[0], imm30_25[5:1]};
+	 imm24_20    <= {imm30_25[0], imm24_20[4:1]};
+	 imm11_7     <= {imm30_25[0], imm11_7[4:1]};
       end
    end
+
+   wire utype = !opcode[4] & (opcode[2:0] == 3'b101);
+   wire sorbtype = opcode[3:0] == 4'b1000;
+   wire iorstype = (opcode == OP_OPIMM) | (opcode == OP_JALR) | (opcode == OP_LOAD) | (opcode == OP_STORE);
+
+   wire m1 = sorbtype;
+
+   wire [1:0] m2;
+   assign m2[1] = (opcode == OP_BRANCH);
+   assign m2[0] = iorstype;
+
+   wire m3 = opcode[4];
+
+   wire gate1  = (cnt == 0) & ((opcode == OP_BRANCH) | (opcode == OP_JAL));
+   wire gate12 = (cnt < 12) & utype;
+
+   wire o_imm = (!(gate1 | gate12) & (cnt_done ? signbit : m1 ? imm11_7[0] : imm24_20[0]));
 
    assign o_op_b_source = (opcode == OP_OPIMM)  ? OP_B_SOURCE_IMM :
                           (opcode == OP_BRANCH) ? OP_B_SOURCE_RS2 :
@@ -252,34 +288,6 @@ module serv_decode
                         (opcode == OP_JALR)  ? RD_SOURCE_CTRL :
                         (opcode == OP_SYSTEM) ? RD_SOURCE_CSR :
                         RD_SOURCE_MEM;
-
-   //31, cnt, 20, +20, +7, 7, 1'b0
-   wire imm_j =
-	(cnt > 19) ? imm[31] :
-        (cnt > 11) ? imm[cnt] :
-	(cnt > 10) ? imm[20] :
-        (cnt > 0)  ? imm[cnt+20] :
-        1'b0;
-
-   wire imm_i = (cnt > 10) ? imm[31] : imm[cnt+20];
-   wire imm_u = (cnt > 11) ? imm[cnt] : 1'b0;
-   wire imm_b =
-	(cnt > 11) ? imm[31]:
-        (cnt > 10) ? imm[7] :
-        (cnt > 4)  ? imm[cnt+20] :
-        (cnt > 0)  ? imm[cnt+7] : 1'b0;
-
-   wire imm_s =
-        (cnt > 10) ? imm[31] :
-        (cnt > 4)  ? imm[cnt+20] :
-        imm[cnt+7];
-
-   wire o_imm =
-	(opcode == OP_JAL) ? imm_j :
-	((opcode == OP_OPIMM) | (opcode == OP_JALR) | (opcode == OP_LOAD)) ? imm_i :
-	((opcode == OP_LUI) | (opcode == OP_AUIPC)) ? imm_u :
-	(opcode == OP_BRANCH) ? imm_b :
-	(opcode == OP_STORE) ? imm_s : 1'b0;
 
    always @(posedge clk) begin
       go <= i_wb_en;
@@ -341,33 +349,8 @@ module serv_decode
       cnt <= cnt + {4'd0,cnt_en};
 
       if (i_rst) begin
-	 //output reg [2:0]  o_funct3,
-	 //output reg 	     o_imm,
 	 state <= IDLE;
 	 cnt   <= 5'd0;
-	 //reg       imm30;
-	 //reg [4:0] opcode;
-	 //reg [31:0] imm;
       end
    end
-//`define SERV_DECODE_CHECKS
-`ifdef SERV_DECODE_CHECKS
-   reg unknown_op = 1'b0;
-
-   always @(opcode)
-     if (i_wb_en) begin
-	if (!((opcode == OP_LOAD) |
-	      (opcode == OP_STORE ) |
-	      (opcode == OP_OPIMM ) |
-	      (opcode == OP_AUIPC ) |
-	      (opcode == OP_OP    ) |
-	      (opcode == OP_LUI   ) |
-	      (opcode == OP_BRANCH) |
-	      (opcode == OP_JALR  ) |
-	      (opcode == OP_SYSTEM  ) |
-	      (opcode == OP_JAL   ))) begin
-	   $display("Unknown opcode %b at %0t", opcode, $time);
-	end // if ((opcode != OP_LOAD) |...
-     end // if (i_wb_en)
-`endif
 endmodule
