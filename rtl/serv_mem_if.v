@@ -77,9 +77,9 @@ module serv_mem_if
 
    wire       upper_half = bytepos[1];
 
-   wire [3:0] o_wb_sel = (is_word ? 4'b1111 :
-			  is_half ? {{2{upper_half}}, ~{2{upper_half}}} :
-			  4'd1 << bytepos);
+   assign o_wb_sel = (is_word ? 4'b1111 :
+		      is_half ? {{2{upper_half}}, ~{2{upper_half}}} :
+		      4'd1 << bytepos);
 /*
    assign o_wb_sel[3] = is_word | (is_half & bytepos[1]) | (bytepos == 2'b11);
    assign o_wb_sel[2] = (bytepos == 2'b10) | is_word;

@@ -82,7 +82,6 @@ module serv_ctrl
 
    reg        en_r;
    reg        en_2r;
-   reg        en_3r;
    reg 	      en_pc_r;
    reg 	      en_pc_2r;
    reg 	      en_pc_3r;
@@ -90,7 +89,6 @@ module serv_ctrl
    always @(posedge clk) begin
       en_r <= i_en;
       en_2r <= en_r;
-      en_3r <= en_2r;
       en_pc_r <= i_pc_en;
       en_pc_2r <= en_pc_r;
       en_pc_3r <= en_pc_2r;
@@ -104,7 +102,6 @@ module serv_ctrl
       if (i_rst) begin
 	 en_r  <= 1'b0;
 	 en_2r <= 1'b0;
-	 en_3r <= 1'b0;
 	 en_pc_r <= 1'b1;
 	 en_pc_2r <= 1'b0;
 	 en_pc_3r <= 1'b0;

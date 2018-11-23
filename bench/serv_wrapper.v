@@ -129,17 +129,16 @@ serv_arbiter serv_arbiter
    ram
      (// Wishbone interface
       .wb_clk_i (wb_clk),
-      .wb_rst_i (wb_rst),
       .wb_adr_i (wb_mem_adr[$clog2(MEMORY_SIZE)-1:0]),
       .wb_cyc_i (wb_mem_cyc),
       .wb_we_i  (wb_mem_we) ,
       .wb_sel_i (wb_mem_sel),
       .wb_dat_i (wb_mem_dat),
-      .wb_dat_o (wb_mem_rdt),
-      .wb_ack_o ());
+      .wb_dat_o (wb_mem_rdt));
 
    riscv_timer riscv_timer
      (.i_clk    (wb_clk),
+      .i_rst    (wb_rst),
       .o_irq    (timer_irq),
       .i_wb_cyc (wb_timer_cyc),
       .i_wb_we  (wb_timer_we) ,

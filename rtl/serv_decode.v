@@ -6,7 +6,6 @@ module serv_decode
    input wire [31:0] i_wb_rdt,
    input wire 	     i_wb_en,
    output wire 	     o_cnt_done,
-   output wire 	     o_ibus_active,
    output wire 	     o_ctrl_en,
    output wire 	     o_ctrl_pc_en,
    output wire 	     o_ctrl_jump,
@@ -72,10 +71,10 @@ module serv_decode
      OP_JAL    = 5'b11011,
      OP_SYSTEM = 5'b11100;
 
-   reg [1:0]    state = IDLE;
+   reg [1:0]    state;
    reg 		go;
 
-   reg [4:0] cnt     = 5'd0;
+   reg [4:0] cnt;
 
    wire      running;
    wire      mem_op;
@@ -84,21 +83,17 @@ module serv_decode
    wire      slt_op;
    wire      branch_op;
    wire      e_op;
-   wire      jump_misaligned;
 
    reg       imm30;
 
    assign o_cnt_done = cnt_done;
 
-   assign o_ibus_active = (state == IDLE);
-
    assign mem_op = !opcode[4] & !opcode[2] & !opcode[0];
 
-   assign shift_op = ((opcode == OP_OPIMM) & (o_funct3[1:0] == 2'b01)) |
-                     ((opcode == OP_OP   ) & (o_funct3[1:0] == 2'b01));
+   wire      op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
 
-   assign slt_op = (!opcode[4] & opcode[2] & !opcode[0]) &
-		    (o_funct3[2:1] == 2'b01);
+   assign shift_op = op_or_opimm & (o_funct3[1:0] == 2'b01);
+   assign slt_op   = op_or_opimm & (o_funct3[2:1] == 2'b01);
 
    assign branch_op = (opcode[4:2] == 3'b110) & !opcode[0];
 
@@ -109,21 +104,20 @@ module serv_decode
 
    assign o_ctrl_jalr = opcode[4] & (opcode[2:0] == 3'b001);
 
-   assign o_ctrl_auipc = (opcode == OP_AUIPC);
+   assign o_ctrl_auipc = !opcode[3] & opcode[2] & opcode[0];
 
-   assign o_ctrl_mret = (opcode == OP_SYSTEM) & op[21] & !(|o_funct3);
+   assign o_ctrl_mret = (opcode[4] & opcode[2]) & op[21] & !(|o_funct3);
 
-   assign o_rf_rd_en = running & !o_ctrl_trap &
-                       (opcode != OP_STORE) &
-                       !branch_op;
+   assign o_rf_rd_en = running & (opcode[2] |
+				  (!opcode[2] & opcode[4] & opcode[0]) |
+				  (!opcode[2] & !opcode[3] & !opcode[0]));
 
    assign o_rf_rs_en = cnt_en;
+   assign o_alu_en   = cnt_en;
+   assign o_ctrl_en  = cnt_en;
 
-   assign o_alu_en = cnt_en;
+   assign o_ctrl_lui = (opcode[0] & !opcode[4] & opcode[3]);
 
-   assign o_ctrl_lui = opcode == OP_LUI;
-
-   assign o_ctrl_en = cnt_en;
 
    assign o_alu_init = (state == INIT);
 
@@ -136,12 +130,12 @@ module serv_decode
 
    assign o_alu_cmp_neg = branch_op & o_funct3[0];
 
-   assign o_csr_en = ((((opcode == OP_SYSTEM) & (|o_funct3)) |
+   assign o_csr_en = ((((opcode[4] & opcode[2]) & (|o_funct3)) |
 		     o_ctrl_mret) & running) | o_ctrl_trap;
 
    wire [3:0] csr_sel = {op[26],op[22:20]};
 
-   always @(o_funct3, op, csr_sel) begin
+   always @(o_funct3, op, csr_sel, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
       casez (o_funct3)
         3'b00?  : o_alu_cmp_sel = ALU_CMP_EQ;
         3'b01?  : o_alu_cmp_sel = ALU_CMP_LT;
@@ -214,10 +208,10 @@ module serv_decode
    assign o_mem_init = mem_op & (state == INIT);
    assign o_mem_bytecnt = cnt[4:3];
 
-   wire jal_misalign  = op[21] & (opcode == OP_JAL);
+   wire jal_misalign  = op[21] & opcode[1] & opcode[4];
 
    reg [4:0] opcode;
-   reg [31:0] op;
+   reg [30:7] op;
    reg 	      signbit;
 
    reg [8:0]  imm19_12_20;
@@ -234,7 +228,7 @@ module serv_decode
          o_funct3      <= i_wb_rdt[14:12];
          imm30         <= i_wb_rdt[30];
          opcode        <= i_wb_rdt[6:2];
-         op           <= i_wb_rdt;
+         op           <= i_wb_rdt[30:7];
 	 signbit       <= i_wb_rdt[31];
       end
       if (cnt_done | go | i_mem_dbus_ack) begin
@@ -265,7 +259,7 @@ module serv_decode
 
    wire m3 = opcode[4];
 
-   wire gate1  = (cnt == 0) & ((opcode == OP_BRANCH) | (opcode == OP_JAL));
+   wire gate1  = (cnt == 0) & ((opcode == OP_BRANCH) | (opcode[1] & opcode[4]));
    wire gate12 = (cnt < 12) & utype;
 
    assign o_imm = (!(gate1 | gate12) & (cnt_done ? signbit : m1 ? imm11_7[0] : imm24_20[0]));
@@ -295,25 +289,21 @@ module serv_decode
 
    always @(i_mem_misalign, o_mem_cmd, e_op, op) begin
       o_csr_mcause[3:0] = 4'd0;
-      if (i_mem_misalign & !o_mem_cmd)
-	o_csr_mcause[3:0] = 4'd4;
-      if (i_mem_misalign & o_mem_cmd)
-	o_csr_mcause[3:0] = 4'd6;
-      if (e_op & !op[20])
-	o_csr_mcause[3:0] = 4'd11;
-      if (e_op & op[20])
-	o_csr_mcause[3:0] = 4'd3;
+      if (i_mem_misalign)
+	o_csr_mcause[3:0] = {2'b01, o_mem_cmd, 1'b0};
+      if (e_op)
+	o_csr_mcause = {!op[20],3'b011};
    end
 
+   wire two_stage_op =
+        slt_op | (opcode[4:2] == 3'b110) | (opcode[2:1] == 2'b00) |
+        shift_op;
    always @(posedge clk) begin
-      state <= state;
       case (state)
         IDLE : begin
            if (go) begin
 	      state <= RUN;
-              if (branch_op |
-                  slt_op | (opcode == OP_JAL) | (opcode == OP_JALR) |
-                  mem_op | shift_op)
+              if (two_stage_op)
 		state <= INIT;
 	      if (e_op)
 		state <= TRAP;

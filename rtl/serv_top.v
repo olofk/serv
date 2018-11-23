@@ -122,7 +122,6 @@ module serv_top
       .i_wb_rdt       (i_ibus_rdt),
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
       .o_cnt_done     (cnt_done),
-      .o_ibus_active  (),
       .o_ctrl_en      (ctrl_en),
       .o_ctrl_pc_en   (ctrl_pc_en),
       .o_ctrl_jump    (jump),

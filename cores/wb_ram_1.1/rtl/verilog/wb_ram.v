@@ -31,7 +31,6 @@ module wb_ram
    parameter aw    = $clog2(depth),
    parameter memfile = "")
   (input  wire 	   wb_clk_i,
-   input wire 		wb_rst_i,
 
    input wire [aw-1:0] 	wb_adr_i,
    input wire [dw-1:0] 	wb_dat_i,
@@ -39,25 +38,9 @@ module wb_ram
    input wire 		wb_we_i,
    input wire 		wb_cyc_i,
 
-   output reg 		wb_ack_o = 1'b0,
    output wire [dw-1:0] wb_dat_o);
 
-   wire [31:0] 		wb_rdt;
-   reg [31:0]      wb_rdt_r;
-   
-   always@(posedge wb_clk_i) begin
-      //Ack generation
-      wb_ack_o <= wb_cyc_i & !wb_ack_o;
-
-      if (wb_cyc_i)
-        wb_rdt_r <= wb_rdt;
-      if (wb_rst_i)
-        wb_ack_o <= 1'b0;
-   end
-
-   assign wb_dat_o = (wb_cyc_i) ? wb_rdt : wb_rdt_r;
-
-   wire ram_we = wb_we_i & wb_cyc_i & wb_ack_o;
+   wire ram_we = wb_we_i & wb_cyc_i;
 
    wb_ram_generic
      #(.depth(depth/4),
@@ -68,6 +51,6 @@ module wb_ram
       .din (wb_dat_i),
       .waddr(wb_adr_i[aw-1:2]),
       .raddr (wb_adr_i[aw-1:2]),
-      .dout (wb_rdt));
+      .dout (wb_dat_o));
 
 endmodule
