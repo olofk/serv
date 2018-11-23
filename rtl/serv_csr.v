@@ -14,12 +14,14 @@ module serv_csr
 
 `include "serv_params.vh"
    /*
-    mtvec RW
-    mepc  RW
-    mstatus RWSC
-    mcause R
-    mip CWi
-    mie SCWi
+    304 mie SCWi
+    305 mtvec RW
+    340 mscratch
+    341 mepc  RW
+    300 mstatus RWSC
+    342 mcause R
+    343 mtval
+    344 mip CWi
     */
 
    reg [31:0] 	mtvec    = 32'h0;

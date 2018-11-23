@@ -50,7 +50,10 @@ module serv_top
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
 
-   wire [1:0]    rd_source;
+   wire 	 rd_ctrl_en;
+   wire 	 rd_alu_en;
+   wire 	 rd_csr_en;
+   wire 	 rd_mem_en;
    wire          ctrl_rd;
    wire          alu_rd;
    wire          mem_rd;
@@ -93,7 +96,7 @@ module serv_top
    wire          mem_en;
 
    wire          mem_cmd;
-   wire          mem_dat_valid;
+   wire [1:0] 	 mem_bytecnt;
 
    wire          mem_init;
    wire 	 mem_misalign;
@@ -149,7 +152,7 @@ module serv_top
       .o_mem_en       (mem_en),
       .o_mem_cmd      (mem_cmd),
       .o_mem_init     (mem_init),
-      .o_mem_dat_valid (mem_dat_valid),
+      .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_dbus_ack (i_dbus_ack),
       .i_mem_misalign (mem_misalign),
       .o_csr_en       (csr_en),
@@ -160,7 +163,10 @@ module serv_top
       .o_csr_d_sel    (csr_d_sel),
       .o_imm          (imm),
       .o_op_b_source  (op_b_source),
-      .o_rd_source    (rd_source));
+      .o_rd_ctrl_en   (rd_ctrl_en),
+      .o_rd_alu_en    (rd_alu_en),
+      .o_rd_csr_en    (rd_csr_en),
+      .o_rd_mem_en    (rd_mem_en));
 
    serv_ctrl
      #(.RESET_PC (RESET_PC))
@@ -186,9 +192,10 @@ module serv_top
       .o_ibus_cyc (o_ibus_cyc),
       .i_ibus_ack (i_ibus_ack));
 
-   assign rd = (rd_source == RD_SOURCE_CTRL) ? ctrl_rd :
-               (rd_source == RD_SOURCE_ALU)  ? alu_rd  :
-               (rd_source == RD_SOURCE_MEM)  ? mem_rd  : csr_rd;
+   assign rd = (rd_ctrl_en & ctrl_rd) |
+	       (rd_alu_en  & alu_rd ) |
+	       (rd_csr_en  & csr_rd ) |
+	       (rd_mem_en  & mem_rd);
 
    assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm : rs2;
 
@@ -229,8 +236,8 @@ module serv_top
       .i_rst    (i_rst),
       .i_en     (mem_en),
       .i_init   (mem_init),
-      .i_dat_valid (mem_dat_valid),
       .i_cmd    (mem_cmd),
+      .i_bytecnt (mem_bytecnt),
       .i_funct3 (funct3),
       .i_rs1    (rs1),
       .i_rs2    (rs2),

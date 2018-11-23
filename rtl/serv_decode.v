@@ -35,7 +35,7 @@ module serv_decode
    output wire 	     o_mem_en,
    output wire 	     o_mem_cmd,
    output wire 	     o_mem_init,
-   output reg 	     o_mem_dat_valid,
+   output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_dbus_ack,
    input wire 	     i_mem_misalign,
    output wire 	     o_csr_en,
@@ -47,7 +47,10 @@ module serv_decode
    output reg [2:0]  o_funct3,
    output wire 	     o_imm,
    output wire 	     o_op_b_source,
-   output wire [1:0] o_rd_source);
+   output wire 	     o_rd_ctrl_en,
+   output wire 	     o_rd_alu_en,
+   output wire 	     o_rd_csr_en,
+   output wire 	     o_rd_mem_en);
 
 `include "serv_params.vh"
 
@@ -89,27 +92,26 @@ module serv_decode
 
    assign o_ibus_active = (state == IDLE);
 
-   assign mem_op = (opcode == OP_LOAD) | (opcode == OP_STORE);
+   assign mem_op = !opcode[4] & !opcode[2] & !opcode[0];
+
    assign shift_op = ((opcode == OP_OPIMM) & (o_funct3[1:0] == 2'b01)) |
                      ((opcode == OP_OP   ) & (o_funct3[1:0] == 2'b01));
 
-   assign slt_op = (((opcode == OP_OPIMM) | (opcode == OP_OP)) &
-		    (o_funct3[2:1] == 2'b01));
+   assign slt_op = (!opcode[4] & opcode[2] & !opcode[0]) &
+		    (o_funct3[2:1] == 2'b01);
 
-   assign branch_op = (opcode == OP_BRANCH);
+   assign branch_op = (opcode[4:2] == 3'b110) & !opcode[0];
 
-   assign e_op = (opcode == OP_SYSTEM) & !(|o_funct3);
+   assign e_op = (opcode[4:2] == 3'b111) & !(|o_funct3);
 
    assign o_ctrl_pc_en  = running | o_ctrl_trap;
-   assign o_ctrl_jump = (opcode == OP_JAL) |
-                        (opcode == OP_JALR) |
-                        (branch_op & i_alu_cmp);
+   assign o_ctrl_jump = (opcode[4:2] == 3'b110) & (opcode[0] | i_alu_cmp);
 
-   assign o_ctrl_jalr = (opcode == OP_JALR);
+   assign o_ctrl_jalr = opcode[4] & (opcode[2:0] == 3'b001);
 
    assign o_ctrl_auipc = (opcode == OP_AUIPC);
 
-   assign o_ctrl_mret = (opcode == OP_SYSTEM) & imm[21] & !(|o_funct3);
+   assign o_ctrl_mret = (opcode == OP_SYSTEM) & op[21] & !(|o_funct3);
 
    assign o_rf_rd_en = running & !o_ctrl_trap &
                        (opcode != OP_STORE) &
@@ -137,7 +139,9 @@ module serv_decode
    assign o_csr_en = ((((opcode == OP_SYSTEM) & (|o_funct3)) |
 		     o_ctrl_mret) & running) | o_ctrl_trap;
 
-   always @(o_funct3, imm) begin
+   wire [3:0] csr_sel = {op[26],op[22:20]};
+
+   always @(o_funct3, op, csr_sel) begin
       casez (o_funct3)
         3'b00?  : o_alu_cmp_sel = ALU_CMP_EQ;
         3'b01?  : o_alu_cmp_sel = ALU_CMP_LT;
@@ -174,17 +178,19 @@ module serv_decode
       if (((o_rf_rs1_addr == 5'd0) & o_funct3[1]) | o_ctrl_trap | o_ctrl_mret)
 	o_csr_source = CSR_SOURCE_CSR;
 
-      casez(imm[31:20])
-	12'h305 : o_csr_sel = CSR_SEL_MTVEC;
-	12'h340 : o_csr_sel = CSR_SEL_MSCRATCH;
-	12'h341 : o_csr_sel = CSR_SEL_MEPC;
-	12'h342 : o_csr_sel = CSR_SEL_MCAUSE;
-	12'h343 : o_csr_sel = CSR_SEL_MTVAL;
-	//12'hf14 : o_csr_sel = CSR_SEL_MHARTID;
+      casez(csr_sel)
+      //4'b0_000 : o_csr_sel = CSR_SEL_MSTATUS;
+      //4'b0_100 : o_csr_sel = CSR_SEL_MIE;
+	4'b0_101 : o_csr_sel = CSR_SEL_MTVEC;
+	4'b1_000 : o_csr_sel = CSR_SEL_MSCRATCH;
+	4'b1_001 : o_csr_sel = CSR_SEL_MEPC;
+	4'b1_010 : o_csr_sel = CSR_SEL_MCAUSE;
+	4'b1_011 : o_csr_sel = CSR_SEL_MTVAL;
+      //4'b1_100 : o_csr_sel = CSR_SEL_MIP;
 	default : begin
 	   o_csr_sel = 3'bxxx;
 	   /*if (o_csr_en) begin
-	      $display("%0t: CSR %03h not implemented", $time, imm[31:20]);
+	      $display("%0t: CSR %03h not implemented", $time, op[31:20]);
 	      //#100 $finish;
 	   end*/
 	end
@@ -206,11 +212,12 @@ module serv_decode
    assign o_mem_cmd  = opcode[3];
 
    assign o_mem_init = mem_op & (state == INIT);
+   assign o_mem_bytecnt = cnt[4:3];
 
-   wire jal_misalign  = imm[21] & (opcode == OP_JAL);
+   wire jal_misalign  = op[21] & (opcode == OP_JAL);
 
    reg [4:0] opcode;
-   reg [31:0] imm;
+   reg [31:0] op;
    reg 	      signbit;
 
    reg [8:0]  imm19_12_20;
@@ -227,15 +234,15 @@ module serv_decode
          o_funct3      <= i_wb_rdt[14:12];
          imm30         <= i_wb_rdt[30];
          opcode        <= i_wb_rdt[6:2];
-         imm           <= i_wb_rdt;
+         op           <= i_wb_rdt;
 	 signbit       <= i_wb_rdt[31];
       end
       if (cnt_done | go | i_mem_dbus_ack) begin
-	 imm19_12_20 <= {imm[19:12],imm[20]};
-	 imm7 <= imm[7];
-	 imm30_25 <= imm[30:25];
-	 imm24_20 <= imm[24:20];
-	 imm11_7  <= imm[11:7];
+	 imm19_12_20 <= {op[19:12],op[20]};
+	 imm7 <= op[7];
+	 imm30_25 <= op[30:25];
+	 imm24_20 <= op[24:20];
+	 imm11_7  <= op[11:7];
 
       end else begin
 	 imm19_12_20 <= {m3 ? signbit : imm24_20[0], imm19_12_20[8:1]};
@@ -268,26 +275,10 @@ module serv_decode
                           (opcode == OP_OP)     ? OP_B_SOURCE_RS2 :
                           1'bx;
 
-   always @(o_funct3, cnt) begin
-      o_mem_dat_valid = 1'b0;
-      casez(o_funct3[1:0])
-        2'b00 : o_mem_dat_valid = (cnt < 8);
-        2'b01 : o_mem_dat_valid = (cnt < 16);
-        2'b10 : o_mem_dat_valid = 1'b1;
-        default: o_mem_dat_valid = 1'b0;
-      endcase
-   end
-
-
-
-   assign o_rd_source = (opcode == OP_JAL)   ? RD_SOURCE_CTRL :
-                        (opcode == OP_OPIMM) ? RD_SOURCE_ALU  :
-                        (opcode == OP_OP)    ? RD_SOURCE_ALU  :
-                        (opcode == OP_LUI)   ? RD_SOURCE_CTRL :
-                        (opcode == OP_AUIPC) ? RD_SOURCE_CTRL :
-                        (opcode == OP_JALR)  ? RD_SOURCE_CTRL :
-                        (opcode == OP_SYSTEM) ? RD_SOURCE_CSR :
-                        RD_SOURCE_MEM;
+   assign o_rd_ctrl_en =  opcode[0];
+   assign o_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
+   assign o_rd_csr_en =               opcode[2] &  opcode[4];
+   assign o_rd_mem_en =              !opcode[2] & !opcode[4];
 
    always @(posedge clk) begin
       go <= i_wb_en;
@@ -302,15 +293,15 @@ module serv_decode
 
    assign o_ctrl_trap = (state == TRAP);
 
-   always @(i_mem_misalign, o_mem_cmd, e_op, imm) begin
+   always @(i_mem_misalign, o_mem_cmd, e_op, op) begin
       o_csr_mcause[3:0] = 4'd0;
       if (i_mem_misalign & !o_mem_cmd)
 	o_csr_mcause[3:0] = 4'd4;
       if (i_mem_misalign & o_mem_cmd)
 	o_csr_mcause[3:0] = 4'd6;
-      if (e_op & !imm[20])
+      if (e_op & !op[20])
 	o_csr_mcause[3:0] = 4'd11;
-      if (e_op & imm[20])
+      if (e_op & op[20])
 	o_csr_mcause[3:0] = 4'd3;
    end
 

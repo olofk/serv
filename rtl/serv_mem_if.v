@@ -5,8 +5,8 @@ module serv_mem_if
    input wire 	      i_rst,
    input wire 	      i_en,
    input wire 	      i_init,
-   input wire 	      i_dat_valid,
    input wire 	      i_cmd,
+   input wire [1:0]   i_bytecnt,
    input wire [2:0]   i_funct3,
    input wire 	      i_rs1,
    input wire 	      i_rs2,
@@ -16,7 +16,7 @@ module serv_mem_if
    input wire 	      i_trap,
    //External interface
    output wire [31:0] o_wb_adr,
-   output reg [31:0]  o_wb_dat = 32'd0,
+   output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
    output wire 	      o_wb_we ,
    output reg 	      o_wb_cyc = 1'b0,
@@ -28,8 +28,17 @@ module serv_mem_if
    reg           en_r;
    reg           en_2r;
    wire          adr;
-   reg [31:0]    dat = 32'd0;
    reg           signbit = 1'b0;
+
+   reg [7:0] 	 dat0;
+   reg [7:0] 	 dat1;
+   reg [7:0] 	 dat2;
+   reg [7:0] 	 dat3;
+   wire 	 dat0_en;
+   wire 	 dat1_en;
+   wire 	 dat2_en;
+   wire 	 dat3_en;
+
 
    ser_add ser_add_rs1_plus_imm
      (
@@ -50,8 +59,14 @@ module serv_mem_if
       .o_par (o_wb_adr[31:1])
       );
 
+   wire 	 dat_cur = (dat_sel == 3) ? dat3[0] :
+		 (dat_sel == 2) ? dat2[0] :
+		 (dat_sel == 1) ? dat1[0] : dat0[0];
+
    wire is_signed = ~i_funct3[2];
-   assign o_rd = i_dat_valid ? dat[0] : signbit & is_signed;
+   assign o_rd = dat_valid ? dat_cur : signbit & is_signed;
+
+   wire dat_valid = is_word | (i_bytecnt == 2'b00) | (is_half & !i_bytecnt[1]);
 
    wire is_word = i_funct3[1];
    wire is_half = i_funct3[0];
@@ -62,35 +77,47 @@ module serv_mem_if
 
    wire       upper_half = bytepos[1];
 
-   assign o_wb_sel = (is_word ? 4'b1111 :
-                      is_half ? {{2{upper_half}}, ~{2{upper_half}}} :
-                      4'd1 << bytepos);
+   wire [3:0] o_wb_sel = (is_word ? 4'b1111 :
+			  is_half ? {{2{upper_half}}, ~{2{upper_half}}} :
+			  4'd1 << bytepos);
+/*
+   assign o_wb_sel[3] = is_word | (is_half & bytepos[1]) | (bytepos == 2'b11);
+   assign o_wb_sel[2] = (bytepos == 2'b10) | is_word;
+   assign o_wb_sel[1] = ((is_word | is_half) & !bytepos[1]) | (bytepos == 2'b01);
+   assign o_wb_sel[0] = (bytepos == 2'b00);
+*/
    assign o_wb_we = i_cmd;
    reg [1:0]  bytepos;
-   reg [4:0]  cnt = 5'd0;
-   reg        dat_en;
-
-   always @(i_funct3, cnt, bytepos)
-     casez(i_funct3[1:0])
-       2'b1? : dat_en = 1'b1;
-       2'b01 : dat_en = bytepos[1] ? (cnt<16) : 1'b1;
-       2'b00 : dat_en = (bytepos == 2'd3) ? (cnt <8) :
-                        (bytepos == 2'd2) ? (cnt < 16) :
-                        (bytepos == 2'd1) ? (cnt < 24) : 1'b1;
-     endcase
 
    reg 	      init_2r = 1'b0;
    reg [1:0]  misalign = 2'b00;
 
-   always @(posedge i_clk) begin
-      //Async?
-      if (init_r) begin
-	 o_wb_dat[7:0]   <= dat[7:0];
-	 o_wb_dat[15:8]  <= (is_word | is_half) ? dat[15:8] : dat[7:0];
-	 o_wb_dat[23:16] <= is_word ? dat[23:16] : dat[7:0];
-	 o_wb_dat[31:24] <= is_word ? dat[31:24] : is_half ? dat[15:8] : dat[7:0];
-      end
+   wire       wbyte0 = (i_bytecnt == 2'b00);
+   wire       wbyte1 = ((i_bytecnt == 2'b01) & !bytepos[0]);
+   wire       wbyte2 = ((i_bytecnt == 2'b10) & !bytepos[1]);
+   wire       wbyte3 = ((i_bytecnt == 2'b11) & !bytepos[1]);
 
+   assign dat0_en = i_en & (i_init ? wbyte0 : (dat_sel == 2'd0));
+   assign dat1_en = i_en & (i_init ? (wbyte0 | wbyte1) : (dat_sel == 2'd1));
+   assign dat2_en = i_en & (i_init ? (wbyte0 | wbyte2) : (dat_sel == 2'd2));
+   assign dat3_en = i_en & (i_init ? (wbyte0 | wbyte1 | wbyte3) : (dat_sel == 2'd3));
+
+   assign o_wb_dat = {dat3,dat2,dat1,dat0};
+
+   wire [1:0] dat_sel = i_bytecnt[1] ? i_bytecnt : (i_bytecnt | bytepos);
+
+   always @(posedge i_clk) begin
+      if (dat0_en)
+	dat0 <= {i_rs2, dat0[7:1]};
+      if (dat1_en)
+	dat1 <= {i_rs2, dat1[7:1]};
+      if (dat2_en)
+	dat2 <= {i_rs2, dat2[7:1]};
+      if (dat3_en)
+	dat3 <= {i_rs2, dat3[7:1]};
+
+      if (wb_en)
+	{dat3,dat2,dat1,dat0} <= i_wb_rdt;
 
       if (i_init & !init_r)
 	misalign[0] <= (!is_byte & adr);
@@ -104,18 +131,9 @@ module serv_mem_if
       if (en_r & !en_2r)
         bytepos[1] <= adr;
 
-      if (i_dat_valid)
-        signbit <= dat[0];
+      if (dat_valid)
+        signbit <= dat_cur;
 
-      if (wb_en & !o_wb_we) begin
-         dat[31:16] <= i_wb_rdt[31:16];
-         dat[15:8]  <= (is_half & upper_half) ? i_wb_rdt[31:24] : i_wb_rdt[15:8];
-         dat[7:0]   <= (is_byte & (bytepos == 2'b11)) ? i_wb_rdt[31:24] :
-                       (is_byte & (bytepos == 2'b10)) ? i_wb_rdt[23:16] :
-                       (is_half & upper_half)         ? i_wb_rdt[23:16] :
-                       (is_byte & (bytepos == 2'b01)) ? i_wb_rdt[15:8] :
-                       i_wb_rdt[7:0];
-      end
 
       en_r <= i_en;
       en_2r <= en_r;
@@ -126,8 +144,5 @@ module serv_mem_if
       else if (init_r & !i_init & !i_trap) begin //Optimize?
          o_wb_cyc <= 1'b1;
       end
-
-      if (i_en & dat_en)
-        dat <= {i_rs2,dat[31:1]};
    end
 endmodule
