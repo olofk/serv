@@ -2,6 +2,8 @@
 module serv_regfile
   (
    input wire 	    i_clk,
+   input wire 	    i_go,
+   output reg 	    o_ready,
    input wire 	    i_rd_en,
    input wire [4:0] i_rd_addr,
    input wire 	    i_rd,
@@ -11,56 +13,55 @@ module serv_regfile
    output wire 	    o_rs1,
    output wire 	    o_rs2);
 
-   reg [4:0]   raddr = 5'd1;
-   reg [4:0]   waddr = 5'd0;
-
-   wire [31:0]  rs;
-
-   wire [4:0] 	raddr2 = raddr & {5{i_rs_en}};
-   reg [31:0] mask;
-
-   always @(i_rd_addr)
-     mask = ~(1 << i_rd_addr);
-
-   SB_RAM40_4K rf0
-     (
-      .RDATA (rs[15:0]),
-      .RCLK (i_clk),
-      .RCLKE (1'b1),
-      .RE (1'b1),
-      .RADDR ({6'd0,raddr2}),
-      .WCLK  (i_clk),
-      .WCLKE (1'b1),
-      .WE (i_rd_en),
-      .WADDR ({6'd0,waddr}),
-      .MASK  (mask[15:0]),
-      .WDATA ({16{i_rd}})
-      );
-
-   SB_RAM40_4K rf1
-     (
-      .RDATA (rs[31:16]),
-      .RCLK (i_clk),
-      .RCLKE (1'b1),
-      .RE (1'b1),
-      .RADDR ({6'd0,raddr2}),
-      .WCLK  (i_clk),
-      .WCLKE (1'b1),
-      .WE (i_rd_en),
-      .WADDR ({6'd0,waddr}),
-      .MASK  (mask[31:16]),
-      .WDATA ({16{i_rd}})
-      );
+   reg 		    t;
    always @(posedge i_clk) begin
-      if (i_rd_en) begin
-         waddr <= waddr + 1;
-      end
-
-      if (i_rs_en)
-        raddr <= raddr + 1;
+     o_ready <= t;
+     t <= i_go;
    end
 
-   assign o_rs1 = (|i_rs1_addr) ? rs[i_rs1_addr] : 1'b0;
-   assign o_rs2 = (|i_rs2_addr) ? rs[i_rs2_addr] : 1'b0;
+   reg rd_r;
 
+   reg [4:0] rcnt;
+   reg [4:0] wcnt;
+   reg 	     rs1;
+   reg 	     rs2;
+   reg 	     rs1_r;
+
+   wire [1:0] wdata = {i_rd, rd_r};
+   always @(posedge i_clk) begin
+      rd_r <= i_rd;
+      if (i_rs_en)
+	wcnt <= wcnt + 1;
+
+      if (i_go)
+	rcnt <= 5'd0;
+      else
+	rcnt <= rcnt + 4'd1;
+      if (rs1_en) begin
+	 rs1 <= rdata[1];
+      end else begin
+	 rs2 <= rdata[1];
+      end
+      rs1_r <= rs1_tmp;
+   end
+
+   wire rs1_tmp = (rs1_en ? rdata[0] : rs1);
+
+   assign o_rs1 = (|i_rs1_addr) & rs1_r;
+   assign o_rs2 = (|i_rs2_addr) & (rs1_en ? rs2 : rdata[0]);
+
+   wire [8:0] waddr = {i_rd_addr, wcnt[4:1]};
+   wire wr_en = wcnt[0] & i_rd_en;
+
+   wire [8:0] raddr = {!rs1_en ? i_rs1_addr : i_rs2_addr, rcnt[4:1]};
+   wire rs1_en = rcnt[0];
+
+   reg [1:0]  memory [0:511];
+   reg [1:0]  rdata;
+
+   always @(posedge i_clk) begin
+      if (wr_en)
+	memory[waddr] <= wdata;
+      rdata <= memory[raddr];
+   end
 endmodule

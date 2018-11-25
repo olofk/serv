@@ -5,6 +5,7 @@ module serv_decode
    input wire 	     i_rst,
    input wire [31:0] i_wb_rdt,
    input wire 	     i_wb_en,
+   input wire 	     i_rf_ready,
    output wire 	     o_cnt_done,
    output wire 	     o_ctrl_en,
    output wire 	     o_ctrl_pc_en,
@@ -35,7 +36,6 @@ module serv_decode
    output wire 	     o_mem_cmd,
    output wire 	     o_mem_init,
    output wire [1:0] o_mem_bytecnt,
-   input wire 	     i_mem_dbus_ack,
    input wire 	     i_mem_misalign,
    output wire 	     o_csr_en,
    output reg [2:0]  o_csr_sel,
@@ -72,7 +72,6 @@ module serv_decode
      OP_SYSTEM = 5'b11100;
 
    reg [1:0]    state;
-   reg 		go;
 
    reg [4:0] cnt;
 
@@ -231,7 +230,7 @@ module serv_decode
          op           <= i_wb_rdt[30:7];
 	 signbit       <= i_wb_rdt[31];
       end
-      if (cnt_done | go | i_mem_dbus_ack) begin
+      if (cnt_done | i_rf_ready) begin
 	 imm19_12_20 <= {op[19:12],op[20]};
 	 imm7 <= op[7];
 	 imm30_25 <= op[30:25];
@@ -274,12 +273,6 @@ module serv_decode
    assign o_rd_csr_en =               opcode[2] &  opcode[4];
    assign o_rd_mem_en =              !opcode[2] & !opcode[4];
 
-   always @(posedge clk) begin
-      go <= i_wb_en;
-      if (i_rst)
-	go <= 1'b0;
-   end
-
    wire cnt_en = (state != IDLE);
 
    wire cnt_done = cnt == 31;
@@ -298,25 +291,28 @@ module serv_decode
    wire two_stage_op =
         slt_op | (opcode[4:2] == 3'b110) | (opcode[2:1] == 2'b00) |
         shift_op;
+   reg 	stage_one_done;
+
    always @(posedge clk) begin
       case (state)
         IDLE : begin
-           if (go) begin
+           if (i_rf_ready) begin
 	      state <= RUN;
-              if (two_stage_op)
+              if (two_stage_op & !stage_one_done)
 		state <= INIT;
 	      if (e_op)
 		state <= TRAP;
 	   end
-	   if (i_mem_dbus_ack)
-	     state <= RUN;
         end
         INIT : begin
+	   stage_one_done <= 1'b1;
+
            if (cnt_done)
              state <= (i_mem_misalign | (o_ctrl_jump & i_ctrl_misalign)) ? TRAP :
 		      mem_op ? IDLE : RUN;
         end
         RUN : begin
+	   stage_one_done <= 1'b0;
            if (cnt_done)
              state <= IDLE;
         end

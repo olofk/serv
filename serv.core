@@ -30,10 +30,8 @@ filesets:
     files:
       - bench/serv_top_tb.v
     file_type : verilogSource
-    depend : [vlog_tb_utils, "yosys:techlibs:ice40"]
+    depend : [vlog_tb_utils]
 
-  techlib:
-    depend : ["yosys:techlibs:ice40fork"]
   wrapper:
     files:
       - rtl/riscv_timer.v
@@ -58,7 +56,6 @@ filesets:
   verilator_tb:
     files:
       - bench/serv_soc_tb.cpp : {file_type : verilogSource}
-    depend : ["yosys:techlibs:ice40"]
 
 targets:
   default:
@@ -90,7 +87,7 @@ targets:
 
   lint:
     default_tool : verilator
-    filesets : [core, techlib]
+    filesets : [core]
     tools:
       verilator:
         mode : lint-only

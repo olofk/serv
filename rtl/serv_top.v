@@ -85,6 +85,7 @@ module serv_top
    wire          alu_sh_right;
    wire [2:0]    alu_rd_sel;
 
+   wire 	 rf_ready;
    wire          rs1;
    wire          rs2;
    wire          rs_en;
@@ -121,6 +122,7 @@ module serv_top
       .i_rst          (i_rst),
       .i_wb_rdt       (i_ibus_rdt),
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
+      .i_rf_ready     (rf_ready),
       .o_cnt_done     (cnt_done),
       .o_ctrl_en      (ctrl_en),
       .o_ctrl_pc_en   (ctrl_pc_en),
@@ -152,7 +154,6 @@ module serv_top
       .o_mem_cmd      (mem_cmd),
       .o_mem_init     (mem_init),
       .o_mem_bytecnt  (mem_bytecnt),
-      .i_mem_dbus_ack (i_dbus_ack),
       .i_mem_misalign (mem_misalign),
       .o_csr_en       (csr_en),
       .o_csr_sel      (csr_sel),
@@ -220,6 +221,8 @@ module serv_top
    serv_regfile regfile
      (
       .i_clk      (clk),
+      .i_go       (i_ibus_ack | i_dbus_ack),
+      .o_ready    (rf_ready),
       .i_rd_en    (rd_en),
       .i_rd_addr  (rd_addr),
       .i_rd       (rd),
