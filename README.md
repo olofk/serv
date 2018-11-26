@@ -47,6 +47,9 @@ Build and run the single threaded zephyr hello world example with verilator
 
     fusesoc run	--target=verilator_tb serv --uart_baudrate=57600 --firmware=../serv/sw/zephyr_phil.hex --memsize=32768
 
+...or... the synchronization example
+
+    fusesoc run	--target=verilator_tb serv --uart_baudrate=57600 --firmware=../serv/sw/zephyr_sync.hex --memsize=16384
 
 Other applications can be tested by compiling and converting to bin and then hex e.g. with makehex.py found in $SERV/serv/riscv-target/serv
 
