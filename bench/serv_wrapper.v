@@ -5,6 +5,8 @@ module serv_wrapper
  output wire q);
 
    parameter memfile = "zephyr_hello.hex";
+   parameter memsize = 8192;
+
 
    reg [4:0] rst_reg = 5'b11111;
 
@@ -106,8 +108,6 @@ serv_arbiter serv_arbiter
    .o_wb_timer_cyc (wb_timer_cyc),
    .i_wb_timer_rdt (wb_timer_rdt));
 
-   localparam MEMORY_SIZE = 2048*4;
-
 `ifndef SYNTHESIS
 //synthesis translate_off
    reg [1023:0] firmware_file;
@@ -124,11 +124,11 @@ serv_arbiter serv_arbiter
 `ifdef SYNTHESIS
 .memfile (memfile),
 `endif
-       .depth (MEMORY_SIZE))
+       .depth (memsize))
    ram
      (// Wishbone interface
       .wb_clk_i (wb_clk),
-      .wb_adr_i (wb_mem_adr[$clog2(MEMORY_SIZE)-1:0]),
+      .wb_adr_i (wb_mem_adr[$clog2(memsize)-1:0]),
       .wb_cyc_i (wb_mem_cyc),
       .wb_we_i  (wb_mem_we) ,
       .wb_sel_i (wb_mem_sel),
