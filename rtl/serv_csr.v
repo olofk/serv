@@ -55,7 +55,8 @@ module serv_csr
 		   (i_csr_source == CSR_SOURCE_CSR) ? csr_out :
 		   1'bx;
 
-   assign csr_out = (i_csr_sel == CSR_SEL_MTVEC)    ? mtvec[0]  :
+   assign csr_out = (i_csr_sel == CSR_SEL_MSTATUS) ? mstatus :
+		    (i_csr_sel == CSR_SEL_MTVEC)    ? mtvec[0]  :
 		    (i_csr_sel == CSR_SEL_MSCRATCH) ? mscratch[0]   :
 		    (i_csr_sel == CSR_SEL_MEPC)    ? mepc[0]   :
 		    (i_csr_sel == CSR_SEL_MCAUSE)  ? mcause[0] :
@@ -76,11 +77,12 @@ module serv_csr
 
       mstatus <= (i_cnt == 2) ? mstatus_mie : 1'b0;
       mie <= (i_cnt == 6) & mie_mtie;
-      mip <= (i_cnt == 6) & i_mtip;
+      mip <= (i_cnt == 6) & i_mtip & o_timer_irq_en;
 
-      if (i_trap)
-	mcause[3:0] <= i_mcause;
-
+      if (i_trap) begin
+	 mcause[31]  <= i_mtip & o_timer_irq_en;
+	 mcause[3:0] <= (i_mtip & o_timer_irq_en) ? 4'd7 : i_mcause[3:0];
+      end
       if (mscratch_en)
 	mscratch <= {csr_in, mscratch[31:1]};
 

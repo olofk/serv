@@ -16,7 +16,7 @@ module riscv_timer
    always @(posedge i_clk) begin
       if (i_wb_cyc & i_wb_we)
 	mtimecmp <= i_wb_dat;
-      mtime <= mtime + 32'd1;
+      mtime <= mtime + 16'd1;
       o_irq <= (mtime >= mtimecmp);
       if (i_rst) begin
 	 mtime <= 16'd0;

@@ -43,6 +43,11 @@ Build and run the single threaded zephyr hello world example with verilator
 
     fusesoc run	--target=verilator_tb serv --uart_baudrate=57600 --firmware=../serv/sw/zephyr_hello_mt.hex --memsize=16384
 
+...or... the philosophers example
+
+    fusesoc run	--target=verilator_tb serv --uart_baudrate=57600 --firmware=../serv/sw/zephyr_phil.hex --memsize=32768
+
+
 Other applications can be tested by compiling and converting to bin and then hex e.g. with makehex.py found in $SERV/serv/riscv-target/serv
 
 Run the compliance tests
@@ -85,6 +90,6 @@ Run with `--firmware=../serv/sw/blinky.hex` as the last argument to run the LED 
 TODO
 ----
 
-- Interrupts don't seem to work.
 - Applications have to be preloaded to RAM at compile-time
 - Store bootloader and register file together in a RAM
+- Make it faster and smaller

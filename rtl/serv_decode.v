@@ -4,6 +4,7 @@ module serv_decode
    input wire 	     clk,
    input wire 	     i_rst,
    input wire 	     i_mtip,
+   input wire 	     i_timer_irq_en,
    input wire [31:0] i_wb_rdt,
    input wire 	     i_wb_en,
    input wire 	     i_rf_ready,
@@ -289,15 +290,11 @@ module serv_decode
    assign o_ctrl_trap = (state == TRAP);
 
    always @(posedge clk) begin
-      if (i_mtip)
-	o_csr_mcause[3:0] <= 4'd7;
-      else begin
-	 o_csr_mcause[3:0] <= 4'd0;
-	 if (i_mem_misalign)
-	   o_csr_mcause[3:0] <= {2'b01, o_mem_cmd, 1'b0};
-	 if (e_op)
-	   o_csr_mcause <= {!op[20],3'b011};
-      end
+      o_csr_mcause[3:0] <= 4'd0;
+      if (i_mem_misalign)
+	o_csr_mcause[3:0] <= {2'b01, o_mem_cmd, 1'b0};
+      if (e_op)
+	o_csr_mcause <= {!op[20],3'b011};
    end
 
    wire two_stage_op =
@@ -305,7 +302,15 @@ module serv_decode
         shift_op;
    reg 	stage_one_done;
 
+   reg 	mtip_r;
+   reg 	pending_irq;
+
    always @(posedge clk) begin
+      mtip_r <= i_mtip;
+
+      if (i_mtip & !mtip_r & i_timer_irq_en)
+	pending_irq <= 1'b1;
+
       cnt_done <= cnt == 30;
 
       case (state)
@@ -314,7 +319,7 @@ module serv_decode
 	      state <= RUN;
               if (two_stage_op & !stage_one_done)
 		state <= INIT;
-	      if (e_op | i_mtip)
+	      if (e_op | pending_irq)
 		state <= TRAP;
 	   end
         end
@@ -331,6 +336,7 @@ module serv_decode
              state <= IDLE;
         end
 	TRAP : begin
+	   pending_irq <= 1'b0;
            if (cnt_done)
              state <= IDLE;
 	end
