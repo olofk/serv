@@ -65,7 +65,7 @@ targets:
   icebreaker:
     default_tool : icestorm
     filesets : [core, mem_files, wrapper, icebreaker]
-    parameters : [memfile]
+    parameters : [memfile, memsize]
     tools:
       icestorm:
         nextpnr_options: [--up5k, --freq, 12]
@@ -80,7 +80,7 @@ targets:
   tinyfpga_bx:
     default_tool : icestorm
     filesets : [core, mem_files, wrapper, tinyfpga_bx]
-    parameters : [memfile]
+    parameters : [memfile, memsize]
     tools:
       icestorm:
         nextpnr_options : [--lp8k, --package, cm81, --freq, 16]
