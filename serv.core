@@ -22,8 +22,8 @@ filesets:
 
   mem_files:
     files:
-      - bitbang.hex  : {copyto : bitbang.hex}
-      - helloservice4000.hex : {copyto : helloservice4000.hex}
+      - sw/blinky.hex       : {copyto : blinky.hex}
+      - sw/zephyr_hello.hex : {copyto : zephyr_hello.hex}
     file_type : user
       
   serv_top_tb:
@@ -65,6 +65,7 @@ targets:
   icebreaker:
     default_tool : icestorm
     filesets : [core, mem_files, wrapper, icebreaker]
+    parameters : [memfile]
     tools:
       icestorm:
         nextpnr_options: [--up5k, --freq, 12]
@@ -79,6 +80,7 @@ targets:
   tinyfpga_bx:
     default_tool : icestorm
     filesets : [core, mem_files, wrapper, tinyfpga_bx]
+    parameters : [memfile]
     tools:
       icestorm:
         nextpnr_options : [--lp8k, --package, cm81, --freq, 16]
@@ -120,7 +122,13 @@ parameters:
 
   firmware:
     datatype : file
+    description : Preload RAM with a hex file at runtime (overrides memfile)
     paramtype : plusarg
+
+  memfile:
+    datatype    : file
+    description : Preload RAM with a hex file at compile-time
+    paramtype   : vlogparam
 
   signature:
     datatype : file

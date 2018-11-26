@@ -4,8 +4,7 @@ module serv_wrapper
  input wire  wb_clk,
  output wire q);
 
-   parameter memfile = "helloservice4000.hex";
-//   parameter memfile = "bitbang.hex";
+   parameter memfile = "zephyr_hello.hex";
 
    reg [4:0] rst_reg = 5'b11111;
 

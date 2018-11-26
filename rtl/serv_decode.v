@@ -78,7 +78,6 @@ module serv_decode
    wire      running;
    wire      mem_op;
    wire      shift_op;
-   wire      csr_op;
    wire      slt_op;
    wire      branch_op;
    wire      e_op;
