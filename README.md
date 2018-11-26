@@ -34,10 +34,14 @@ Check that the CPU passes the linter
 Running test software
 ---------------------
 
-Build and run the zephyr hello world example with verilator
+Build and run the single threaded zephyr hello world example with verilator
 
     cd $SERV/workspace
-    fusesoc run	--target=verilator_tb serv --firmware=../serv/hellomin.hex
+    fusesoc run	--target=verilator_tb serv --uart_baudrate=57600 --firmware=../serv/sw/zephyr_hello.hex
+
+..or... the multithreaded version
+
+    fusesoc run	--target=verilator_tb serv --uart_baudrate=57600 --firmware=../serv/sw/zephyr_hello_mt.hex --memsize=16384
 
 Other applications can be tested by compiling and converting to bin and then hex e.g. with makehex.py found in $SERV/serv/riscv-target/serv
 
@@ -59,7 +63,9 @@ Run the compliance tests
 Run on hardware
 ---------------
 
-Only supported so far is a single threaded hello world on TinyFPGA BX
+Only supported so far is a single threaded Zephyr hello world example on the icebreaker and tinyFPGA BX boards
+
+TinyFPGA BX
 
 Pin B3 is used for UART output with 57600 baud rate.
 
@@ -67,4 +73,18 @@ Pin B3 is used for UART output with 57600 baud rate.
     fusesoc run --target=tinyfpga_bx serv
     tinyprog --program build/serv_0/tinyfpga_bx-icestorm/serv_0.bin
 
+Icebreaker
 
+Pin 9 is used for UART output with 57600 baud rate.
+
+    cd $SERV/workspace
+    fusesoc run --target=icebreaker serv
+
+Run with `--firmware=../serv/sw/blinky.hex` as the last argument to run the LED blink example instead
+
+TODO
+----
+
+- Interrupts don't seem to work.
+- Applications have to be preloaded to RAM at compile-time
+- Store bootloader and register file together in a RAM
