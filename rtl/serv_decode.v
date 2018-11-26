@@ -3,9 +3,11 @@ module serv_decode
   (
    input wire 	     clk,
    input wire 	     i_rst,
+   input wire 	     i_mtip,
    input wire [31:0] i_wb_rdt,
    input wire 	     i_wb_en,
    input wire 	     i_rf_ready,
+   output wire [4:0] o_cnt,
    output wire 	     o_cnt_done,
    output wire 	     o_ctrl_en,
    output wire 	     o_ctrl_pc_en,
@@ -75,6 +77,8 @@ module serv_decode
 
    reg [4:0] cnt;
 
+   assign o_cnt = cnt;
+
    wire      running;
    wire      mem_op;
    wire      shift_op;
@@ -119,11 +123,15 @@ module serv_decode
 
    assign o_alu_init = (state == INIT);
 
-   assign o_alu_sub = (opcode == OP_OP) ? imm30 /*    ? 1'b1*/ :
-                      (branch_op & (o_funct3 == 3'b100)) ? 1'b1 :
-                      (branch_op & (o_funct3 == 3'b101)) ? 1'b1 :
-                      (branch_op & (o_funct3 == 3'b110)) ? 1'b1 :
-                      1'b0;
+   reg alu_sub_r;
+   assign o_alu_sub = alu_sub_r;
+
+   always @(posedge clk)
+     alu_sub_r <= (opcode == OP_OP) ? imm30 /*    ? 1'b1*/ :
+                  (branch_op & (o_funct3 == 3'b100)) ? 1'b1 :
+                  (branch_op & (o_funct3 == 3'b101)) ? 1'b1 :
+                  (branch_op & (o_funct3 == 3'b110)) ? 1'b1 :
+                  1'b0;
 
 
    assign o_alu_cmp_neg = branch_op & o_funct3[0];
@@ -150,17 +158,6 @@ module serv_decode
         default : o_alu_cmp_uns = 1'bx;
       endcase
 
-      casez(o_funct3)
-        3'b000  : o_alu_rd_sel = ALU_RESULT_ADD;
-        3'b001  : o_alu_rd_sel = ALU_RESULT_SR;
-        3'b01?  : o_alu_rd_sel = ALU_RESULT_LT;
-        3'b100  : o_alu_rd_sel = ALU_RESULT_XOR;
-        3'b101  : o_alu_rd_sel = ALU_RESULT_SR;
-        3'b110  : o_alu_rd_sel = ALU_RESULT_OR;
-        3'b111  : o_alu_rd_sel = ALU_RESULT_AND;
-        default : o_alu_rd_sel = 3'bxx;
-      endcase
-
       casez(o_funct3[1:0])
 	2'b01   : o_csr_source = CSR_SOURCE_EXT; //Check for x0
 	2'b10   : o_csr_source = CSR_SOURCE_SET;
@@ -171,14 +168,14 @@ module serv_decode
 	o_csr_source = CSR_SOURCE_CSR;
 
       casez(csr_sel)
-      //4'b0_000 : o_csr_sel = CSR_SEL_MSTATUS;
-      //4'b0_100 : o_csr_sel = CSR_SEL_MIE;
+	4'b0_000 : o_csr_sel = CSR_SEL_MSTATUS;
+	4'b0_100 : o_csr_sel = CSR_SEL_MIE;
 	4'b0_101 : o_csr_sel = CSR_SEL_MTVEC;
 	4'b1_000 : o_csr_sel = CSR_SEL_MSCRATCH;
 	4'b1_001 : o_csr_sel = CSR_SEL_MEPC;
 	4'b1_010 : o_csr_sel = CSR_SEL_MCAUSE;
 	4'b1_011 : o_csr_sel = CSR_SEL_MTVAL;
-      //4'b1_100 : o_csr_sel = CSR_SEL_MIP;
+	4'b1_100 : o_csr_sel = CSR_SEL_MIP;
 	default : begin
 	   o_csr_sel = 3'bxxx;
 	   /*if (o_csr_en) begin
@@ -219,6 +216,17 @@ module serv_decode
    reg [4:0]  imm11_7;
 
    always @(posedge clk) begin
+      casez(o_funct3)
+        3'b000  : o_alu_rd_sel <= ALU_RESULT_ADD;
+        3'b001  : o_alu_rd_sel <= ALU_RESULT_SR;
+        3'b01?  : o_alu_rd_sel <= ALU_RESULT_LT;
+        3'b100  : o_alu_rd_sel <= ALU_RESULT_XOR;
+        3'b101  : o_alu_rd_sel <= ALU_RESULT_SR;
+        3'b110  : o_alu_rd_sel <= ALU_RESULT_OR;
+        3'b111  : o_alu_rd_sel <= ALU_RESULT_AND;
+        //default : o_alu_rd_sel <= 3'bxx;
+      endcase
+
       if (i_wb_en) begin
          o_rf_rd_addr  <= i_wb_rdt[11:7];
          o_rf_rs1_addr <= i_wb_rdt[19:15];
@@ -274,17 +282,22 @@ module serv_decode
 
    wire cnt_en = (state != IDLE);
 
-   wire cnt_done = cnt == 31;
+   reg 	cnt_done;
+
    assign running = (state == RUN);
 
    assign o_ctrl_trap = (state == TRAP);
 
-   always @(i_mem_misalign, o_mem_cmd, e_op, op) begin
-      o_csr_mcause[3:0] = 4'd0;
-      if (i_mem_misalign)
-	o_csr_mcause[3:0] = {2'b01, o_mem_cmd, 1'b0};
-      if (e_op)
-	o_csr_mcause = {!op[20],3'b011};
+   always @(posedge clk) begin
+      if (i_mtip)
+	o_csr_mcause[3:0] <= 4'd7;
+      else begin
+	 o_csr_mcause[3:0] <= 4'd0;
+	 if (i_mem_misalign)
+	   o_csr_mcause[3:0] <= {2'b01, o_mem_cmd, 1'b0};
+	 if (e_op)
+	   o_csr_mcause <= {!op[20],3'b011};
+      end
    end
 
    wire two_stage_op =
@@ -293,13 +306,15 @@ module serv_decode
    reg 	stage_one_done;
 
    always @(posedge clk) begin
+      cnt_done <= cnt == 30;
+
       case (state)
         IDLE : begin
            if (i_rf_ready) begin
 	      state <= RUN;
               if (two_stage_op & !stage_one_done)
 		state <= INIT;
-	      if (e_op)
+	      if (e_op | i_mtip)
 		state <= TRAP;
 	   end
         end

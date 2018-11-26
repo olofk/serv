@@ -3,6 +3,9 @@ module serv_csr
   (
    input wire 	    i_clk,
    input wire 	    i_en,
+   input wire [4:0] i_cnt,
+   input wire 	    i_mtip,
+   output wire 	    o_timer_irq_en,
    input wire [2:0] i_csr_sel,
    input wire [1:0] i_csr_source,
    input wire 	    i_trap,
@@ -14,17 +17,24 @@ module serv_csr
 
 `include "serv_params.vh"
    /*
+    300 mstatus RWSC
     304 mie SCWi
     305 mtvec RW
+    344 mip CWi
+
     340 mscratch
     341 mepc  RW
-    300 mstatus RWSC
     342 mcause R
     343 mtval
-    344 mip CWi
     */
 
-   reg [31:0] 	mtvec    = 32'h0;
+   reg 		    mstatus;
+   reg 		    mstatus_mie;
+   reg 		    mie;
+   reg 		    mie_mtie;
+   reg [31:0] 	    mtvec    = 32'h0;
+   reg 		    mip;
+
    reg [31:0] 	mscratch = 32'h0;
    reg [31:0] 	mepc     = 32'h0;
    reg [31:0] 	mcause   = 32'h0;
@@ -55,7 +65,19 @@ module serv_csr
 
    assign o_q = csr_out;
 
+   wire 	o_timer_irq_en = mstatus_mie & mie_mtie;
+
    always @(posedge i_clk) begin
+      if (i_en & (i_cnt == 3) & (i_csr_sel == CSR_SEL_MSTATUS))
+	mstatus_mie <= csr_in;
+
+      if (i_en & (i_cnt == 7) & (i_csr_sel == CSR_SEL_MIE))
+	mie_mtie <= csr_in;
+
+      mstatus <= (i_cnt == 2) ? mstatus_mie : 1'b0;
+      mie <= (i_cnt == 6) & mie_mtie;
+      mip <= (i_cnt == 6) & i_mtip;
+
       if (i_trap)
 	mcause[3:0] <= i_mcause;
 

@@ -156,6 +156,7 @@ serv_arbiter serv_arbiter
      (
       .clk      (wb_clk),
       .i_rst    (wb_rst),
+      .i_timer_irq  (timer_irq),
 
       .o_ibus_adr   (wb_cpu_ibus_adr),
       .o_ibus_cyc   (wb_cpu_ibus_cyc),
