@@ -75,7 +75,7 @@ Only supported so far is a single threaded Zephyr hello world example on the ice
 
 TinyFPGA BX
 
-Pin B3 is used for UART output with 57600 baud rate.
+Pin A6 is used for UART output with 115200 baud rate.
 
     cd $SERV/workspace
     fusesoc run --target=tinyfpga_bx serv

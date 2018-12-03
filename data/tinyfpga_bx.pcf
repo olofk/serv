@@ -1,2 +1,2 @@
-set_io q B3
-set_io wb_clk B2
+set_io q A6
+set_io i_clk B2

@@ -1,19 +1,21 @@
 `default_nettype none
 module serv_wrapper
 (
- input wire  wb_clk,
+ input wire  i_clk,
  output wire q);
 
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
+   parameter PLL = "NONE";
 
+   wire      wb_clk;
+   wire      wb_rst;
 
-   reg [4:0] rst_reg = 5'b11111;
-
-   always @(posedge wb_clk)
-     rst_reg <= {1'b0, rst_reg[4:1]};
-
-   wire      wb_rst = rst_reg[0];
+   serv_clock_gen #(.PLL (PLL))
+   clock_gen
+     (.i_clk (i_clk),
+      .o_clk (wb_clk),
+      .o_rst (wb_rst));
 
    wire 	timer_irq;
 

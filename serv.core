@@ -25,7 +25,7 @@ filesets:
       - sw/blinky.hex       : {copyto : blinky.hex}
       - sw/zephyr_hello.hex : {copyto : zephyr_hello.hex}
     file_type : user
-      
+
   serv_top_tb:
     files:
       - bench/serv_top_tb.v
@@ -34,13 +34,14 @@ filesets:
 
   wrapper:
     files:
+      - rtl/serv_clock_gen.v
       - rtl/riscv_timer.v
       - rtl/wb_gpio.v
       - bench/serv_arbiter.v
       - bench/serv_mux.v
       - bench/serv_wrapper.v
     file_type : verilogSource
-    depend : [wb_ram]
+    depend : [wb_ram, "fusesoc:utils:generators"]
 
   netlist:
     files: [synth.v : {file_type : verilogSource}]
@@ -65,10 +66,11 @@ targets:
   icebreaker:
     default_tool : icestorm
     filesets : [core, mem_files, wrapper, icebreaker]
-    parameters : [memfile, memsize]
+    generate: [icebreaker_pll]
+    parameters : [memfile, memsize, PLL=ICE40_PAD]
     tools:
       icestorm:
-        nextpnr_options: [--up5k, --freq, 12]
+        nextpnr_options: [--up5k, --freq, 16]
         pnr: next
     toplevel : serv_wrapper
 
@@ -80,10 +82,11 @@ targets:
   tinyfpga_bx:
     default_tool : icestorm
     filesets : [core, mem_files, wrapper, tinyfpga_bx]
-    parameters : [memfile, memsize]
+    generate: [tinyfpga_bx_pll]
+    parameters : [memfile, memsize, PLL=ICE40_CORE]
     tools:
       icestorm:
-        nextpnr_options : [--lp8k, --package, cm81, --freq, 16]
+        nextpnr_options : [--lp8k, --package, cm81, --freq, 32]
         pnr: next
     toplevel : serv_wrapper
 
@@ -116,6 +119,11 @@ targets:
     toplevel : serv_wrapper
 
 parameters:
+  PLL:
+    datatype : str
+    description : PLL type to use for main clock generation
+    paramtype : vlogparam
+
   RISCV_FORMAL:
     datatype  : bool
     paramtype : vlogdefine
@@ -147,3 +155,15 @@ parameters:
   vcd:
     datatype : bool
     paramtype : plusarg
+
+generate:
+  icebreaker_pll:
+    generator: icepll
+    parameters:
+      freq_out : 16
+
+  tinyfpga_bx_pll:
+    generator: icepll
+    parameters:
+      freq_in  : 16
+      freq_out : 32
