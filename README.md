@@ -1,6 +1,8 @@
 SERV
 ====
 
+SERV is an award-winning bit-serial RISC-V core
+
 Prerequisites
 -------------
 
