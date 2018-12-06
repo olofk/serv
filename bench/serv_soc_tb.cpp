@@ -55,7 +55,7 @@ int main(int argc, char **argv, char **env)
 
 	signal(SIGINT, INThandler);
 
-	top->wb_clk = 1;
+	top->i_clk = 1;
 	bool q = top->q;
 	while (!(done || Verilated::gotFinish())) {
 	  top->eval();
@@ -96,7 +96,7 @@ int main(int argc, char **argv, char **env)
 	      printf("%lu output q is %s\n", main_time, q ? "ON" : "OFF");
 	    }
 	    }*/
-	  top->wb_clk = !top->wb_clk;
+	  top->i_clk = !top->i_clk;
 	  main_time+=31.25;
 	}
 	if (tfp)

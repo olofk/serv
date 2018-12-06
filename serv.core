@@ -20,6 +20,11 @@ filesets:
       - rtl/serv_top.v
     file_type : verilogSource
 
+  ice40_pll:
+    files:
+      - rtl/ice40_pll.v : {file_type : verilogSource}
+    depend : ["fusesoc:utils:generators"]
+
   mem_files:
     files:
       - sw/blinky.hex       : {copyto : blinky.hex}
@@ -41,7 +46,7 @@ filesets:
       - bench/serv_mux.v
       - bench/serv_wrapper.v
     file_type : verilogSource
-    depend : [wb_ram, "fusesoc:utils:generators"]
+    depend : [wb_ram]
 
   netlist:
     files: [synth.v : {file_type : verilogSource}]
@@ -65,7 +70,7 @@ targets:
 
   icebreaker:
     default_tool : icestorm
-    filesets : [core, mem_files, wrapper, icebreaker]
+    filesets : [core, ice40_pll, mem_files, wrapper, icebreaker]
     generate: [icebreaker_pll]
     parameters : [memfile, memsize, PLL=ICE40_PAD]
     tools:
@@ -81,7 +86,7 @@ targets:
 
   tinyfpga_bx:
     default_tool : icestorm
-    filesets : [core, mem_files, wrapper, tinyfpga_bx]
+    filesets : [core, ice40_pll, mem_files, wrapper, tinyfpga_bx]
     generate: [tinyfpga_bx_pll]
     parameters : [memfile, memsize, PLL=ICE40_CORE]
     tools:

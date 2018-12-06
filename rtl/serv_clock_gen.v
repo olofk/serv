@@ -8,36 +8,11 @@ module serv_clock_gen
    parameter PLL = "NONE";
 
    generate
-      if (PLL == "ICE40_CORE") begin
-	 wire locked;
-	 SB_PLL40_CORE
-	   #(`include "pll.vh")
-	 pll
-	   (
-	    .LOCK(locked),
-	    .RESETB(1'b1),
-	    .BYPASS(1'b0),
-	    .REFERENCECLK(i_clk),
-	    .PLLOUTCORE(o_clk));
-	 reg [1:0] rst_reg;
-	 always @(posedge o_clk)
-	   rst_reg <= {!locked, rst_reg[1]};
-	 assign o_rst = rst_reg[0];
-      end else if (PLL == "ICE40_PAD") begin
-	 wire locked;
-	 SB_PLL40_PAD
-	   #(`include "pll.vh")
-	 pll
-	   (
-	    .LOCK(locked),
-	    .RESETB(1'b1),
-	    .BYPASS(1'b0),
-	    .PACKAGEPIN (i_clk),
-	    .PLLOUTCORE(o_clk));
-	 reg [1:0] rst_reg;
-	 always @(posedge o_clk)
-	   rst_reg <= {!locked, rst_reg[1]};
-	 assign o_rst = rst_reg[0];
+      if ((PLL == "ICE40_CORE") || (PLL == "ICE40_PAD")) begin
+	 ice40_pll #(.PLL (PLL)) pll
+	   (.i_clk (i_clk),
+	    .o_clk (o_clk),
+	    .o_rst (o_rst));
       end else begin
 	 assign o_clk = i_clk;
 
