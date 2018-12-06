@@ -283,9 +283,13 @@ module serv_top
 `ifdef RISCV_FORMAL
    reg [31:0]    rs1_fv, rs2_fv, rd_fv;
    reg [31:0]    pc = RESET_PC;
+   reg [31:0]    insn;
    reg           ctrl_pc_en_r = 1'b0;
 
    always @(posedge clk) begin
+      if (i_ibus_ack)
+	insn <= i_ibus_rdt;
+
       ctrl_pc_en_r <= ctrl_pc_en;
       if (rs_en) begin
          rs1_fv <= {rs1,rs1_fv[31:1]};
@@ -299,7 +303,7 @@ module serv_top
          pc <= o_ibus_adr;
          rvfi_valid <= 1'b1;
          rvfi_order <= rvfi_order + 1;
-         rvfi_insn  <= i_ibus_rdt;
+         rvfi_insn  <= insn;
          rvfi_trap <= 1'b0;
          rvfi_halt <= 1'b0;
          rvfi_intr <= 1'b0;
