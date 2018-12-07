@@ -1,9 +1,9 @@
 `default_nettype none
 module serv_clock_gen
   (
-   input  i_clk,
-   output o_clk,
-   output o_rst);
+   input wire  i_clk,
+   output wire o_clk,
+   output wire o_rst);
 
    parameter PLL = "NONE";
 
