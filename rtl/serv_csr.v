@@ -66,7 +66,7 @@ module serv_csr
 
    assign o_q = csr_out;
 
-   wire 	o_timer_irq_en = mstatus_mie & mie_mtie;
+   assign 	o_timer_irq_en = mstatus_mie & mie_mtie;
 
    always @(posedge i_clk) begin
       if (i_en & (i_cnt == 3) & (i_csr_sel == CSR_SEL_MSTATUS))
