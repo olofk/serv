@@ -2,6 +2,7 @@
 module serv_regfile
   (
    input wire 	    i_clk,
+   input wire 	    i_rst,
    input wire 	    i_go,
    output reg 	    o_ready,
    input wire 	    i_rd_en,
@@ -17,6 +18,10 @@ module serv_regfile
    always @(posedge i_clk) begin
      o_ready <= t;
      t <= i_go;
+      if (i_rst) begin
+	 o_ready <= 1'b0;
+	 t <= 1'b0;
+      end
    end
 
    reg rd_r;
@@ -43,6 +48,9 @@ module serv_regfile
 	 rs2 <= rdata[1];
       end
       rs1_r <= rs1_tmp;
+      if (i_rst) begin
+	 wcnt <= 5'd0;
+      end
    end
 
    wire rs1_tmp = (rs1_en ? rdata[0] : rs1);

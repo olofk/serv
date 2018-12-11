@@ -7,6 +7,7 @@ module serv_alu
    input wire 	    i_rs1,
    input wire 	    i_op_b,
    input wire 	    i_init,
+   input wire 	    i_cnt_done,
    input wire 	    i_sub,
    input wire 	    i_cmp_sel,
    input wire 	    i_cmp_neg,
@@ -25,11 +26,12 @@ module serv_alu
    wire        result_lt;
    wire        result_sh;
 
+   reg 	       result_lt_r;
+
    wire [4:0]  shamt;
 
    reg         en_r;
    wire        v;
-   reg         msb_lt = 1'b0;
    reg         init_r;
    wire        shamt_l;
    wire        shamt_ser;
@@ -49,6 +51,7 @@ module serv_alu
 
    shift_reg #(.LEN (5)) shamt_reg
      (.clk (clk),
+      .i_rst (i_rst),
       .i_en (i_shamt_en),
       .i_d  (shamt_ser),
       .o_q  (shamt[0]),
@@ -57,6 +60,7 @@ module serv_alu
    ser_shift shift
      (
       .i_clk (clk),
+      .i_rst (i_rst),
       .i_load (i_init),
       .i_shamt (shamt),
       .i_signed (i_sh_signed),
@@ -102,17 +106,17 @@ module serv_alu
       .i_a   (i_rs1),
       .i_b   (i_op_b),
       .i_clr (!i_init),
+      .i_sign (i_cnt_done & !i_cmp_uns),
       .o_q   (result_lt));
 
    reg last_eq;
 
-   wire       result_lt2 = last_eq ? result_lt : msb_lt;
    assign plus_1 = i_en & !en_r;
-   assign o_cmp = i_cmp_neg^((i_cmp_sel == ALU_CMP_EQ) ? result_eq : result_lt2);
+   assign o_cmp = i_cmp_neg^((i_cmp_sel == ALU_CMP_EQ) ? (result_eq & (i_rs1 == i_op_b)) : result_lt);
 
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
                  (i_rd_sel == ALU_RESULT_SR)  ? result_sh :
-                 (i_rd_sel == ALU_RESULT_LT)  ? (result_lt2 & init_r & ~i_init) :
+                 (i_rd_sel == ALU_RESULT_LT)  ? (result_lt_r & init_r & ~i_init) :
                  (i_rd_sel == ALU_RESULT_XOR) ? i_rs1^i_op_b :
                  (i_rd_sel == ALU_RESULT_OR)  ? i_rs1|i_op_b :
                  (i_rd_sel == ALU_RESULT_AND) ? i_rs1&i_op_b :
@@ -121,7 +125,7 @@ module serv_alu
    always @(posedge clk) begin
       if (i_init) begin
          last_eq <= i_rs1 == i_op_b;
-         msb_lt <= i_cmp_uns ? (~i_rs1 & i_op_b) : (i_rs1 & ~i_op_b);
+	 result_lt_r <= result_lt;
       end
 
       en_r <= i_en;

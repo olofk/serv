@@ -3,6 +3,7 @@ module shift_reg
     parameter INIT = 0)
   (
    input wire 		 clk,
+   input wire 		 i_rst,
    input wire 		 i_en,
    input wire 		 i_d,
    output wire 		 o_q,
@@ -12,6 +13,8 @@ module shift_reg
    assign o_q = data[0];
    assign o_par = data[LEN-1:1];
    always @(posedge clk)
-     if (i_en)
+     if (i_rst)
+       data <= INIT;
+     else if (i_en)
        data <= {i_d, data[LEN-1:1]};
 endmodule

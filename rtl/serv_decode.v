@@ -12,7 +12,7 @@ module serv_decode
    output wire 	     o_cnt_done,
    output wire 	     o_ctrl_en,
    output wire 	     o_ctrl_pc_en,
-   output wire 	     o_ctrl_jump,
+   output reg 	     o_ctrl_jump,
    output wire 	     o_ctrl_jalr,
    output wire 	     o_ctrl_auipc,
    output wire 	     o_ctrl_lui,
@@ -103,7 +103,7 @@ module serv_decode
    assign e_op = (opcode[4:2] == 3'b111) & !(|o_funct3);
 
    assign o_ctrl_pc_en  = running | o_ctrl_trap;
-   assign o_ctrl_jump = (opcode[4:2] == 3'b110) & (opcode[0] | i_alu_cmp);
+   wire take_branch = (opcode[4:2] == 3'b110) & (opcode[0] | i_alu_cmp);
 
    assign o_ctrl_jalr = opcode[4] & (opcode[2:0] == 3'b001);
 
@@ -306,6 +306,9 @@ module serv_decode
    reg 	pending_irq;
 
    always @(posedge clk) begin
+      if (state == INIT)
+	o_ctrl_jump <= take_branch;
+
       mtip_r <= i_mtip;
 
       if (i_mtip & !mtip_r & i_timer_irq_en)
@@ -327,7 +330,7 @@ module serv_decode
 	   stage_one_done <= 1'b1;
 
            if (cnt_done)
-             state <= (i_mem_misalign | (o_ctrl_jump & i_ctrl_misalign)) ? TRAP :
+             state <= (i_mem_misalign | (take_branch & i_ctrl_misalign)) ? TRAP :
 		      mem_op ? IDLE : RUN;
         end
         RUN : begin
@@ -348,6 +351,9 @@ module serv_decode
       if (i_rst) begin
 	 state <= IDLE;
 	 cnt   <= 5'd0;
+	 pending_irq <= 1'b0;
+	 stage_one_done <= 1'b0;
+	 o_ctrl_jump <= 1'b0;
       end
    end
 endmodule

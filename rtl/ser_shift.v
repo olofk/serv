@@ -2,6 +2,7 @@
 module ser_shift
   (
    input wire 	    i_clk,
+   input wire 	    i_rst,
    input wire 	    i_load,
    input wire [4:0] i_shamt,
    input wire 	    i_signed,
@@ -17,6 +18,7 @@ module ser_shift
 
    shift_reg #(.LEN (32)) sh_reg
      (.clk (i_clk),
+      .i_rst (i_rst),
       .i_en (i_load),
       .i_d  (i_d),
       .o_q  (shiftreg[0]),

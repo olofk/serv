@@ -215,6 +215,7 @@ module serv_top
       .i_rs1      (rs1),
       .i_op_b     (op_b),
       .i_init     (alu_init),
+      .i_cnt_done (cnt_done),
       .i_sub      (alu_sub),
       .i_cmp_sel  (alu_cmp_sel),
       .i_cmp_neg  (alu_cmp_neg),
@@ -229,6 +230,7 @@ module serv_top
    serv_regfile regfile
      (
       .i_clk      (clk),
+      .i_rst      (i_rst),
       .i_go       (i_ibus_ack | i_dbus_ack),
       .o_ready    (rf_ready),
       .i_rd_en    (rd_en),

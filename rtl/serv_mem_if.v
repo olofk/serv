@@ -19,7 +19,7 @@ module serv_mem_if
    output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
    output wire 	      o_wb_we ,
-   output reg 	      o_wb_cyc = 1'b0,
+   output reg 	      o_wb_cyc,
    input wire [31:0]  i_wb_rdt,
    input wire 	      i_wb_ack);
 
@@ -50,13 +50,16 @@ module serv_mem_if
       .q   (adr),
       .o_v ());
 
-   shift_reg #(32) shift_reg_adr
+   assign o_wb_adr[1:0] = 2'b00;
+
+   shift_reg #(30) shift_reg_adr
      (
       .clk   (i_clk),
+      .i_rst (i_rst),
       .i_en  (i_init | (i_en & i_trap)),
       .i_d   (adr),
-      .o_q   (o_wb_adr[0]),
-      .o_par (o_wb_adr[31:1])
+      .o_q   (o_wb_adr[2]),
+      .o_par (o_wb_adr[31:3])
       );
 
    wire 	 dat_cur = (dat_sel == 3) ? dat3[0] :
@@ -143,6 +146,11 @@ module serv_mem_if
         o_wb_cyc <= 1'b0;
       else if (init_r & !i_init & !i_trap) begin //Optimize?
          o_wb_cyc <= 1'b1;
+      end
+      if (i_rst) begin
+	 o_wb_cyc <= 1'b0;
+	 init_r <= 1'b0;
+	 init_2r <= 1'b0;
       end
    end
 endmodule

@@ -56,6 +56,7 @@ module serv_ctrl
    pc_reg
      (
       .clk (clk),
+      .i_rst (i_rst),
       .i_en (i_pc_en),
       .i_d  (new_pc),
       .o_q  (pc),
