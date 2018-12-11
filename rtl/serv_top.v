@@ -281,14 +281,25 @@ module serv_top
       .o_q          (csr_rd));
 
 `ifdef RISCV_FORMAL
-   reg [31:0]    rs1_fv, rs2_fv, rd_fv;
+   reg [31:0]    rs1_fv, rs2_fv;
    reg [31:0]    pc = RESET_PC;
-   reg [31:0]    insn;
    reg           ctrl_pc_en_r = 1'b0;
 
    always @(posedge clk) begin
+      if (i_dbus_ack) begin
+         rvfi_mem_addr <= o_dbus_adr;
+         rvfi_mem_rmask <= o_dbus_we ? 4'b0000 : o_dbus_sel;
+         rvfi_mem_wmask <= o_dbus_we ? o_dbus_sel : 4'b0000;
+         rvfi_mem_rdata <= i_dbus_rdt;
+         rvfi_mem_wdata <= o_dbus_dat;
+      end
+      if (i_ibus_ack) begin
+         rvfi_mem_rmask <= 4'b0000;
+         rvfi_mem_wmask <= 4'b0000;
+      end
+
       if (i_ibus_ack)
-	insn <= i_ibus_rdt;
+	rvfi_insn <= i_ibus_rdt;
 
       ctrl_pc_en_r <= ctrl_pc_en;
       if (rs_en) begin
@@ -296,15 +307,23 @@ module serv_top
          rs2_fv <= {rs2,rs2_fv[31:1]};
       end
       if (rd_en) begin
-         rd_fv <= {rd,rd_fv[31:1]};
+         rvfi_rd_wdata <= {rd & (|rd_addr),rvfi_rd_wdata[31:1]};
+         rvfi_rd_addr <= rd_addr;
+      end else if (i_ibus_ack) begin
+	 rvfi_rd_wdata <= 32'd0;
+	 rvfi_rd_addr  <= 5'd0;
       end
+
+      if (trap)
+	rvfi_trap <= 1'b1;
+      else if (i_ibus_ack)
+	rvfi_trap <= 1'b0;
+
       rvfi_valid <= 1'b0;
       if (ctrl_pc_en_r & !ctrl_pc_en) begin
          pc <= o_ibus_adr;
          rvfi_valid <= 1'b1;
          rvfi_order <= rvfi_order + 1;
-         rvfi_insn  <= insn;
-         rvfi_trap <= 1'b0;
          rvfi_halt <= 1'b0;
          rvfi_intr <= 1'b0;
          rvfi_mode <= 2'd3;
@@ -312,15 +331,8 @@ module serv_top
          rvfi_rs2_addr <= rs2_addr;
          rvfi_rs1_rdata <= rs1_fv;
          rvfi_rs2_rdata <= rs2_fv;
-         rvfi_rd_addr <= rd_addr;
-         rvfi_rd_wdata <= rd_fv;
          rvfi_pc_rdata <= pc;
          rvfi_pc_wdata <= o_ibus_adr;
-         rvfi_mem_addr <= o_dbus_adr;
-         rvfi_mem_rmask <= 4'bxxxx;
-         rvfi_mem_wmask <= o_dbus_sel;
-         rvfi_mem_rdata <= i_dbus_rdt;
-         rvfi_mem_wdata <= o_dbus_dat;
       end
    end
 `endif
