@@ -25,7 +25,7 @@ module ser_shift
       .o_par (shiftreg[31:1]));
 
    always @(posedge i_clk) begin
-      cnt <= cnt + 1;
+      cnt <= cnt + 5'd1;
       if (cnt == 31) begin
          signbit <= shiftreg[cnt];
          wrapped <= 1'b1;

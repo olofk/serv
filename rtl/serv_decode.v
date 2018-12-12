@@ -77,6 +77,17 @@ module serv_decode
    reg [1:0]    state;
 
    reg [4:0] cnt;
+   reg 	cnt_done;
+
+   reg [4:0] opcode;
+   reg [30:7] op;
+   reg 	      signbit;
+
+   reg [8:0]  imm19_12_20;
+   reg 	      imm7;
+   reg [5:0]  imm30_25;
+   reg [4:0]  imm24_20;
+   reg [4:0]  imm11_7;
 
    assign o_cnt = cnt;
 
@@ -206,15 +217,6 @@ module serv_decode
 
    wire jal_misalign  = op[21] & opcode[1] & opcode[4];
 
-   reg [4:0] opcode;
-   reg [30:7] op;
-   reg 	      signbit;
-
-   reg [8:0]  imm19_12_20;
-   reg 	      imm7;
-   reg [5:0]  imm30_25;
-   reg [4:0]  imm24_20;
-   reg [4:0]  imm11_7;
 
    always @(posedge clk) begin
       casez(o_funct3)
@@ -282,8 +284,6 @@ module serv_decode
    assign o_rd_mem_en =              !opcode[2] & !opcode[4];
 
    wire cnt_en = (state != IDLE);
-
-   reg 	cnt_done;
 
    assign running = (state == RUN);
 

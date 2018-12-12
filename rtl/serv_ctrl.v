@@ -23,6 +23,12 @@ module serv_ctrl
 
    parameter RESET_PC = 32'd8;
 
+   reg        en_r;
+   reg        en_2r;
+   reg 	      en_pc_r;
+   reg 	      en_pc_2r;
+   reg 	      en_pc_3r;
+
    wire       pc_plus_4;
    wire       pc_plus_offset;
 
@@ -80,12 +86,6 @@ module serv_ctrl
 
    wire       pc_plus_offset_aligned = pc_plus_offset & en_pc_r;
 
-
-   reg        en_r;
-   reg        en_2r;
-   reg 	      en_pc_r;
-   reg 	      en_pc_2r;
-   reg 	      en_pc_3r;
 
    always @(posedge clk) begin
       en_r <= i_en;

@@ -26,17 +26,21 @@ module serv_regfile
 
    reg rd_r;
 
+   reg [1:0]  rdata;
    reg [4:0] rcnt;
    reg [4:0] wcnt;
    reg 	     rs1;
    reg 	     rs2;
    reg 	     rs1_r;
 
+   wire rs1_en = rcnt[0];
+   wire rs1_tmp = (rs1_en ? rdata[0] : rs1);
+
    wire [1:0] wdata = {i_rd, rd_r};
    always @(posedge i_clk) begin
       rd_r <= i_rd;
       if (i_rs_en)
-	wcnt <= wcnt + 1;
+	wcnt <= wcnt + 5'd1;
 
       if (i_go)
 	rcnt <= 5'd0;
@@ -53,7 +57,6 @@ module serv_regfile
       end
    end
 
-   wire rs1_tmp = (rs1_en ? rdata[0] : rs1);
 
    assign o_rs1 = (|i_rs1_addr) & rs1_r;
    assign o_rs2 = (|i_rs2_addr) & (rs1_en ? rs2 : rdata[0]);
@@ -62,10 +65,8 @@ module serv_regfile
    wire wr_en = wcnt[0] & i_rd_en;
 
    wire [8:0] raddr = {!rs1_en ? i_rs1_addr : i_rs2_addr, rcnt[4:1]};
-   wire rs1_en = rcnt[0];
 
    reg [1:0]  memory [0:511];
-   reg [1:0]  rdata;
 
    always @(posedge i_clk) begin
       if (wr_en)
