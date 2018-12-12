@@ -9,6 +9,7 @@ module serv_alu
    input wire 	    i_init,
    input wire 	    i_cnt_done,
    input wire 	    i_sub,
+   input wire [1:0] i_bool_op,
    input wire 	    i_cmp_sel,
    input wire 	    i_cmp_neg,
    input wire 	    i_cmp_uns,
@@ -16,7 +17,7 @@ module serv_alu
    input wire 	    i_shamt_en,
    input wire 	    i_sh_right,
    input wire 	    i_sh_signed,
-   input wire [2:0] i_rd_sel,
+   input wire [1:0] i_rd_sel,
    output wire 	    o_rd);
 
 `include "serv_params.vh"
@@ -114,13 +115,14 @@ module serv_alu
    assign plus_1 = i_en & !en_r;
    assign o_cmp = i_cmp_neg^((i_cmp_sel == ALU_CMP_EQ) ? (result_eq & (i_rs1 == i_op_b)) : result_lt);
 
+   localparam [15:0] BOOL_LUT = 16'h8E96;//And, Or, =, xor
+   wire result_bool = BOOL_LUT[{i_bool_op, i_rs1, i_op_b}];
+
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
                  (i_rd_sel == ALU_RESULT_SR)  ? result_sh :
                  (i_rd_sel == ALU_RESULT_LT)  ? (result_lt_r & init_r & ~i_init) :
-                 (i_rd_sel == ALU_RESULT_XOR) ? i_rs1^i_op_b :
-                 (i_rd_sel == ALU_RESULT_OR)  ? i_rs1|i_op_b :
-                 (i_rd_sel == ALU_RESULT_AND) ? i_rs1&i_op_b :
-                 1'bx;
+                 (i_rd_sel == ALU_RESULT_BOOL) ? result_bool : 1'bx;
+
 
    always @(posedge clk) begin
       if (i_init) begin

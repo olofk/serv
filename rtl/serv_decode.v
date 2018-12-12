@@ -27,6 +27,7 @@ module serv_decode
    output wire 	     o_alu_en,
    output wire 	     o_alu_init,
    output wire 	     o_alu_sub,
+   output wire [1:0] o_alu_bool_op,
    output reg 	     o_alu_cmp_sel,
    output wire 	     o_alu_cmp_neg,
    output reg 	     o_alu_cmp_uns,
@@ -34,7 +35,7 @@ module serv_decode
    output wire 	     o_alu_shamt_en,
    output wire 	     o_alu_sh_signed,
    output wire 	     o_alu_sh_right,
-   output reg [2:0]  o_alu_rd_sel,
+   output reg [1:0]  o_alu_rd_sel,
    output wire 	     o_mem_en,
    output wire 	     o_mem_cmd,
    output wire 	     o_mem_init,
@@ -217,18 +218,17 @@ module serv_decode
 
    wire jal_misalign  = op[21] & opcode[1] & opcode[4];
 
+   assign o_alu_bool_op = o_funct3[1:0];
 
    always @(posedge clk) begin
       casez(o_funct3)
         3'b000  : o_alu_rd_sel <= ALU_RESULT_ADD;
         3'b001  : o_alu_rd_sel <= ALU_RESULT_SR;
         3'b01?  : o_alu_rd_sel <= ALU_RESULT_LT;
-        3'b100  : o_alu_rd_sel <= ALU_RESULT_XOR;
+        3'b100  : o_alu_rd_sel <= ALU_RESULT_BOOL;
         3'b101  : o_alu_rd_sel <= ALU_RESULT_SR;
-        3'b110  : o_alu_rd_sel <= ALU_RESULT_OR;
-        3'b111  : o_alu_rd_sel <= ALU_RESULT_AND;
-        //default : o_alu_rd_sel <= 3'bxx;
-      endcase
+        3'b11?  : o_alu_rd_sel <= ALU_RESULT_BOOL;
+      endcase // casez (o_funct3)
 
       if (i_wb_en) begin
          o_rf_rd_addr  <= i_wb_rdt[11:7];
