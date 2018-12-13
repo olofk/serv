@@ -14,6 +14,7 @@ module serv_mem_if
    output wire 	      o_rd,
    output wire 	      o_misalign,
    input wire 	      i_trap,
+   output wire 	      o_adr,
    //External interface
    output wire [31:0] o_wb_adr,
    output wire [31:0] o_wb_dat,
@@ -39,6 +40,7 @@ module serv_mem_if
    wire 	 dat2_en;
    wire 	 dat3_en;
 
+   assign o_adr = adr;
 
    ser_add ser_add_rs1_plus_imm
      (

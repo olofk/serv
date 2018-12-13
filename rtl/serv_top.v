@@ -106,6 +106,7 @@ module serv_top
    wire 	 mem_misalign;
 
    wire 	 bad_pc;
+   wire 	 bad_adr;
 
    wire 	 csr_en;
    wire [2:0] 	 csr_sel;
@@ -257,6 +258,7 @@ module serv_top
       .o_rd     (mem_rd),
       .o_misalign (mem_misalign),
       .i_trap   (trap),
+      .o_adr    (bad_adr),
       //External interface
       .o_wb_adr   (o_dbus_adr),
       .o_wb_dat   (o_dbus_dat),
@@ -277,7 +279,7 @@ module serv_top
       .i_csr_source (csr_source),
       .i_trap       (trap),
       .i_pc         (o_ibus_adr[0]),
-      .i_mtval      (mem_misalign ? o_dbus_adr[0] : bad_pc),
+      .i_mtval      (mem_misalign ? bad_adr : bad_pc),
       .i_mcause     (mcause),
       .i_d          (csr_d_sel ? csr_imm : rs1),
       .o_q          (csr_rd));

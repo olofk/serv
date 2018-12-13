@@ -308,6 +308,8 @@ module serv_decode
    always @(posedge clk) begin
       if (state == INIT)
 	o_ctrl_jump <= take_branch;
+      if (state == IDLE)
+	o_ctrl_jump <= 1'b0;
 
       mtip_r <= i_mtip;
 
