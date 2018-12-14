@@ -273,10 +273,9 @@ module serv_decode
 
    assign o_imm = (!(gate1 | gate12) & (cnt_done ? signbit : m1 ? imm11_7[0] : imm24_20[0]));
 
-   assign o_op_b_source = (opcode == OP_OPIMM)  ? OP_B_SOURCE_IMM :
-                          (opcode == OP_BRANCH) ? OP_B_SOURCE_RS2 :
-                          (opcode == OP_OP)     ? OP_B_SOURCE_RS2 :
-                          1'bx;
+   //0 (OP_B_SOURCE_IMM) when OPIMM
+   //1 (OP_B_SOURCE_RS2) when BRANCH or OP
+   assign o_op_b_source = opcode[3];
 
    assign o_rd_ctrl_en =  opcode[0];
    assign o_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
