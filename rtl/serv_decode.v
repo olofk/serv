@@ -81,14 +81,11 @@ module serv_decode
    reg 	cnt_done;
 
    reg [4:0] opcode;
-   reg [30:7] op;
-   reg 	      signbit;
-
-   reg [8:0]  imm19_12_20;
-   reg 	      imm7;
-   reg [5:0]  imm30_25;
-   reg [4:0]  imm24_20;
-   reg [4:0]  imm11_7;
+   reg [31:0] imm;
+   reg 	      op20;
+   reg 	      op21;
+   reg 	      op22;
+   reg 	      op26;
 
    assign o_cnt = cnt;
 
@@ -121,7 +118,7 @@ module serv_decode
 
    assign o_ctrl_auipc = !opcode[3] & opcode[2] & opcode[0];
 
-   assign o_ctrl_mret = (opcode[4] & opcode[2]) & op[21] & !(|o_funct3);
+   assign o_ctrl_mret = (opcode[4] & opcode[2]) & op21 & !(|o_funct3);
 
    assign o_rf_rd_en = running & (opcode[2] |
 				  (!opcode[2] & opcode[4] & opcode[0]) |
@@ -152,9 +149,9 @@ module serv_decode
    assign o_csr_en = ((((opcode[4] & opcode[2]) & (|o_funct3)) |
 		     o_ctrl_mret) & running) | o_ctrl_trap;
 
-   wire [3:0] csr_sel = {op[26],op[22:20]};
+   wire [3:0] csr_sel = {op26,op22, op21, op20};
 
-   always @(o_funct3, op, csr_sel, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
+   always @(o_funct3, csr_sel, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
       casez (o_funct3)
         3'b00?  : o_alu_cmp_sel = ALU_CMP_EQ;
         3'b01?  : o_alu_cmp_sel = ALU_CMP_LT;
@@ -216,7 +213,7 @@ module serv_decode
    assign o_mem_init = mem_op & (state == INIT);
    assign o_mem_bytecnt = cnt[4:3];
 
-   wire jal_misalign  = op[21] & opcode[1] & opcode[4];
+   wire jal_misalign  = op21 & opcode[1] & opcode[4];
 
    assign o_alu_bool_op = o_funct3[1:0];
 
@@ -237,41 +234,43 @@ module serv_decode
          o_funct3      <= i_wb_rdt[14:12];
          imm30         <= i_wb_rdt[30];
          opcode        <= i_wb_rdt[6:2];
-         op           <= i_wb_rdt[30:7];
-	 signbit       <= i_wb_rdt[31];
-      end
-      if (cnt_done | i_rf_ready) begin
-	 imm19_12_20 <= {op[19:12],op[20]};
-	 imm7 <= op[7];
-	 imm30_25 <= op[30:25];
-	 imm24_20 <= op[24:20];
-	 imm11_7  <= op[11:7];
+	 op20 <= i_wb_rdt[20];
+	 op21 <= i_wb_rdt[21];
+	 op22 <= i_wb_rdt[22];
+	 op26 <= i_wb_rdt[26];
 
-      end else begin
-	 imm19_12_20 <= {m3 ? signbit : imm24_20[0], imm19_12_20[8:1]};
-	 imm7        <= signbit;
-	 imm30_25    <= {m2[1] ? imm7 : m2[0] ? signbit : imm19_12_20[0], imm30_25[5:1]};
-	 imm24_20    <= {imm30_25[0], imm24_20[4:1]};
-	 imm11_7     <= {imm30_25[0], imm11_7[4:1]};
+	 imm[31] <= sign_bit;
+	 imm[30:20] <= utype ? i_wb_rdt[30:20] : {11{sign_bit}};
+	 imm[19:12] <= (utype | jtype) ? i_wb_rdt[19:12] : {8{sign_bit}};
+	 imm[11]    <= btype ? i_wb_rdt[7] :
+		       utype ? 1'b0 :
+		       jtype ? i_wb_rdt[20] :
+		       sign_bit;
+	 imm[10:5]  <= utype ? 6'd0 : i_wb_rdt[30:25];
+	 imm[4:1]   <= (sorbtype) ? i_wb_rdt[11:8] :
+		       (iorjtype) ? i_wb_rdt[24:21] :
+		       4'd0;
+	 imm[0]     <= itype ? i_wb_rdt[20] :
+		       stype ? i_wb_rdt[7] :
+		       1'b0;
       end
+      if (cnt_en)
+	imm <= {imm[0], imm[31:1]};
    end
 
-   wire utype = !opcode[4] & (opcode[2:0] == 3'b101);
-   wire sorbtype = opcode[3:0] == 4'b1000;
-   wire iorstype = (opcode == OP_OPIMM) | (opcode == OP_JALR) | (opcode == OP_LOAD) | (opcode == OP_STORE);
+   wire [4:0] op_code = i_wb_rdt[6:2];
 
-   wire m1 = sorbtype;
+   wire btype = op_code[4] & !op_code[2] & !op_code[0];
+   wire itype = (!op_code[3] & !op_code[0]) | (!op_code[2]&!op_code[1]&op_code[0]) | (!op_code[0]&op_code[2]);
+   wire jtype = op_code[1];
+   wire stype = op_code[3] & ~op_code[2] & ~op_code[4];
+   wire utype = !op_code[4] & op_code[0];
 
-   wire [1:0] m2;
-   assign m2[1] = (opcode == OP_BRANCH);
-   assign m2[0] = iorstype;
+   wire iorjtype = (op_code[0] & ~op_code[2]) | (op_code[2] & ~op_code[0]) | (~op_code[0] & ~op_code[3]);
+   wire sorbtype = op_code[3:0] == 4'b1000;
+   wire sign_bit = i_wb_rdt[31];
 
-   wire m3 = opcode[4];
-
-   wire gate1  = (cnt == 0) & ((opcode == OP_BRANCH) | (opcode[1] & opcode[4]));
-   wire gate12 = (cnt < 12) & utype;
-
-   assign o_imm = (!(gate1 | gate12) & (cnt_done ? signbit : m1 ? imm11_7[0] : imm24_20[0]));
+   assign o_imm = imm[0];
 
    //0 (OP_B_SOURCE_IMM) when OPIMM
    //1 (OP_B_SOURCE_RS2) when BRANCH or OP
@@ -293,9 +292,10 @@ module serv_decode
       if (i_mem_misalign)
 	o_csr_mcause[3:0] <= {2'b01, o_mem_cmd, 1'b0};
       if (e_op)
-	o_csr_mcause <= {!op[20],3'b011};
+	o_csr_mcause <= {!op20,3'b011};
    end
 
+   //slt*, branch/jump, shift, load/store
    wire two_stage_op =
         slt_op | (opcode[4:2] == 3'b110) | (opcode[2:1] == 2'b00) |
         shift_op;
