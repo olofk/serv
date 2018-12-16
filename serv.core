@@ -61,12 +61,11 @@ filesets:
 
   verilator_tb:
     files:
-      - bench/serv_soc_tb.cpp : {file_type : verilogSource}
+      - bench/serv_soc_tb.cpp : {file_type : cppSource}
 
 targets:
   default:
     filesets : [core]
-    toplevel : serv_top_tb
 
   icebreaker:
     default_tool : icestorm
