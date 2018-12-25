@@ -58,11 +58,11 @@ module serv_regfile
    end
 
 
-   assign o_rs1 = (|i_rs1_addr) & rs1_r;
-   assign o_rs2 = (|i_rs2_addr) & (rs1_en ? rs2 : rdata[0]);
+   assign o_rs1 = rs1_r;
+   assign o_rs2 = (rs1_en ? rs2 : rdata[0]);
 
    wire [8:0] waddr = {i_rd_addr, wcnt[4:1]};
-   wire wr_en = wcnt[0] & i_rd_en;
+   wire wr_en = wcnt[0] & i_rd_en & (|i_rd_addr);
 
    wire [8:0] raddr = {!rs1_en ? i_rs1_addr : i_rs2_addr, rcnt[4:1]};
 
@@ -73,4 +73,12 @@ module serv_regfile
 	memory[waddr] <= wdata;
       rdata <= memory[raddr];
    end
+
+`ifdef RISCV_FORMAL
+   integer i;
+   initial
+     for (i=0;i<512;i=i+1)
+       memory[i] = 2'd0;
+`endif
+
 endmodule
