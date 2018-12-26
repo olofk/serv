@@ -34,21 +34,11 @@ module serv_alu
    reg         en_r;
    wire        v;
    reg         init_r;
-   wire        shamt_l;
    wire        shamt_ser;
    wire        plus_1;
+   wire        b_inv_plus_1;
 
-   ser_add ser_add_inv_shamt_plus1
-     (
-      .clk (clk),
-      .rst (i_rst),
-      .a   (~i_op_b),
-      .b   (plus_1),
-      .clr (!i_en),
-      .q   (shamt_l),
-      .o_v ());
-
-   assign shamt_ser = i_sh_right ? i_op_b : shamt_l;
+   assign shamt_ser = i_sh_right ? i_op_b : b_inv_plus_1;
 
    shift_reg #(.LEN (5)) shamt_reg
      (.clk (clk),
@@ -69,7 +59,6 @@ module serv_alu
       .i_d (i_rs1),
       .o_q (result_sh));
 
-   wire       b_inv_plus_1;
 
    ser_add ser_add_inv_plus_1
      (
