@@ -41,8 +41,14 @@ module serv_decode
    output wire 	     o_mem_init,
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
-   output wire 	     o_csr_en,
-   output reg [2:0]  o_csr_sel,
+   output wire 	     o_csr_mstatus_en,
+   output wire 	     o_csr_mie_en,
+   output wire 	     o_csr_mtvec_en,
+   output wire 	     o_csr_mip_en,
+   output wire 	     o_csr_mscratch_en,
+   output wire 	     o_csr_mepc_en,
+   output wire 	     o_csr_mcause_en,
+   output wire 	     o_csr_mtval_en,
    output reg [1:0]  o_csr_source,
    output reg [3:0]  o_csr_mcause,
    output wire 	     o_csr_imm,
@@ -52,7 +58,6 @@ module serv_decode
    output wire 	     o_op_b_source,
    output wire 	     o_rd_ctrl_en,
    output wire 	     o_rd_alu_en,
-   output wire 	     o_rd_csr_en,
    output wire 	     o_rd_mem_en);
 
 `include "serv_params.vh"
@@ -109,7 +114,7 @@ module serv_decode
 
    assign branch_op = (opcode[4:2] == 3'b110) & !opcode[0];
 
-   assign e_op = (opcode[4:2] == 3'b111) & !(|o_funct3);
+   assign e_op = (opcode[4:2] == 3'b111) & !op21 & !(|o_funct3);
 
    assign o_ctrl_pc_en  = running | o_ctrl_trap;
    wire take_branch = (opcode[4:2] == 3'b110) & (opcode[0] | i_alu_cmp);
@@ -145,13 +150,29 @@ module serv_decode
 
 
    assign o_alu_cmp_neg = branch_op & o_funct3[0];
+   /*
+    300 0_000 mstatus RWSC
+    304 0_100 mie SCWi
+    305 0_101 mtvec RW
+    340 1_000 mscratch
+    341 1_001 mepc  RW
+    342 1_010 mcause R
+    343 1_011 mtval
+    344 1_100 mip CWi
+    */
+   assign o_csr_mstatus_en = csr_en & !op26 & !op22;
+   assign o_csr_mie_en     = csr_en & !op26 &  op22 & !op20;
+   assign o_csr_mtvec_en = ((!op26 & op20 & opcode[4] & opcode[2]) & state[1]) | (state == TRAP);
+   assign o_csr_mscratch_en = csr_en & op26 & !op22 & !op21 & !op20;
+   assign o_csr_mepc_en     = csr_en & op26         & !op21 &  op20 | (o_ctrl_mret & state[1]);
+   assign o_csr_mcause_en   = csr_en                &  op21 & !op20;
+   assign o_csr_mtval_en    = csr_en                &  op21 &  op20;
+   assign o_csr_mip_en      = csr_en & op26 & op22;
 
-   assign o_csr_en = ((((opcode[4] & opcode[2]) & (|o_funct3)) |
-		     o_ctrl_mret) & running) | o_ctrl_trap;
+   wire csr_en = opcode[4] & opcode[2] & (|o_funct3) & running;
 
-   wire [3:0] csr_sel = {op26,op22, op21, op20};
 
-   always @(o_funct3, csr_sel, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
+   always @(o_funct3, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
       casez (o_funct3)
         3'b00?  : o_alu_cmp_sel = ALU_CMP_EQ;
         3'b01?  : o_alu_cmp_sel = ALU_CMP_LT;
@@ -177,27 +198,6 @@ module serv_decode
       if (((o_rf_rs1_addr == 5'd0) & o_funct3[1]) | o_ctrl_trap | o_ctrl_mret)
 	o_csr_source = CSR_SOURCE_CSR;
 
-      casez(csr_sel)
-	4'b0_000 : o_csr_sel = CSR_SEL_MSTATUS;
-	4'b0_100 : o_csr_sel = CSR_SEL_MIE;
-	4'b0_101 : o_csr_sel = CSR_SEL_MTVEC;
-	4'b1_000 : o_csr_sel = CSR_SEL_MSCRATCH;
-	4'b1_001 : o_csr_sel = CSR_SEL_MEPC;
-	4'b1_010 : o_csr_sel = CSR_SEL_MCAUSE;
-	4'b1_011 : o_csr_sel = CSR_SEL_MTVAL;
-	4'b1_100 : o_csr_sel = CSR_SEL_MIP;
-	default : begin
-	   o_csr_sel = 3'bxxx;
-	   /*if (o_csr_en) begin
-	      $display("%0t: CSR %03h not implemented", $time, op[31:20]);
-	      //#100 $finish;
-	   end*/
-	end
-      endcase
-      if (o_ctrl_trap)
-	o_csr_sel = CSR_SEL_MTVEC;
-      if (o_ctrl_mret)
-	o_csr_sel = CSR_SEL_MEPC;
    end
 
    assign o_csr_imm = (cnt < 5) ? o_rf_rs1_addr[cnt[2:0]] : 1'b0;
@@ -278,7 +278,6 @@ module serv_decode
 
    assign o_rd_ctrl_en =  opcode[0];
    assign o_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
-   assign o_rd_csr_en =               opcode[2] &  opcode[4];
    assign o_rd_mem_en =              !opcode[2] & !opcode[4];
 
    wire cnt_en = (state != IDLE);

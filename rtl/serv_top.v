@@ -53,7 +53,6 @@ module serv_top
 
    wire 	 rd_ctrl_en;
    wire 	 rd_alu_en;
-   wire 	 rd_csr_en;
    wire 	 rd_mem_en;
    wire          ctrl_rd;
    wire          alu_rd;
@@ -109,8 +108,14 @@ module serv_top
    wire 	 bad_pc;
    wire 	 bad_adr;
 
-   wire 	 csr_en;
-   wire [2:0] 	 csr_sel;
+   wire 	 csr_mstatus_en;
+   wire 	 csr_mie_en;
+   wire 	 csr_mtvec_en;
+   wire 	 csr_mip_en;
+   wire 	 csr_mscratch_en;
+   wire 	 csr_mepc_en;
+   wire 	 csr_mcause_en;
+   wire 	 csr_mtval_en;
    wire [1:0]	 csr_source;
    wire 	 csr_imm;
    wire 	 csr_d_sel;
@@ -166,8 +171,14 @@ module serv_top
       .o_mem_init     (mem_init),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
-      .o_csr_en       (csr_en),
-      .o_csr_sel      (csr_sel),
+      .o_csr_mstatus_en  (csr_mstatus_en),
+      .o_csr_mie_en      (csr_mie_en),
+      .o_csr_mtvec_en    (csr_mtvec_en),
+      .o_csr_mip_en      (csr_mip_en),
+      .o_csr_mscratch_en (csr_mscratch_en),
+      .o_csr_mepc_en     (csr_mepc_en),
+      .o_csr_mcause_en   (csr_mcause_en),
+      .o_csr_mtval_en    (csr_mtval_en),
       .o_csr_source   (csr_source),
       .o_csr_mcause   (mcause),
       .o_csr_imm      (csr_imm),
@@ -176,7 +187,6 @@ module serv_top
       .o_op_b_source  (op_b_source),
       .o_rd_ctrl_en   (rd_ctrl_en),
       .o_rd_alu_en    (rd_alu_en),
-      .o_rd_csr_en    (rd_csr_en),
       .o_rd_mem_en    (rd_mem_en));
 
    serv_ctrl
@@ -205,7 +215,7 @@ module serv_top
 
    assign rd = (rd_ctrl_en & ctrl_rd) |
 	       (rd_alu_en  & alu_rd ) |
-	       (rd_csr_en  & csr_rd ) |
+	       (csr_rd ) |
 	       (rd_mem_en  & mem_rd);
 
    assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm : rs2;
@@ -274,11 +284,17 @@ module serv_top
    serv_csr csr
      (
       .i_clk        (clk),
-      .i_en         (csr_en),
       .i_cnt        (cnt),
       .i_mtip       (i_timer_irq),
       .o_timer_irq_en ( timer_irq_en),
-      .i_csr_sel    (csr_sel),
+      .i_mstatus_en (csr_mstatus_en),
+      .i_mie_en     (csr_mie_en    ),
+      .i_mtvec_en   (csr_mtvec_en  ),
+      .i_mip_en     (csr_mip_en    ),
+      .i_mscratch_en (csr_mscratch_en),
+      .i_mepc_en    (csr_mepc_en   ),
+      .i_mcause_en  (csr_mcause_en ),
+      .i_mtval_en   (csr_mtval_en  ),
       .i_csr_source (csr_source),
       .i_trap       (trap),
       .i_pc         (o_ibus_adr[0]),

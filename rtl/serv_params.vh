@@ -26,27 +26,6 @@ localparam [0:0]
  AND
 */
 
-   /*
-    300 mstatus RWSC
-    304 mie SCWi
-    305 mtvec RW
-    344 mip CWi
-
-    340 mscratch
-    341 mepc  RW
-    342 mcause R
-    343 mtval
-    */
-localparam [2:0]
-  CSR_SEL_MSTATUS  = 3'd0,
-  CSR_SEL_MIE      = 3'd1,
-  CSR_SEL_MTVEC    = 3'd2,
-  CSR_SEL_MIP      = 3'd3,
-  CSR_SEL_MSCRATCH = 3'd4,
-  CSR_SEL_MEPC     = 3'd5,
-  CSR_SEL_MCAUSE   = 3'd6,
-  CSR_SEL_MTVAL    = 3'd7;
-
 localparam [1:0]
   CSR_SOURCE_CSR = 2'b00,
   CSR_SOURCE_EXT = 2'b01,
