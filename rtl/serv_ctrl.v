@@ -10,7 +10,8 @@ module serv_ctrl
    input wire 	      i_offset,
    input wire 	      i_rs1,
    input wire 	      i_jalr,
-   input wire 	      i_auipc,
+   input wire 	      i_jal_or_jalr,
+   input wire 	      i_utype,
    input wire 	      i_lui,
    input wire 	      i_trap,
    input wire 	      i_csr_pc,
@@ -70,9 +71,9 @@ module serv_ctrl
       );
 
    assign new_pc = i_trap ? (i_csr_pc & en_pc_r) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
-   assign o_rd  = i_lui ? i_offset : i_auipc ? pc_plus_offset_aligned : pc_plus_4;
+   assign o_rd  = (i_utype & pc_plus_offset_aligned) | (pc_plus_4 & i_jal_or_jalr);
 
-   assign offset_a = i_jalr ? i_rs1 : pc;
+   assign offset_a = !i_lui & (i_jalr ? i_rs1 : pc);
 
    ser_add ser_add_pc_plus_offset
      (

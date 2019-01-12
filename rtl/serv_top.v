@@ -51,7 +51,6 @@ module serv_top
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
 
-   wire 	 rd_ctrl_en;
    wire 	 rd_alu_en;
    wire 	 rd_mem_en;
    wire          ctrl_rd;
@@ -65,7 +64,8 @@ module serv_top
    wire 	 ctrl_misalign;
    wire          jump;
    wire          jalr;
-   wire          auipc;
+   wire          jal_or_jalr;
+   wire          utype;
    wire 	 mret;
    wire          imm;
    wire 	 trap;
@@ -143,7 +143,8 @@ module serv_top
       .o_ctrl_pc_en   (ctrl_pc_en),
       .o_ctrl_jump    (jump),
       .o_ctrl_jalr    (jalr),
-      .o_ctrl_auipc   (auipc),
+      .o_ctrl_jal_or_jalr    (jal_or_jalr),
+      .o_ctrl_utype   (utype),
       .o_ctrl_lui     (lui),
       .o_ctrl_trap    (trap),
       .o_ctrl_mret    (mret),
@@ -185,7 +186,6 @@ module serv_top
       .o_csr_d_sel    (csr_d_sel),
       .o_imm          (imm),
       .o_op_b_source  (op_b_source),
-      .o_rd_ctrl_en   (rd_ctrl_en),
       .o_rd_alu_en    (rd_alu_en),
       .o_rd_mem_en    (rd_mem_en));
 
@@ -202,7 +202,8 @@ module serv_top
       .i_offset   (imm),
       .i_rs1      (rs1),
       .i_jalr     (jalr),
-      .i_auipc    (auipc),
+      .i_jal_or_jalr     (jal_or_jalr),
+      .i_utype    (utype),
       .i_lui      (lui),
       .i_trap     (trap | mret),
       .i_csr_pc   (csr_rd),
@@ -213,7 +214,7 @@ module serv_top
       .o_ibus_cyc (o_ibus_cyc),
       .i_ibus_ack (i_ibus_ack));
 
-   assign rd = (rd_ctrl_en & ctrl_rd) |
+   assign rd = (ctrl_rd ) |
 	       (rd_alu_en  & alu_rd ) |
 	       (csr_rd ) |
 	       (rd_mem_en  & mem_rd);

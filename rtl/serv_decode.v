@@ -14,7 +14,8 @@ module serv_decode
    output wire 	     o_ctrl_pc_en,
    output reg 	     o_ctrl_jump,
    output wire 	     o_ctrl_jalr,
-   output wire 	     o_ctrl_auipc,
+   output wire 	     o_ctrl_jal_or_jalr,
+   output wire 	     o_ctrl_utype,
    output wire 	     o_ctrl_lui,
    output wire 	     o_ctrl_trap,
    output wire 	     o_ctrl_mret,
@@ -56,7 +57,6 @@ module serv_decode
    output reg [2:0]  o_funct3,
    output wire 	     o_imm,
    output wire 	     o_op_b_source,
-   output wire 	     o_rd_ctrl_en,
    output wire 	     o_rd_alu_en,
    output wire 	     o_rd_mem_en);
 
@@ -119,10 +119,10 @@ module serv_decode
    assign o_ctrl_pc_en  = running | o_ctrl_trap;
    wire take_branch = (opcode[4:2] == 3'b110) & (opcode[0] | i_alu_cmp);
 
-   assign o_ctrl_jalr = opcode[4] & (opcode[2:0] == 3'b001);
+   assign o_ctrl_jalr = opcode[4] & (opcode[1:0] == 2'b01);
 
-   assign o_ctrl_auipc = !opcode[3] & opcode[2] & opcode[0];
-
+   assign o_ctrl_utype = !opcode[4] & opcode[2] & opcode[0];
+   assign o_ctrl_jal_or_jalr = opcode[4] & opcode[0];
    assign o_ctrl_mret = (opcode[4] & opcode[2]) & op21 & !(|o_funct3);
 
    assign o_rf_rd_en = running & (opcode[2] |
@@ -276,7 +276,6 @@ module serv_decode
    //1 (OP_B_SOURCE_RS2) when BRANCH or OP
    assign o_op_b_source = opcode[3];
 
-   assign o_rd_ctrl_en =  opcode[0];
    assign o_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
    assign o_rd_mem_en =              !opcode[2] & !opcode[4];
 
