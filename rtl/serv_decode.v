@@ -67,18 +67,6 @@ module serv_decode
      RUN      = 2'd2,
      TRAP     = 2'd3;
 
-   localparam [4:0]
-     OP_LOAD   = 5'b00000,
-     OP_STORE  = 5'b01000,
-     OP_OPIMM  = 5'b00100,
-     OP_AUIPC  = 5'b00101,
-     OP_OP     = 5'b01100,
-     OP_LUI    = 5'b01101,
-     OP_BRANCH = 5'b11000,
-     OP_JALR   = 5'b11001,
-     OP_JAL    = 5'b11011,
-     OP_SYSTEM = 5'b11100;
-
    reg [1:0]    state;
 
    reg [4:0] cnt;
@@ -140,12 +128,7 @@ module serv_decode
    assign o_alu_sub = alu_sub_r;
 
    always @(posedge clk)
-     alu_sub_r <= (opcode == OP_OP) ? imm30 /*    ? 1'b1*/ :
-                  (branch_op & (o_funct3 == 3'b100)) ? 1'b1 :
-                  (branch_op & (o_funct3 == 3'b101)) ? 1'b1 :
-                  (branch_op & (o_funct3 == 3'b110)) ? 1'b1 :
-                  1'b0;
-
+     alu_sub_r <= opcode[3] & imm30;
 
    assign o_alu_cmp_neg = branch_op & o_funct3[0];
    /*
