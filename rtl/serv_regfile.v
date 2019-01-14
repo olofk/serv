@@ -10,7 +10,6 @@ module serv_regfile
    input wire 	    i_rd,
    input wire [4:0] i_rs1_addr,
    input wire [4:0] i_rs2_addr,
-   input wire 	    i_rs_en,
    output wire 	    o_rs1,
    output wire 	    o_rs2);
 
@@ -39,7 +38,7 @@ module serv_regfile
    wire [1:0] wdata = {i_rd, rd_r};
    always @(posedge i_clk) begin
       rd_r <= i_rd;
-      if (i_rs_en)
+      if (i_rd_en)
 	wcnt <= wcnt + 5'd1;
 
       if (i_go)

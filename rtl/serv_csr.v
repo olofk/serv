@@ -36,10 +36,8 @@ module serv_csr
 
    reg 		    mstatus;
    reg 		    mstatus_mie;
-   reg 		    mie;
    reg 		    mie_mtie;
    reg [31:0] 	    mtvec    = 32'h0;
-   reg 		    mip;
 
    reg [31:0] 	mscratch;
    reg [31:0] 	mepc;
@@ -75,8 +73,6 @@ module serv_csr
 	mie_mtie <= csr_in;
 
       mstatus <= (i_cnt == 2) ? mstatus_mie : 1'b0;
-      mie <= (i_cnt == 6) & mie_mtie;
-      mip <= (i_cnt == 6) & i_mtip & o_timer_irq_en;
 
       if (i_trap) begin
 	 mcause[31]  <= i_mtip & o_timer_irq_en;

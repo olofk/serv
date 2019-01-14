@@ -91,7 +91,6 @@ module serv_top
    wire 	 rf_ready;
    wire          rs1;
    wire          rs2;
-   wire          rs_en;
    wire          rd_en;
 
    wire          op_b_source;
@@ -164,7 +163,6 @@ module serv_top
       .o_alu_rd_sel   (alu_rd_sel),
       .o_rf_rd_en     (rd_en),
       .o_rf_rd_addr   (rd_addr),
-      .o_rf_rs_en     (rs_en),
       .o_rf_rs1_addr  (rs1_addr),
       .o_rf_rs2_addr  (rs2_addr),
       .o_mem_en       (mem_en),
@@ -253,7 +251,6 @@ module serv_top
       .i_rd       (rd),
       .i_rs1_addr (rs1_addr),
       .i_rs2_addr (rs2_addr),
-      .i_rs_en    (rs_en),
       .o_rs1      (rs1),
       .o_rs2      (rs2));
 
@@ -326,7 +323,7 @@ module serv_top
 	rvfi_insn <= i_ibus_rdt;
 
       ctrl_pc_en_r <= ctrl_pc_en;
-      if (rs_en) begin
+      if (alu_en) begin
          rs1_fv <= {rs1,rs1_fv[31:1]};
          rs2_fv <= {rs2,rs2_fv[31:1]};
       end

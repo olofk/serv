@@ -22,7 +22,6 @@ module serv_decode
    input wire 	     i_ctrl_misalign,
    output wire 	     o_rf_rd_en,
    output reg [4:0]  o_rf_rd_addr,
-   output wire 	     o_rf_rs_en,
    output reg [4:0]  o_rf_rs1_addr,
    output reg [4:0]  o_rf_rs2_addr,
    output wire 	     o_alu_en,
@@ -129,7 +128,6 @@ module serv_decode
 				  (!opcode[2] & opcode[4] & opcode[0]) |
 				  (!opcode[2] & !opcode[3] & !opcode[0]));
 
-   assign o_rf_rs_en = cnt_en;
    assign o_alu_en   = cnt_en;
    assign o_ctrl_en  = cnt_en;
 
@@ -212,8 +210,6 @@ module serv_decode
 
    assign o_mem_init = mem_op & (state == INIT);
    assign o_mem_bytecnt = cnt[4:3];
-
-   wire jal_misalign  = op21 & opcode[1] & opcode[4];
 
    assign o_alu_bool_op = o_funct3[1:0];
 
