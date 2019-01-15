@@ -3,6 +3,7 @@ module serv_csr
   (
    input wire 	    i_clk,
    input wire [4:0] i_cnt,
+   input wire [3:0] i_cnt_r,
    input wire 	    i_mtip,
    output wire 	    o_timer_irq_en,
    input wire 	    i_mstatus_en,
@@ -66,13 +67,13 @@ module serv_csr
    assign 	o_timer_irq_en = mstatus_mie & mie_mtie;
 
    always @(posedge i_clk) begin
-      if (i_mstatus_en & (i_cnt == 3))
+      if (i_mstatus_en & (i_cnt[4:2] == 3'd0) & i_cnt_r[3])
 	mstatus_mie <= csr_in;
 
-      if (i_mie_en & (i_cnt == 7))
+      if (i_mie_en & (i_cnt[4:2] == 3'd1) & i_cnt_r[3])
 	mie_mtie <= csr_in;
 
-      mstatus <= (i_cnt == 2) ? mstatus_mie : 1'b0;
+      mstatus <= (i_cnt[4:2] == 0) & i_cnt_r[2] & mstatus_mie;
 
       if (i_trap) begin
 	 mcause[31]  <= i_mtip & o_timer_irq_en;

@@ -71,6 +71,7 @@ module serv_top
    wire 	 trap;
 
    wire [4:0] 	 cnt;
+   wire [3:0] 	 cnt_r;
 
    wire 	 cnt_done;
    wire [2:0]    funct3;
@@ -137,6 +138,7 @@ module serv_top
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
       .i_rf_ready     (rf_ready),
       .o_cnt          (cnt),
+      .o_cnt_r        (cnt_r),
       .o_cnt_done     (cnt_done),
       .o_ctrl_en      (ctrl_en),
       .o_ctrl_pc_en   (ctrl_pc_en),
@@ -195,6 +197,8 @@ module serv_top
       .i_rst      (i_rst),
       .i_en       (ctrl_en),
       .i_pc_en    (ctrl_pc_en),
+      .i_cnt      (cnt),
+      .i_cnt_r    (cnt_r),
       .i_cnt_done (cnt_done),
       .i_jump     (jump),
       .i_offset   (imm),
@@ -283,6 +287,7 @@ module serv_top
      (
       .i_clk        (clk),
       .i_cnt        (cnt),
+      .i_cnt_r      (cnt_r),
       .i_mtip       (i_timer_irq),
       .o_timer_irq_en ( timer_irq_en),
       .i_mstatus_en (csr_mstatus_en),

@@ -5,6 +5,8 @@ module serv_ctrl
    input wire 	      i_rst,
    input wire 	      i_en,
    input wire 	      i_pc_en,
+   input wire [4:0]   i_cnt,
+   input wire [3:0]   i_cnt_r,
    input wire 	      i_cnt_done,
    input wire 	      i_jump,
    input wire 	      i_offset,
@@ -24,11 +26,7 @@ module serv_ctrl
 
    parameter RESET_PC = 32'd8;
 
-   reg        en_r;
-   reg        en_2r;
    reg 	      en_pc_r;
-   reg 	      en_pc_2r;
-   reg 	      en_pc_3r;
 
    wire       pc_plus_4;
    wire       pc_plus_offset;
@@ -41,7 +39,7 @@ module serv_ctrl
 
    wire       offset_a;
 
-   assign plus_4        = en_pc_2r & !en_pc_3r;
+   assign plus_4        = i_cnt_r[2] & (i_cnt[4:2] == 3'd0);
 
    assign o_ibus_adr[0] = pc;
    assign o_bad_pc = pc_plus_offset_aligned;
@@ -81,7 +79,7 @@ module serv_ctrl
       .rst (i_rst),
       .a   (offset_a),
       .b   (i_offset),
-      .clr (!i_en | (i_cnt_done & !i_pc_en)),
+      .clr (!i_en | i_cnt_done),
       .q   (pc_plus_offset),
       .o_v ());
 
@@ -89,24 +87,16 @@ module serv_ctrl
 
 
    always @(posedge clk) begin
-      en_r <= i_en;
-      en_2r <= en_r;
       en_pc_r <= i_pc_en;
-      en_pc_2r <= en_pc_r;
-      en_pc_3r <= en_pc_2r;
 
-      if (en_r & !en_2r)
+      if ((i_cnt[4:2] == 3'd0) & i_cnt_r[1])
 	o_misalign <= pc_plus_offset;
       if (en_pc_r & !i_pc_en)
         o_ibus_cyc <= 1'b1;
       else if (o_ibus_cyc & i_ibus_ack)
         o_ibus_cyc <= 1'b0;
       if (i_rst) begin
-	 en_r  <= 1'b0;
-	 en_2r <= 1'b0;
 	 en_pc_r <= 1'b1;
-	 en_pc_2r <= 1'b0;
-	 en_pc_3r <= 1'b0;
 	 o_ibus_cyc <= 1'b0;
       end
    end

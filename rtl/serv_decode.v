@@ -9,6 +9,7 @@ module serv_decode
    input wire 	     i_wb_en,
    input wire 	     i_rf_ready,
    output wire [4:0] o_cnt,
+   output reg [3:0]  o_cnt_r,
    output wire 	     o_cnt_done,
    output wire 	     o_ctrl_en,
    output wire 	     o_ctrl_pc_en,
@@ -292,7 +293,7 @@ module serv_decode
       if (i_mtip & !mtip_r & i_timer_irq_en)
 	pending_irq <= 1'b1;
 
-      cnt_done <= cnt == 30;
+      cnt_done <= (cnt[4:2] == 3'b111) & o_cnt_r[2];
 
       case (state)
         IDLE : begin
@@ -325,6 +326,8 @@ module serv_decode
       endcase
 
       cnt <= cnt + {4'd0,cnt_en};
+      if (cnt_en)
+	o_cnt_r <= {o_cnt_r[2:0],o_cnt_r[3]};
 
       if (i_rst) begin
 	 state <= IDLE;
@@ -332,6 +335,7 @@ module serv_decode
 	 pending_irq <= 1'b0;
 	 stage_one_done <= 1'b0;
 	 o_ctrl_jump <= 1'b0;
+	 o_cnt_r <= 4'b0001;
       end
    end
 endmodule
