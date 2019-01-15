@@ -189,6 +189,26 @@ module serv_top
       .o_rd_alu_en    (rd_alu_en),
       .o_rd_mem_en    (rd_mem_en));
 
+   wire [1:0] 	 lsb;
+   wire [31:0] 	 bufreg_out;
+   assign o_dbus_adr = {bufreg_out[31:2], 2'b00};
+
+   serv_bufreg bufreg
+     (
+      .i_clk    (clk),
+      .i_rst    (i_rst),
+      .i_cnt    (cnt),
+      .i_cnt_r  (cnt_r),
+      .i_en     (alu_en),
+      .i_clr    (!mem_en),
+      .i_rs1    (rs1),
+      .i_rs1_en (1'b1),
+      .i_imm    (imm),
+      .i_imm_en (1'b1),
+      .o_lsb    (lsb),
+      .o_reg    (bufreg_out),
+      .o_q      (bad_adr));
+
    serv_ctrl
      #(.RESET_PC (RESET_PC))
    ctrl
@@ -267,15 +287,12 @@ module serv_top
       .i_cmd    (mem_cmd),
       .i_bytecnt (mem_bytecnt),
       .i_funct3 (funct3),
-      .i_rs1    (rs1),
       .i_rs2    (rs2),
-      .i_imm    (imm),
       .o_rd     (mem_rd),
+      .i_lsb      (lsb),
       .o_misalign (mem_misalign),
       .i_trap   (trap),
-      .o_adr    (bad_adr),
       //External interface
-      .o_wb_adr   (o_dbus_adr),
       .o_wb_dat   (o_dbus_dat),
       .o_wb_sel   (o_dbus_sel),
       .o_wb_we    (o_dbus_we ),

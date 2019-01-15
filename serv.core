@@ -11,6 +11,7 @@ filesets:
       - rtl/ser_eq.v
       - rtl/ser_lt.v
       - rtl/ser_shift.v
+      - rtl/serv_bufreg.v
       - rtl/serv_alu.v
       - rtl/serv_csr.v
       - rtl/serv_ctrl.v

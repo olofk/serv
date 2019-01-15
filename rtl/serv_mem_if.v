@@ -8,15 +8,12 @@ module serv_mem_if
    input wire 	      i_cmd,
    input wire [1:0]   i_bytecnt,
    input wire [2:0]   i_funct3,
-   input wire 	      i_rs1,
    input wire 	      i_rs2,
-   input wire 	      i_imm,
    output wire 	      o_rd,
+   input wire [1:0]   i_lsb,
    output reg 	      o_misalign,
    input wire 	      i_trap,
-   output wire 	      o_adr,
    //External interface
-   output wire [31:0] o_wb_adr,
    output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
    output wire 	      o_wb_we ,
@@ -26,8 +23,7 @@ module serv_mem_if
 
    wire          wb_en = o_wb_cyc & i_wb_ack;
    reg           init_r;
-   reg 		 init_2r;
-   wire          adr;
+
    reg           signbit = 1'b0;
 
    reg [7:0] 	 dat0;
@@ -38,30 +34,6 @@ module serv_mem_if
    wire 	 dat1_en;
    wire 	 dat2_en;
    wire 	 dat3_en;
-
-   assign o_adr = adr;
-
-   ser_add ser_add_rs1_plus_imm
-     (
-      .clk (i_clk),
-      .rst (i_rst),
-      .a   (i_rs1),
-      .b   (i_imm),
-      .clr (!i_en),
-      .q   (adr),
-      .o_v ());
-
-   assign o_wb_adr[1:0] = 2'b00;
-
-   shift_reg #(30) shift_reg_adr
-     (
-      .clk   (i_clk),
-      .i_rst (i_rst),
-      .i_en  (i_init | i_trap),
-      .i_d   (adr),
-      .o_q   (o_wb_adr[2]),
-      .o_par (o_wb_adr[31:3])
-      );
 
    wire 	 dat_cur = (dat_sel == 3) ? dat3[0] :
 		 (dat_sel == 2) ? dat2[0] :
@@ -76,8 +48,6 @@ module serv_mem_if
    wire is_half = i_funct3[0];
    wire is_byte = !(|i_funct3[1:0]);
 
-
-
    wire       upper_half = bytepos[1];
 /*
    assign o_wb_sel = (is_word ? 4'b1111 :
@@ -90,7 +60,7 @@ module serv_mem_if
    assign o_wb_sel[0] = (bytepos == 2'b00);
 
    assign o_wb_we = i_cmd;
-   reg [1:0]  bytepos;
+   wire [1:0]  bytepos;
 
 
    wire       wbyte0 = (i_bytecnt == 2'b00);
@@ -107,6 +77,8 @@ module serv_mem_if
 
    wire [1:0] dat_sel = i_bytecnt[1] ? i_bytecnt : (i_bytecnt | bytepos);
 
+   assign bytepos = i_lsb;
+
    always @(posedge i_clk) begin
       if (dat0_en)
 	dat0 <= {i_rs2, dat0[7:1]};
@@ -120,17 +92,11 @@ module serv_mem_if
       if (wb_en)
 	{dat3,dat2,dat1,dat0} <= i_wb_rdt;
 
-      if (i_init & !init_r)
-        bytepos[0] <= adr;
-      if (init_r & !init_2r)
-        bytepos[1] <= adr;
-
       o_misalign <= i_en & ((bytepos[0] & !is_byte) | (bytepos[1] & is_word));
       if (dat_valid)
         signbit <= dat_cur;
 
       init_r <= i_init;
-      init_2r <= init_r;
       if (wb_en)
         o_wb_cyc <= 1'b0;
       else if (init_r & !i_init & !i_trap) begin //Optimize?
@@ -139,7 +105,6 @@ module serv_mem_if
       if (i_rst) begin
 	 o_wb_cyc <= 1'b0;
 	 init_r <= 1'b0;
-	 init_2r <= 1'b0;
       end
    end
 endmodule
