@@ -6,6 +6,7 @@ module serv_alu
    input wire 	    i_en,
    input wire 	    i_rs1,
    input wire 	    i_op_b,
+   input wire 	    i_buf,
    input wire 	    i_init,
    input wire 	    i_cnt_done,
    input wire 	    i_sub,
@@ -17,6 +18,7 @@ module serv_alu
    input wire 	    i_shamt_en,
    input wire 	    i_sh_right,
    input wire 	    i_sh_signed,
+   output wire 	    o_sh_done, 
    input wire [1:0] i_rd_sel,
    output wire 	    o_rd);
 
@@ -30,6 +32,7 @@ module serv_alu
    reg 	       result_lt_r;
 
    wire [4:0]  shamt;
+   reg 	       shamt_msb;
 
    reg         en_r;
    wire        v;
@@ -54,11 +57,18 @@ module serv_alu
       .i_rst (i_rst),
       .i_load (i_init),
       .i_shamt (shamt),
-      .i_signed (i_sh_signed),
+      .i_shamt_msb (shamt_msb),
+      .i_signbit (i_sh_signed & i_rs1),
       .i_right  (i_sh_right),
-      .i_d (i_rs1),
+      .o_done   (o_sh_done),
+      .i_d (i_buf),
       .o_q (result_sh));
 
+   wire        b_inv_plus_1_cy;
+        
+   always @(posedge clk)
+     if (i_shamt_en)
+       shamt_msb <= b_inv_plus_1_cy;
 
    ser_add ser_add_inv_plus_1
      (
@@ -68,7 +78,7 @@ module serv_alu
       .b   (plus_1),
       .clr (!i_en),
       .q   (b_inv_plus_1),
-      .o_v ());
+      .o_v (b_inv_plus_1_cy));
 
    wire       add_b = i_sub ? b_inv_plus_1 : i_op_b;
 

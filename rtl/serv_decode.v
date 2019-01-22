@@ -11,6 +11,9 @@ module serv_decode
    output wire [4:0] o_cnt,
    output reg [3:0]  o_cnt_r,
    output wire 	     o_cnt_done,
+   output reg 	     o_bufreg_hold,
+   output wire 	     o_bufreg_imm_en,
+   output wire 	     o_bufreg_loop,
    output wire 	     o_ctrl_en,
    output wire 	     o_ctrl_pc_en,
    output reg 	     o_ctrl_jump,
@@ -21,6 +24,7 @@ module serv_decode
    output wire 	     o_ctrl_trap,
    output wire 	     o_ctrl_mret,
    input wire 	     i_ctrl_misalign,
+   output wire 	     o_rf_rs_en,
    output wire 	     o_rf_rd_en,
    output reg [4:0]  o_rf_rd_addr,
    output reg [4:0]  o_rf_rs1_addr,
@@ -36,6 +40,7 @@ module serv_decode
    output wire 	     o_alu_shamt_en,
    output wire 	     o_alu_sh_signed,
    output wire 	     o_alu_sh_right,
+   input wire 	     i_alu_sh_done,
    output reg [1:0]  o_alu_rd_sel,
    output wire 	     o_mem_en,
    output wire 	     o_mem_cmd,
@@ -103,6 +108,9 @@ module serv_decode
    assign branch_op = (opcode[4:2] == 3'b110) & !opcode[0];
 
    assign e_op = (opcode[4:2] == 3'b111) & !op21 & !(|o_funct3);
+
+   assign o_bufreg_imm_en = !opcode[2];
+   assign o_bufreg_loop   = op_or_opimm & !(state == INIT);
 
    assign o_ctrl_pc_en  = running | o_ctrl_trap;
    wire take_branch = (opcode[4:2] == 3'b110) & (opcode[0] | i_alu_cmp);
@@ -273,6 +281,8 @@ module serv_decode
 	o_csr_mcause <= {!op20,3'b011};
    end
 
+   assign o_rf_rs_en = two_stage_op ? (state == INIT) : o_ctrl_pc_en;
+
    //slt*, branch/jump, shift, load/store
    wire two_stage_op =
         slt_op | (opcode[4:2] == 3'b110) | (opcode[2:1] == 2'b00) |
@@ -295,6 +305,8 @@ module serv_decode
 
       cnt_done <= (cnt[4:2] == 3'b111) & o_cnt_r[2];
 
+      o_bufreg_hold <= 1'b0;
+
       case (state)
         IDLE : begin
            if (i_rf_ready) begin
@@ -303,14 +315,21 @@ module serv_decode
 		state <= INIT;
 	      if (e_op | pending_irq)
 		state <= TRAP;
-	   end
+	   end else if (i_alu_sh_done & shift_op & stage_one_done)
+	     state <= RUN;
         end
         INIT : begin
 	   stage_one_done <= 1'b1;
 
            if (cnt_done)
-             state <= (i_mem_misalign | (take_branch & i_ctrl_misalign)) ? TRAP :
-		      mem_op ? IDLE : RUN;
+	     if (i_mem_misalign | (take_branch & i_ctrl_misalign))
+               state <= TRAP;
+	     else if (mem_op | shift_op ) begin
+		state <= IDLE;
+		o_bufreg_hold <= 1'b1;
+	     end
+	     else
+	       state <= RUN;
         end
         RUN : begin
 	   stage_one_done <= 1'b0;

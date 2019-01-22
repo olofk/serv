@@ -6,6 +6,7 @@ module serv_bufreg
    input wire [3:0]   i_cnt_r,
    input wire 	      i_en,
    input wire 	      i_clr,
+   input wire 	      i_loop,
    input wire 	      i_rs1,
    input wire 	      i_rs1_en,
    input wire 	      i_imm,
@@ -26,7 +27,7 @@ module serv_bufreg
       if (i_rst)
 	data <= 32'd0;
       else if (i_en)
-	data <= {q, data[31:1]};
+	data <= {i_loop ? o_q : q, data[31:1]};
 
       if ((i_cnt[4:2] == 3'd0) & i_cnt_r[0] & i_en)
 	o_lsb[0] <= q;

@@ -60,7 +60,7 @@ module serv_mem_if
    assign o_wb_sel[0] = (bytepos == 2'b00);
 
    assign o_wb_we = i_cmd;
-   wire [1:0]  bytepos;
+   reg [1:0] bytepos;
 
 
    wire       wbyte0 = (i_bytecnt == 2'b00);
@@ -77,9 +77,10 @@ module serv_mem_if
 
    wire [1:0] dat_sel = i_bytecnt[1] ? i_bytecnt : (i_bytecnt | bytepos);
 
-   assign bytepos = i_lsb;
-
    always @(posedge i_clk) begin
+      if (i_init)
+	bytepos <= i_lsb;
+
       if (dat0_en)
 	dat0 <= {i_rs2, dat0[7:1]};
       if (dat1_en)

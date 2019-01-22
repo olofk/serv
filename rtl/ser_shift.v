@@ -5,40 +5,27 @@ module ser_shift
    input wire 	    i_rst,
    input wire 	    i_load,
    input wire [4:0] i_shamt,
-   input wire 	    i_signed,
+   input wire 	    i_shamt_msb,
+   input wire 	    i_signbit,
    input wire 	    i_right,
+   output wire 	    o_done,
    input wire 	    i_d,
    output wire 	    o_q);
 
-   wire [31:0] 	    shiftreg;
-
-   reg 		    signbit = 1'b0;
-   reg 		    wrapped = 1'b0;
-   reg [4:0] 	    cnt = 5'd0;
-
-   shift_reg #(.LEN (32)) sh_reg
-     (.clk (i_clk),
-      .i_rst (i_rst),
-      .i_en (i_load),
-      .i_d  (i_d),
-      .o_q  (shiftreg[0]),
-      .o_par (shiftreg[31:1]));
-
+   reg 		    signbit;
+   reg [5:0] 	    cnt;
+   reg 		    wrapped;
+   
    always @(posedge i_clk) begin
-      cnt <= cnt + 5'd1;
-      if (cnt == 31) begin
-         signbit <= shiftreg[cnt];
-         wrapped <= 1'b1;
-      end
+      cnt <= cnt + 6'd1;
       if (i_load) begin
-         cnt <= i_shamt;
-         wrapped <= 1'b0;
+         cnt <= 6'd0;
+	 signbit <= i_signbit & i_right;
       end
-
-
+      wrapped <= cnt[5] | (i_shamt_msb & !i_right);
    end
 
-   wire shiftreg_valid = (i_shamt == 0) | (wrapped^i_right);
-   assign o_q = shiftreg_valid ? shiftreg[cnt] : signbit & i_signed;
+   assign o_done = (cnt == i_shamt);
+   assign o_q = (i_right^wrapped) ? i_d : signbit;
 
 endmodule

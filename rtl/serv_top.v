@@ -76,6 +76,10 @@ module serv_top
    wire 	 cnt_done;
    wire [2:0]    funct3;
 
+   wire 	 bufreg_hold;
+   wire 	 bufreg_imm_en;
+   wire 	 bufreg_loop;
+
    wire          alu_en;
    wire          alu_init;
    wire          alu_sub;
@@ -87,11 +91,13 @@ module serv_top
    wire          alu_shamt_en;
    wire          alu_sh_signed;
    wire          alu_sh_right;
+   wire 	 alu_sh_done;
    wire [1:0]    alu_rd_sel;
 
    wire 	 rf_ready;
    wire          rs1;
    wire          rs2;
+   wire 	 rs_en;
    wire          rd_en;
 
    wire          op_b_source;
@@ -136,10 +142,13 @@ module serv_top
       .i_timer_irq_en (timer_irq_en),
       .i_wb_rdt       (i_ibus_rdt),
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
-      .i_rf_ready     (rf_ready),
+      .i_rf_ready     (rf_ready | i_dbus_ack),
       .o_cnt          (cnt),
       .o_cnt_r        (cnt_r),
       .o_cnt_done     (cnt_done),
+      .o_bufreg_hold  (bufreg_hold),
+      .o_bufreg_imm_en (bufreg_imm_en),
+      .o_bufreg_loop   (bufreg_loop),
       .o_ctrl_en      (ctrl_en),
       .o_ctrl_pc_en   (ctrl_pc_en),
       .o_ctrl_jump    (jump),
@@ -162,7 +171,9 @@ module serv_top
       .o_alu_shamt_en (alu_shamt_en),
       .o_alu_sh_signed (alu_sh_signed),
       .o_alu_sh_right (alu_sh_right),
+      .i_alu_sh_done  (alu_sh_done),
       .o_alu_rd_sel   (alu_rd_sel),
+      .o_rf_rs_en     (rs_en),
       .o_rf_rd_en     (rd_en),
       .o_rf_rd_addr   (rd_addr),
       .o_rf_rs1_addr  (rs1_addr),
@@ -199,12 +210,13 @@ module serv_top
       .i_rst    (i_rst),
       .i_cnt    (cnt),
       .i_cnt_r  (cnt_r),
-      .i_en     (alu_en),
+      .i_en     (!(bufreg_hold | o_dbus_cyc)),
       .i_clr    (!mem_en),
+      .i_loop   (bufreg_loop),
       .i_rs1    (rs1),
       .i_rs1_en (1'b1),
       .i_imm    (imm),
-      .i_imm_en (1'b1),
+      .i_imm_en (bufreg_imm_en),
       .o_lsb    (lsb),
       .o_reg    (bufreg_out),
       .o_q      (bad_adr));
@@ -250,6 +262,7 @@ module serv_top
       .i_en       (alu_en),
       .i_rs1      (rs1),
       .i_op_b     (op_b),
+      .i_buf      (bad_adr), //FIXME
       .i_init     (alu_init),
       .i_cnt_done (cnt_done),
       .i_sub      (alu_sub),
@@ -261,6 +274,7 @@ module serv_top
       .i_shamt_en (alu_shamt_en),
       .i_sh_right (alu_sh_right),
       .i_sh_signed (alu_sh_signed),
+      .o_sh_done  (alu_sh_done),
       .i_rd_sel   (alu_rd_sel),
       .o_rd       (alu_rd));
 
@@ -268,7 +282,7 @@ module serv_top
      (
       .i_clk      (clk),
       .i_rst      (i_rst),
-      .i_go       (i_ibus_ack | i_dbus_ack),
+      .i_go       (i_ibus_ack),
       .o_ready    (rf_ready),
       .i_rd_en    (rd_en),
       .i_rd_addr  (rd_addr),
@@ -345,7 +359,7 @@ module serv_top
 	rvfi_insn <= i_ibus_rdt;
 
       ctrl_pc_en_r <= ctrl_pc_en;
-      if (alu_en) begin
+      if (rs_en) begin
          rs1_fv <= {rs1,rs1_fv[31:1]};
          rs2_fv <= {rs2,rs2_fv[31:1]};
       end
