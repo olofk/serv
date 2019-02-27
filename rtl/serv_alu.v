@@ -35,8 +35,6 @@ module serv_alu
    reg 	       shamt_msb;
 
    reg         en_r;
-   wire        v;
-   reg         init_r;
    wire        shamt_ser;
    wire        plus_1;
    wire        b_inv_plus_1;
@@ -90,15 +88,7 @@ module serv_alu
       .b   (add_b),
       .clr (!i_en),
       .q   (result_add),
-      .o_v (v));
-
-   ser_eq ser_eq
-     (
-      .clk (clk),
-      .a   (i_rs1),
-      .b   (i_op_b),
-      .clr (!i_init),
-      .o_q (result_eq));
+      .o_v ());
 
    ser_lt ser_lt
      (
@@ -109,28 +99,32 @@ module serv_alu
       .i_sign (i_cnt_done & !i_cmp_uns),
       .o_q   (result_lt));
 
-   reg last_eq;
-
    assign plus_1 = i_en & !en_r;
-   assign o_cmp = i_cmp_neg^((i_cmp_sel == ALU_CMP_EQ) ? (result_eq & (i_rs1 == i_op_b)) : result_lt);
+   assign o_cmp = i_cmp_neg^((i_cmp_sel == ALU_CMP_EQ) ? result_eq : result_lt);
 
    localparam [15:0] BOOL_LUT = 16'h8E96;//And, Or, =, xor
    wire result_bool = BOOL_LUT[{i_bool_op, i_rs1, i_op_b}];
 
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
                  (i_rd_sel == ALU_RESULT_SR)  ? result_sh :
-                 (i_rd_sel == ALU_RESULT_LT)  ? (result_lt_r & init_r & ~i_init) :
+                 (i_rd_sel == ALU_RESULT_LT)  ? result_lt_r :
                  (i_rd_sel == ALU_RESULT_BOOL) ? result_bool : 1'bx;
 
 
+   reg 	eq_r;
+
    always @(posedge clk) begin
       if (i_init) begin
-         last_eq <= i_rs1 == i_op_b;
 	 result_lt_r <= result_lt;
+	 eq_r <= result_eq;
+      end else begin
+	 eq_r <= 1'b1;
+	 if (result_lt_r)
+	   result_lt_r <= 1'b0;
       end
-
       en_r <= i_en;
-      init_r <= i_init;
-
    end
+
+   assign result_eq = eq_r & (i_rs1 == i_op_b);
+
 endmodule
