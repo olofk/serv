@@ -277,7 +277,7 @@ module serv_top
       .o_sh_done  (alu_sh_done),
       .i_rd_sel   (alu_rd_sel),
       .o_rd       (alu_rd));
-
+/*
    serv_regfile regfile
      (
       .i_clk      (clk),
@@ -291,6 +291,39 @@ module serv_top
       .i_rs2_addr (rs2_addr),
       .o_rs1      (rs1),
       .o_rs2      (rs2));
+*/
+   wire 	 csr_in;
+   wire 	 rf_csr_out;
+
+   serv_mpram regfile
+     (
+      .i_clk       (clk),
+      .i_rst       (i_rst),
+      //MEPC write port
+      .i_mepc_wen  (1'b0),
+      .i_mepc      (1'b0),
+      //MTVAL write port
+      .i_mtval_wen (1'b0),
+      .i_mtval     (1'b0),
+      //CSR write port
+      .i_csr_mscratch_en (csr_mscratch_en),
+      .i_csr_mtvec_en    (csr_mtvec_en),
+      .i_csr       (csr_in),
+      //RD write port
+      .i_rd_wen    (rd_en & (|rd_addr)),
+      .i_rd_waddr  (rd_addr),
+      .i_rd        (rd),
+
+      .i_rreq      (i_ibus_ack),
+      .o_rgnt      (rf_ready),
+      //RS1 read port
+      .i_rs1_raddr (rs1_addr),
+      .o_rs1       (rs1),
+      //RS2 read port
+      .i_rs2_raddr (rs2_addr),
+      .o_rs2       (rs2),
+      //CSR read port
+      .o_csr       (rf_csr_out));
 
    serv_mem_if mem_if
      (
@@ -319,13 +352,13 @@ module serv_top
       .i_clk        (clk),
       .i_cnt        (cnt),
       .i_cnt_r      (cnt_r),
+      .i_rf_csr_out (rf_csr_out),
+      .o_csr_in     (csr_in),
       .i_mtip       (i_timer_irq),
       .o_timer_irq_en ( timer_irq_en),
       .i_mstatus_en (csr_mstatus_en),
       .i_mie_en     (csr_mie_en    ),
-      .i_mtvec_en   (csr_mtvec_en  ),
       .i_mip_en     (csr_mip_en    ),
-      .i_mscratch_en (csr_mscratch_en),
       .i_mepc_en    (csr_mepc_en   ),
       .i_mcause_en  (csr_mcause_en ),
       .i_mtval_en   (csr_mtval_en  ),

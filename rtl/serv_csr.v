@@ -4,13 +4,16 @@ module serv_csr
    input wire 	    i_clk,
    input wire [4:0] i_cnt,
    input wire [3:0] i_cnt_r,
+   //From mpram
+   input wire 	    i_rf_csr_out,
+   //to mpram
+   output wire 	    o_csr_in,
+   //Stuff
    input wire 	    i_mtip,
    output wire 	    o_timer_irq_en,
    input wire 	    i_mstatus_en,
    input wire 	    i_mie_en,
-   input wire 	    i_mtvec_en,
    input wire 	    i_mip_en,
-   input wire 	    i_mscratch_en,
    input wire 	    i_mepc_en,
    input wire 	    i_mcause_en,
    input wire 	    i_mtval_en,
@@ -38,15 +41,12 @@ module serv_csr
    reg 		    mstatus;
    reg 		    mstatus_mie;
    reg 		    mie_mtie;
-   reg [31:0] 	    mtvec    = 32'h0;
 
-   reg [31:0] 	mscratch;
    reg [31:0] 	mepc;
    reg 		mcause31;
    reg [3:0] 	mcause3_0;
    wire 	mcause;
    reg [31:0] 	mtval;
-
 
    wire 	csr_in;
    wire 	csr_out;
@@ -58,8 +58,7 @@ module serv_csr
 		   1'bx;
 
    assign csr_out = (i_mstatus_en & mstatus) |
-		    (i_mtvec_en & mtvec[0]) |
-		    (i_mscratch_en & mscratch[0]) |
+		    i_rf_csr_out |
 		    (i_mepc_en & mepc[0]) |
 		    (i_mcause_en & mcause) |
 		    (i_mtval_en & mtval[0]);
@@ -71,6 +70,8 @@ module serv_csr
    assign mcause = (i_cnt[4:2] == 3'd0) ? mcause3_0[0] : //[3:0]
 		   ((i_cnt[4:2] == 3'd7) & i_cnt_r[3]) ? mcause31 //[31]
 		   : 1'b0;
+
+   assign o_csr_in = csr_in;
 
    always @(posedge i_clk) begin
       if (i_mstatus_en & (i_cnt[4:2] == 3'd0) & i_cnt_r[3])
@@ -85,11 +86,6 @@ module serv_csr
 	 mcause31  <= i_mtip & o_timer_irq_en;
 	 mcause3_0 <= (i_mtip & o_timer_irq_en) ? 4'd7 : i_mcause[3:0];
       end
-      if (i_mscratch_en)
-	mscratch <= {csr_in, mscratch[31:1]};
-
-      if (i_mtvec_en)
-	mtvec <= {csr_in, mtvec[31:1]};
 
       if (i_mepc_en | i_trap)
 	mepc <= {i_trap ? i_pc : csr_in, mepc[31:1]};
