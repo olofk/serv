@@ -42,7 +42,9 @@ module serv_csr
 
    reg [31:0] 	mscratch;
    reg [31:0] 	mepc;
-   reg [31:0] 	mcause;
+   reg 		mcause31;
+   reg [3:0] 	mcause3_0;
+   wire 	mcause;
    reg [31:0] 	mtval;
 
 
@@ -59,12 +61,16 @@ module serv_csr
 		    (i_mtvec_en & mtvec[0]) |
 		    (i_mscratch_en & mscratch[0]) |
 		    (i_mepc_en & mepc[0]) |
-		    (i_mcause_en & mcause[0]) |
+		    (i_mcause_en & mcause) |
 		    (i_mtval_en & mtval[0]);
 
    assign o_q = csr_out;
 
    assign 	o_timer_irq_en = mstatus_mie & mie_mtie;
+
+   assign mcause = (i_cnt[4:2] == 3'd0) ? mcause3_0[0] : //[3:0]
+		   ((i_cnt[4:2] == 3'd7) & i_cnt_r[3]) ? mcause31 //[31]
+		   : 1'b0;
 
    always @(posedge i_clk) begin
       if (i_mstatus_en & (i_cnt[4:2] == 3'd0) & i_cnt_r[3])
@@ -76,8 +82,8 @@ module serv_csr
       mstatus <= (i_cnt[4:2] == 0) & i_cnt_r[2] & mstatus_mie;
 
       if (i_trap) begin
-	 mcause[31]  <= i_mtip & o_timer_irq_en;
-	 mcause[3:0] <= (i_mtip & o_timer_irq_en) ? 4'd7 : i_mcause[3:0];
+	 mcause31  <= i_mtip & o_timer_irq_en;
+	 mcause3_0 <= (i_mtip & o_timer_irq_en) ? 4'd7 : i_mcause[3:0];
       end
       if (i_mscratch_en)
 	mscratch <= {csr_in, mscratch[31:1]};
@@ -88,8 +94,12 @@ module serv_csr
       if (i_mepc_en | i_trap)
 	mepc <= {i_trap ? i_pc : csr_in, mepc[31:1]};
 
-      if (i_mcause_en)
-	mcause <= {csr_in, mcause[31:1]};
+      if (i_mcause_en) begin
+	 if (i_cnt[4:2] == 3'd0)
+	   mcause3_0 <= {csr_in, mcause3_0[3:1]};
+	 if ((i_cnt[4:2] == 3'd7) & i_cnt_r[3])
+	   mcause31 <= csr_in;
+      end
 
       if (i_mtval_en | i_trap)
 	mtval <= {i_trap ? i_mtval : csr_in, mtval[31:1]};
