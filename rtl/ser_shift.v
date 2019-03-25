@@ -15,7 +15,7 @@ module ser_shift
    reg 		    signbit;
    reg [5:0] 	    cnt;
    reg 		    wrapped;
-   
+
    always @(posedge i_clk) begin
       cnt <= cnt + 6'd1;
       if (i_load) begin
@@ -25,7 +25,7 @@ module ser_shift
       wrapped <= cnt[5] | (i_shamt_msb & !i_right);
    end
 
-   assign o_done = (cnt == i_shamt);
+   assign o_done = (cnt[4:0] == i_shamt);
    assign o_q = (i_right^wrapped) ? i_d : signbit;
 
 endmodule

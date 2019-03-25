@@ -5,7 +5,7 @@ module serv_clock_gen
    output wire o_clk,
    output wire o_rst);
 
-   parameter PLL = "NONE";
+   parameter [79:0] PLL = "NONE";
 
    generate
       if ((PLL == "ICE40_CORE") || (PLL == "ICE40_PAD")) begin

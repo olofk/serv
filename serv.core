@@ -119,7 +119,7 @@ targets:
     parameters : [RISCV_FORMAL, firmware, memsize, signature, uart_baudrate, vcd]
     tools:
       verilator:
-        verilator_options : [-Wno-fatal, --trace]
+        verilator_options : [--trace]
     toplevel : serv_wrapper
 
 parameters:

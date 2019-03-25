@@ -19,7 +19,7 @@ module serv_bufreg
    reg 		      c_r;
    reg [31:0] 	      data;
 
-   assign {c,q} = (i_rs1 & i_rs1_en) + (i_imm & i_imm_en) + c_r;
+   assign {c,q} = {1'b0,(i_rs1 & i_rs1_en)} + {1'b0,(i_imm & i_imm_en)} + c_r;
 
    always @(posedge i_clk) begin
       c_r <= c & !i_clr;

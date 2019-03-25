@@ -18,7 +18,7 @@ module serv_alu
    input wire 	    i_shamt_en,
    input wire 	    i_sh_right,
    input wire 	    i_sh_signed,
-   output wire 	    o_sh_done, 
+   output wire 	    o_sh_done,
    input wire [1:0] i_rd_sel,
    output wire 	    o_rd);
 
@@ -63,7 +63,7 @@ module serv_alu
       .o_q (result_sh));
 
    wire        b_inv_plus_1_cy;
-        
+
    always @(posedge clk)
      if (i_shamt_en)
        shamt_msb <= b_inv_plus_1_cy;

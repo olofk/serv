@@ -11,11 +11,11 @@ module riscv_timer
    reg [15:0] 	     mtime;
    reg [15:0] 	     mtimecmp;
 
-   assign o_wb_dat = mtime;
+   assign o_wb_dat = {16'd0,mtime};
 
    always @(posedge i_clk) begin
       if (i_wb_cyc & i_wb_we)
-	mtimecmp <= i_wb_dat;
+	mtimecmp <= i_wb_dat[15:0];
       mtime <= mtime + 16'd1;
       o_irq <= (mtime >= mtimecmp);
       if (i_rst) begin

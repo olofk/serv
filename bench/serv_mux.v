@@ -59,8 +59,8 @@ module serv_mux
 
    generate
       if (sim) begin
-	 wire sig_en = (i_wb_cpu_adr[31:28] == 8'h8) & i_wb_cpu_cyc & o_wb_cpu_ack;
-	 wire halt_en = (i_wb_cpu_adr[31:28] == 8'h9) & i_wb_cpu_cyc & o_wb_cpu_ack;
+	 wire sig_en = (i_wb_cpu_adr[31:28] == 4'h8) & i_wb_cpu_cyc & o_wb_cpu_ack;
+	 wire halt_en = (i_wb_cpu_adr[31:28] == 4'h9) & i_wb_cpu_cyc & o_wb_cpu_ack;
 
 	 reg [1023:0] signature_file;
 	 integer      f = 0;
