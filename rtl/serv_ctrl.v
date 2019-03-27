@@ -21,7 +21,7 @@ module serv_ctrl
    output wire 	      o_bad_pc,
    output reg 	      o_misalign = 1'b0,
    output wire [31:0] o_ibus_adr,
-   output reg 	      o_ibus_cyc,
+   output wire	      o_ibus_cyc,
    input wire 	      i_ibus_ack);
 
    parameter RESET_PC = 32'd8;
@@ -85,19 +85,18 @@ module serv_ctrl
 
    wire       pc_plus_offset_aligned = pc_plus_offset & en_pc_r;
 
+   assign o_ibus_cyc = en_pc_r & !i_pc_en;
 
    always @(posedge clk) begin
-      en_pc_r <= i_pc_en;
+      if (i_pc_en)
+	en_pc_r <= 1'b1;
+      else if (o_ibus_cyc & i_ibus_ack)
+        en_pc_r <= 1'b0;
 
       if ((i_cnt[4:2] == 3'd0) & i_cnt_r[1])
 	o_misalign <= pc_plus_offset;
-      if (en_pc_r & !i_pc_en)
-        o_ibus_cyc <= 1'b1;
-      else if (o_ibus_cyc & i_ibus_ack)
-        o_ibus_cyc <= 1'b0;
       if (i_rst) begin
 	 en_pc_r <= 1'b1;
-	 o_ibus_cyc <= 1'b0;
       end
    end
 

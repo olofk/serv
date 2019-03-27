@@ -338,11 +338,41 @@ module serv_top
       .o_q          (csr_rd));
 
 `ifdef RISCV_FORMAL
-   reg [31:0]    rs1_fv, rs2_fv;
-   reg [31:0]    pc = RESET_PC;
-   reg           ctrl_pc_en_r = 1'b0;
+   reg [31:0] 	 pc = RESET_PC;
 
    always @(posedge clk) begin
+      rvfi_valid <= cnt_done & ctrl_pc_en;
+      rvfi_order <= rvfi_order + rvfi_valid;
+      if (o_ibus_cyc & i_ibus_ack)
+	rvfi_insn <= i_ibus_rdt;
+      if (rd_en)
+        rvfi_rd_wdata <= {rd,rvfi_rd_wdata[31:1]};
+      if (cnt_done & ctrl_pc_en) begin
+         rvfi_pc_rdata <= pc;
+	 if (!rd_en)
+	   rvfi_rd_addr <= 5'd0;
+	 if (!rd_en | !(|rd_addr))
+	   rvfi_rd_wdata <= 32'd0;
+      end
+      rvfi_trap <= trap;
+      if (rvfi_valid) begin
+         rvfi_trap <= 1'b0;
+         pc <= rvfi_pc_wdata;
+      end
+
+      rvfi_halt <= 1'b0;
+      rvfi_intr <= 1'b0;
+      rvfi_mode <= 2'd3;
+      if (rf_ready) begin
+	 rvfi_rs1_addr <= rs1_addr;
+         rvfi_rs2_addr <= rs2_addr;
+	 rvfi_rd_addr  <= rd_addr;
+      end
+      if (rs_en) begin
+         rvfi_rs1_rdata <= {rs1,rvfi_rs1_rdata[31:1]};
+         rvfi_rs2_rdata <= {rs2,rvfi_rs2_rdata[31:1]};
+      end
+
       if (i_dbus_ack) begin
          rvfi_mem_addr <= o_dbus_adr;
          rvfi_mem_rmask <= o_dbus_we ? 4'b0000 : o_dbus_sel;
@@ -354,44 +384,10 @@ module serv_top
          rvfi_mem_rmask <= 4'b0000;
          rvfi_mem_wmask <= 4'b0000;
       end
-
-      if (i_ibus_ack)
-	rvfi_insn <= i_ibus_rdt;
-
-      ctrl_pc_en_r <= ctrl_pc_en;
-      if (rs_en) begin
-         rs1_fv <= {rs1,rs1_fv[31:1]};
-         rs2_fv <= {rs2,rs2_fv[31:1]};
-      end
-      if (rd_en) begin
-         rvfi_rd_wdata <= {rd & (|rd_addr),rvfi_rd_wdata[31:1]};
-         rvfi_rd_addr <= rd_addr;
-      end else if (i_ibus_ack) begin
-	 rvfi_rd_wdata <= 32'd0;
-	 rvfi_rd_addr  <= 5'd0;
-      end
-
-      if (trap)
-	rvfi_trap <= 1'b1;
-      else if (i_ibus_ack)
-	rvfi_trap <= 1'b0;
-
-      rvfi_valid <= 1'b0;
-      if (ctrl_pc_en_r & !ctrl_pc_en) begin
-         pc <= o_ibus_adr;
-         rvfi_valid <= 1'b1;
-         rvfi_order <= rvfi_order + 1;
-         rvfi_halt <= 1'b0;
-         rvfi_intr <= 1'b0;
-         rvfi_mode <= 2'd3;
-         rvfi_rs1_addr <= rs1_addr;
-         rvfi_rs2_addr <= rs2_addr;
-         rvfi_rs1_rdata <= rs1_fv;
-         rvfi_rs2_rdata <= rs2_fv;
-         rvfi_pc_rdata <= pc;
-         rvfi_pc_wdata <= o_ibus_adr;
-      end
    end
+   always @(o_ibus_adr)
+     rvfi_pc_wdata <= o_ibus_adr;
+
 `endif
 
 endmodule
