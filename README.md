@@ -1,3 +1,5 @@
+<img align="right" src="https://svg.wavedrom.com/{signal:[{wave:'0.P...'},{wave:'023450',data:'S E R V'}]}"/>
+
 SERV
 ====
 
