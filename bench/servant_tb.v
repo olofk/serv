@@ -1,18 +1,20 @@
 `default_nettype none
-module serv_top_tb;
+module servant_tb;
 
-   parameter memfile = "bitbang.hex";
+   parameter memfile = "";
 
-   reg wb_clk = 1'b1;
+   reg wb_clk = 1'b0;
+   reg wb_rst = 1'b1;
 
    reg q_r = 1'b0;
    wire q;
 
-   always #31 wb_clk <= !wb_clk;
+   always  #31 wb_clk <= !wb_clk;
+   initial #62 wb_rst <= 1'b0;
 
    vlog_tb_utils vtu();
 
-   serv_wrapper #(memfile) dut(wb_clk, q);
+   servant #(memfile) dut(wb_clk, wb_rst, q);
 
    always @(posedge wb_clk)
      if (q != q_r) begin

@@ -2,7 +2,7 @@
 #include <signal.h>
 
 #include "verilated_vcd_c.h"
-#include "Vserv_wrapper.h"
+#include "Vservant.h"
 
 using namespace std;
 
@@ -34,7 +34,7 @@ int main(int argc, char **argv, char **env)
 	char uart_ch = 0;
 	Verilated::commandArgs(argc, argv);
 
-	Vserv_wrapper* top = new Vserv_wrapper;
+	Vservant* top = new Vservant;
 
 	const char *arg = Verilated::commandArgsPlusMatch("uart_baudrate=");
 	if (arg[0]) {
@@ -55,9 +55,10 @@ int main(int argc, char **argv, char **env)
 
 	signal(SIGINT, INThandler);
 
-	top->i_clk = 1;
+	top->wb_clk = 1;
 	bool q = top->q;
 	while (!(done || Verilated::gotFinish())) {
+	  top->wb_rst = main_time < 100;
 	  top->eval();
 	  if (tfp)
 	    tfp->dump(main_time);
@@ -96,8 +97,9 @@ int main(int argc, char **argv, char **env)
 	      printf("%lu output q is %s\n", main_time, q ? "ON" : "OFF");
 	    }
 	    }*/
-	  top->i_clk = !top->i_clk;
+	  top->wb_clk = !top->wb_clk;
 	  main_time+=31.25;
+
 	}
 	if (tfp)
 	  tfp->close();

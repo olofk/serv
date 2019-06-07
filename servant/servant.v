@@ -1,21 +1,12 @@
 `default_nettype none
-module serv_wrapper
+module servant
 (
- input wire  i_clk,
+ input wire  wb_clk,
+ input wire  wb_rst,
  output wire q);
 
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
-   parameter PLL = "NONE";
-
-   wire      wb_clk;
-   wire      wb_rst;
-
-   serv_clock_gen #(.PLL (PLL))
-   clock_gen
-     (.i_clk (i_clk),
-      .o_clk (wb_clk),
-      .o_rst (wb_rst));
 
    wire 	timer_irq;
 

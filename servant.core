@@ -1,0 +1,138 @@
+CAPI=2:
+
+name : ::servant:0
+
+filesets:
+  service:
+    files:
+      - servant/ice40_pll.v
+      - servant/service.v
+    file_type : verilogSource
+    depend : ["fusesoc:utils:generators"]
+
+  mem_files:
+    files:
+      - sw/blinky.hex       : {copyto : blinky.hex}
+      - sw/zephyr_hello.hex : {copyto : zephyr_hello.hex}
+    file_type : user
+
+  servant_tb:
+    files:
+      - bench/servant_tb.v
+    file_type : verilogSource
+    depend : [vlog_tb_utils]
+
+  soc:
+    files:
+      - servant/servant_clock_gen.v
+      - servant/servant_timer.v
+      - servant/servant_gpio.v
+      - servant/servant_arbiter.v
+      - servant/servant_mux.v
+      - servant/servant.v
+    file_type : verilogSource
+    depend : [serv, wb_ram]
+
+  tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
+  icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
+
+  verilator_tb: {files: [bench/servant_tb.cpp : {file_type : cppSource}]}
+
+targets:
+  default:
+    filesets : [soc]
+
+  icebreaker:
+    default_tool : icestorm
+    filesets : [mem_files, soc, service, icebreaker]
+    generate: [icebreaker_pll]
+    parameters : [memfile, memsize, PLL=ICE40_PAD]
+    tools:
+      icestorm:
+        nextpnr_options: [--up5k, --freq, 16]
+        pnr: next
+    toplevel : service
+
+  tinyfpga_bx:
+    default_tool : icestorm
+    filesets : [mem_files, soc, service, tinyfpga_bx]
+    generate: [tinyfpga_bx_pll]
+    parameters : [memfile, memsize, PLL=ICE40_CORE]
+    tools:
+      icestorm:
+        nextpnr_options : [--lp8k, --package, cm81, --freq, 32]
+        pnr: next
+    toplevel : service
+
+  lint:
+    default_tool : verilator
+    filesets : [soc]
+    tools:
+      verilator:
+        mode : lint-only
+    toplevel : servant
+
+  sim:
+    default_tool: icarus
+    filesets : [soc, servant_tb]
+    parameters : [RISCV_FORMAL=true, firmware]
+    toplevel : servant_tb
+
+  verilator_tb:
+    default_tool: verilator
+    filesets : [soc, verilator_tb]
+    parameters : [RISCV_FORMAL, firmware, memsize, signature, uart_baudrate, vcd]
+    tools:
+      verilator:
+        verilator_options : [--trace]
+    toplevel : servant
+
+parameters:
+  PLL:
+    datatype : str
+    description : PLL type to use for main clock generation
+    paramtype : vlogparam
+
+  RISCV_FORMAL:
+    datatype  : bool
+    paramtype : vlogdefine
+
+  firmware:
+    datatype : file
+    description : Preload RAM with a hex file at runtime (overrides memfile)
+    paramtype : plusarg
+
+  memfile:
+    datatype    : file
+    description : Preload RAM with a hex file at compile-time
+    paramtype   : vlogparam
+
+  memsize:
+    datatype    : int
+    default     : 8192
+    description : Memory size in bytes for RAM (default 8kiB)
+    paramtype   : vlogparam
+
+  signature:
+    datatype : file
+    paramtype : plusarg
+  uart_baudrate:
+    datatype : int
+    description : Treat q output as an UART with the specified baudrate (0 or omitted parameter disables UART decoding)
+    paramtype : plusarg
+
+  vcd:
+    datatype : bool
+    paramtype : plusarg
+
+generate:
+  icebreaker_pll:
+    generator: icepll
+    parameters:
+      freq_out : 16
+
+  tinyfpga_bx_pll:
+    generator: icepll
+    parameters:
+      freq_in  : 16
+      freq_out : 32
