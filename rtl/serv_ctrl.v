@@ -30,7 +30,7 @@ module serv_ctrl
 
    wire       pc_plus_4;
    wire       pc_plus_offset;
-
+   wire       pc_plus_offset_aligned;
    wire       plus_4;
 
    wire       pc;
@@ -83,7 +83,7 @@ module serv_ctrl
       .q   (pc_plus_offset),
       .o_v ());
 
-   wire       pc_plus_offset_aligned = pc_plus_offset & en_pc_r;
+   assign pc_plus_offset_aligned = pc_plus_offset & en_pc_r;
 
    assign o_ibus_cyc = en_pc_r & !i_pc_en;
 

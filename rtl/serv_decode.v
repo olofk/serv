@@ -77,6 +77,7 @@ module serv_decode
 
    reg [4:0] cnt;
    reg 	cnt_done;
+   wire cnt_en;
 
    reg [4:0] opcode;
    reg [31:0] imm;
@@ -150,6 +151,8 @@ module serv_decode
     343 1_011 mtval
     344 1_100 mip CWi
     */
+   wire csr_en = opcode[4] & opcode[2] & (|o_funct3) & running;
+
    assign o_csr_mstatus_en = csr_en & !op26 & !op22;
    assign o_csr_mie_en     = csr_en & !op26 &  op22 & !op20;
    assign o_csr_mtvec_en = ((!op26 & op20 & opcode[4] & opcode[2]) & state[1]) | (state == TRAP);
@@ -159,7 +162,6 @@ module serv_decode
    assign o_csr_mtval_en    = csr_en                &  op21 &  op20;
    assign o_csr_mip_en      = csr_en & op26 & op22;
 
-   wire csr_en = opcode[4] & opcode[2] & (|o_funct3) & running;
 
 
    always @(o_funct3, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
@@ -205,6 +207,19 @@ module serv_decode
 
    assign o_alu_bool_op = o_funct3[1:0];
 
+   wire sign_bit = i_wb_rdt[31];
+
+   wire [4:0] op_code = i_wb_rdt[6:2];
+
+   wire btype = op_code[4] & !op_code[2] & !op_code[0];
+   wire itype = (!op_code[3] & !op_code[0]) | (!op_code[2]&!op_code[1]&op_code[0]) | (!op_code[0]&op_code[2]);
+   wire jtype = op_code[1];
+   wire stype = op_code[3] & ~op_code[2] & ~op_code[4];
+   wire utype = !op_code[4] & op_code[0];
+
+   wire iorjtype = (op_code[0] & ~op_code[2]) | (op_code[2] & ~op_code[0]) | (~op_code[0] & ~op_code[3]);
+   wire sorbtype = op_code[3:0] == 4'b1000;
+
    always @(posedge clk) begin
       casez(o_funct3)
         3'b000  : o_alu_rd_sel <= ALU_RESULT_ADD;
@@ -246,17 +261,6 @@ module serv_decode
 	imm <= {imm[0], imm[31:1]};
    end
 
-   wire [4:0] op_code = i_wb_rdt[6:2];
-
-   wire btype = op_code[4] & !op_code[2] & !op_code[0];
-   wire itype = (!op_code[3] & !op_code[0]) | (!op_code[2]&!op_code[1]&op_code[0]) | (!op_code[0]&op_code[2]);
-   wire jtype = op_code[1];
-   wire stype = op_code[3] & ~op_code[2] & ~op_code[4];
-   wire utype = !op_code[4] & op_code[0];
-
-   wire iorjtype = (op_code[0] & ~op_code[2]) | (op_code[2] & ~op_code[0]) | (~op_code[0] & ~op_code[3]);
-   wire sorbtype = op_code[3:0] == 4'b1000;
-   wire sign_bit = i_wb_rdt[31];
 
    assign o_imm = imm[0];
 
@@ -267,7 +271,7 @@ module serv_decode
    assign o_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
    assign o_rd_mem_en =              !opcode[2] & !opcode[4];
 
-   wire cnt_en = (state != IDLE);
+   assign cnt_en = (state != IDLE);
 
    assign running = (state == RUN);
 
@@ -281,7 +285,6 @@ module serv_decode
 	o_csr_mcause <= {!op20,3'b011};
    end
 
-   assign o_rf_rs_en = two_stage_op ? (state == INIT) : o_ctrl_pc_en;
 
    //slt*, branch/jump, shift, load/store
    wire two_stage_op =
@@ -291,6 +294,8 @@ module serv_decode
 
    reg 	mtip_r;
    reg 	pending_irq;
+
+   assign o_rf_rs_en = two_stage_op ? (state == INIT) : o_ctrl_pc_en;
 
    always @(posedge clk) begin
       if (state == INIT)

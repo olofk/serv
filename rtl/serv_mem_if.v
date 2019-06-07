@@ -34,19 +34,22 @@ module serv_mem_if
    wire 	 dat1_en;
    wire 	 dat2_en;
    wire 	 dat3_en;
+   reg [1:0] 	 bytepos;
+
+   wire [1:0] dat_sel = i_bytecnt[1] ? i_bytecnt : (i_bytecnt | bytepos);
 
    wire 	 dat_cur = (dat_sel == 3) ? dat3[0] :
 		 (dat_sel == 2) ? dat2[0] :
 		 (dat_sel == 1) ? dat1[0] : dat0[0];
 
    wire is_signed = ~i_funct3[2];
-   assign o_rd = dat_valid ? dat_cur : signbit & is_signed;
-
-   wire dat_valid = is_word | (i_bytecnt == 2'b00) | (is_half & !i_bytecnt[1]);
-
    wire is_word = i_funct3[1];
    wire is_half = i_funct3[0];
    wire is_byte = !(|i_funct3[1:0]);
+
+   wire dat_valid = is_word | (i_bytecnt == 2'b00) | (is_half & !i_bytecnt[1]);
+   assign o_rd = dat_valid ? dat_cur : signbit & is_signed;
+
 
    wire       upper_half = bytepos[1];
 /*
@@ -60,7 +63,6 @@ module serv_mem_if
    assign o_wb_sel[0] = (bytepos == 2'b00);
 
    assign o_wb_we = i_cmd;
-   reg [1:0] bytepos;
 
 
    wire       wbyte0 = (i_bytecnt == 2'b00);
@@ -74,8 +76,6 @@ module serv_mem_if
    assign dat3_en = i_en & (i_init ? (wbyte0 | wbyte1 | wbyte3) : (dat_sel == 2'd3));
 
    assign o_wb_dat = {dat3,dat2,dat1,dat0};
-
-   wire [1:0] dat_sel = i_bytecnt[1] ? i_bytecnt : (i_bytecnt | bytepos);
 
    always @(posedge i_clk) begin
       if (i_init)

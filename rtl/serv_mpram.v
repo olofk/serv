@@ -46,6 +46,7 @@ module serv_mpram
 
    reg [3:0] 	     wcnt_lo;
    reg [2:0] 	     wcnt_hi;
+   reg 		     wgo_r;
 
    assign wdata = wcnt_lo[0] ? wdata0[3:0] :
 		  wcnt_lo[1] ? wdata1[3:0] :
@@ -67,7 +68,6 @@ module serv_mpram
 
    wire 	     wgo = !(|wcnt_lo) & |({i_rd_wen,csr_en,i_mtval_wen,i_mepc_wen});
 
-   reg 		     wgo_r;
 
    always @(posedge i_clk) begin
       if (wgo) begin
