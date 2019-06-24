@@ -4,9 +4,7 @@ name : ::servant:0
 
 filesets:
   service:
-    files:
-      - servant/ice40_pll.v
-      - servant/service.v
+    files: [servant/ice40_pll.v, servant/service.v]
     file_type : verilogSource
     depend : ["fusesoc:utils:generators"]
 
@@ -17,9 +15,7 @@ filesets:
     file_type : user
 
   servant_tb:
-    files:
-      - bench/servant_tb.v
-    file_type : verilogSource
+    files: [bench/servant_tb.v : {file_type : verilogSource}]
     depend : [vlog_tb_utils]
 
   soc:
@@ -35,9 +31,12 @@ filesets:
 
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
-
   verilator_tb: {files: [bench/servant_tb.cpp : {file_type : cppSource}]}
-
+  nexys_a7:
+    files:
+      - servant/servix_clock_gen.v : {file_type : verilogSource}
+      - servant/servix.v : {file_type : verilogSource}
+      - data/nexys_a7.xdc : {file_type : xdc}
 targets:
   default:
     filesets : [soc]
@@ -71,6 +70,14 @@ targets:
       verilator:
         mode : lint-only
     toplevel : servant
+
+  nexys_a7:
+    default_tool: vivado
+    filesets : [mem_files, soc, nexys_a7]
+    parameters : [memfile, memsize]
+    tools:
+      vivado: {part : xc7a100tcsg324-1}
+    toplevel : servix
 
   sim:
     default_tool: icarus
