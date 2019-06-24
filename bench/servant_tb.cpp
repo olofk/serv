@@ -23,15 +23,67 @@ void INThandler(int signal)
 	done = true;
 }
 
+typedef struct {
+  bool last_value;
+} gpio_context_t;
+
+void do_gpio(gpio_context_t *context, bool gpio) {
+  if (context->last_value != gpio) {
+    context->last_value = gpio;
+    printf("%lu output q is %s\n", main_time, gpio ? "ON" : "OFF");
+  }
+}
+
+typedef struct {
+  uint8_t state;
+  char ch;
+  uint32_t baud_t;
+  vluint64_t last_update;
+} uart_context_t;
+
+void uart_init(uart_context_t *context, uint32_t baud_rate) {
+  context->baud_t = 1000*1000*1000/baud_rate;
+}
+
+void do_uart(uart_context_t *context, bool rx) {
+  if (context->state == 0) {
+    if (!rx) {
+      context->last_update = main_time + context->baud_t/2;
+      context->state++;
+    }
+  }
+  else if(context->state == 1) {
+    if (main_time > context->last_update) {
+      context->last_update += context->baud_t;
+      context->ch = 0;
+      context->state++;
+    }
+  }
+  else if (context->state < 10) {
+    if (main_time > context->last_update) {
+      context->last_update += context->baud_t;
+      context->ch |= rx << (context->state-2);
+      context->state++;
+    }
+  }
+  else {
+    if (main_time > context->last_update) {
+      context->last_update += context->baud_t;
+      putchar(context->ch);
+      context->state=0;
+    }
+  }
+}
+
 int main(int argc, char **argv, char **env)
 {
   vluint64_t sample_time = 0;
 	uint32_t insn = 0;
 	uint32_t ex_pc = 0;
 	int baud_rate = 0;
-	int baud_t    = 0;
-	int uart_state = 0;
-	char uart_ch = 0;
+
+	gpio_context_t gpio_context;
+	uart_context_t uart_context;
 	Verilated::commandArgs(argc, argv);
 
 	Vservant* top = new Vservant;
@@ -40,7 +92,7 @@ int main(int argc, char **argv, char **env)
 	if (arg[0]) {
 	  baud_rate = atoi(arg+15);
 	  if (baud_rate) {
-	    baud_t = 1000*1000*1000/baud_rate;
+	    uart_init(&uart_context, baud_rate);
 	  }
 	}
 
@@ -62,41 +114,10 @@ int main(int argc, char **argv, char **env)
 	  top->eval();
 	  if (tfp)
 	    tfp->dump(main_time);
-	  if (baud_rate) {
-	    if (uart_state == 0) {
-	      if (!top->q) {
-		sample_time = main_time + baud_t/2;
-		uart_state++;
-	      }
-	    }
-	    else if(uart_state == 1) {
-	      if (main_time > sample_time) {
-		sample_time += baud_t;
-		uart_ch = 0;
-		uart_state++;
-	      }
-	    }
-	    else if (uart_state < 10) {
-	      if (main_time > sample_time) {
-		sample_time += baud_t;
-		uart_ch |= top->q << (uart_state-2);
-		uart_state++;
-	      }
-	    }
-	    else {
-	      if (main_time > sample_time) {
-		sample_time += baud_t;
-		putchar(uart_ch);
-		uart_state=0;
-	      }
-	    }
-	  }
-	  /*else {
-	    if (q != top->q) {
-	      q = top->q;
-	      printf("%lu output q is %s\n", main_time, q ? "ON" : "OFF");
-	    }
-	    }*/
+	  if (baud_rate)
+	    do_uart(&uart_context, top->q);
+	  else
+	    do_gpio(&gpio_context, top->q);
 	  top->wb_clk = !top->wb_clk;
 	  main_time+=31.25;
 
