@@ -2,8 +2,8 @@
 module serv_csr
   (
    input wire 	    i_clk,
-   input wire [4:0] i_cnt,
-   input wire [3:0] i_cnt_r,
+   input wire [4:2] i_cnt,
+   input wire [3:2] i_cnt_r,
    //From mpram
    input wire 	    i_rf_csr_out,
    //to mpram

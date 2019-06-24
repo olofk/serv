@@ -8,7 +8,7 @@ module serv_decode
    input wire [31:0] i_wb_rdt,
    input wire 	     i_wb_en,
    input wire 	     i_rf_ready,
-   output wire [4:0] o_cnt,
+   output reg [4:0]  o_cnt,
    output reg [3:0]  o_cnt_r,
    output wire 	     o_cnt_done,
    output reg 	     o_bufreg_hold,
@@ -75,7 +75,6 @@ module serv_decode
 
    reg [1:0]    state;
 
-   reg [4:0] cnt;
    reg 	cnt_done;
    wire cnt_en;
 
@@ -85,8 +84,6 @@ module serv_decode
    reg 	      op21;
    reg 	      op22;
    reg 	      op26;
-
-   assign o_cnt = cnt;
 
    wire      running;
    wire      mem_op;
@@ -192,10 +189,10 @@ module serv_decode
 
    end
 
-   assign o_csr_imm = (cnt < 5) ? o_rf_rs1_addr[cnt[2:0]] : 1'b0;
+   assign o_csr_imm = (o_cnt < 5) ? o_rf_rs1_addr[o_cnt[2:0]] : 1'b0;
    assign o_csr_d_sel = o_funct3[2];
 
-   assign o_alu_shamt_en = (cnt < 5) & (state == INIT);
+   assign o_alu_shamt_en = (o_cnt < 5) & (state == INIT);
    assign o_alu_sh_signed = imm30;
    assign o_alu_sh_right = o_funct3[2];
 
@@ -203,7 +200,7 @@ module serv_decode
    assign o_mem_cmd  = opcode[3];
 
    assign o_mem_init = mem_op & (state == INIT);
-   assign o_mem_bytecnt = cnt[4:3];
+   assign o_mem_bytecnt = o_cnt[4:3];
 
    assign o_alu_bool_op = o_funct3[1:0];
 
@@ -308,7 +305,7 @@ module serv_decode
       if (i_mtip & !mtip_r & i_timer_irq_en)
 	pending_irq <= 1'b1;
 
-      cnt_done <= (cnt[4:2] == 3'b111) & o_cnt_r[2];
+      cnt_done <= (o_cnt[4:2] == 3'b111) & o_cnt_r[2];
 
       o_bufreg_hold <= 1'b0;
 
@@ -349,13 +346,13 @@ module serv_decode
         default : state <= IDLE;
       endcase
 
-      cnt <= cnt + {4'd0,cnt_en};
+      o_cnt <= o_cnt + {4'd0,cnt_en};
       if (cnt_en)
 	o_cnt_r <= {o_cnt_r[2:0],o_cnt_r[3]};
 
       if (i_rst) begin
 	 state <= IDLE;
-	 cnt   <= 5'd0;
+	 o_cnt   <= 5'd0;
 	 pending_irq <= 1'b0;
 	 stage_one_done <= 1'b0;
 	 o_ctrl_jump <= 1'b0;

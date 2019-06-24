@@ -208,8 +208,8 @@ module serv_top
      (
       .i_clk    (clk),
       .i_rst    (i_rst),
-      .i_cnt    (cnt),
-      .i_cnt_r  (cnt_r),
+      .i_cnt    (cnt[4:2]),
+      .i_cnt_r  (cnt_r[1:0]),
       .i_en     (!(bufreg_hold | o_dbus_cyc)),
       .i_clr    (!mem_en),
       .i_loop   (bufreg_loop),
@@ -229,8 +229,8 @@ module serv_top
       .i_rst      (i_rst),
       .i_en       (ctrl_en),
       .i_pc_en    (ctrl_pc_en),
-      .i_cnt      (cnt),
-      .i_cnt_r    (cnt_r),
+      .i_cnt      (cnt[4:2]),
+      .i_cnt_r    (cnt_r[2:1]),
       .i_cnt_done (cnt_done),
       .i_jump     (jump),
       .i_offset   (imm),
@@ -350,8 +350,8 @@ module serv_top
    serv_csr csr
      (
       .i_clk        (clk),
-      .i_cnt        (cnt),
-      .i_cnt_r      (cnt_r),
+      .i_cnt        (cnt[4:2]),
+      .i_cnt_r      (cnt_r[3:2]),
       .i_rf_csr_out (rf_csr_out),
       .o_csr_in     (csr_in),
       .i_mtip       (i_timer_irq),

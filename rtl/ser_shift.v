@@ -2,7 +2,6 @@
 module ser_shift
   (
    input wire 	    i_clk,
-   input wire 	    i_rst,
    input wire 	    i_load,
    input wire [4:0] i_shamt,
    input wire 	    i_shamt_msb,

@@ -2,8 +2,8 @@ module serv_bufreg
   (
    input wire 	      i_clk,
    input wire 	      i_rst,
-   input wire [4:0]   i_cnt,
-   input wire [3:0]   i_cnt_r,
+   input wire [4:2]   i_cnt,
+   input wire [1:0]   i_cnt_r,
    input wire 	      i_en,
    input wire 	      i_clr,
    input wire 	      i_loop,

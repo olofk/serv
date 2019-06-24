@@ -52,7 +52,6 @@ module serv_alu
    ser_shift shift
      (
       .i_clk (clk),
-      .i_rst (i_rst),
       .i_load (i_init),
       .i_shamt (shamt),
       .i_shamt_msb (shamt_msb),
