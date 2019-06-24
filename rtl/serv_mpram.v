@@ -164,6 +164,10 @@ module serv_mpram
    end
 
 `ifdef RISCV_FORMAL
+ `define SERV_CLEAR_RAM
+`endif
+
+`ifdef SERV_CLEAR_RAM
    integer i;
    initial
      for (i=0;i<256;i=i+1)

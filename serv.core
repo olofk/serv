@@ -24,7 +24,7 @@ filesets:
 targets:
   default:
     filesets : [core]
-    parameters : [RISCV_FORMAL]
+    parameters : [RISCV_FORMAL, SERV_CLEAR_RAM]
 
   lint:
     default_tool : verilator
@@ -36,6 +36,10 @@ targets:
 
 parameters:
   RISCV_FORMAL:
+    datatype  : bool
+    paramtype : vlogdefine
+
+  SERV_CLEAR_RAM:
     datatype  : bool
     paramtype : vlogdefine
 
