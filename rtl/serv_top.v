@@ -19,6 +19,7 @@ module serv_top
    output reg 	      rvfi_halt = 1'b0,
    output reg 	      rvfi_intr = 1'b0,
    output reg [1:0]   rvfi_mode = 2'b11,
+   output reg [1:0]   rvfi_ixl = 2'b01,
    output reg [4:0]   rvfi_rs1_addr,
    output reg [4:0]   rvfi_rs2_addr,
    output reg [31:0]  rvfi_rs1_rdata,
@@ -396,6 +397,7 @@ module serv_top
       rvfi_halt <= 1'b0;
       rvfi_intr <= 1'b0;
       rvfi_mode <= 2'd3;
+      rvfi_ixl = 2'd1;
       if (rf_ready) begin
 	 rvfi_rs1_addr <= rs1_addr;
          rvfi_rs2_addr <= rs2_addr;
