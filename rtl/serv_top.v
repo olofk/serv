@@ -117,15 +117,12 @@ module serv_top
 
    wire 	 csr_mstatus_en;
    wire 	 csr_mie_en;
-   wire 	 csr_mtvec_en;
-   wire 	 csr_mip_en;
-   wire 	 csr_mscratch_en;
-   wire 	 csr_mepc_en;
    wire 	 csr_mcause_en;
-   wire 	 csr_mtval_en;
    wire [1:0]	 csr_source;
    wire 	 csr_imm;
    wire 	 csr_d_sel;
+   wire 	 csr_en;
+   wire [1:0] 	 csr_addr;
 
    wire [3:0] 	 mcause;
 
@@ -184,14 +181,11 @@ module serv_top
       .o_mem_init     (mem_init),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
+      .o_csr_en          (csr_en),
+      .o_csr_addr        (csr_addr),
       .o_csr_mstatus_en  (csr_mstatus_en),
       .o_csr_mie_en      (csr_mie_en),
-      .o_csr_mtvec_en    (csr_mtvec_en),
-      .o_csr_mip_en      (csr_mip_en),
-      .o_csr_mscratch_en (csr_mscratch_en),
-      .o_csr_mepc_en     (csr_mepc_en),
       .o_csr_mcause_en   (csr_mcause_en),
-      .o_csr_mtval_en    (csr_mtval_en),
       .o_csr_source   (csr_source),
       .o_csr_mcause   (mcause),
       .o_csr_imm      (csr_imm),
@@ -300,15 +294,13 @@ module serv_top
      (
       .i_clk       (clk),
       .i_rst       (i_rst),
-      //MEPC write port
-      .i_mepc_wen  (1'b0),
-      .i_mepc      (1'b0),
-      //MTVAL write port
-      .i_mtval_wen (1'b0),
-      .i_mtval     (1'b0),
+      //Trap interface
+      .i_trap      (trap),
+      .i_mepc      (o_ibus_adr[0]),
+      .i_mtval     (mem_misalign ? bad_adr : bad_pc),
       //CSR write port
-      .i_csr_mscratch_en (csr_mscratch_en),
-      .i_csr_mtvec_en    (csr_mtvec_en),
+      .i_csr_en    (csr_en),
+      .i_csr_addr  (csr_addr),
       .i_csr       (csr_in),
       //RD write port
       .i_rd_wen    (rd_en & (|rd_addr)),
@@ -359,14 +351,9 @@ module serv_top
       .o_timer_irq_en ( timer_irq_en),
       .i_mstatus_en (csr_mstatus_en),
       .i_mie_en     (csr_mie_en    ),
-      .i_mip_en     (csr_mip_en    ),
-      .i_mepc_en    (csr_mepc_en   ),
       .i_mcause_en  (csr_mcause_en ),
-      .i_mtval_en   (csr_mtval_en  ),
       .i_csr_source (csr_source),
       .i_trap       (trap),
-      .i_pc         (o_ibus_adr[0]),
-      .i_mtval      (mem_misalign ? bad_adr : bad_pc),
       .i_mcause     (mcause),
       .i_d          (csr_d_sel ? csr_imm : rs1),
       .o_q          (csr_rd));
@@ -376,7 +363,7 @@ module serv_top
 
    always @(posedge clk) begin
       rvfi_valid <= cnt_done & ctrl_pc_en;
-      rvfi_order <= rvfi_order + rvfi_valid;
+      rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
       if (o_ibus_cyc & i_ibus_ack)
 	rvfi_insn <= i_ibus_rdt;
       if (rd_en)
@@ -420,8 +407,10 @@ module serv_top
          rvfi_mem_wmask <= 4'b0000;
       end
    end
+   /* verilator lint_off COMBDLY */
    always @(o_ibus_adr)
      rvfi_pc_wdata <= o_ibus_adr;
+   /* verilator lint_on COMBDLY */
 
 `endif
 

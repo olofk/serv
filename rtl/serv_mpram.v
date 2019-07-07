@@ -3,15 +3,13 @@ module serv_mpram
   (
    input wire 	    i_clk,
    input wire 	    i_rst,
-   //MEPC write port
-   input wire 	    i_mepc_wen,
+   //Trap interface
+   input wire 	    i_trap,
    input wire 	    i_mepc,
-   //MTVAL write port
-   input wire 	    i_mtval_wen,
    input wire 	    i_mtval,
    //CSR interface
-   input wire 	    i_csr_mscratch_en,
-   input wire 	    i_csr_mtvec_en,
+   input wire 	    i_csr_en,
+   input wire [1:0] i_csr_addr,
    input wire 	    i_csr,
    output wire 	    o_csr,
    //RD write port
@@ -27,10 +25,6 @@ module serv_mpram
    //RS2 read port
    input wire [4:0] i_rs2_raddr,
    output wire 	    o_rs2);
-
-   reg [1:0] 	    csr_addr;
-   wire 	    csr_en = i_csr_mscratch_en|i_csr_mtvec_en;
-
 
    wire [8:0] 	    waddr;
 
@@ -55,24 +49,24 @@ module serv_mpram
    assign wen = !wgo_r & |(wen_r & wcnt_lo);
 
    reg [4:0] 	     rd_waddr;
-   //mepc  100000
+   //mepc  100010
    //mtval 100011
    //csr   1000xx
    //rd    0xxxxx
    assign waddr[8] = !wcnt_lo[3];
    assign waddr[7:5] = wcnt_lo[3] ? rd_waddr[4:2] : 3'b000;
    assign waddr[4:3] = wcnt_lo[3] ? rd_waddr[1:0] :
-		       wcnt_lo[2] ? csr_addr :
-		       wcnt_lo[1] ? 2'b11 : 2'b00;
+		       wcnt_lo[2] ? i_csr_addr :
+		       wcnt_lo[1] ? 2'b11 : 2'b10;
    assign waddr[2:0] = wcnt_hi;
 
-   wire 	     wgo = !(|wcnt_lo) & |({i_rd_wen,csr_en,i_mtval_wen,i_mepc_wen});
+   wire 	     wgo = !(|wcnt_lo) & |({i_rd_wen,i_csr_en,i_trap, i_trap});
 
 
    always @(posedge i_clk) begin
       if (wgo) begin
 	 wgo_r <= 1'b1;
-	 wen_r <= {i_rd_wen,csr_en,i_mtval_wen,i_mepc_wen};
+	 wen_r <= {i_rd_wen,i_csr_en,i_trap,i_trap};
 	 rd_waddr <= i_rd_waddr;
       end
       wdata0 <= {i_mepc,wdata0[4:1]};
@@ -120,10 +114,8 @@ module serv_mpram
       if (i_rreq) begin
 	 rcnt_lo <= 4'd1;
 	 rcnt_hi <= 3'd0;
-	 csr_addr <= {1'b0,i_csr_mtvec_en};
       end else
 	rcnt_lo <= {rcnt_lo[2:0],rcnt_lo[3]};
-
 
       rdata0[4:0] <= rdata0[5:1];
       rdata1[3:0] <= rdata1[4:1];
@@ -145,12 +137,12 @@ module serv_mpram
    assign raddr[7:5] = rcnt_lo[0] ? i_rs1_raddr[4:2] :
 		       rcnt_lo[1] ? i_rs2_raddr[4:2] : 3'd0;
    assign raddr[4:3] = rcnt_lo[0] ? i_rs1_raddr[1:0] :
-		       rcnt_lo[1] ? i_rs2_raddr[1:0] : csr_addr;
+		       rcnt_lo[1] ? i_rs2_raddr[1:0] : i_csr_addr;
    assign raddr[2:0] = rcnt_hi;
 
    assign o_rs1 = rdata0[0];
    assign o_rs2 = rdata1[0];
-   assign o_csr = rdata2[0] & csr_en;
+   assign o_csr = rdata2[0] & i_csr_en;
 
    reg [3:0]  memory [0:511];
 

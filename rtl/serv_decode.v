@@ -22,7 +22,7 @@ module serv_decode
    output wire 	     o_ctrl_utype,
    output wire 	     o_ctrl_lui,
    output wire 	     o_ctrl_trap,
-   output wire 	     o_ctrl_mret,
+   output reg 	     o_ctrl_mret,
    input wire 	     i_ctrl_misalign,
    output wire 	     o_rf_rs_en,
    output wire 	     o_rf_rd_en,
@@ -47,14 +47,11 @@ module serv_decode
    output wire 	     o_mem_init,
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
+   output wire 	     o_csr_en,
+   output reg [1:0]  o_csr_addr,
    output wire 	     o_csr_mstatus_en,
    output wire 	     o_csr_mie_en,
-   output wire 	     o_csr_mtvec_en,
-   output wire 	     o_csr_mip_en,
-   output wire 	     o_csr_mscratch_en,
-   output wire 	     o_csr_mepc_en,
    output wire 	     o_csr_mcause_en,
-   output wire 	     o_csr_mtval_en,
    output reg [1:0]  o_csr_source,
    output reg [3:0]  o_csr_mcause,
    output wire 	     o_csr_imm,
@@ -117,7 +114,8 @@ module serv_decode
 
    assign o_ctrl_utype = !opcode[4] & opcode[2] & opcode[0];
    assign o_ctrl_jal_or_jalr = opcode[4] & opcode[0];
-   assign o_ctrl_mret = (opcode[4] & opcode[2]) & op21 & !(|o_funct3);
+
+   wire mret = (i_wb_rdt[6] & i_wb_rdt[4] & i_wb_rdt[21] & !(|i_wb_rdt[14:12]));
 
    assign o_rf_rd_en = running & (opcode[2] |
 				  (!opcode[2] & opcode[4] & opcode[0]) |
@@ -148,17 +146,17 @@ module serv_decode
     343 1_011 mtval
     344 1_100 mip CWi
     */
+
+   //true  for mtvec,mscratch,mepc and mtval
+   //false for mstatus, mie, mcause, mip
+   wire csr_valid = op20 | (op26 & !op22 & !op21);
+
+   assign o_csr_en = (o_ctrl_mret & state[1]) | o_ctrl_trap | (csr_en & csr_valid);
    wire csr_en = opcode[4] & opcode[2] & (|o_funct3) & running;
 
    assign o_csr_mstatus_en = csr_en & !op26 & !op22;
    assign o_csr_mie_en     = csr_en & !op26 &  op22 & !op20;
-   assign o_csr_mtvec_en = ((!op26 & op20 & opcode[4] & opcode[2]) & state[1]) | (state == TRAP);
-   assign o_csr_mscratch_en = csr_en & op26 & !op22 & !op21 & !op20;
-   assign o_csr_mepc_en     = csr_en & op26         & !op21 &  op20 | (o_ctrl_mret & state[1]);
    assign o_csr_mcause_en   = csr_en                &  op21 & !op20;
-   assign o_csr_mtval_en    = csr_en                &  op21 &  op20;
-   assign o_csr_mip_en      = csr_en & op26 & op22;
-
 
 
    always @(o_funct3, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
@@ -239,6 +237,13 @@ module serv_decode
 	 op22 <= i_wb_rdt[22];
 	 op26 <= i_wb_rdt[26];
 
+	 //Default to mtvec to have the correct CSR address loaded in case of trap
+	 o_csr_addr <= mret ? 2'b10 : //mepc
+		       (i_wb_rdt[26] & !i_wb_rdt[20]) ? 2'b00 : //mscratch
+		       (i_wb_rdt[26] & !i_wb_rdt[21]) ? 2'b10 : //mepc
+		       (i_wb_rdt[26])                 ? 2'b11 : //mtval
+		       2'b01;                                   //mtvec
+	 o_ctrl_mret <= mret;
 	 imm[31] <= sign_bit;
 	 imm[30:20] <= utype ? i_wb_rdt[30:20] : {11{sign_bit}};
 	 imm[19:12] <= (utype | jtype) ? i_wb_rdt[19:12] : {8{sign_bit}};
