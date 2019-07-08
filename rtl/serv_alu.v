@@ -12,7 +12,6 @@ module serv_alu
    input wire 	    i_sub,
    input wire [1:0] i_bool_op,
    input wire 	    i_cmp_sel,
-   input wire 	    i_cmp_neg,
    input wire 	    i_cmp_uns,
    output wire 	    o_cmp,
    input wire 	    i_shamt_en,
@@ -99,7 +98,7 @@ module serv_alu
       .o_q   (result_lt));
 
    assign plus_1 = i_en & !en_r;
-   assign o_cmp = i_cmp_neg^((i_cmp_sel == ALU_CMP_EQ) ? result_eq : result_lt);
+   assign o_cmp = (i_cmp_sel == ALU_CMP_EQ) ? result_eq : result_lt;
 
    localparam [15:0] BOOL_LUT = 16'h8E96;//And, Or, =, xor
    wire result_bool = BOOL_LUT[{i_bool_op, i_rs1, i_op_b}];

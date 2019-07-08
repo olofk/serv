@@ -34,7 +34,6 @@ module serv_decode
    output wire 	     o_alu_sub,
    output wire [1:0] o_alu_bool_op,
    output reg 	     o_alu_cmp_sel,
-   output wire 	     o_alu_cmp_neg,
    output reg 	     o_alu_cmp_uns,
    input wire 	     i_alu_cmp,
    output wire 	     o_alu_shamt_en,
@@ -100,15 +99,19 @@ module serv_decode
    assign shift_op = op_or_opimm & (o_funct3[1:0] == 2'b01);
    assign slt_op   = op_or_opimm & (o_funct3[2:1] == 2'b01);
 
-   assign branch_op = (opcode[4:2] == 3'b110) & !opcode[0];
-
    assign e_op = (opcode[4:2] == 3'b111) & !op21 & !(|o_funct3);
 
    assign o_bufreg_imm_en = !opcode[2];
    assign o_bufreg_loop   = op_or_opimm & !(state == INIT);
 
    assign o_ctrl_pc_en  = running | o_ctrl_trap;
-   wire take_branch = (opcode[4:2] == 3'b110) & (opcode[0] | i_alu_cmp);
+
+
+   //Take branch for jump or branch instructions (opcode == 1x0xx) if
+   //a) It's an unconditional branch (opcode[0] == 1)
+   //b) It's a conditional branch (opcode[0] == 0) of type beq,blt,bltu (o_funct3[0] == 0) and ALU compare is true
+   //c) It's a conditional branch (opcode[0] == 0) of type bne,bge,bgeu (o_funct3[0] == 1) and ALU compare is false
+   wire take_branch = (opcode[4] & !opcode[2]) & (opcode[0] | (i_alu_cmp^o_funct3[0]));
 
    assign o_ctrl_jalr = opcode[4] & (opcode[1:0] == 2'b01);
 
@@ -135,7 +138,6 @@ module serv_decode
    always @(posedge clk)
      alu_sub_r <= opcode[3] & imm30;
 
-   assign o_alu_cmp_neg = branch_op & o_funct3[0];
    /*
     300 0_000 mstatus RWSC
     304 0_100 mie SCWi
