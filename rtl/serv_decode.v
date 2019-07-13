@@ -33,7 +33,7 @@ module serv_decode
    output wire 	     o_alu_init,
    output wire 	     o_alu_sub,
    output wire [1:0] o_alu_bool_op,
-   output reg 	     o_alu_cmp_sel,
+   output wire 	     o_alu_cmp_eq,
    output reg 	     o_alu_cmp_uns,
    input wire 	     i_alu_cmp,
    output wire 	     o_alu_shamt_en,
@@ -161,14 +161,10 @@ module serv_decode
    assign o_csr_mcause_en   = csr_en                &  op21 & !op20;
 
 
-   always @(o_funct3, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
-      casez (o_funct3)
-        3'b00?  : o_alu_cmp_sel = ALU_CMP_EQ;
-        3'b01?  : o_alu_cmp_sel = ALU_CMP_LT;
-        3'b1??  : o_alu_cmp_sel = ALU_CMP_LT;
-        default : o_alu_cmp_sel = 1'bx;
-      endcase
 
+   assign o_alu_cmp_eq = o_funct3[2:1] == 2'b00;
+
+   always @(o_funct3, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
       casez (o_funct3)
         3'b00?  : o_alu_cmp_uns = 1'b0;
         3'b010  : o_alu_cmp_uns = 1'b0;

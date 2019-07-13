@@ -8,20 +8,6 @@ localparam[1:0]
   ALU_RESULT_LT   = 2'd2,
   ALU_RESULT_BOOL = 2'd3;
 
-localparam [0:0]
-  ALU_CMP_LT = 1'b0,
-  ALU_CMP_EQ = 1'b1;
-
-/*
- source
- ADD, SUB
- SL,SR
- SLT
- XOR,
- OR
- AND
-*/
-
 localparam [1:0]
   CSR_SOURCE_CSR = 2'b00,
   CSR_SOURCE_EXT = 2'b01,
