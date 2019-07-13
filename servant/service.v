@@ -22,7 +22,7 @@ module service
        .memsize (memsize))
    servant
      (.wb_clk (wb_clk),
-      .wb_clk (wb_clk),
+      .wb_rst (wb_rst),
       .q      (q));
 
 endmodule
