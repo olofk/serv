@@ -153,13 +153,12 @@ module serv_decode
    //false for mstatus, mie, mcause, mip
    wire csr_valid = op20 | (op26 & !op22 & !op21);
 
-   assign o_csr_en = (o_ctrl_mret & state[1]) | o_ctrl_trap | (csr_en & csr_valid);
-   wire csr_en = opcode[4] & opcode[2] & (|o_funct3) & running;
+   wire csr_op = opcode[4] & opcode[2] & (|o_funct3);
 
-   assign o_csr_mstatus_en = csr_en & !op26 & !op22;
-   assign o_csr_mie_en     = csr_en & !op26 &  op22 & !op20;
-   assign o_csr_mcause_en   = csr_en                &  op21 & !op20;
-
+   assign o_csr_en = state[1] & (o_ctrl_mret | state[0] | (csr_op & csr_valid));
+   assign o_csr_mstatus_en = csr_op & (state == RUN) & !op26 & !op22;
+   assign o_csr_mie_en     = csr_op & (state == RUN) & !op26 &  op22 & !op20;
+   assign o_csr_mcause_en  = csr_op & (state == RUN)         &  op21 & !op20;
 
 
    assign o_alu_cmp_eq = o_funct3[2:1] == 2'b00;
