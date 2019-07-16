@@ -48,6 +48,7 @@ module serv_top
 
    wire 	 rd_alu_en;
    wire 	 rd_mem_en;
+   wire 	 rd_csr_en;
    wire          ctrl_rd;
    wire          alu_rd;
    wire          mem_rd;
@@ -116,6 +117,8 @@ module serv_top
    wire 	 csr_d_sel;
    wire 	 csr_en;
    wire [1:0] 	 csr_addr;
+   wire 	 csr_pc;
+
 
    wire [3:0] 	 mcause;
 
@@ -170,6 +173,7 @@ module serv_top
       .o_mem_init     (mem_init),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
+      .o_rd_csr_en    (rd_csr_en),
       .o_csr_en          (csr_en),
       .o_csr_addr        (csr_addr),
       .o_csr_mstatus_en  (csr_mstatus_en),
@@ -225,7 +229,7 @@ module serv_top
       //Data
       .i_imm      (imm),
       .i_buf      (bufreg_q),
-      .i_csr_pc   (csr_rd),
+      .i_csr_pc   (csr_pc),
       .o_rd       (ctrl_rd),
       .o_bad_pc   (bad_pc),
       //External
@@ -235,7 +239,7 @@ module serv_top
 
    assign rd = (ctrl_rd ) |
 	       (rd_alu_en  & alu_rd ) |
-	       (csr_rd ) |
+	       (csr_rd & rd_csr_en) |
 	       (rd_mem_en  & mem_rd);
 
    assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm : rs2;
@@ -287,6 +291,7 @@ module serv_top
       .i_trap      (trap),
       .i_mepc      (o_ibus_adr[0]),
       .i_mtval     (mem_misalign ? bufreg_q : bad_pc),
+      .o_csr_pc    (csr_pc),
       //CSR write port
       .i_csr_en    (csr_en),
       .i_csr_addr  (csr_addr),

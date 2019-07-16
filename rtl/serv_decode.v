@@ -45,12 +45,13 @@ module serv_decode
    output wire 	     o_mem_init,
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
+   output wire 	     o_rd_csr_en,
    output wire 	     o_csr_en,
    output reg [1:0]  o_csr_addr,
    output wire 	     o_csr_mstatus_en,
    output wire 	     o_csr_mie_en,
    output wire 	     o_csr_mcause_en,
-   output reg [1:0]  o_csr_source,
+   output wire [1:0] o_csr_source,
    output reg [3:0]  o_csr_mcause,
    output wire 	     o_csr_imm,
    output wire 	     o_csr_d_sel,
@@ -98,7 +99,9 @@ module serv_decode
    assign shift_op = op_or_opimm & (o_funct3[1:0] == 2'b01);
    assign slt_op   = op_or_opimm & (o_funct3[2:1] == 2'b01);
 
-   assign e_op = (opcode[4:2] == 3'b111) & !op21 & !(|o_funct3);
+   //Matches system opcodes except CSR accesses (o_funct3 == 0)
+   //No idea anymore why the !op21 condition is needed here
+   assign e_op = opcode[4] & opcode[2] & !op21 & !(|o_funct3);
 
    //jal,branch =     imm
    //jalr       = rs1+imm
@@ -160,9 +163,11 @@ module serv_decode
    //false for mstatus, mie, mcause, mip
    wire csr_valid = op20 | (op26 & !op22 & !op21);
 
+   //Matches system ops except eceall/ebreak
    wire csr_op = opcode[4] & opcode[2] & (|o_funct3);
+   assign o_rd_csr_en = csr_op;
 
-   assign o_csr_en = state[1] & (o_ctrl_mret | state[0] | (csr_op & csr_valid));
+   assign o_csr_en         = csr_op & (state == RUN) & csr_valid;
    assign o_csr_mstatus_en = csr_op & (state == RUN) & !op26 & !op22;
    assign o_csr_mie_en     = csr_op & (state == RUN) & !op26 &  op22 & !op20;
    assign o_csr_mcause_en  = csr_op & (state == RUN)         &  op21 & !op20;
@@ -170,7 +175,7 @@ module serv_decode
 
    assign o_alu_cmp_eq = o_funct3[2:1] == 2'b00;
 
-   always @(o_funct3, o_rf_rs1_addr, o_ctrl_trap, o_ctrl_mret) begin
+   always @(o_funct3) begin
       casez (o_funct3)
         3'b00?  : o_alu_cmp_uns = 1'b0;
         3'b010  : o_alu_cmp_uns = 1'b0;
@@ -179,18 +184,9 @@ module serv_decode
         3'b11?  : o_alu_cmp_uns = 1'b1;
         default : o_alu_cmp_uns = 1'bx;
       endcase
-
-      casez(o_funct3[1:0])
-	2'b01   : o_csr_source = CSR_SOURCE_EXT; //Check for x0
-	2'b10   : o_csr_source = CSR_SOURCE_SET;
-	2'b11   : o_csr_source = CSR_SOURCE_CLR;
-	default : o_csr_source = 2'bxx;
-      endcase
-      if (((o_rf_rs1_addr == 5'd0) & o_funct3[1]) | o_ctrl_trap | o_ctrl_mret)
-	o_csr_source = CSR_SOURCE_CSR;
-
    end
 
+   assign o_csr_source = o_funct3[1:0];
    assign o_csr_imm = (o_cnt < 5) ? o_rf_rs1_addr[o_cnt[2:0]] : 1'b0;
    assign o_csr_d_sel = o_funct3[2];
 
@@ -242,11 +238,11 @@ module serv_decode
 	 op26 <= i_wb_rdt[26];
 
 	 //Default to mtvec to have the correct CSR address loaded in case of trap
-	 o_csr_addr <= mret ? 2'b10 : //mepc
-		       (i_wb_rdt[26] & !i_wb_rdt[20]) ? 2'b00 : //mscratch
-		       (i_wb_rdt[26] & !i_wb_rdt[21]) ? 2'b10 : //mepc
-		       (i_wb_rdt[26])                 ? 2'b11 : //mtval
-		       2'b01;                                   //mtvec
+	 o_csr_addr <= mret ? CSR_MEPC :
+		       (i_wb_rdt[26] & !i_wb_rdt[20]) ? CSR_MSCRATCH :
+		       (i_wb_rdt[26] & !i_wb_rdt[21]) ? CSR_MEPC :
+		       (i_wb_rdt[26])                 ? CSR_MTVAL :
+		       CSR_MTVEC;
 	 o_ctrl_mret <= mret;
 	 imm[31] <= sign_bit;
 	 imm[30:20] <= utype ? i_wb_rdt[30:20] : {11{sign_bit}};

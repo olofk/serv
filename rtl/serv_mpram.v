@@ -7,6 +7,7 @@ module serv_mpram
    input wire 	    i_trap,
    input wire 	    i_mepc,
    input wire 	    i_mtval,
+   output wire 	    o_csr_pc,
    //CSR interface
    input wire 	    i_csr_en,
    input wire [1:0] i_csr_addr,
@@ -25,6 +26,8 @@ module serv_mpram
    //RS2 read port
    input wire [4:0] i_rs2_raddr,
    output wire 	    o_rs2);
+
+`include "serv_params.vh"
 
    wire [8:0] 	    waddr;
 
@@ -57,7 +60,7 @@ module serv_mpram
    assign waddr[7:5] = wcnt_lo[3] ? rd_waddr[4:2] : 3'b000;
    assign waddr[4:3] = wcnt_lo[3] ? rd_waddr[1:0] :
 		       wcnt_lo[2] ? i_csr_addr :
-		       wcnt_lo[1] ? 2'b11 : 2'b10;
+		       wcnt_lo[1] ? CSR_MTVAL : CSR_MEPC;
    assign waddr[2:0] = wcnt_hi;
 
    wire 	     wgo = !(|wcnt_lo) & |({i_rd_wen,i_csr_en,i_trap, i_trap});
@@ -137,12 +140,14 @@ module serv_mpram
    assign raddr[7:5] = rcnt_lo[0] ? i_rs1_raddr[4:2] :
 		       rcnt_lo[1] ? i_rs2_raddr[4:2] : 3'd0;
    assign raddr[4:3] = rcnt_lo[0] ? i_rs1_raddr[1:0] :
-		       rcnt_lo[1] ? i_rs2_raddr[1:0] : i_csr_addr;
+		       rcnt_lo[1] ? i_rs2_raddr[1:0] :
+		       i_trap ? CSR_MTVEC : i_csr_addr;
    assign raddr[2:0] = rcnt_hi;
 
    assign o_rs1 = rdata0[0];
    assign o_rs2 = rdata1[0];
    assign o_csr = rdata2[0] & i_csr_en;
+   assign o_csr_pc = rdata2[0];
 
    reg [3:0]  memory [0:511];
 
