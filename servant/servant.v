@@ -158,6 +158,7 @@ serv_arbiter serv_arbiter
       .rvfi_halt      (),
       .rvfi_intr      (),
       .rvfi_mode      (),
+      .rvfi_ixl       (),
       .rvfi_rs1_addr  (),
       .rvfi_rs2_addr  (),
       .rvfi_rs1_rdata (),
