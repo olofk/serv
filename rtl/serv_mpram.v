@@ -33,49 +33,57 @@ module serv_mpram
 
    reg [4:0] 	     wdata0;
    reg [5:0] 	     wdata1;
-   reg [6:0] 	     wdata2;
-   reg [7:0] 	     wdata3;
 
    wire [3:0] 	     wdata;
 
    wire 	     wen;
-   reg [3:0] 	     wen_r;
+   reg [1:0] 	     wen_r;
 
    reg [3:0] 	     wcnt_lo;
    reg [2:0] 	     wcnt_hi;
    reg 		     wgo_r;
 
-   assign wdata = wcnt_lo[0] ? wdata0[3:0] :
-		  wcnt_lo[1] ? wdata1[3:0] :
-		  wcnt_lo[2] ? wdata2[3:0] :
-		  /*wcnt_lo[3] ?*/ wdata3[3:0];
-   assign wen = !wgo_r & |(wen_r & wcnt_lo);
+   assign wdata = wcnt_lo[0] ? wdata0[3:0] : wdata1[3:0];
+
+   assign wen = !wgo_r & |(wen_r & wcnt_lo[1:0]);
 
    reg [4:0] 	     rd_waddr;
+
+   //port 0 rd mtval
+   //port 1 csr mepc
    //mepc  100010
    //mtval 100011
    //csr   1000xx
    //rd    0xxxxx
-   assign waddr[8] = !wcnt_lo[3];
-   assign waddr[7:5] = wcnt_lo[3] ? rd_waddr[4:2] : 3'b000;
-   assign waddr[4:3] = wcnt_lo[3] ? rd_waddr[1:0] :
-		       wcnt_lo[2] ? i_csr_addr :
-		       wcnt_lo[1] ? CSR_MTVAL : CSR_MEPC;
+   wire [5:0] waddr0 = trap_3r ? {4'b1000,CSR_MTVAL} : {1'b0,rd_waddr};
+   wire [5:0] waddr1 = trap_3r ? {4'b1000,CSR_MEPC}  : {4'b1000,i_csr_addr};
+  
+   assign waddr[8:3] = wcnt_lo[0] ? waddr0 : waddr1;
+ 
+//   assign waddr[8] = wcnt_lo[1] | i_trap;
+//   assign waddr[7:5] = (wcnt_lo[1] | i_trap) ? 3'b000 : rd_waddr[4:2];
+//   assign waddr[4:3] = wcnt_lo[0] ? (i_trap ? CSR_MTVAL : rd_waddr[1:0]) :
+//		                    (i_trap ? CSR_MEPC  : i_csr_addr);
    assign waddr[2:0] = wcnt_hi;
 
-   wire 	     wgo = !(|wcnt_lo) & |({i_rd_wen,i_csr_en,i_trap, i_trap});
+   wire 	     wgo = !(|wcnt_lo) & (i_rd_wen | i_csr_en | i_trap);
 
+   reg 		     trap_r;
+   reg 		     trap_2r;
+   reg 		     trap_3r;
 
    always @(posedge i_clk) begin
+      trap_r <= i_trap;
+      trap_2r <= trap_r;
+      trap_3r <= trap_2r;
+      
       if (wgo) begin
 	 wgo_r <= 1'b1;
-	 wen_r <= {i_rd_wen,i_csr_en,i_trap,i_trap};
+	 wen_r <= {i_csr_en|i_trap,i_rd_wen|i_trap};
 	 rd_waddr <= i_rd_waddr;
       end
-      wdata0 <= {i_mepc,wdata0[4:1]};
-      wdata1 <= {i_mtval,wdata1[5:1]};
-      wdata2 <= {i_csr,wdata2[6:1]};
-      wdata3 <= {i_rd,wdata3[7:1]};
+      wdata0 <= {i_trap ? i_mtval : i_rd ,wdata0[4:1]};
+      wdata1 <= {i_trap ? i_mepc  : i_csr,wdata1[5:1]};
       wcnt_lo <= {wcnt_lo[2:0],wcnt_lo[3] | wgo};
       if (wcnt_lo[3]) begin
 	 wcnt_hi <= wcnt_hi + 1;
