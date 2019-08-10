@@ -321,6 +321,7 @@ module serv_top
       .i_rst    (i_rst),
       .i_en     (mem_en),
       .i_init   (mem_init),
+      .i_cnt_done (cnt_done),
       .i_cmd    (mem_cmd),
       .i_bytecnt (mem_bytecnt),
       .i_funct3 (funct3),
@@ -328,7 +329,6 @@ module serv_top
       .o_rd     (mem_rd),
       .i_lsb      (lsb),
       .o_misalign (mem_misalign),
-      .i_trap   (trap),
       //External interface
       .o_wb_dat   (o_dbus_dat),
       .o_wb_sel   (o_dbus_sel),

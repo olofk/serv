@@ -5,6 +5,7 @@ module serv_mem_if
    input wire 	      i_rst,
    input wire 	      i_en,
    input wire 	      i_init,
+   input wire         i_cnt_done,
    input wire 	      i_cmd,
    input wire [1:0]   i_bytecnt,
    input wire [2:0]   i_funct3,
@@ -12,7 +13,6 @@ module serv_mem_if
    output wire 	      o_rd,
    input wire [1:0]   i_lsb,
    output reg 	      o_misalign,
-   input wire 	      i_trap,
    //External interface
    output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
@@ -22,7 +22,6 @@ module serv_mem_if
    input wire 	      i_wb_ack);
 
    wire          wb_en = o_wb_cyc & i_wb_ack;
-   reg           init_r;
 
    reg           signbit = 1'b0;
 
@@ -97,15 +96,13 @@ module serv_mem_if
       if (dat_valid)
         signbit <= dat_cur;
 
-      init_r <= i_init;
       if (wb_en)
         o_wb_cyc <= 1'b0;
-      else if (init_r & !i_init & !i_trap) begin //Optimize?
-         o_wb_cyc <= 1'b1;
-      end
+      else if (i_init & i_cnt_done & !o_misalign)
+	o_wb_cyc <= 1'b1;
+
       if (i_rst) begin
 	 o_wb_cyc <= 1'b0;
-	 init_r <= 1'b0;
       end
    end
 endmodule
