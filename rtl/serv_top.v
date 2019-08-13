@@ -1,11 +1,5 @@
 `default_nettype none
 
-`define RISCV_FORMAL_NRET 1
-`define RISCV_FORMAL_XLEN 32
-`define RISCV_FORMAL_ILEN 32
-//`define RISCV_FORMAL_COMPRESSED
-`define RISCV_FORMAL_ALIGNED_MEM
-
 module serv_top
   (
    input wire 	      clk,
