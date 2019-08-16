@@ -123,14 +123,13 @@ module serv_top
 
    wire 	 lui;
 
-   wire 	 timer_irq_en;
+   wire 	 new_irq;
 
    serv_decode decode
      (
       .clk (clk),
       .i_rst          (i_rst),
-      .i_mtip         (i_timer_irq),
-      .i_timer_irq_en (timer_irq_en),
+      .i_new_irq      (new_irq),
       .i_wb_rdt       (i_ibus_rdt),
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
       .i_rf_ready     (rf_ready | i_dbus_ack),
@@ -339,7 +338,7 @@ module serv_top
       .i_rf_csr_out (rf_csr_out),
       .o_csr_in     (csr_in),
       .i_mtip       (i_timer_irq),
-      .o_timer_irq_en ( timer_irq_en),
+      .o_new_irq    (new_irq),
       .i_mstatus_en (csr_mstatus_en),
       .i_mie_en     (csr_mie_en    ),
       .i_mcause_en  (csr_mcause_en ),

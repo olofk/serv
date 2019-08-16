@@ -3,8 +3,7 @@ module serv_decode
   (
    input wire 	     clk,
    input wire 	     i_rst,
-   input wire 	     i_mtip,
-   input wire 	     i_timer_irq_en,
+   input wire 	     i_new_irq,
    input wire [31:0] i_wb_rdt,
    input wire 	     i_wb_en,
    input wire 	     i_rf_ready,
@@ -291,7 +290,6 @@ module serv_decode
         shift_op;
    reg 	stage_one_done;
 
-   reg 	mtip_r;
    reg 	pending_irq;
 
    assign o_rf_rs_en = two_stage_op ? (state == INIT) : o_ctrl_pc_en;
@@ -302,9 +300,7 @@ module serv_decode
       if (state == IDLE)
 	o_ctrl_jump <= 1'b0;
 
-      mtip_r <= i_mtip;
-
-      if (i_mtip & !mtip_r & i_timer_irq_en)
+      if (i_new_irq)
 	pending_irq <= 1'b1;
 
       cnt_done <= (o_cnt[4:2] == 3'b111) & o_cnt_r[2];
