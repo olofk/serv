@@ -74,6 +74,7 @@ module serv_top
    wire 	 bufreg_hold;
    wire 	 bufreg_imm_en;
    wire 	 bufreg_loop;
+   wire 	 bufreg_q;
 
    wire          alu_en;
    wire          alu_init;
@@ -106,7 +107,6 @@ module serv_top
    wire 	 mem_misalign;
 
    wire 	 bad_pc;
-   wire 	 bad_adr;
 
    wire 	 csr_mstatus_en;
    wire 	 csr_mie_en;
@@ -205,7 +205,7 @@ module serv_top
       .i_imm_en (bufreg_imm_en),
       .o_lsb    (lsb),
       .o_reg    (bufreg_out),
-      .o_q      (bad_adr));
+      .o_q      (bufreg_q));
 
    serv_ctrl
      #(.RESET_PC (RESET_PC))
@@ -248,7 +248,7 @@ module serv_top
       .i_en       (alu_en),
       .i_rs1      (rs1),
       .i_op_b     (op_b),
-      .i_buf      (bad_adr), //FIXME
+      .i_buf      (bufreg_q),
       .i_init     (alu_init),
       .i_cnt_done (cnt_done),
       .i_sub      (alu_sub),
@@ -287,7 +287,7 @@ module serv_top
       //Trap interface
       .i_trap      (trap),
       .i_mepc      (o_ibus_adr[0]),
-      .i_mtval     (mem_misalign ? bad_adr : bad_pc),
+      .i_mtval     (mem_misalign ? bufreg_q : bad_pc),
       //CSR write port
       .i_csr_en    (csr_en),
       .i_csr_addr  (csr_addr),
