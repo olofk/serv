@@ -89,7 +89,7 @@ targets:
   verilator_tb:
     default_tool: verilator
     filesets : [soc, verilator_tb]
-    parameters : [RISCV_FORMAL, firmware, memsize, signature, uart_baudrate, vcd]
+    parameters : [RISCV_FORMAL, firmware, memsize, signature, timeout, uart_baudrate, vcd]
     tools:
       verilator:
         verilator_options : [--trace]
@@ -127,6 +127,10 @@ parameters:
   uart_baudrate:
     datatype : int
     description : Treat q output as an UART with the specified baudrate (0 or omitted parameter disables UART decoding)
+    paramtype : plusarg
+
+  timeout:
+    datatype : int
     paramtype : plusarg
 
   vcd:

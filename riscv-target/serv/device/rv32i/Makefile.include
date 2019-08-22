@@ -5,6 +5,7 @@ endif
 
 RUN_TARGET=\
     $(TARGET_SIM) \
+        +timeout=100000000 \
         +signature=$(work_dir_isa)/$(*).signature.output \
         +firmware=$(work_dir_isa)/$<.hex 2> $(work_dir_isa)/$@
 

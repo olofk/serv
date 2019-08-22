@@ -107,6 +107,11 @@ int main(int argc, char **argv, char **env)
 
 	signal(SIGINT, INThandler);
 
+	vluint64_t timeout = 0;
+	const char *arg_timeout = Verilated::commandArgsPlusMatch("timeout=");
+	if (arg_timeout[0])
+	  timeout = atoi(arg_timeout+9);
+
 	top->wb_clk = 1;
 	bool q = top->q;
 	while (!(done || Verilated::gotFinish())) {
@@ -118,6 +123,12 @@ int main(int argc, char **argv, char **env)
 	    do_uart(&uart_context, top->q);
 	  else
 	    do_gpio(&gpio_context, top->q);
+
+	  if (timeout && (main_time >= timeout)) {
+	    printf("Timeout: Exiting at time %lu\n", main_time);
+	    done = true;
+	  }
+
 	  top->wb_clk = !top->wb_clk;
 	  main_time+=31.25;
 
