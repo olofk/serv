@@ -3,25 +3,26 @@ module serv_ctrl
   (
    input wire 	      clk,
    input wire 	      i_rst,
-   input wire 	      i_en,
+   //State
    input wire 	      i_pc_en,
    input wire [4:2]   i_cnt,
    input wire [2:1]   i_cnt_r,
    input wire 	      i_cnt_done,
+   //Control
    input wire 	      i_jump,
-   input wire 	      i_offset,
-   input wire 	      i_rs1,
-   input wire 	      i_jalr,
    input wire 	      i_jal_or_jalr,
    input wire 	      i_utype,
-   input wire 	      i_lui,
+   input wire 	      i_pc_rel,
    input wire 	      i_trap,
+   //Data
+   input wire 	      i_imm,
+   input wire 	      i_buf,
    input wire 	      i_csr_pc,
    output wire 	      o_rd,
    output wire 	      o_bad_pc,
-   output reg 	      o_misalign = 1'b0,
+   //External
    output wire [31:0] o_ibus_adr,
-   output wire	      o_ibus_cyc,
+   output wire 	      o_ibus_cyc,
    input wire 	      i_ibus_ack);
 
    parameter RESET_PC = 32'd8;
@@ -38,6 +39,7 @@ module serv_ctrl
    wire       new_pc;
 
    wire       offset_a;
+   wire       offset_b;
 
    assign plus_4        = i_cnt_r[2] & (i_cnt[4:2] == 3'd0);
 
@@ -71,15 +73,16 @@ module serv_ctrl
    assign new_pc = i_trap ? (i_csr_pc & en_pc_r) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
    assign o_rd  = (i_utype & pc_plus_offset_aligned) | (pc_plus_4 & i_jal_or_jalr);
 
-   assign offset_a = !i_lui & (i_jalr ? i_rs1 : pc);
+   assign offset_a = i_pc_rel & pc;
+   assign offset_b = i_utype ? i_imm : i_buf;
 
    ser_add ser_add_pc_plus_offset
      (
       .clk (clk),
       .rst (i_rst),
       .a   (offset_a),
-      .b   (i_offset),
-      .clr (!i_en | i_cnt_done),
+      .b   (offset_b),
+      .clr (!i_pc_en),
       .q   (pc_plus_offset),
       .o_v ());
 
@@ -93,8 +96,6 @@ module serv_ctrl
       else if (o_ibus_cyc & i_ibus_ack)
         en_pc_r <= 1'b0;
 
-      if ((i_cnt[4:2] == 3'd0) & i_cnt_r[1])
-	o_misalign <= pc_plus_offset;
       if (i_rst) begin
 	 en_pc_r <= 1'b1;
       end

@@ -11,15 +11,15 @@ module serv_decode
    output reg [3:0]  o_cnt_r,
    output wire 	     o_cnt_done,
    output reg 	     o_bufreg_hold,
+   output wire 	     o_bufreg_rs1_en,
    output wire 	     o_bufreg_imm_en,
    output wire 	     o_bufreg_loop,
-   output wire 	     o_ctrl_en,
    output wire 	     o_ctrl_pc_en,
    output reg 	     o_ctrl_jump,
    output wire 	     o_ctrl_jalr,
    output wire 	     o_ctrl_jal_or_jalr,
    output wire 	     o_ctrl_utype,
-   output wire 	     o_ctrl_lui,
+   output wire 	     o_ctrl_pc_rel,
    output wire 	     o_ctrl_trap,
    output reg 	     o_ctrl_mret,
    input wire 	     i_ctrl_misalign,
@@ -100,7 +100,13 @@ module serv_decode
 
    assign e_op = (opcode[4:2] == 3'b111) & !op21 & !(|o_funct3);
 
+   //jal,branch =     imm
+   //jalr       = rs1+imm
+   //mem        = rs1+imm
+   //shift      = rs1
+   assign o_bufreg_rs1_en = !opcode[4] | (!opcode[1] & opcode[0]);
    assign o_bufreg_imm_en = !opcode[2];
+
    assign o_bufreg_loop   = op_or_opimm & !(state == INIT);
 
    assign o_ctrl_pc_en  = running | o_ctrl_trap;
@@ -117,6 +123,12 @@ module serv_decode
    assign o_ctrl_utype = !opcode[4] & opcode[2] & opcode[0];
    assign o_ctrl_jal_or_jalr = opcode[4] & opcode[0];
 
+   //True for jal, b* auipc
+   //False for jalr, lui
+   assign o_ctrl_pc_rel = (opcode[2:0] == 3'b000) |
+			  (opcode[1:0] == 2'b11) |
+			  (opcode[4:3] == 2'b00);
+
    wire mret = (i_wb_rdt[6] & i_wb_rdt[4] & i_wb_rdt[21] & !(|i_wb_rdt[14:12]));
 
    assign o_rf_rd_en = running & (opcode[2] |
@@ -124,10 +136,6 @@ module serv_decode
 				  (!opcode[2] & !opcode[3] & !opcode[0]));
 
    assign o_alu_en   = cnt_en;
-   assign o_ctrl_en  = cnt_en;
-
-   assign o_ctrl_lui = (opcode[0] & !opcode[4] & opcode[3]);
-
 
    assign o_alu_init = (state == INIT);
 

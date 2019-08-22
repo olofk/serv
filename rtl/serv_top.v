@@ -54,9 +54,7 @@ module serv_top
    wire          csr_rd;
    wire          rd;
 
-   wire          ctrl_en;
    wire          ctrl_pc_en;
-   wire 	 ctrl_misalign;
    wire          jump;
    wire          jalr;
    wire          jal_or_jalr;
@@ -64,6 +62,7 @@ module serv_top
    wire 	 mret;
    wire          imm;
    wire 	 trap;
+   wire 	 pc_rel;
 
    wire [4:0] 	 cnt;
    wire [3:0] 	 cnt_r;
@@ -72,6 +71,7 @@ module serv_top
    wire [2:0]    funct3;
 
    wire 	 bufreg_hold;
+   wire 	 bufreg_rs1_en;
    wire 	 bufreg_imm_en;
    wire 	 bufreg_loop;
    wire 	 bufreg_q;
@@ -121,8 +121,6 @@ module serv_top
 
    parameter RESET_PC = 32'd8;
 
-   wire 	 lui;
-
    wire 	 new_irq;
 
    serv_decode decode
@@ -137,18 +135,18 @@ module serv_top
       .o_cnt_r        (cnt_r),
       .o_cnt_done     (cnt_done),
       .o_bufreg_hold  (bufreg_hold),
+      .o_bufreg_rs1_en (bufreg_rs1_en),
       .o_bufreg_imm_en (bufreg_imm_en),
       .o_bufreg_loop   (bufreg_loop),
-      .o_ctrl_en      (ctrl_en),
       .o_ctrl_pc_en   (ctrl_pc_en),
       .o_ctrl_jump    (jump),
       .o_ctrl_jalr    (jalr),
       .o_ctrl_jal_or_jalr    (jal_or_jalr),
       .o_ctrl_utype   (utype),
-      .o_ctrl_lui     (lui),
+      .o_ctrl_pc_rel  (pc_rel),
       .o_ctrl_trap    (trap),
       .o_ctrl_mret    (mret),
-      .i_ctrl_misalign(ctrl_misalign),
+      .i_ctrl_misalign(lsb[1]),
       .o_funct3       (funct3),
       .o_alu_en       (alu_en),
       .o_alu_init     (alu_init),
@@ -197,10 +195,10 @@ module serv_top
       .i_cnt    (cnt[4:2]),
       .i_cnt_r  (cnt_r[1:0]),
       .i_en     (!(bufreg_hold | o_dbus_cyc)),
-      .i_clr    (!mem_en),
+      .i_clr    (!(mem_en | (jal_or_jalr & alu_init))), //FIXME
       .i_loop   (bufreg_loop),
       .i_rs1    (rs1),
-      .i_rs1_en (1'b1),
+      .i_rs1_en (bufreg_rs1_en),
       .i_imm    (imm),
       .i_imm_en (bufreg_imm_en),
       .o_lsb    (lsb),
@@ -213,23 +211,24 @@ module serv_top
      (
       .clk        (clk),
       .i_rst      (i_rst),
-      .i_en       (ctrl_en),
+      //State
       .i_pc_en    (ctrl_pc_en),
       .i_cnt      (cnt[4:2]),
       .i_cnt_r    (cnt_r[2:1]),
       .i_cnt_done (cnt_done),
+      //Control
       .i_jump     (jump),
-      .i_offset   (imm),
-      .i_rs1      (rs1),
-      .i_jalr     (jalr),
-      .i_jal_or_jalr     (jal_or_jalr),
+      .i_jal_or_jalr (jal_or_jalr),
       .i_utype    (utype),
-      .i_lui      (lui),
+      .i_pc_rel   (pc_rel),
       .i_trap     (trap | mret),
+      //Data
+      .i_imm      (imm),
+      .i_buf      (bufreg_q),
       .i_csr_pc   (csr_rd),
       .o_rd       (ctrl_rd),
       .o_bad_pc   (bad_pc),
-      .o_misalign (ctrl_misalign),
+      //External
       .o_ibus_adr (o_ibus_adr),
       .o_ibus_cyc (o_ibus_cyc),
       .i_ibus_ack (i_ibus_ack));
