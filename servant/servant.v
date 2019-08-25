@@ -107,12 +107,12 @@ serv_arbiter serv_arbiter
    initial
      if ($value$plusargs("firmware=%s", firmware_file)) begin
 	$display("Loading RAM from %0s", firmware_file);
-	$readmemh(firmware_file, ram.ram0.mem);
+	$readmemh(firmware_file, ram.mem);
      end
 //synthesis translate_on
 `endif
 
-   wb_ram
+   servant_ram
      #(
 `ifdef SYNTHESIS
 .memfile (memfile),
@@ -120,13 +120,13 @@ serv_arbiter serv_arbiter
        .depth (memsize))
    ram
      (// Wishbone interface
-      .wb_clk_i (wb_clk),
-      .wb_adr_i (wb_mem_adr[$clog2(memsize)-1:0]),
-      .wb_cyc_i (wb_mem_cyc),
-      .wb_we_i  (wb_mem_we) ,
-      .wb_sel_i (wb_mem_sel),
-      .wb_dat_i (wb_mem_dat),
-      .wb_dat_o (wb_mem_rdt));
+      .i_wb_clk (wb_clk),
+      .i_wb_adr (wb_mem_adr[$clog2(memsize)-1:0]),
+      .i_wb_cyc (wb_mem_cyc),
+      .i_wb_we  (wb_mem_we) ,
+      .i_wb_sel (wb_mem_sel),
+      .i_wb_dat (wb_mem_dat),
+      .o_wb_rdt (wb_mem_rdt));
 
    riscv_timer riscv_timer
      (.i_clk    (wb_clk),

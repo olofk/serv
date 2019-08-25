@@ -25,9 +25,10 @@ filesets:
       - servant/servant_gpio.v
       - servant/servant_arbiter.v
       - servant/servant_mux.v
+      - servant/servant_ram.v
       - servant/servant.v
     file_type : verilogSource
-    depend : [serv, wb_ram]
+    depend : [serv]
 
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
