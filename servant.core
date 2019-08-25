@@ -57,6 +57,13 @@ filesets:
       - servant/servix.v : {file_type : verilogSource}
       - data/arty_a7_35t.xdc : {file_type : xdc}
 
+  ulx3s:
+    files:
+      - data/ulx3s.lpf : {file_type : LPF}
+      - servant/ecppll.v : {file_type : verilogSource}
+      - servant/servant_ecp5_clock_gen.v : {file_type : verilogSource}
+      - servant/servant_ecp5.v : {file_type : verilogSource}
+
   zcu106:
     files:
       - servant/servus_clock_gen.v : {file_type : verilogSource}
@@ -133,6 +140,18 @@ targets:
       - firmware
       - memsize
     toplevel : servant_tb
+
+  ulx3s_85:
+    default_tool: diamond
+    description : ULX3S 85k version
+    filesets : [mem_files, soc, ulx3s]
+    parameters : [memfile, memsize]
+    tools:
+      diamond:
+        part : LFE5U-85F-6BG381C
+      trellis:
+        nextpnr_options : [--package, CABGA381, --85k]
+    toplevel: servant_ecp5
 
   verilator_tb:
     default_tool: verilator
