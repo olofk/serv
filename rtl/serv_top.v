@@ -352,7 +352,7 @@ module serv_top
    reg [31:0] 	 pc = RESET_PC;
 
    always @(posedge clk) begin
-      rvfi_valid <= cnt_done & ctrl_pc_en;
+      rvfi_valid <= cnt_done & ctrl_pc_en & !i_rst;
       rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
       if (o_ibus_cyc & i_ibus_ack)
 	rvfi_insn <= i_ibus_rdt;
