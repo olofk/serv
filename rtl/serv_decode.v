@@ -41,9 +41,8 @@ module serv_decode
    input wire 	     i_alu_sh_done,
    output reg [1:0]  o_alu_rd_sel,
    output wire 	     o_dbus_cyc,
-   output wire 	     o_mem_en,
+   output wire 	     o_mem_op,
    output wire 	     o_mem_cmd,
-   output wire 	     o_mem_init,
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
    output wire 	     o_rd_csr_en,
@@ -94,6 +93,7 @@ module serv_decode
    assign o_cnt_done = cnt_done;
 
    assign mem_op = !opcode[4] & !opcode[2] & !opcode[0];
+   assign o_mem_op = mem_op;
 
    wire      op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
 
@@ -195,10 +195,8 @@ module serv_decode
    assign o_alu_sh_signed = imm30;
    assign o_alu_sh_right = o_funct3[2];
 
-   assign o_mem_en   = mem_op & cnt_en;
    assign o_mem_cmd  = opcode[3];
 
-   assign o_mem_init = mem_op & (state == INIT);
    assign o_mem_bytecnt = o_cnt[4:3];
 
    assign o_alu_bool_op = o_funct3[1:0];
@@ -280,9 +278,11 @@ module serv_decode
 
    assign o_ctrl_trap = (state == TRAP);
 
+   wire mem_misalign = mem_op & i_mem_misalign;
+
    always @(posedge clk) begin
       o_csr_mcause[3:0] <= 4'd0;
-      if (i_mem_misalign)
+      if (mem_misalign)
 	o_csr_mcause[3:0] <= {2'b01, o_mem_cmd, 1'b0};
       if (e_op)
 	o_csr_mcause <= {!op20,3'b011};
@@ -299,7 +299,7 @@ module serv_decode
 
    assign o_rf_rs_en = two_stage_op ? (state == INIT) : o_ctrl_pc_en;
 
-   assign o_dbus_cyc = (state == IDLE) & stage_one_done & mem_op & !i_mem_misalign;
+   assign o_dbus_cyc = (state == IDLE) & stage_one_done & mem_op & !mem_misalign;
 
    always @(posedge clk) begin
       if (state == INIT)
@@ -329,7 +329,7 @@ module serv_decode
 	   stage_one_done <= 1'b1;
 
            if (cnt_done)
-	     if (i_mem_misalign | (take_branch & i_ctrl_misalign))
+	     if (mem_misalign | (take_branch & i_ctrl_misalign))
                state <= TRAP;
 	     else if (mem_op | shift_op ) begin
 		state <= IDLE;

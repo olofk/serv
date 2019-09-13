@@ -99,12 +99,11 @@ module serv_top
    wire          op_b_source;
    wire          op_b;
 
-   wire          mem_en;
+   wire          mem_op;
 
    wire          mem_cmd;
    wire [1:0] 	 mem_bytecnt;
 
-   wire          mem_init;
    wire 	 mem_misalign;
 
    wire 	 bad_pc;
@@ -130,6 +129,7 @@ module serv_top
      (
       .clk (clk),
       .i_rst          (i_rst),
+      .o_mem_op       (mem_op),
       .i_new_irq      (new_irq),
       .i_wb_rdt       (i_ibus_rdt),
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
@@ -169,9 +169,7 @@ module serv_top
       .o_rf_rs1_addr  (rs1_addr),
       .o_rf_rs2_addr  (rs2_addr),
       .o_dbus_cyc     (o_dbus_cyc),
-      .o_mem_en       (mem_en),
       .o_mem_cmd      (mem_cmd),
-      .o_mem_init     (mem_init),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
       .o_rd_csr_en    (rd_csr_en),
@@ -200,7 +198,7 @@ module serv_top
       .i_cnt    (cnt[4:2]),
       .i_cnt_r  (cnt_r[1:0]),
       .i_en     (!(bufreg_hold | o_dbus_cyc)),
-      .i_clr    (!(mem_en | (jal_or_jalr & alu_init))), //FIXME
+      .i_clr    (!((alu_en & mem_op) | (jal_or_jalr & alu_init))), //FIXME
       .i_loop   (bufreg_loop),
       .i_rs1    (rs1),
       .i_rs1_en (bufreg_rs1_en),
@@ -291,7 +289,7 @@ module serv_top
       //Trap interface
       .i_trap      (trap),
       .i_mepc      (o_ibus_adr[0]),
-      .i_mtval     (mem_misalign ? bufreg_q : bad_pc),
+      .i_mtval     ((mem_misalign & mem_op) ? bufreg_q : bad_pc),
       .o_csr_pc    (csr_pc),
       //CSR write port
       .i_csr_en    (csr_en),
@@ -317,8 +315,8 @@ module serv_top
      (
       .i_clk    (clk),
       .i_rst    (i_rst),
-      .i_en     (mem_en),
-      .i_init   (mem_init),
+      .i_en     (alu_en),
+      .i_init   (alu_init),
       .i_cnt_done (cnt_done),
       .i_cmd    (mem_cmd),
       .i_bytecnt (mem_bytecnt),

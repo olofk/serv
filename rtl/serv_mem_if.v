@@ -91,7 +91,7 @@ module serv_mem_if
       if (wb_en)
 	{dat3,dat2,dat1,dat0} <= i_wb_rdt;
 
-      o_misalign <= i_en & ((bytepos[0] & !is_byte) | (bytepos[1] & is_word));
+      o_misalign <= (bytepos[0] & !is_byte) | (bytepos[1] & is_word);
       if (dat_valid)
         signbit <= dat_cur;
 
