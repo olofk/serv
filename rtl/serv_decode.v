@@ -40,6 +40,7 @@ module serv_decode
    output wire 	     o_alu_sh_right,
    input wire 	     i_alu_sh_done,
    output reg [1:0]  o_alu_rd_sel,
+   output wire 	     o_dbus_cyc,
    output wire 	     o_mem_en,
    output wire 	     o_mem_cmd,
    output wire 	     o_mem_init,
@@ -297,6 +298,8 @@ module serv_decode
    reg 	pending_irq;
 
    assign o_rf_rs_en = two_stage_op ? (state == INIT) : o_ctrl_pc_en;
+
+   assign o_dbus_cyc = (state == IDLE) & stage_one_done & mem_op & !i_mem_misalign;
 
    always @(posedge clk) begin
       if (state == INIT)

@@ -17,11 +17,10 @@ module serv_mem_if
    output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
    output wire 	      o_wb_we ,
-   output reg 	      o_wb_cyc,
    input wire [31:0]  i_wb_rdt,
    input wire 	      i_wb_ack);
 
-   wire          wb_en = o_wb_cyc & i_wb_ack;
+   wire          wb_en = i_wb_ack;
 
    reg           signbit = 1'b0;
 
@@ -96,13 +95,5 @@ module serv_mem_if
       if (dat_valid)
         signbit <= dat_cur;
 
-      if (wb_en)
-        o_wb_cyc <= 1'b0;
-      else if (i_init & i_cnt_done & !o_misalign)
-	o_wb_cyc <= 1'b1;
-
-      if (i_rst) begin
-	 o_wb_cyc <= 1'b0;
-      end
    end
 endmodule

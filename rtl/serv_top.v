@@ -168,6 +168,7 @@ module serv_top
       .o_rf_rd_addr   (rd_addr),
       .o_rf_rs1_addr  (rs1_addr),
       .o_rf_rs2_addr  (rs2_addr),
+      .o_dbus_cyc     (o_dbus_cyc),
       .o_mem_en       (mem_en),
       .o_mem_cmd      (mem_cmd),
       .o_mem_init     (mem_init),
@@ -330,7 +331,6 @@ module serv_top
       .o_wb_dat   (o_dbus_dat),
       .o_wb_sel   (o_dbus_sel),
       .o_wb_we    (o_dbus_we ),
-      .o_wb_cyc   (o_dbus_cyc),
       .i_wb_rdt   (i_dbus_rdt),
       .i_wb_ack   (i_dbus_ack));
 
