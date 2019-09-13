@@ -7,6 +7,8 @@ module serv_decode
    input wire [31:0] i_wb_rdt,
    input wire 	     i_wb_en,
    input wire 	     i_rf_ready,
+   output wire 	     o_init,
+   output wire 	     o_cnt_en,
    output reg [4:0]  o_cnt,
    output reg [3:0]  o_cnt_r,
    output wire 	     o_cnt_done,
@@ -28,8 +30,6 @@ module serv_decode
    output reg [4:0]  o_rf_rd_addr,
    output reg [4:0]  o_rf_rs1_addr,
    output reg [4:0]  o_rf_rs2_addr,
-   output wire 	     o_alu_en,
-   output wire 	     o_alu_init,
    output wire 	     o_alu_sub,
    output wire [1:0] o_alu_bool_op,
    output wire 	     o_alu_cmp_eq,
@@ -138,10 +138,6 @@ module serv_decode
    assign o_rf_rd_en = running & (opcode[2] |
 				  (!opcode[2] & opcode[4] & opcode[0]) |
 				  (!opcode[2] & !opcode[3] & !opcode[0]));
-
-   assign o_alu_en   = cnt_en;
-
-   assign o_alu_init = (state == INIT);
 
    reg alu_sub_r;
    assign o_alu_sub = alu_sub_r;
@@ -273,6 +269,9 @@ module serv_decode
    assign o_rd_mem_en =              !opcode[2] & !opcode[4];
 
    assign cnt_en = (state != IDLE);
+   assign o_cnt_en   = cnt_en;
+
+   assign o_init = (state == INIT);
 
    assign running = (state == RUN);
 

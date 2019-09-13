@@ -65,6 +65,8 @@ module serv_top
    wire 	 trap;
    wire 	 pc_rel;
 
+   wire          init;
+   wire          cnt_en;
    wire [4:0] 	 cnt;
    wire [3:0] 	 cnt_r;
 
@@ -77,8 +79,6 @@ module serv_top
    wire 	 bufreg_loop;
    wire 	 bufreg_q;
 
-   wire          alu_en;
-   wire          alu_init;
    wire          alu_sub;
    wire [1:0] 	 alu_bool_op;
    wire          alu_cmp_eq;
@@ -134,6 +134,8 @@ module serv_top
       .i_wb_rdt       (i_ibus_rdt),
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
       .i_rf_ready     (rf_ready | i_dbus_ack),
+      .o_init         (init),
+      .o_cnt_en       (cnt_en),
       .o_cnt          (cnt),
       .o_cnt_r        (cnt_r),
       .o_cnt_done     (cnt_done),
@@ -151,8 +153,6 @@ module serv_top
       .o_ctrl_mret    (mret),
       .i_ctrl_misalign(lsb[1]),
       .o_funct3       (funct3),
-      .o_alu_en       (alu_en),
-      .o_alu_init     (alu_init),
       .o_alu_sub      (alu_sub),
       .o_alu_bool_op  (alu_bool_op),
       .o_alu_cmp_eq   (alu_cmp_eq),
@@ -198,7 +198,7 @@ module serv_top
       .i_cnt    (cnt[4:2]),
       .i_cnt_r  (cnt_r[1:0]),
       .i_en     (!(bufreg_hold | o_dbus_cyc)),
-      .i_clr    (!alu_init),
+      .i_clr    (!init),
       .i_loop   (bufreg_loop),
       .i_rs1    (rs1),
       .i_rs1_en (bufreg_rs1_en),
@@ -247,11 +247,11 @@ module serv_top
      (
       .clk        (clk),
       .i_rst      (i_rst),
-      .i_en       (alu_en),
+      .i_en       (cnt_en),
       .i_rs1      (rs1),
       .i_op_b     (op_b),
       .i_buf      (bufreg_q),
-      .i_init     (alu_init),
+      .i_init     (init),
       .i_cnt_done (cnt_done),
       .i_sub      (alu_sub),
       .i_bool_op  (alu_bool_op),
@@ -315,8 +315,8 @@ module serv_top
      (
       .i_clk    (clk),
       .i_rst    (i_rst),
-      .i_en     (alu_en),
-      .i_init   (alu_init),
+      .i_en     (cnt_en),
+      .i_init   (init),
       .i_cnt_done (cnt_done),
       .i_cmd    (mem_cmd),
       .i_bytecnt (mem_bytecnt),
