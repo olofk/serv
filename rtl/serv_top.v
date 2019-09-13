@@ -198,7 +198,7 @@ module serv_top
       .i_cnt    (cnt[4:2]),
       .i_cnt_r  (cnt_r[1:0]),
       .i_en     (!(bufreg_hold | o_dbus_cyc)),
-      .i_clr    (!((alu_en & mem_op) | (jal_or_jalr & alu_init))), //FIXME
+      .i_clr    (!alu_init),
       .i_loop   (bufreg_loop),
       .i_rs1    (rs1),
       .i_rs1_en (bufreg_rs1_en),
