@@ -18,6 +18,7 @@ filesets:
       - rtl/serv_mem_if.v
       - rtl/serv_regfile.v
       - rtl/serv_mpram.v
+      - rtl/serv_state.v
       - rtl/serv_top.v
     file_type : verilogSource
 
