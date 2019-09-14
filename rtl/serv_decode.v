@@ -34,7 +34,7 @@ module serv_decode
    output wire 	     o_alu_sub,
    output wire [1:0] o_alu_bool_op,
    output wire 	     o_alu_cmp_eq,
-   output reg 	     o_alu_cmp_uns,
+   output wire	     o_alu_cmp_uns,
    input wire 	     i_alu_cmp,
    output wire 	     o_alu_shamt_en,
    output wire 	     o_alu_sh_signed,
@@ -177,17 +177,7 @@ module serv_decode
 
    assign o_alu_cmp_eq = o_funct3[2:1] == 2'b00;
 
-   always @(o_funct3) begin
-      casez (o_funct3)
-        3'b00?  : o_alu_cmp_uns = 1'b0;
-        3'b010  : o_alu_cmp_uns = 1'b0;
-        3'b011  : o_alu_cmp_uns = 1'b1;
-        3'b10?  : o_alu_cmp_uns = 1'b0;
-        3'b11?  : o_alu_cmp_uns = 1'b1;
-        default : o_alu_cmp_uns = 1'bx;
-      endcase
-   end
-
+   assign o_alu_cmp_uns = (o_funct3[0] & o_funct3[1]) | (o_funct3[1] & o_funct3[2]);
    assign o_alu_shamt_en = (o_cnt < 5) & (state == INIT);
    assign o_alu_sh_signed = imm30;
    assign o_alu_sh_right = o_funct3[2];
