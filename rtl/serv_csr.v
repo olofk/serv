@@ -2,6 +2,7 @@
 module serv_csr
   (
    input wire 	    i_clk,
+   input wire 	    i_run,
    input wire [4:2] i_cnt,
    input wire [3:2] i_cnt_r,
    //From mpram
@@ -39,9 +40,9 @@ module serv_csr
 		   (i_csr_source == CSR_SOURCE_CSR) ? csr_out :
 		   1'bx;
 
-   assign csr_out = (i_mstatus_en & mstatus) |
+   assign csr_out = (i_mstatus_en & i_run & mstatus) |
 		    i_rf_csr_out |
-		    (i_mcause_en & mcause);
+		    (i_mcause_en & i_run & mcause);
 
    assign o_q = csr_out;
 
@@ -72,7 +73,7 @@ module serv_csr
 	 mcause3_0 <= timer_irq ? 4'd7 : i_mcause[3:0];
       end
 
-      if (i_mcause_en) begin
+      if (i_mcause_en & i_run) begin
 	 if (i_cnt[4:2] == 3'd0)
 	   mcause3_0 <= {csr_in, mcause3_0[3:1]};
 	 if ((i_cnt[4:2] == 3'd7) & i_cnt_r[3])

@@ -3,6 +3,7 @@ module serv_mpram
   (
    input wire 	    i_clk,
    input wire 	    i_rst,
+   input wire       i_run,
    //Trap interface
    input wire 	    i_trap,
    input wire 	    i_mepc,
@@ -57,16 +58,16 @@ module serv_mpram
    //rd    0xxxxx
    wire [5:0] waddr0 = trap_3r ? {4'b1000,CSR_MTVAL} : {1'b0,rd_waddr};
    wire [5:0] waddr1 = trap_3r ? {4'b1000,CSR_MEPC}  : {4'b1000,i_csr_addr};
-  
+
    assign waddr[8:3] = wcnt_lo[0] ? waddr0 : waddr1;
- 
+
 //   assign waddr[8] = wcnt_lo[1] | i_trap;
 //   assign waddr[7:5] = (wcnt_lo[1] | i_trap) ? 3'b000 : rd_waddr[4:2];
 //   assign waddr[4:3] = wcnt_lo[0] ? (i_trap ? CSR_MTVAL : rd_waddr[1:0]) :
 //		                    (i_trap ? CSR_MEPC  : i_csr_addr);
    assign waddr[2:0] = wcnt_hi;
 
-   wire 	     wgo = !(|wcnt_lo) & (i_rd_wen | i_csr_en | i_trap);
+   wire 	     wgo = !(|wcnt_lo) & ((i_run & (i_rd_wen | i_csr_en)) | i_trap);
 
    reg 		     trap_r;
    reg 		     trap_2r;
@@ -76,10 +77,10 @@ module serv_mpram
       trap_r <= i_trap;
       trap_2r <= trap_r;
       trap_3r <= trap_2r;
-      
+
       if (wgo) begin
 	 wgo_r <= 1'b1;
-	 wen_r <= {i_csr_en|i_trap,i_rd_wen|i_trap};
+	 wen_r <= {(i_run & i_csr_en)|i_trap,(i_rd_wen & i_run)|i_trap};
 	 rd_waddr <= i_rd_waddr;
       end
       wdata0 <= {i_trap ? i_mtval : i_rd ,wdata0[4:1]};

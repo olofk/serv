@@ -8,6 +8,7 @@ module serv_decode
    input wire 	     i_wb_en,
    input wire 	     i_rf_ready,
    output wire 	     o_init,
+   output wire 	     o_run,
    output wire 	     o_cnt_en,
    output reg [4:0]  o_cnt,
    output reg [3:0]  o_cnt_r,
@@ -135,9 +136,9 @@ module serv_decode
 
    wire mret = (i_wb_rdt[6] & i_wb_rdt[4] & i_wb_rdt[21] & !(|i_wb_rdt[14:12]));
 
-   assign o_rf_rd_en = running & (opcode[2] |
-				  (!opcode[2] & opcode[4] & opcode[0]) |
-				  (!opcode[2] & !opcode[3] & !opcode[0]));
+   assign o_rf_rd_en = (opcode[2] |
+			(!opcode[2] & opcode[4] & opcode[0]) |
+			(!opcode[2] & !opcode[3] & !opcode[0]));
 
    reg alu_sub_r;
    assign o_alu_sub = alu_sub_r;
@@ -164,11 +165,15 @@ module serv_decode
    wire csr_op = opcode[4] & opcode[2] & (|o_funct3);
    assign o_rd_csr_en = csr_op;
 
-   assign o_csr_en         = csr_op & (state == RUN) & csr_valid;
-   assign o_csr_mstatus_en = csr_op & (state == RUN) & !op26 & !op22;
-   assign o_csr_mie_en     = csr_op & (state == RUN) & !op26 &  op22 & !op20;
-   assign o_csr_mcause_en  = csr_op & (state == RUN)         &  op21 & !op20;
+   assign o_csr_en         = csr_op & csr_valid;
+   assign o_csr_mstatus_en = csr_op & !op26 & !op22;
+   assign o_csr_mie_en     = csr_op & !op26 &  op22 & !op20;
+   assign o_csr_mcause_en  = csr_op         &  op21 & !op20;
 
+   assign o_csr_source = o_funct3[1:0];
+   assign o_csr_d_sel = o_funct3[2];
+
+   assign o_csr_imm = (o_cnt < 5) ? o_rf_rs1_addr[o_cnt[2:0]] : 1'b0;
 
    assign o_alu_cmp_eq = o_funct3[2:1] == 2'b00;
 
@@ -182,10 +187,6 @@ module serv_decode
         default : o_alu_cmp_uns = 1'bx;
       endcase
    end
-
-   assign o_csr_source = o_funct3[1:0];
-   assign o_csr_imm = (o_cnt < 5) ? o_rf_rs1_addr[o_cnt[2:0]] : 1'b0;
-   assign o_csr_d_sel = o_funct3[2];
 
    assign o_alu_shamt_en = (o_cnt < 5) & (state == INIT);
    assign o_alu_sh_signed = imm30;
@@ -274,6 +275,7 @@ module serv_decode
    assign o_init = (state == INIT);
 
    assign running = (state == RUN);
+   assign o_run = running;
 
    assign o_ctrl_trap = (state == TRAP);
 

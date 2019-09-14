@@ -66,6 +66,7 @@ module serv_top
    wire 	 pc_rel;
 
    wire          init;
+   wire          run;
    wire          cnt_en;
    wire [4:0] 	 cnt;
    wire [3:0] 	 cnt_r;
@@ -135,6 +136,7 @@ module serv_top
       .i_wb_en        (o_ibus_cyc & i_ibus_ack),
       .i_rf_ready     (rf_ready | i_dbus_ack),
       .o_init         (init),
+      .o_run          (run),
       .o_cnt_en       (cnt_en),
       .o_cnt          (cnt),
       .o_cnt_r        (cnt_r),
@@ -286,6 +288,7 @@ module serv_top
      (
       .i_clk       (clk),
       .i_rst       (i_rst),
+      .i_run       (run),
       //Trap interface
       .i_trap      (trap),
       .i_mepc      (o_ibus_adr[0]),
@@ -335,6 +338,7 @@ module serv_top
    serv_csr csr
      (
       .i_clk        (clk),
+      .i_run        (run),
       .i_cnt        (cnt[4:2]),
       .i_cnt_r      (cnt_r[3:2]),
       .i_rf_csr_out (rf_csr_out),
