@@ -112,7 +112,8 @@ module serv_decode
    assign o_bufreg_rs1_en = !opcode[4] | (!opcode[1] & opcode[0]);
    assign o_bufreg_imm_en = !opcode[2];
 
-   assign o_bufreg_loop   = op_or_opimm & !(state == INIT);
+   //Set loop mode for shift operations
+   assign o_bufreg_loop   = op_or_opimm;
 
    assign o_ctrl_pc_en  = running | o_ctrl_trap;
 
