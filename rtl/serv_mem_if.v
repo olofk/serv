@@ -5,10 +5,11 @@ module serv_mem_if
    input wire 	      i_rst,
    input wire 	      i_en,
    input wire 	      i_init,
-   input wire         i_cnt_done,
    input wire 	      i_cmd,
+   input wire 	      i_signed,
+   input wire 	      i_word,
+   input wire 	      i_half,
    input wire [1:0]   i_bytecnt,
-   input wire [2:0]   i_funct3,
    input wire 	      i_rs2,
    output wire 	      o_rd,
    input wire [1:0]   i_lsb,
@@ -40,24 +41,19 @@ module serv_mem_if
 		 (dat_sel == 2) ? dat2[0] :
 		 (dat_sel == 1) ? dat1[0] : dat0[0];
 
-   wire is_signed = ~i_funct3[2];
-   wire is_word = i_funct3[1];
-   wire is_half = i_funct3[0];
-   wire is_byte = !(|i_funct3[1:0]);
-
-   wire dat_valid = is_word | (i_bytecnt == 2'b00) | (is_half & !i_bytecnt[1]);
-   assign o_rd = dat_valid ? dat_cur : signbit & is_signed;
+   wire dat_valid = i_word | (i_bytecnt == 2'b00) | (i_half & !i_bytecnt[1]);
+   assign o_rd = dat_valid ? dat_cur : signbit & i_signed;
 
 
    wire       upper_half = bytepos[1];
 /*
-   assign o_wb_sel = (is_word ? 4'b1111 :
-		      is_half ? {{2{upper_half}}, ~{2{upper_half}}} :
+   assign o_wb_sel = (i_word ? 4'b1111 :
+		      i_half ? {{2{upper_half}}, ~{2{upper_half}}} :
 		      4'd1 << bytepos);
 */
-   assign o_wb_sel[3] = is_word | (is_half & bytepos[1]) | (bytepos == 2'b11);
-   assign o_wb_sel[2] = (bytepos == 2'b10) | is_word;
-   assign o_wb_sel[1] = ((is_word | is_half) & !bytepos[1]) | (bytepos == 2'b01);
+   assign o_wb_sel[3] = i_word | (i_half & bytepos[1]) | (bytepos == 2'b11);
+   assign o_wb_sel[2] = (bytepos == 2'b10) | i_word;
+   assign o_wb_sel[1] = ((i_word | i_half) & !bytepos[1]) | (bytepos == 2'b01);
    assign o_wb_sel[0] = (bytepos == 2'b00);
 
    assign o_wb_we = i_cmd;
@@ -91,7 +87,7 @@ module serv_mem_if
       if (wb_en)
 	{dat3,dat2,dat1,dat0} <= i_wb_rdt;
 
-      o_misalign <= (bytepos[0] & !is_byte) | (bytepos[1] & is_word);
+      o_misalign <= (bytepos[0] & (i_word | i_half)) | (bytepos[1] & i_word);
       if (dat_valid)
         signbit <= dat_cur;
 

@@ -80,7 +80,6 @@ module serv_top
    wire [3:0] 	 cnt_r;
 
    wire 	 cnt_done;
-   wire [2:0]    funct3;
 
    wire 	 bufreg_hold;
    wire 	 bufreg_rs1_en;
@@ -110,6 +109,9 @@ module serv_top
 
 
    wire          mem_cmd;
+   wire          mem_signed;
+   wire          mem_word;
+   wire          mem_half;
    wire [1:0] 	 mem_bytecnt;
 
    wire 	 mem_misalign;
@@ -208,8 +210,10 @@ module serv_top
       .o_rf_rs1_addr      (rs1_addr),
       .o_rf_rs2_addr      (rs2_addr),
       //To mem IF
-      .o_funct3           (funct3),
       .o_mem_cmd          (mem_cmd),
+      .o_mem_signed       (mem_signed),
+      .o_mem_word         (mem_word),
+      .o_mem_half         (mem_half),
       //To CSR
       .o_csr_en           (csr_en),
       .o_csr_addr         (csr_addr),
@@ -356,10 +360,11 @@ module serv_top
       .i_rst    (i_rst),
       .i_en     (cnt_en),
       .i_init   (init),
-      .i_cnt_done (cnt_done),
       .i_cmd    (mem_cmd),
+      .i_signed (mem_signed),
+      .i_word   (mem_word),
+      .i_half   (mem_half),
       .i_bytecnt (mem_bytecnt),
-      .i_funct3 (funct3),
       .i_rs2    (rs2),
       .o_rd     (mem_rd),
       .i_lsb      (lsb),

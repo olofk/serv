@@ -39,7 +39,9 @@ module serv_decode
    output reg [4:0]  o_rf_rs1_addr,
    output reg [4:0]  o_rf_rs2_addr,
    //To mem IF
-   output reg [2:0]  o_funct3,
+   output wire 	     o_mem_signed,
+   output wire 	     o_mem_word,
+   output wire 	     o_mem_half,
    output wire 	     o_mem_cmd,
    //To CSR
    output wire 	     o_csr_en,
@@ -59,6 +61,7 @@ module serv_decode
 `include "serv_params.vh"
 
    reg [4:0] opcode;
+   reg [2:0] funct3;
    reg [31:0] imm;
    reg 	      op20;
    reg 	      op21;
@@ -70,13 +73,13 @@ module serv_decode
    wire      op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
 
    assign o_mem_op   = !opcode[4] & !opcode[2] & !opcode[0];
-   assign o_shift_op = op_or_opimm & (o_funct3[1:0] == 2'b01);
-   assign o_slt_op   = op_or_opimm & (o_funct3[2:1] == 2'b01);
+   assign o_shift_op = op_or_opimm & (funct3[1:0] == 2'b01);
+   assign o_slt_op   = op_or_opimm & (funct3[2:1] == 2'b01);
    assign o_branch_op = opcode[4] & !opcode[2];
 
-   //Matches system opcodes except CSR accesses (o_funct3 == 0)
+   //Matches system opcodes except CSR accesses (funct3 == 0)
    //No idea anymore why the !op21 condition is needed here
-   assign o_e_op = opcode[4] & opcode[2] & !op21 & !(|o_funct3);
+   assign o_e_op = opcode[4] & opcode[2] & !op21 & !(|funct3);
 
    assign o_ebreak = op20;
 
@@ -92,11 +95,11 @@ module serv_decode
 
    //Take branch for jump or branch instructions (opcode == 1x0xx) if
    //a) It's an unconditional branch (opcode[0] == 1)
-   //b) It's a conditional branch (opcode[0] == 0) of type beq,blt,bltu (o_funct3[0] == 0) and ALU compare is true
-   //c) It's a conditional branch (opcode[0] == 0) of type bne,bge,bgeu (o_funct3[0] == 1) and ALU compare is false
+   //b) It's a conditional branch (opcode[0] == 0) of type beq,blt,bltu (funct3[0] == 0) and ALU compare is true
+   //c) It's a conditional branch (opcode[0] == 0) of type bne,bge,bgeu (funct3[0] == 1) and ALU compare is false
    //Only valid during the last cycle of INIT, when the branch condition has
    //been calculated.
-   wire o_take_branch = opcode[4] & !opcode[2] & (opcode[0] | (i_alu_cmp^o_funct3[0]));
+   wire o_take_branch = opcode[4] & !opcode[2] & (opcode[0] | (i_alu_cmp^funct3[0]));
 
    assign o_ctrl_utype       = !opcode[4] & opcode[2] & opcode[0];
    assign o_ctrl_jalr        = opcode[4] & (opcode[1:0] == 2'b01);
@@ -132,7 +135,7 @@ module serv_decode
    wire csr_valid = op20 | (op26 & !op22 & !op21);
 
    //Matches system ops except eceall/ebreak
-   wire csr_op = opcode[4] & opcode[2] & (|o_funct3);
+   wire csr_op = opcode[4] & opcode[2] & (|funct3);
    assign o_rd_csr_en = csr_op;
 
    assign o_csr_en         = csr_op & csr_valid;
@@ -140,18 +143,21 @@ module serv_decode
    assign o_csr_mie_en     = csr_op & !op26 &  op22 & !op20;
    assign o_csr_mcause_en  = csr_op         &  op21 & !op20;
 
-   assign o_csr_source = o_funct3[1:0];
-   assign o_csr_d_sel = o_funct3[2];
+   assign o_csr_source = funct3[1:0];
+   assign o_csr_d_sel = funct3[2];
 
-   assign o_alu_cmp_eq = o_funct3[2:1] == 2'b00;
+   assign o_alu_cmp_eq = funct3[2:1] == 2'b00;
 
-   assign o_alu_cmp_uns = (o_funct3[0] & o_funct3[1]) | (o_funct3[1] & o_funct3[2]);
+   assign o_alu_cmp_uns = (funct3[0] & funct3[1]) | (funct3[1] & funct3[2]);
    assign o_alu_sh_signed = imm30;
-   assign o_alu_sh_right = o_funct3[2];
+   assign o_alu_sh_right = funct3[2];
 
    assign o_mem_cmd  = opcode[3];
+   assign o_mem_signed = ~funct3[2];
+   assign o_mem_word   = funct3[1];
+   assign o_mem_half   = funct3[0];
 
-   assign o_alu_bool_op = o_funct3[1:0];
+   assign o_alu_bool_op = funct3[1:0];
 
    wire sign_bit = i_wb_rdt[31];
 
@@ -167,20 +173,20 @@ module serv_decode
    wire sorbtype = op_code[3:0] == 4'b1000;
 
    always @(posedge clk) begin
-      casez(o_funct3)
+      casez(funct3)
         3'b000  : o_alu_rd_sel <= ALU_RESULT_ADD;
         3'b001  : o_alu_rd_sel <= ALU_RESULT_SR;
         3'b01?  : o_alu_rd_sel <= ALU_RESULT_LT;
         3'b100  : o_alu_rd_sel <= ALU_RESULT_BOOL;
         3'b101  : o_alu_rd_sel <= ALU_RESULT_SR;
         3'b11?  : o_alu_rd_sel <= ALU_RESULT_BOOL;
-      endcase // casez (o_funct3)
+      endcase // casez (funct3)
 
       if (i_wb_en) begin
          o_rf_rd_addr  <= i_wb_rdt[11:7];
          o_rf_rs1_addr <= i_wb_rdt[19:15];
          o_rf_rs2_addr <= i_wb_rdt[24:20];
-         o_funct3      <= i_wb_rdt[14:12];
+         funct3        <= i_wb_rdt[14:12];
          imm30         <= i_wb_rdt[30];
          opcode        <= i_wb_rdt[6:2];
 	 op20 <= i_wb_rdt[20];
