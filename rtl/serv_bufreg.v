@@ -30,9 +30,9 @@ module serv_bufreg
       else if (i_en)
 	data <= {(i_loop & !i_init) ? o_q : q, data[31:1]};
 
-      if ((i_cnt[4:2] == 3'd0) & i_cnt_r[0] & i_en)
+      if ((i_cnt[4:2] == 3'd0) & i_cnt_r[0] & i_init)
 	o_lsb[0] <= q;
-      if ((i_cnt[4:2] == 3'd0) & i_cnt_r[1] & i_en)
+      if ((i_cnt[4:2] == 3'd0) & i_cnt_r[1] & i_init)
 	o_lsb[1] <= q;
    end
 

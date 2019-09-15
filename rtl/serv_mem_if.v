@@ -21,9 +21,7 @@ module serv_mem_if
    input wire [31:0]  i_wb_rdt,
    input wire 	      i_wb_ack);
 
-   wire          wb_en = i_wb_ack;
-
-   reg           signbit = 1'b0;
+   reg           signbit;
 
    reg [7:0] 	 dat0;
    reg [7:0] 	 dat1;
@@ -33,9 +31,8 @@ module serv_mem_if
    wire 	 dat1_en;
    wire 	 dat2_en;
    wire 	 dat3_en;
-   reg [1:0] 	 bytepos;
 
-   wire [1:0] dat_sel = i_bytecnt[1] ? i_bytecnt : (i_bytecnt | bytepos);
+   wire [1:0] dat_sel = i_bytecnt[1] ? i_bytecnt : (i_bytecnt | i_lsb);
 
    wire 	 dat_cur = (dat_sel == 3) ? dat3[0] :
 		 (dat_sel == 2) ? dat2[0] :
@@ -45,24 +42,20 @@ module serv_mem_if
    assign o_rd = dat_valid ? dat_cur : signbit & i_signed;
 
 
-   wire       upper_half = bytepos[1];
-/*
-   assign o_wb_sel = (i_word ? 4'b1111 :
-		      i_half ? {{2{upper_half}}, ~{2{upper_half}}} :
-		      4'd1 << bytepos);
-*/
-   assign o_wb_sel[3] = i_word | (i_half & bytepos[1]) | (bytepos == 2'b11);
-   assign o_wb_sel[2] = (bytepos == 2'b10) | i_word;
-   assign o_wb_sel[1] = ((i_word | i_half) & !bytepos[1]) | (bytepos == 2'b01);
-   assign o_wb_sel[0] = (bytepos == 2'b00);
+   wire       upper_half = i_lsb[1];
+
+   assign o_wb_sel[3] = i_word | (i_half & i_lsb[1]) | (i_lsb == 2'b11);
+   assign o_wb_sel[2] = (i_lsb == 2'b10) | i_word;
+   assign o_wb_sel[1] = ((i_word | i_half) & !i_lsb[1]) | (i_lsb == 2'b01);
+   assign o_wb_sel[0] = (i_lsb == 2'b00);
 
    assign o_wb_we = i_cmd;
 
 
    wire       wbyte0 = (i_bytecnt == 2'b00);
-   wire       wbyte1 = ((i_bytecnt == 2'b01) & !bytepos[0]);
-   wire       wbyte2 = ((i_bytecnt == 2'b10) & !bytepos[1]);
-   wire       wbyte3 = ((i_bytecnt == 2'b11) & !bytepos[1]);
+   wire       wbyte1 = ((i_bytecnt == 2'b01) & !i_lsb[0]);
+   wire       wbyte2 = ((i_bytecnt == 2'b10) & !i_lsb[1]);
+   wire       wbyte3 = ((i_bytecnt == 2'b11) & !i_lsb[1]);
 
    assign dat0_en = i_en & (i_init ? wbyte0 : (dat_sel == 2'd0));
    assign dat1_en = i_en & (i_init ? (wbyte0 | wbyte1) : (dat_sel == 2'd1));
@@ -72,8 +65,6 @@ module serv_mem_if
    assign o_wb_dat = {dat3,dat2,dat1,dat0};
 
    always @(posedge i_clk) begin
-      if (i_init)
-	bytepos <= i_lsb;
 
       if (dat0_en)
 	dat0 <= {i_rs2, dat0[7:1]};
@@ -84,10 +75,10 @@ module serv_mem_if
       if (dat3_en)
 	dat3 <= {i_rs2, dat3[7:1]};
 
-      if (wb_en)
+      if (i_wb_ack)
 	{dat3,dat2,dat1,dat0} <= i_wb_rdt;
 
-      o_misalign <= (bytepos[0] & (i_word | i_half)) | (bytepos[1] & i_word);
+      o_misalign <= (i_lsb[0] & (i_word | i_half)) | (i_lsb[1] & i_word);
       if (dat_valid)
         signbit <= dat_cur;
 
