@@ -107,8 +107,6 @@ module serv_top
    wire          op_b_source;
    wire          op_b;
 
-
-   wire          mem_cmd;
    wire          mem_signed;
    wire          mem_word;
    wire          mem_half;
@@ -146,7 +144,7 @@ module serv_top
       .i_mem_op       (mem_op),
       .i_shift_op     (shift_op),
       .i_slt_op       (slt_op),
-      .i_mem_cmd      (mem_cmd),
+      .i_mem_cmd      (o_dbus_we),
       .i_e_op         (e_op),
       .i_ebreak       (ebreak),
       .i_rs1_addr     (rs1_addr),
@@ -210,7 +208,7 @@ module serv_top
       .o_rf_rs1_addr      (rs1_addr),
       .o_rf_rs2_addr      (rs2_addr),
       //To mem IF
-      .o_mem_cmd          (mem_cmd),
+      .o_mem_cmd          (o_dbus_we),
       .o_mem_signed       (mem_signed),
       .o_mem_word         (mem_word),
       .o_mem_half         (mem_half),
@@ -360,7 +358,6 @@ module serv_top
       .i_rst    (i_rst),
       .i_en     (cnt_en),
       .i_init   (init),
-      .i_cmd    (mem_cmd),
       .i_signed (mem_signed),
       .i_word   (mem_word),
       .i_half   (mem_half),
@@ -372,7 +369,6 @@ module serv_top
       //External interface
       .o_wb_dat   (o_dbus_dat),
       .o_wb_sel   (o_dbus_sel),
-      .o_wb_we    (o_dbus_we ),
       .i_wb_rdt   (i_dbus_rdt),
       .i_wb_ack   (i_dbus_ack));
 

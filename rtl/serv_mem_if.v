@@ -5,7 +5,6 @@ module serv_mem_if
    input wire 	      i_rst,
    input wire 	      i_en,
    input wire 	      i_init,
-   input wire 	      i_cmd,
    input wire 	      i_signed,
    input wire 	      i_word,
    input wire 	      i_half,
@@ -17,7 +16,6 @@ module serv_mem_if
    //External interface
    output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
-   output wire 	      o_wb_we ,
    input wire [31:0]  i_wb_rdt,
    input wire 	      i_wb_ack);
 
@@ -48,9 +46,6 @@ module serv_mem_if
    assign o_wb_sel[2] = (i_lsb == 2'b10) | i_word;
    assign o_wb_sel[1] = ((i_word | i_half) & !i_lsb[1]) | (i_lsb == 2'b01);
    assign o_wb_sel[0] = (i_lsb == 2'b00);
-
-   assign o_wb_we = i_cmd;
-
 
    wire       wbyte0 = (i_bytecnt == 2'b00);
    wire       wbyte1 = ((i_bytecnt == 2'b01) & !i_lsb[0]);
