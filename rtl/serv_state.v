@@ -78,19 +78,22 @@ module serv_state
 	o_csr_mcause <= {!i_ebreak,3'b011};
    end
 
-   reg 	stage_one_done;
+   reg 	stage_two_pending;
 
    reg 	pending_irq;
 
    assign o_rf_rs_en = two_stage_op ? (state == INIT) : o_ctrl_pc_en;
 
-   assign o_dbus_cyc = (state == IDLE) & stage_one_done & i_mem_op & !mem_misalign;
+   assign o_dbus_cyc = (state == IDLE) & stage_two_pending & i_mem_op & !mem_misalign;
 
    always @(posedge i_clk) begin
       if (state == INIT)
 	o_ctrl_jump <= i_take_branch;
       if (state == IDLE)
 	o_ctrl_jump <= 1'b0;
+
+      if (cnt_en)
+	stage_two_pending <= o_init;
 
       if (i_new_irq)
 	pending_irq <= 1'b1;
@@ -103,15 +106,14 @@ module serv_state
         IDLE : begin
            if (i_rf_ready) begin
 	      state <= RUN;
-              if (two_stage_op & !stage_one_done)
+              if (two_stage_op & !stage_two_pending)
 		state <= INIT;
 	      if (i_e_op | pending_irq)
 		state <= TRAP;
-	   end else if (i_alu_sh_done & i_shift_op & stage_one_done)
+	   end else if (i_alu_sh_done & i_shift_op & stage_two_pending)
 	     state <= RUN;
         end
         INIT : begin
-	   stage_one_done <= 1'b1;
 
            if (cnt_done)
 	     if (mem_misalign | (i_take_branch & i_ctrl_misalign))
@@ -124,7 +126,6 @@ module serv_state
 	       state <= RUN;
         end
         RUN : begin
-	   stage_one_done <= 1'b0;
            if (cnt_done)
              state <= IDLE;
         end
@@ -144,7 +145,7 @@ module serv_state
 	 state <= IDLE;
 	 o_cnt   <= 5'd0;
 	 pending_irq <= 1'b0;
-	 stage_one_done <= 1'b0;
+	 stage_two_pending <= 1'b0;
 	 o_ctrl_jump <= 1'b0;
 	 o_cnt_r <= 4'b0001;
       end
