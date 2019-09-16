@@ -100,7 +100,8 @@ module serv_state
 
       cnt_done <= (o_cnt[4:2] == 3'b111) & o_cnt_r[2];
 
-      o_bufreg_hold <= 1'b0;
+      //Shift operations require bufreg to hold for one cycle before shifting
+      o_bufreg_hold <= i_shift_op & cnt_done;
 
       case (state)
         IDLE : begin
@@ -118,10 +119,8 @@ module serv_state
            if (cnt_done)
 	     if (mem_misalign | (i_take_branch & i_ctrl_misalign))
                state <= TRAP;
-	     else if (i_mem_op | i_shift_op ) begin
-		state <= IDLE;
-		o_bufreg_hold <= 1'b1;
-	     end
+	     else if (i_mem_op | i_shift_op )
+	       state <= IDLE;
 	     else
 	       state <= RUN;
         end
