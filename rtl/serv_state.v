@@ -22,7 +22,6 @@ module serv_state
    output reg 	     o_ctrl_jump,
    output wire 	     o_ctrl_trap,
    input wire 	     i_ctrl_misalign,
-   output wire 	     o_rf_rs_en,
    output wire 	     o_alu_shamt_en,
    input wire 	     i_alu_sh_done,
    output wire 	     o_dbus_cyc,
@@ -81,8 +80,6 @@ module serv_state
    reg 	stage_two_pending;
 
    reg 	pending_irq;
-
-   assign o_rf_rs_en = two_stage_op ? (state == INIT) : o_ctrl_pc_en;
 
    assign o_dbus_cyc = (state == IDLE) & stage_two_pending & i_mem_op & !mem_misalign;
 

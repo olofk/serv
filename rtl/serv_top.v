@@ -101,7 +101,6 @@ module serv_top
    wire 	 rf_ready;
    wire          rs1;
    wire          rs2;
-   wire 	 rs_en;
    wire          rd_en;
 
    wire          op_b_source;
@@ -161,7 +160,6 @@ module serv_top
       .i_ctrl_misalign(lsb[1]),
       .o_alu_shamt_en (alu_shamt_en),
       .i_alu_sh_done  (alu_sh_done),
-      .o_rf_rs_en     (rs_en),
       .o_dbus_cyc     (o_dbus_cyc),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
@@ -394,6 +392,8 @@ module serv_top
 `ifdef RISCV_FORMAL
    reg [31:0] 	 pc = RESET_PC;
 
+   wire rs_en = (branch_op|mem_op|shift_op|slt_op) ? init : ctrl_pc_en;
+
    always @(posedge clk) begin
       rvfi_valid <= cnt_done & ctrl_pc_en & !i_rst;
       rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
@@ -444,6 +444,7 @@ module serv_top
    always @(o_ibus_adr)
      rvfi_pc_wdata <= o_ibus_adr;
    /* verilator lint_on COMBDLY */
+
 
 `endif
 
