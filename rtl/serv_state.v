@@ -4,6 +4,8 @@ module serv_state
    input wire 	     i_rst,
    input wire 	     i_new_irq,
    input wire 	     i_dbus_ack,
+   input wire 	     i_ibus_ack,
+   output wire 	     o_rf_rreq,
    input wire 	     i_rf_ready,
    input wire 	     i_take_branch,
    input wire 	     i_branch_op,
@@ -83,6 +85,8 @@ module serv_state
    reg 	pending_irq;
 
    assign o_dbus_cyc = (state == IDLE) & stage_two_pending & i_mem_op & !mem_misalign;
+
+   assign o_rf_rreq = i_ibus_ack;
 
    always @(posedge i_clk) begin
       if (state == INIT)

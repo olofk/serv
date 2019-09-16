@@ -98,6 +98,7 @@ module serv_top
    wire 	 alu_sh_done;
    wire [1:0]    alu_rd_sel;
 
+   wire 	 rf_rreq;
    wire 	 rf_ready;
    wire          rs1;
    wire          rs2;
@@ -141,6 +142,8 @@ module serv_top
       .i_rst          (i_rst),
       .i_new_irq      (new_irq),
       .i_dbus_ack     (i_dbus_ack),
+      .i_ibus_ack     (i_ibus_ack),
+      .o_rf_rreq      (rf_rreq),
       .i_rf_ready     (rf_ready),
       .i_take_branch  (take_branch),
       .i_branch_op    (branch_op),
@@ -341,7 +344,7 @@ module serv_top
       .i_rd_waddr  (rd_addr),
       .i_rd        (rd),
 
-      .i_rreq      (i_ibus_ack),
+      .i_rreq      (rf_rreq),
       .o_rgnt      (rf_ready),
       //RS1 read port
       .i_rs1_raddr (rs1_addr),
