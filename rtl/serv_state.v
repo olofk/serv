@@ -3,6 +3,7 @@ module serv_state
    input wire 	     i_clk,
    input wire 	     i_rst,
    input wire 	     i_new_irq,
+   input wire 	     i_dbus_ack,
    input wire 	     i_rf_ready,
    input wire 	     i_take_branch,
    input wire 	     i_branch_op,
@@ -102,7 +103,7 @@ module serv_state
 
       case (state)
         IDLE : begin
-           if (i_rf_ready) begin
+           if (i_rf_ready | i_dbus_ack) begin
 	      state <= RUN;
               if (two_stage_op & !stage_two_pending)
 		state <= INIT;
