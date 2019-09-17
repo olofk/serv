@@ -99,6 +99,7 @@ module serv_top
    wire [1:0]    alu_rd_sel;
 
    wire 	 rf_rreq;
+   wire 	 rf_wreq;
    wire 	 rf_ready;
    wire          rs1;
    wire          rs2;
@@ -144,6 +145,7 @@ module serv_top
       .i_dbus_ack     (i_dbus_ack),
       .i_ibus_ack     (i_ibus_ack),
       .o_rf_rreq      (rf_rreq),
+      .o_rf_wreq      (rf_wreq),
       .i_rf_ready     (rf_ready),
       .i_take_branch  (take_branch),
       .i_branch_op    (branch_op),
@@ -240,7 +242,7 @@ module serv_top
       .i_rst    (i_rst),
       .i_cnt    (cnt[4:2]),
       .i_cnt_r  (cnt_r[1:0]),
-      .i_en     (!(bufreg_hold | o_dbus_cyc)),
+      .i_en     (!bufreg_hold),
       .i_init   (init),
       .i_loop   (bufreg_loop),
       .i_rs1    (rs1),
@@ -318,6 +320,7 @@ module serv_top
       .i_run       (run),
       //Trap interface
       .i_trap      (trap),
+      .i_mret      (mret),
       .i_mepc      (o_ibus_adr[0]),
       .i_mtval     ((mem_misalign & mem_op) ? bufreg_q : bad_pc),
       .o_csr_pc    (csr_pc),
@@ -331,6 +334,7 @@ module serv_top
       .i_rd        (rd),
 
       .i_rreq      (rf_rreq),
+      .i_wreq      (rf_wreq),
       .o_rgnt      (rf_ready),
       //RS1 read port
       .i_rs1_raddr (rs1_addr),

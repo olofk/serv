@@ -105,7 +105,7 @@ module serv_alu
 
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
                  (i_rd_sel == ALU_RESULT_SR)  ? result_sh :
-                 (i_rd_sel == ALU_RESULT_LT)  ? result_lt_r :
+                 (i_rd_sel == ALU_RESULT_LT)  ? result_lt_r & plus_1:
                  (i_rd_sel == ALU_RESULT_BOOL) ? result_bool : 1'bx;
 
 
@@ -117,8 +117,6 @@ module serv_alu
 	 eq_r <= result_eq;
       end else begin
 	 eq_r <= 1'b1;
-	 if (result_lt_r)
-	   result_lt_r <= 1'b0;
       end
       en_r <= i_en;
    end
