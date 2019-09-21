@@ -99,7 +99,7 @@ module serv_decode
    //c) It's a conditional branch (opcode[0] == 0) of type bne,bge,bgeu (funct3[0] == 1) and ALU compare is false
    //Only valid during the last cycle of INIT, when the branch condition has
    //been calculated.
-   wire o_take_branch = opcode[4] & !opcode[2] & (opcode[0] | (i_alu_cmp^funct3[0]));
+   assign o_take_branch = opcode[4] & !opcode[2] & (opcode[0] | (i_alu_cmp^funct3[0]));
 
    assign o_ctrl_utype       = !opcode[4] & opcode[2] & opcode[0];
    assign o_ctrl_jalr        = opcode[4] & (opcode[1:0] == 2'b01);
