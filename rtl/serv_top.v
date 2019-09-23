@@ -307,21 +307,7 @@ module serv_top
       .o_sh_done  (alu_sh_done),
       .i_rd_sel   (alu_rd_sel),
       .o_rd       (alu_rd));
-/*
-   serv_regfile regfile
-     (
-      .i_clk      (clk),
-      .i_rst      (i_rst),
-      .i_go       (i_ibus_ack),
-      .o_ready    (rf_ready),
-      .i_rd_en    (rd_en),
-      .i_rd_addr  (rd_addr),
-      .i_rd       (rd),
-      .i_rs1_addr (rs1_addr),
-      .i_rs2_addr (rs2_addr),
-      .o_rs1      (rs1),
-      .o_rs2      (rs2));
-*/
+
    wire 	 csr_in;
    wire 	 rf_csr_out;
 
