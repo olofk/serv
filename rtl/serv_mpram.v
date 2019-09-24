@@ -102,7 +102,8 @@ module serv_mpram
    wire [5:0] rreg0 = {1'b0, i_rs1_raddr};
    wire [5:0] rreg1 =
 	      i_trap   ? {4'b1000, CSR_MTVEC} :
-	      (i_csr_en | i_mret) ? {4'b1000, i_csr_addr} :
+	      i_mret   ? {4'b1000, CSR_MEPC} :
+	      i_csr_en ? {4'b1000, i_csr_addr} :
 	      {1'b0,i_rs2_raddr};
    wire [5:0] rreg = rport ? rreg1 : rreg0;
    wire [9:0] raddr = {rreg, rslot};

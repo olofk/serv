@@ -24,7 +24,7 @@ module serv_decode
    output wire 	     o_ctrl_jal_or_jalr,
    output wire 	     o_ctrl_utype,
    output wire 	     o_ctrl_pc_rel,
-   output reg 	     o_ctrl_mret,
+   output wire 	     o_ctrl_mret,
    //To alu
    output wire 	     o_alu_sub,
    output wire [1:0] o_alu_bool_op,
@@ -45,7 +45,7 @@ module serv_decode
    output wire 	     o_mem_cmd,
    //To CSR
    output wire 	     o_csr_en,
-   output reg [1:0]  o_csr_addr,
+   output wire [1:0] o_csr_addr,
    output wire 	     o_csr_mstatus_en,
    output wire 	     o_csr_mie_en,
    output wire 	     o_csr_mcause_en,
@@ -111,7 +111,7 @@ module serv_decode
 			  (opcode[1:0] == 2'b11) |
 			  (opcode[4:3] == 2'b00);
 
-   wire mret = (i_wb_rdt[6] & i_wb_rdt[4] & i_wb_rdt[21] & !(|i_wb_rdt[14:12]));
+   assign o_ctrl_mret = (opcode[4] & opcode[2] & op21 & !(|funct3));
 
    assign o_rf_rd_en = (opcode[2] |
 			(!opcode[2] & opcode[4] & opcode[0]) |
@@ -145,6 +145,11 @@ module serv_decode
 
    assign o_csr_source = funct3[1:0];
    assign o_csr_d_sel = funct3[2];
+
+   assign o_csr_addr = (op26 & !op20) ? CSR_MSCRATCH :
+		       (op26 & !op21) ? CSR_MEPC :
+		       (op26)         ? CSR_MTVAL :
+		       CSR_MTVEC;
 
    assign o_alu_cmp_eq = funct3[2:1] == 2'b00;
 
@@ -194,13 +199,6 @@ module serv_decode
 	 op22 <= i_wb_rdt[22];
 	 op26 <= i_wb_rdt[26];
 
-	 //Default to mtvec to have the correct CSR address loaded in case of trap
-	 o_csr_addr <= mret ? CSR_MEPC :
-		       (i_wb_rdt[26] & !i_wb_rdt[20]) ? CSR_MSCRATCH :
-		       (i_wb_rdt[26] & !i_wb_rdt[21]) ? CSR_MEPC :
-		       (i_wb_rdt[26])                 ? CSR_MTVAL :
-		       CSR_MTVEC;
-	 o_ctrl_mret <= mret;
 	 imm[31] <= sign_bit;
 	 imm[30:20] <= utype ? i_wb_rdt[30:20] : {11{sign_bit}};
 	 imm[19:12] <= (utype | jtype) ? i_wb_rdt[19:12] : {8{sign_bit}};
