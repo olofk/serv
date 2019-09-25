@@ -5,6 +5,10 @@ module serv_csr
    input wire 	    i_run,
    input wire [4:2] i_cnt,
    input wire [3:2] i_cnt_r,
+   input wire 	    i_e_op,
+   input wire 	    i_ebreak,
+   input wire 	    i_mem_cmd,
+   input wire 	    i_mem_misalign,
    //From mpram
    input wire 	    i_rf_csr_out,
    //to mpram
@@ -17,7 +21,6 @@ module serv_csr
    input wire 	    i_mcause_en,
    input wire [1:0] i_csr_source,
    input wire 	    i_trap,
-   input wire [3:0] i_mcause,
    input wire 	    i_d,
    output wire 	    o_q);
 
@@ -70,7 +73,10 @@ module serv_csr
 
       if (i_trap) begin
 	 mcause31  <= timer_irq;
-	 mcause3_0 <= timer_irq ? 4'd7 : i_mcause[3:0];
+	 mcause3_0 <= timer_irq ? 4'd7 :
+		      i_e_op ? {!i_ebreak, 3'b011} :
+		      i_mem_misalign ? {2'b01, i_mem_cmd, 1'b0} :
+		      4'd0;
       end
 
       if (i_mcause_en & i_run) begin

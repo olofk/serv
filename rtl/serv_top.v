@@ -126,9 +126,6 @@ module serv_top
    wire [1:0] 	 csr_addr;
    wire 	 csr_pc;
 
-
-   wire [3:0] 	 mcause;
-
    parameter RESET_PC = 32'd8;
 
    wire 	 new_irq;
@@ -151,9 +148,7 @@ module serv_top
       .i_mem_op       (mem_op),
       .i_shift_op     (shift_op),
       .i_slt_op       (slt_op),
-      .i_mem_cmd      (o_dbus_we),
       .i_e_op         (e_op),
-      .i_ebreak       (ebreak),
       .i_rs1_addr     (rs1_addr),
       .o_init         (init),
       .o_run          (run),
@@ -171,8 +166,7 @@ module serv_top
       .o_dbus_cyc     (o_dbus_cyc),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
-      .o_csr_imm      (csr_imm),
-      .o_csr_mcause   (mcause));
+      .o_csr_imm      (csr_imm));
 
    serv_decode decode
      (
@@ -370,6 +364,10 @@ module serv_top
       .i_run        (run),
       .i_cnt        (cnt[4:2]),
       .i_cnt_r      (cnt_r[3:2]),
+      .i_e_op       (e_op),
+      .i_ebreak     (ebreak),
+      .i_mem_cmd    (o_dbus_we),
+      .i_mem_misalign (mem_misalign),
       .i_rf_csr_out (rf_csr_out),
       .o_csr_in     (csr_in),
       .i_mtip       (i_timer_irq),
@@ -379,7 +377,6 @@ module serv_top
       .i_mcause_en  (csr_mcause_en ),
       .i_csr_source (csr_source),
       .i_trap       (trap),
-      .i_mcause     (mcause),
       .i_d          (csr_d_sel ? csr_imm : rs1),
       .o_q          (csr_rd));
 

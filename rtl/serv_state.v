@@ -13,9 +13,7 @@ module serv_state
    input wire 	     i_mem_op,
    input wire 	     i_shift_op,
    input wire 	     i_slt_op,
-   input wire 	     i_mem_cmd,
    input wire 	     i_e_op,
-   input wire 	     i_ebreak,
    input wire [4:0]  i_rs1_addr,
    output wire 	     o_init,
    output wire 	     o_run,
@@ -31,7 +29,6 @@ module serv_state
    output wire 	     o_dbus_cyc,
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
-   output reg [3:0]  o_csr_mcause,
    output wire 	     o_cnt_done,
    output wire 	     o_bufreg_hold,
    output wire 	     o_csr_imm);
@@ -71,14 +68,6 @@ module serv_state
 
    //slt*, branch/jump, shift, load/store
    wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
-
-   always @(posedge i_clk) begin
-      o_csr_mcause[3:0] <= 4'd0;
-      if (i_mem_misalign)
-	o_csr_mcause[3:0] <= {2'b01, i_mem_cmd, 1'b0};
-      if (i_e_op)
-	o_csr_mcause <= {!i_ebreak,3'b011};
-   end
 
    reg 	stage_two_pending;
 
