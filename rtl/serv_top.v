@@ -322,7 +322,7 @@ module serv_top
       .i_trap      (trap),
       .i_mret      (mret),
       .i_mepc      (o_ibus_adr[0]),
-      .i_mtval     ((mem_misalign & mem_op) ? bufreg_q : bad_pc),
+      .i_mtval     (mem_misalign ? bufreg_q : bad_pc),
       .o_csr_pc    (csr_pc),
       //CSR write port
       .i_csr_en    (csr_en),
@@ -351,6 +351,7 @@ module serv_top
       .i_rst    (i_rst),
       .i_en     (cnt_en),
       .i_init   (init),
+      .i_mem_op (mem_op),
       .i_signed (mem_signed),
       .i_word   (mem_word),
       .i_half   (mem_half),

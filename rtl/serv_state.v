@@ -72,11 +72,9 @@ module serv_state
    //slt*, branch/jump, shift, load/store
    wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
 
-   wire mem_misalign = i_mem_op & i_mem_misalign;
-
    always @(posedge i_clk) begin
       o_csr_mcause[3:0] <= 4'd0;
-      if (mem_misalign)
+      if (i_mem_misalign)
 	o_csr_mcause[3:0] <= {2'b01, i_mem_cmd, 1'b0};
       if (i_e_op)
 	o_csr_mcause <= {!i_ebreak,3'b011};
@@ -86,9 +84,9 @@ module serv_state
 
    reg 	pending_irq;
 
-   assign o_dbus_cyc = (state == IDLE) & stage_two_pending & i_mem_op & !mem_misalign;
+   assign o_dbus_cyc = (state == IDLE) & stage_two_pending & i_mem_op & !i_mem_misalign;
 
-   wire trap_pending = (o_ctrl_jump & i_ctrl_misalign) | mem_misalign;
+   wire trap_pending = (o_ctrl_jump & i_ctrl_misalign) | i_mem_misalign;
 
    //Prepare RF for reads when a new instruction is fetched
    // or when stage one caused an exception (rreq implies a write request too)

@@ -5,6 +5,7 @@ module serv_mem_if
    input wire 	      i_rst,
    input wire 	      i_en,
    input wire 	      i_init,
+   input wire 	      i_mem_op,
    input wire 	      i_signed,
    input wire 	      i_word,
    input wire 	      i_half,
@@ -12,7 +13,7 @@ module serv_mem_if
    input wire 	      i_rs2,
    output wire 	      o_rd,
    input wire [1:0]   i_lsb,
-   output reg 	      o_misalign,
+   output wire 	      o_misalign,
    //External interface
    output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
@@ -20,6 +21,7 @@ module serv_mem_if
    input wire 	      i_wb_ack);
 
    reg           signbit;
+   reg 		 misalign;
 
    reg [7:0] 	 dat0;
    reg [7:0] 	 dat1;
@@ -59,6 +61,8 @@ module serv_mem_if
 
    assign o_wb_dat = {dat3,dat2,dat1,dat0};
 
+   assign o_misalign = misalign & i_mem_op;
+
    always @(posedge i_clk) begin
 
       if (dat0_en)
@@ -73,7 +77,7 @@ module serv_mem_if
       if (i_wb_ack)
 	{dat3,dat2,dat1,dat0} <= i_wb_rdt;
 
-      o_misalign <= (i_lsb[0] & (i_word | i_half)) | (i_lsb[1] & i_word);
+      misalign <= (i_lsb[0] & (i_word | i_half)) | (i_lsb[1] & i_word);
       if (dat_valid)
         signbit <= dat_cur;
 
