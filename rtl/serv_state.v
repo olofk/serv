@@ -101,10 +101,8 @@ module serv_state
    assign o_bufreg_hold = !cnt_en & (stage_two_req | ~i_shift_op);
 
    always @(posedge i_clk) begin
-      if (state == INIT)
-	o_ctrl_jump <= i_take_branch;
-      if (o_ctrl_pc_en & cnt_done)
-	o_ctrl_jump <= 1'b0;
+      if (cnt_done)
+	o_ctrl_jump <= (state == INIT) & i_take_branch;
 
       if (cnt_en)
 	stage_two_pending <= o_init;
