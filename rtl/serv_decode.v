@@ -4,6 +4,7 @@ module serv_decode
    input wire 	     clk,
    //Input
    input wire 	     i_cnt_en,
+   input wire 	     i_cnt_done,
    input wire [31:0] i_wb_rdt,
    input wire 	     i_wb_en,
    input wire 	     i_alu_cmp,
@@ -19,6 +20,7 @@ module serv_decode
    output wire 	     o_bufreg_loop,
    output wire 	     o_bufreg_rs1_en,
    output wire 	     o_bufreg_imm_en,
+   output wire 	     o_bufreg_clr_lsb,
    //To ctrl
    output wire 	     o_ctrl_jalr,
    output wire 	     o_ctrl_jal_or_jalr,
@@ -61,7 +63,6 @@ module serv_decode
 
    reg [4:0] opcode;
    reg [2:0] funct3;
-   reg [31:0] imm;
    reg 	      op20;
    reg 	      op21;
    reg 	      op22;
@@ -91,6 +92,11 @@ module serv_decode
 
    //Loop bufreg contents for shift operations
    assign o_bufreg_loop   = op_or_opimm;
+
+   //Clear LSB of immediate for BRANCH and JAL ops
+   //True for BRANCH and JAL
+   //False for JALR/LOAD/STORE/OP/OPIMM?
+   assign o_bufreg_clr_lsb = opcode[4] & ((opcode[1:0] == 2'b00) | (opcode[1:0] == 2'b11));
 
    //Take branch for jump or branch instructions (opcode == 1x0xx) if
    //a) It's an unconditional branch (opcode[0] == 1)
@@ -163,18 +169,13 @@ module serv_decode
 
    assign o_alu_bool_op = funct3[1:0];
 
-   wire sign_bit = i_wb_rdt[31];
+   reg 	      signbit;
 
-   wire [4:0] op_code = i_wb_rdt[6:2];
-
-   wire btype = op_code[4] & !op_code[2] & !op_code[0];
-   wire itype = (!op_code[3] & !op_code[0]) | (!op_code[2]&!op_code[1]&op_code[0]) | (!op_code[0]&op_code[2]);
-   wire jtype = op_code[1];
-   wire stype = op_code[3] & ~op_code[2] & ~op_code[4];
-   wire utype = !op_code[4] & op_code[0];
-
-   wire iorjtype = (op_code[0] & ~op_code[2]) | (op_code[2] & ~op_code[0]) | (~op_code[0] & ~op_code[3]);
-   wire sorbtype = op_code[3:0] == 4'b1000;
+   reg [8:0]  imm19_12_20;
+   reg 	      imm7;
+   reg [5:0]  imm30_25;
+   reg [4:0]  imm24_20;
+   reg [4:0]  imm11_7;
 
    always @(funct3)
       casez(funct3)
@@ -199,27 +200,36 @@ module serv_decode
 	 op22 <= i_wb_rdt[22];
 	 op26 <= i_wb_rdt[26];
 
-	 imm[31] <= sign_bit;
-	 imm[30:20] <= utype ? i_wb_rdt[30:20] : {11{sign_bit}};
-	 imm[19:12] <= (utype | jtype) ? i_wb_rdt[19:12] : {8{sign_bit}};
-	 imm[11]    <= btype ? i_wb_rdt[7] :
-		       utype ? 1'b0 :
-		       jtype ? i_wb_rdt[20] :
-		       sign_bit;
-	 imm[10:5]  <= utype ? 6'd0 : i_wb_rdt[30:25];
-	 imm[4:1]   <= (sorbtype) ? i_wb_rdt[11:8] :
-		       (iorjtype) ? i_wb_rdt[24:21] :
-		       4'd0;
-	 imm[0]     <= itype ? i_wb_rdt[20] :
-		       stype ? i_wb_rdt[7] :
-		       1'b0;
+	 //Immediate decoder
+	 signbit     <= i_wb_rdt[31];
+	 imm19_12_20 <= {i_wb_rdt[19:12],i_wb_rdt[20]};
+	 imm7        <= i_wb_rdt[7];
+	 imm30_25    <= i_wb_rdt[30:25];
+	 imm24_20    <= i_wb_rdt[24:20];
+	 imm11_7     <= i_wb_rdt[11:7];
       end
-      if (i_cnt_en)
-	imm <= {imm[0], imm[31:1]};
+      if (i_cnt_en) begin
+	 imm19_12_20 <= {m3 ? signbit : imm24_20[0], imm19_12_20[8:1]};
+	 imm7        <= signbit;
+	 imm30_25    <= {m2[1] ? imm7 : m2[0] ? signbit : imm19_12_20[0], imm30_25[5:1]};
+	 imm24_20    <= {imm30_25[0], imm24_20[4:1]};
+	 imm11_7     <= {imm30_25[0], imm11_7[4:1]};
+      end
    end
 
+   //True for S (STORE) or B (BRANCH) type instructions
+   //False for J type instructions
+   wire m1 = opcode[3:0] == 4'b1000;
 
-   assign o_imm = imm[0];
+   wire [1:0] m2;
+   assign m2[1] = opcode[4] & !opcode[0];
+
+   //True for OP-IMM, LOAD, STORE, JALR
+   //False for LUI, AUIPC, JAL
+   assign m2[0] = (opcode[1:0] == 2'b00) | (opcode[2:1] == 2'b00);
+   wire m3 = opcode[4];
+
+   assign o_imm = i_cnt_done ? signbit : m1 ? imm11_7[0] : imm24_20[0];
 
    //0 (OP_B_SOURCE_IMM) when OPIMM
    //1 (OP_B_SOURCE_RS2) when BRANCH or OP

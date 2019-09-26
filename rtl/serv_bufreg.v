@@ -11,6 +11,7 @@ module serv_bufreg
    input wire 	      i_rs1_en,
    input wire 	      i_imm,
    input wire 	      i_imm_en,
+   input wire 	      i_clr_lsb,
    output reg [1:0]   o_lsb,
    output wire [31:0] o_reg,
    output wire 	      o_q);
@@ -19,7 +20,9 @@ module serv_bufreg
    reg 		      c_r;
    reg [31:0] 	      data;
 
-   assign {c,q} = {1'b0,(i_rs1 & i_rs1_en)} + {1'b0,(i_imm & i_imm_en)} + c_r;
+   wire 	      clr_lsb = (i_cnt[4:2] == 3'd0) & i_cnt_r[0] & i_clr_lsb;
+
+   assign {c,q} = {1'b0,(i_rs1 & i_rs1_en)} + {1'b0,(i_imm & i_imm_en & !clr_lsb)} + c_r;
 
    always @(posedge i_clk) begin
       //Clear carry when not in INIT state

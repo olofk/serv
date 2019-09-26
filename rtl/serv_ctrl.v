@@ -74,7 +74,7 @@ module serv_ctrl
    assign o_rd  = (i_utype & pc_plus_offset_aligned) | (pc_plus_4 & i_jal_or_jalr);
 
    assign offset_a = i_pc_rel & pc;
-   assign offset_b = i_utype ? i_imm : i_buf;
+   assign offset_b = i_utype ? (i_imm & (i_cnt[4] | (i_cnt[3:2] == 2'b11))): i_buf;
 
    ser_add ser_add_pc_plus_offset
      (

@@ -168,11 +168,14 @@ module serv_top
       .i_mem_misalign (mem_misalign),
       .o_csr_imm      (csr_imm));
 
+   wire 	bufreg_clr_lsb;
+
    serv_decode decode
      (
       .clk (clk),
       //Input
       .i_cnt_en           (cnt_en),
+      .i_cnt_done         (cnt_done),
       .i_wb_rdt           (i_ibus_rdt),
       .i_wb_en            (o_ibus_cyc & i_ibus_ack),
       .i_alu_cmp          (alu_cmp),
@@ -188,6 +191,7 @@ module serv_top
       .o_bufreg_loop      (bufreg_loop),
       .o_bufreg_rs1_en    (bufreg_rs1_en),
       .o_bufreg_imm_en    (bufreg_imm_en),
+      .o_bufreg_clr_lsb   (bufreg_clr_lsb),
       //To ctrl
       .o_ctrl_jalr        (jalr),
       .o_ctrl_jal_or_jalr (jal_or_jalr),
@@ -241,6 +245,7 @@ module serv_top
       .i_rs1_en (bufreg_rs1_en),
       .i_imm    (imm),
       .i_imm_en (bufreg_imm_en),
+      .i_clr_lsb (bufreg_clr_lsb),
       .o_lsb    (lsb),
       .o_reg    (bufreg_out),
       .o_q      (bufreg_q));
