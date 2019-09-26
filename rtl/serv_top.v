@@ -132,6 +132,9 @@ module serv_top
 
    wire 	 new_irq;
 
+   wire [1:0]   lsb;
+   wire [31:0]  bufreg_out;
+
    serv_state state
      (
       .i_clk (clk),
@@ -225,8 +228,6 @@ module serv_top
       .o_rd_alu_en        (rd_alu_en),
       .o_rd_mem_en        (rd_mem_en));
 
-   wire [1:0] 	 lsb;
-   wire [31:0] 	 bufreg_out;
    assign o_dbus_adr = {bufreg_out[31:2], 2'b00};
 
    serv_bufreg bufreg

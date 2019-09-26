@@ -44,6 +44,10 @@ module serv_mpram
    reg [2:0] 	     wcnt_hi;
    reg 		     wgo_r;
 
+   reg            trap_r;
+   reg            trap_2r;
+   reg            trap_3r;
+
    assign wdata = wcnt_lo[0] ? wdata0[3:0] : wdata1[3:0];
 
    assign wen = !wgo_r & |(wen_r & wcnt_lo[1:0]);
@@ -68,10 +72,6 @@ module serv_mpram
    assign waddr[2:0] = wcnt_hi;
 
    wire 	     wgo = !(|wcnt_lo) & ((i_run & (i_rd_wen | i_csr_en)) | i_trap);
-
-   reg 		     trap_r;
-   reg 		     trap_2r;
-   reg 		     trap_3r;
 
    always @(posedge i_clk) begin
       trap_r <= i_trap;
