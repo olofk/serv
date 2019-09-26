@@ -9,7 +9,7 @@ module shift_reg
    output wire 		 o_q,
    output wire [LEN-2:0] o_par);
 
-   reg [LEN-1:0] 	 data = INIT;
+   reg [LEN-1:0] 	 data;
    assign o_q = data[0];
    assign o_par = data[LEN-1:1];
    always @(posedge clk)
