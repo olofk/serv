@@ -55,8 +55,7 @@ module serv_decode
    output wire 	     o_imm,
    output wire 	     o_op_b_source,
    output wire 	     o_rd_csr_en,
-   output wire 	     o_rd_alu_en,
-   output wire 	     o_rd_mem_en);
+   output wire 	     o_rd_alu_en);
 
 `include "serv_params.vh"
 
@@ -226,7 +225,6 @@ module serv_decode
    assign o_op_b_source = opcode[3];
 
    assign o_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
-   assign o_rd_mem_en =              !opcode[2] & !opcode[4];
 
 
 endmodule

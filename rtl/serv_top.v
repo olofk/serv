@@ -55,7 +55,6 @@ module serv_top
    wire 	 slt_op;
 
    wire 	 rd_alu_en;
-   wire 	 rd_mem_en;
    wire 	 rd_csr_en;
    wire          ctrl_rd;
    wire          alu_rd;
@@ -231,8 +230,7 @@ module serv_top
       .o_imm              (imm),
       .o_op_b_source      (op_b_source),
       .o_rd_csr_en        (rd_csr_en),
-      .o_rd_alu_en        (rd_alu_en),
-      .o_rd_mem_en        (rd_mem_en));
+      .o_rd_alu_en        (rd_alu_en));
 
    assign o_dbus_adr = {bufreg_out[31:2], 2'b00};
 
@@ -284,7 +282,7 @@ module serv_top
    assign rd = (ctrl_rd ) |
 	       (rd_alu_en  & alu_rd ) |
 	       (csr_rd & rd_csr_en) |
-	       (rd_mem_en  & mem_rd);
+	       (mem_rd);
 
    assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm : rs2;
 
