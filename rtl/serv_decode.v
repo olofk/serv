@@ -176,16 +176,17 @@ module serv_decode
    wire iorjtype = (op_code[0] & ~op_code[2]) | (op_code[2] & ~op_code[0]) | (~op_code[0] & ~op_code[3]);
    wire sorbtype = op_code[3:0] == 4'b1000;
 
-   always @(posedge clk) begin
+   always @(funct3)
       casez(funct3)
-        3'b000  : o_alu_rd_sel <= ALU_RESULT_ADD;
-        3'b001  : o_alu_rd_sel <= ALU_RESULT_SR;
-        3'b01?  : o_alu_rd_sel <= ALU_RESULT_LT;
-        3'b100  : o_alu_rd_sel <= ALU_RESULT_BOOL;
-        3'b101  : o_alu_rd_sel <= ALU_RESULT_SR;
-        3'b11?  : o_alu_rd_sel <= ALU_RESULT_BOOL;
-      endcase // casez (funct3)
+        3'b000  : o_alu_rd_sel = ALU_RESULT_ADD;
+        3'b001  : o_alu_rd_sel = ALU_RESULT_SR;
+        3'b01?  : o_alu_rd_sel = ALU_RESULT_LT;
+        3'b100  : o_alu_rd_sel = ALU_RESULT_BOOL;
+        3'b101  : o_alu_rd_sel = ALU_RESULT_SR;
+        3'b11?  : o_alu_rd_sel = ALU_RESULT_BOOL;
+      endcase
 
+   always @(posedge clk) begin
       if (i_wb_en) begin
          o_rf_rd_addr  <= i_wb_rdt[11:7];
          o_rf_rs1_addr <= i_wb_rdt[19:15];
