@@ -22,7 +22,6 @@ module serv_decode
    output wire 	     o_bufreg_imm_en,
    output wire 	     o_bufreg_clr_lsb,
    //To ctrl
-   output wire 	     o_ctrl_jalr,
    output wire 	     o_ctrl_jal_or_jalr,
    output wire 	     o_ctrl_utype,
    output wire 	     o_ctrl_pc_rel,
@@ -107,7 +106,6 @@ module serv_decode
    assign o_take_branch = opcode[4] & !opcode[2] & (opcode[0] | (i_alu_cmp^funct3[0]));
 
    assign o_ctrl_utype       = !opcode[4] & opcode[2] & opcode[0];
-   assign o_ctrl_jalr        = opcode[4] & (opcode[1:0] == 2'b01);
    assign o_ctrl_jal_or_jalr = opcode[4] & opcode[0];
 
    //True for jal, b* auipc

@@ -64,7 +64,6 @@ module serv_top
 
    wire          ctrl_pc_en;
    wire          jump;
-   wire          jalr;
    wire          jal_or_jalr;
    wire          utype;
    wire 	 mret;
@@ -193,7 +192,6 @@ module serv_top
       .o_bufreg_imm_en    (bufreg_imm_en),
       .o_bufreg_clr_lsb   (bufreg_clr_lsb),
       //To ctrl
-      .o_ctrl_jalr        (jalr),
       .o_ctrl_jal_or_jalr (jal_or_jalr),
       .o_ctrl_utype       (utype),
       .o_ctrl_pc_rel      (pc_rel),
