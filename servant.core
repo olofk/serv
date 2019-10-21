@@ -31,6 +31,13 @@ filesets:
     file_type : verilogSource
     depend : [serv]
 
+  cyc1000:
+    files:
+      - data/cyc1000.sdc : {file_type : SDC}
+      - data/cyc1000.tcl : {file_type : tclSource}
+      - servant/servclone10_clock_gen.v : {file_type : verilogSource}
+      - servant/servclone10.v : {file_type : verilogSource}
+
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
   verilator_tb: {files: [bench/servant_tb.cpp : {file_type : cppSource}]}
@@ -47,6 +54,17 @@ filesets:
 targets:
   default:
     filesets : [soc]
+
+  cyc1000:
+    default_tool: quartus
+    description: cyc1000 FPGA board
+    filesets : [mem_files, soc, cyc1000]
+    parameters : [memfile, memsize=32768]
+    tools:
+      quartus:
+        family : Cyclone 10 LP
+        device : 10CL025YU256C8G
+    toplevel : servclone10
 
   icebreaker:
     default_tool : icestorm
