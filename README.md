@@ -29,7 +29,7 @@ Create a workspace directory for FuseSoC
 
 Register the serv repo as a core library
 
-`cd $SERV/workspace && fusesoc library add serv ../serv`
+`cd $SERV/workspace && fusesoc library add serv $SERV`
 
 Check that the CPU passes the linter
 
