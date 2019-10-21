@@ -47,22 +47,26 @@ void uart_init(uart_context_t *context, uint32_t baud_rate) {
 
 void do_uart(uart_context_t *context, bool rx) {
   if (context->state == 0) {
+    if (rx)
+      context->state++;
+  }
+  else if (context->state == 1) {
     if (!rx) {
       context->last_update = main_time + context->baud_t/2;
       context->state++;
     }
   }
-  else if(context->state == 1) {
+  else if(context->state == 2) {
     if (main_time > context->last_update) {
       context->last_update += context->baud_t;
       context->ch = 0;
       context->state++;
     }
   }
-  else if (context->state < 10) {
+  else if (context->state < 11) {
     if (main_time > context->last_update) {
       context->last_update += context->baud_t;
-      context->ch |= rx << (context->state-2);
+      context->ch |= rx << (context->state-3);
       context->state++;
     }
   }
@@ -70,7 +74,7 @@ void do_uart(uart_context_t *context, bool rx) {
     if (main_time > context->last_update) {
       context->last_update += context->baud_t;
       putchar(context->ch);
-      context->state=0;
+      context->state=1;
     }
   }
 }
