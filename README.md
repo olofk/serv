@@ -9,7 +9,7 @@ Prerequisites
 -------------
 
 Create a directory to keep all the different parts of the project together. We
-will refer to this directory as `$SERV from now on`
+will refer to this directory as `$SERV` from now on.
 
 Download the main serv repo
 
