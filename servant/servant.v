@@ -116,7 +116,7 @@ serv_arbiter serv_arbiter
 
    servant_ram
      #(
-`ifdef SYNTHESIS
+`ifndef VERILATOR
 .memfile (memfile),
 `endif
        .depth (memsize))
