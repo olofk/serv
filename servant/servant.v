@@ -105,10 +105,12 @@ serv_arbiter serv_arbiter
 //synthesis translate_off
    reg [1023:0] firmware_file;
    initial
+     /* verilator lint_off WIDTH */
      if ($value$plusargs("firmware=%s", firmware_file)) begin
 	$display("Loading RAM from %0s", firmware_file);
 	$readmemh(firmware_file, ram.mem);
      end
+     /* verilator lint_on WIDTH */
 //synthesis translate_on
 `endif
 

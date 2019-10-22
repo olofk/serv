@@ -66,10 +66,12 @@ module serv_mux
 	 integer      f = 0;
 
 	 initial
+       /* verilator lint_off WIDTH */
 	   if ($value$plusargs("signature=%s", signature_file)) begin
 	      $display("Writing signature to %0s", signature_file);
 	      f = $fopen(signature_file, "w");
 	   end
+       /* verilator lint_on WIDTH */
 
 	 always @(posedge i_clk)
 	    if (sig_en & (f != 0))
