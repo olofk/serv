@@ -23,13 +23,13 @@ module servant
    wire [31:0] 	wb_cpu_dbus_rdt;
    wire 	wb_cpu_dbus_ack;
 
-   wire [31:0] 	wb_cpu_adr;
-   wire [31:0] 	wb_cpu_dat;
-   wire [3:0] 	wb_cpu_sel;
-   wire 	wb_cpu_we;
-   wire 	wb_cpu_cyc;
-   wire [31:0] 	wb_cpu_rdt;
-   wire 	wb_cpu_ack;
+   wire [31:0] 	wb_dmux_mem_adr;
+   wire [31:0] 	wb_dmux_mem_dat;
+   wire [3:0] 	wb_dmux_mem_sel;
+   wire 	wb_dmux_mem_we;
+   wire 	wb_dmux_mem_cyc;
+   wire [31:0] 	wb_dmux_mem_rdt;
+   wire 	wb_dmux_mem_ack;
 
    wire [31:0] 	wb_mem_adr;
    wire [31:0] 	wb_mem_dat;
@@ -37,6 +37,7 @@ module servant
    wire 	wb_mem_we;
    wire 	wb_mem_cyc;
    wire [31:0] 	wb_mem_rdt;
+   wire 	wb_mem_ack;
    wire 	wb_gpio_dat;
    wire 	wb_gpio_cyc;
    wire [31:0] 	wb_timer_dat;
@@ -46,26 +47,26 @@ module servant
 
 servant_arbiter servant_arbiter
    (
-    .i_wb_cpu_dbus_adr (wb_cpu_dbus_adr),
-    .i_wb_cpu_dbus_dat (wb_cpu_dbus_dat),
-    .i_wb_cpu_dbus_sel (wb_cpu_dbus_sel),
-    .i_wb_cpu_dbus_we  (wb_cpu_dbus_we ),
-    .i_wb_cpu_dbus_cyc (wb_cpu_dbus_cyc),
-    .o_wb_cpu_dbus_rdt (wb_cpu_dbus_rdt),
-    .o_wb_cpu_dbus_ack (wb_cpu_dbus_ack),
+    .i_wb_cpu_dbus_adr (wb_dmux_mem_adr),
+    .i_wb_cpu_dbus_dat (wb_dmux_mem_dat),
+    .i_wb_cpu_dbus_sel (wb_dmux_mem_sel),
+    .i_wb_cpu_dbus_we  (wb_dmux_mem_we ),
+    .i_wb_cpu_dbus_cyc (wb_dmux_mem_cyc),
+    .o_wb_cpu_dbus_rdt (wb_dmux_mem_rdt),
+    .o_wb_cpu_dbus_ack (wb_dmux_mem_ack),
 
     .i_wb_cpu_ibus_adr (wb_cpu_ibus_adr),
     .i_wb_cpu_ibus_cyc (wb_cpu_ibus_cyc),
     .o_wb_cpu_ibus_rdt (wb_cpu_ibus_rdt),
     .o_wb_cpu_ibus_ack (wb_cpu_ibus_ack),
 
-    .o_wb_cpu_adr (wb_cpu_adr),
-    .o_wb_cpu_dat (wb_cpu_dat),
-    .o_wb_cpu_sel (wb_cpu_sel),
-    .o_wb_cpu_we  (wb_cpu_we ),
-    .o_wb_cpu_cyc (wb_cpu_cyc),
-    .i_wb_cpu_rdt (wb_cpu_rdt),
-    .i_wb_cpu_ack (wb_cpu_ack));
+    .o_wb_cpu_adr (wb_mem_adr),
+    .o_wb_cpu_dat (wb_mem_dat),
+    .o_wb_cpu_sel (wb_mem_sel),
+    .o_wb_cpu_we  (wb_mem_we ),
+    .o_wb_cpu_cyc (wb_mem_cyc),
+    .i_wb_cpu_rdt (wb_mem_rdt),
+    .i_wb_cpu_ack (wb_mem_ack));
 
 
 `ifdef VERILATOR
@@ -77,20 +78,20 @@ servant_arbiter servant_arbiter
   (
    .i_clk (wb_clk),
    .i_rst (wb_rst),
-   .i_wb_cpu_adr (wb_cpu_adr),
-   .i_wb_cpu_dat (wb_cpu_dat),
-   .i_wb_cpu_sel (wb_cpu_sel),
-   .i_wb_cpu_we  (wb_cpu_we),
-   .i_wb_cpu_cyc (wb_cpu_cyc),
-   .o_wb_cpu_rdt (wb_cpu_rdt),
-   .o_wb_cpu_ack (wb_cpu_ack),
+   .i_wb_cpu_adr (wb_cpu_dbus_adr),
+   .i_wb_cpu_dat (wb_cpu_dbus_dat),
+   .i_wb_cpu_sel (wb_cpu_dbus_sel),
+   .i_wb_cpu_we  (wb_cpu_dbus_we),
+   .i_wb_cpu_cyc (wb_cpu_dbus_cyc),
+   .o_wb_cpu_rdt (wb_cpu_dbus_rdt),
+   .o_wb_cpu_ack (wb_cpu_dbus_ack),
 
-   .o_wb_mem_adr (wb_mem_adr),
-   .o_wb_mem_dat (wb_mem_dat),
-   .o_wb_mem_sel (wb_mem_sel),
-   .o_wb_mem_we  (wb_mem_we),
-   .o_wb_mem_cyc (wb_mem_cyc),
-   .i_wb_mem_rdt (wb_mem_rdt),
+   .o_wb_mem_adr (wb_dmux_mem_adr),
+   .o_wb_mem_dat (wb_dmux_mem_dat),
+   .o_wb_mem_sel (wb_dmux_mem_sel),
+   .o_wb_mem_we  (wb_dmux_mem_we),
+   .o_wb_mem_cyc (wb_dmux_mem_cyc),
+   .i_wb_mem_rdt (wb_dmux_mem_rdt),
 
    .o_wb_gpio_dat (wb_gpio_dat),
    .o_wb_gpio_cyc (wb_gpio_cyc),
@@ -127,7 +128,8 @@ servant_arbiter servant_arbiter
       .i_wb_we  (wb_mem_we) ,
       .i_wb_sel (wb_mem_sel),
       .i_wb_dat (wb_mem_dat),
-      .o_wb_rdt (wb_mem_rdt));
+      .o_wb_rdt (wb_mem_rdt),
+      .o_wb_ack (wb_mem_ack));
 
    servant_timer timer
      (.i_clk    (wb_clk),
