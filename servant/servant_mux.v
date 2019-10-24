@@ -4,7 +4,7 @@
  timer = 10
  testcon = 11
  */
-module serv_mux
+module servant_mux
   (
    input wire 	      i_clk,
    input wire 	      i_rst,

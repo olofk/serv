@@ -44,7 +44,7 @@ module servant
    wire 	wb_timer_cyc;
    wire [31:0] 	wb_timer_rdt;
 
-serv_arbiter serv_arbiter
+servant_arbiter servant_arbiter
    (
     .i_ibus_active (wb_cpu_ibus_cyc),
     .i_wb_cpu_dbus_adr (wb_cpu_dbus_adr),
@@ -74,7 +74,7 @@ serv_arbiter serv_arbiter
 `else
    parameter sim = 0;
 `endif
-   serv_mux #(sim) serv_mux
+   servant_mux #(sim) servant_mux
   (
    .i_clk (wb_clk),
    .i_rst (wb_rst),
@@ -130,7 +130,7 @@ serv_arbiter serv_arbiter
       .i_wb_dat (wb_mem_dat),
       .o_wb_rdt (wb_mem_rdt));
 
-   riscv_timer riscv_timer
+   servant_timer timer
      (.i_clk    (wb_clk),
       .i_rst    (wb_rst),
       .o_irq    (timer_irq),
@@ -139,7 +139,7 @@ serv_arbiter serv_arbiter
       .i_wb_dat (wb_timer_dat),
       .o_wb_dat (wb_timer_rdt));
 
-   wb_gpio gpio
+   servant_gpio gpio
      (.i_wb_clk (wb_clk),
       .i_wb_dat (wb_gpio_dat),
       .i_wb_cyc (wb_gpio_cyc),

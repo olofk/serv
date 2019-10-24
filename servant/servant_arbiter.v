@@ -1,4 +1,4 @@
-module serv_arbiter
+module servant_arbiter
   (
    input wire 	      i_ibus_active,
    input wire [31:0]  i_wb_cpu_dbus_adr,

@@ -1,4 +1,4 @@
-module wb_gpio
+module servant_gpio
   (
    input wire i_wb_clk,
    input wire i_wb_dat,

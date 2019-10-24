@@ -1,5 +1,5 @@
 `default_nettype none
-module riscv_timer
+module servant_timer
   (input wire 	     i_clk,
    input wire 	      i_rst,
    output reg 	      o_irq = 1'b0,
