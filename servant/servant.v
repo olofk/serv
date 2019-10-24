@@ -46,7 +46,6 @@ module servant
 
 servant_arbiter servant_arbiter
    (
-    .i_ibus_active (wb_cpu_ibus_cyc),
     .i_wb_cpu_dbus_adr (wb_cpu_dbus_adr),
     .i_wb_cpu_dbus_dat (wb_cpu_dbus_dat),
     .i_wb_cpu_dbus_sel (wb_cpu_dbus_sel),
