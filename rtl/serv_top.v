@@ -125,6 +125,17 @@ module serv_top
    wire [1:0] 	 csr_addr;
    wire 	 csr_pc;
 
+   wire [5:0] 	 wreg0;
+   wire [5:0] 	 wreg1;
+   wire  	 wen0;
+   wire 	 wen1;
+   wire  	 wdata0;
+   wire  	 wdata1;
+   wire [5:0] 	 rreg0;
+   wire [5:0] 	 rreg1;
+   wire 	 rdata0;
+   wire 	 rdata1;
+
    parameter RESET_PC = 32'd8;
 
    wire 	 new_irq;
@@ -312,10 +323,21 @@ module serv_top
    wire 	 csr_in;
    wire 	 rf_csr_out;
 
-   serv_mpram regfile
+   serv_rf_if rf_if
      (
       .i_clk       (clk),
       .i_rst       (i_rst),
+      .o_wreg0     (wreg0),
+      .o_wreg1     (wreg1),
+      .o_wen0      (wen0),
+      .o_wen1      (wen1),
+      .o_wdata0    (wdata0),
+      .o_wdata1    (wdata1),
+      .o_rreg0     (rreg0),
+      .o_rreg1     (rreg1),
+      .i_rdata0    (rdata0),
+      .i_rdata1    (rdata1),
+
       .i_run       (run),
       //Trap interface
       .i_trap      (trap),
@@ -332,18 +354,33 @@ module serv_top
       .i_rd_waddr  (rd_addr),
       .i_rd        (rd),
 
-      .i_rreq      (rf_rreq),
-      .i_wreq      (rf_wreq),
-      .o_rgnt      (rf_ready),
       //RS1 read port
       .i_rs1_raddr (rs1_addr),
       .o_rs1       (rs1),
       //RS2 read port
       .i_rs2_raddr (rs2_addr),
       .o_rs2       (rs2),
+
       //CSR read port
       .o_csr       (rf_csr_out));
 
+   serv_rf_2bit rf
+     (.i_clk    (clk),
+      .i_rst    (i_rst),
+      .i_wreq   (rf_wreq),
+      .i_rreq   (rf_rreq),
+      .o_rgnt   (rf_ready),
+      .i_wreg0  (wreg0),
+      .i_wreg1  (wreg1),
+      .i_wen0   (wen0),
+      .i_wen1   (wen1),
+      .i_wdata0 (wdata0),
+      .i_wdata1 (wdata1),
+      .i_rreg0  (rreg0),
+      .i_rreg1  (rreg1),
+      .o_rdata0 (rdata0),
+      .o_rdata1 (rdata1));
+      
    serv_mem_if mem_if
      (
       .i_clk    (clk),

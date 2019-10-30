@@ -1,36 +1,22 @@
 `default_nettype none
-module serv_mpram
+module serv_rf_2bit
   (
    input wire 	    i_clk,
    input wire 	    i_rst,
-   input wire       i_run,
-   //Trap interface
-   input wire 	    i_trap,
-   input wire 	    i_mret,
-   input wire 	    i_mepc,
-   input wire 	    i_mtval,
-   output wire 	    o_csr_pc,
-   //CSR interface
-   input wire 	    i_csr_en,
-   input wire [1:0] i_csr_addr,
-   input wire 	    i_csr,
-   output wire 	    o_csr,
-   //RD write port
-   input wire 	    i_rd_wen,
-   input wire [4:0] i_rd_waddr,
-   input wire 	    i_rd,
-
    input wire 	    i_wreq,
    input wire 	    i_rreq,
    output reg 	    o_rgnt,
-   //RS1 read port
-   input wire [4:0] i_rs1_raddr,
-   output wire 	    o_rs1,
-   //RS2 read port
-   input wire [4:0] i_rs2_raddr,
-   output wire 	    o_rs2);
+   input wire [5:0] i_wreg0,
+   input wire [5:0] i_wreg1,
+   input wire 	    i_wen0,
+   input wire 	    i_wen1,
+   input wire 	    i_wdata0,
+   input wire 	    i_wdata1,
+   input wire [5:0] i_rreg0,
+   input wire [5:0] i_rreg1,
+   output wire 	    o_rdata0,
+   output wire 	    o_rdata1);
 
-`include "serv_params.vh"
 
    /*
     ********** Write side ***********
@@ -42,28 +28,15 @@ module serv_mpram
    wire [3:0] 	     wslot = wcnt[4:1];
    wire 	     wport = wcnt[0];
 
-   wire 	     wdata0 = i_trap ? i_mtval : i_rd;
-   wire 	     wdata1 = i_trap ? i_mepc : i_csr;
    reg 		     wdata0_r;
    reg 		     wdata1_r;
    reg 		     wdata1_2r;
    wire [1:0] 	     wdata = !wport ?
-		     {wdata0  , wdata0_r} :
+		     {i_wdata0, wdata0_r} :
 		     {wdata1_r, wdata1_2r};
 
-   //port 0 rd mtval
-   //port 1 csr mepc
-   //mepc  100010
-   //mtval 100011
-   //csr   1000xx
-   //rd    0xxxxx
-   wire [5:0] wreg0 = i_trap ? {4'b1000,CSR_MTVAL} : {1'b0,i_rd_waddr};
-   wire [5:0] wreg1 = i_trap ? {4'b1000,CSR_MEPC}  : {4'b1000,i_csr_addr};
-   wire [5:0] wreg  = wport ? wreg1 : wreg0;
+   wire [5:0] wreg  = wport ? i_wreg1 : i_wreg0;
    wire [9:0] waddr = {wreg, wslot};
-
-   wire       wen0 = i_trap | (i_rd_wen & i_run);
-   wire       wen1 = i_trap | i_csr_en;
 
    wire       wen = wgo & (wport ? wen1_r : wen0_r);
 
@@ -73,11 +46,11 @@ module serv_mpram
    reg 	      wen1_r;
 
    always @(posedge i_clk) begin
-      wen0_r    <= wen0;
-      wen1_r    <= wen1;
+      wen0_r    <= i_wen0;
+      wen1_r    <= i_wen1;
       wreq_r    <= i_wreq;
-      wdata0_r  <= wdata0;
-      wdata1_r  <= wdata1;
+      wdata0_r  <= i_wdata0;
+      wdata1_r  <= i_wdata1;
       wdata1_2r <= wdata1_r;
 
       if (wgo)
@@ -97,32 +70,21 @@ module serv_mpram
     ********** Read side ***********
     */
 
-   //0 : RS1
-   //1 : RS2 / CSR
 
    reg [4:0]  rcnt;
    wire [3:0] rslot = rcnt[4:1];
    wire       rport = rcnt[0];
 
-   wire [5:0] rreg0 = {1'b0, i_rs1_raddr};
-   wire [5:0] rreg1 =
-	      i_trap   ? {4'b1000, CSR_MTVEC} :
-	      i_mret   ? {4'b1000, CSR_MEPC} :
-	      i_csr_en ? {4'b1000, i_csr_addr} :
-	      {1'b0,i_rs2_raddr};
-   wire [5:0] rreg = rport ? rreg1 : rreg0;
+   wire [5:0] rreg = rport ? i_rreg1 : i_rreg0;
    wire [9:0] raddr = {rreg, rslot};
 
    reg [1:0]  rdata;
    reg [1:0]  rdata0;
    reg 	      rdata1;
 
-   assign o_rs1 = !rport ? rdata0[0] : rdata0[1];
-   assign o_rs2 = rport ? rdata1 : rdata[0];
 
-   assign o_csr = o_rs2 & i_csr_en;
-   assign o_csr_pc = o_rs2;
-
+   assign o_rdata0 = !rport ? rdata0[0] : rdata0[1];
+   assign o_rdata1 = rport ? rdata1 : rdata[0];
 
    reg 	      rreq_r;
 
