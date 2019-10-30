@@ -62,18 +62,23 @@ module serv_mpram
    wire [5:0] wreg  = wport ? wreg1 : wreg0;
    wire [9:0] waddr = {wreg, wslot};
 
-   wire       wen = wgo & (i_trap | (wport ? i_csr_en : i_rd_wen & run_r));
+   wire       wen0 = i_trap | (i_rd_wen & i_run);
+   wire       wen1 = i_trap | i_csr_en;
+
+   wire       wen = wgo & (wport ? wen1_r : wen0_r);
 
    reg 	      wreq_r;
-   reg 	      run_r;
+
+   reg 	      wen0_r;
+   reg 	      wen1_r;
 
    always @(posedge i_clk) begin
-      wreq_r    <= i_wreq | o_rgnt;
+      wen0_r    <= wen0;
+      wen1_r    <= wen1;
+      wreq_r    <= i_wreq;
       wdata0_r  <= wdata0;
       wdata1_r  <= wdata1;
       wdata1_2r <= wdata1_r;
-      run_r <= i_run;
-
 
       if (wgo)
 	wcnt <= wcnt+5'd1;

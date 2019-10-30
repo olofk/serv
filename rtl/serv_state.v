@@ -83,7 +83,7 @@ module serv_state
    assign o_rf_rreq = i_ibus_ack | (stage_two_req & trap_pending);
 
    //Prepare RF for writes when everything is ready to enter stage two
-   assign o_rf_wreq = ((i_shift_op & i_alu_sh_done & stage_two_pending) | (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op))) & !trap_pending;
+   assign o_rf_wreq = ((i_shift_op & i_alu_sh_done & stage_two_pending) | (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op))) & !trap_pending | i_rf_ready;
 
    //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
    assign o_bufreg_hold = !cnt_en & (stage_two_req | ~i_shift_op);
