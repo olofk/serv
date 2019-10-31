@@ -21,7 +21,9 @@ module serv_rf_if
    input wire 	     i_trap,
    input wire 	     i_mret,
    input wire 	     i_mepc,
-   input wire 	     i_mtval,
+   input wire 	     i_mem_misalign,
+   input wire 	     i_bufreg_q,
+   input wire 	     i_bad_pc,
    output wire 	     o_csr_pc,
    //CSR interface
    input wire 	     i_csr_en,
@@ -31,7 +33,12 @@ module serv_rf_if
    //RD write port
    input wire 	     i_rd_wen,
    input wire [4:0]  i_rd_waddr,
-   input wire 	     i_rd,
+   input wire 	     i_ctrl_rd,
+   input wire 	     i_alu_rd,
+   input wire 	     i_rd_alu_en,
+   input wire 	     i_csr_rd,
+   input wire 	     i_rd_csr_en,
+   input wire 	     i_mem_rd,
 
    //RS1 read port
    input wire [4:0]  i_rs1_raddr,
@@ -46,7 +53,14 @@ module serv_rf_if
     ********** Write side ***********
     */
 
-   assign 	     o_wdata0 = i_trap ? i_mtval : i_rd;
+   wire 	     rd = (i_ctrl_rd ) |
+			  (i_alu_rd & i_rd_alu_en) |
+			  (i_csr_rd & i_rd_csr_en) |
+			  (i_mem_rd);
+
+   wire 	     mtval = i_mem_misalign ? i_bufreg_q : i_bad_pc;
+
+   assign 	     o_wdata0 = i_trap ? mtval  : rd;
    assign	     o_wdata1 = i_trap ? i_mepc : i_csr;
    
    //port 0 rd mtval

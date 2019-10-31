@@ -60,7 +60,6 @@ module serv_top
    wire          alu_rd;
    wire          mem_rd;
    wire          csr_rd;
-   wire          rd;
 
    wire          ctrl_pc_en;
    wire          jump;
@@ -291,11 +290,6 @@ module serv_top
       .o_ibus_cyc (o_ibus_cyc),
       .i_ibus_ack (i_ibus_ack));
 
-   assign rd = (ctrl_rd ) |
-	       (rd_alu_en  & alu_rd ) |
-	       (csr_rd & rd_csr_en) |
-	       (mem_rd);
-
    assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm : rs2;
 
    serv_alu alu
@@ -327,6 +321,7 @@ module serv_top
      (
       .i_clk       (clk),
       .i_rst       (i_rst),
+      //RF interface
       .o_wreg0     (wreg0),
       .o_wreg1     (wreg1),
       .o_wen0      (wen0),
@@ -343,7 +338,9 @@ module serv_top
       .i_trap      (trap),
       .i_mret      (mret),
       .i_mepc      (o_ibus_adr[0]),
-      .i_mtval     (mem_misalign ? bufreg_q : bad_pc),
+      .i_mem_misalign (mem_misalign),
+      .i_bufreg_q  (bufreg_q),
+      .i_bad_pc    (bad_pc),
       .o_csr_pc    (csr_pc),
       //CSR write port
       .i_csr_en    (csr_en),
@@ -352,7 +349,12 @@ module serv_top
       //RD write port
       .i_rd_wen    (rd_en & (|rd_addr)),
       .i_rd_waddr  (rd_addr),
-      .i_rd        (rd),
+      .i_ctrl_rd   (ctrl_rd),
+      .i_alu_rd    (alu_rd),
+      .i_rd_alu_en (rd_alu_en),
+      .i_csr_rd    (csr_rd),
+      .i_rd_csr_en (rd_csr_en),
+      .i_mem_rd    (mem_rd),
 
       //RS1 read port
       .i_rs1_raddr (rs1_addr),
@@ -436,8 +438,8 @@ module serv_top
       rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
       if (o_ibus_cyc & i_ibus_ack)
 	rvfi_insn <= i_ibus_rdt;
-      if (rd_en)
-        rvfi_rd_wdata <= {rd,rvfi_rd_wdata[31:1]};
+      if (wen0)
+        rvfi_rd_wdata <= {wdata0,rvfi_rd_wdata[31:1]};
       if (cnt_done & ctrl_pc_en) begin
          rvfi_pc_rdata <= pc;
 	 if (!rd_en)
