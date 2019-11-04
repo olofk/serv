@@ -38,19 +38,19 @@ Check that the CPU passes the linter
 Build and run the single threaded zephyr hello world example with verilator
 
     cd $SERV/workspace
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello.hex
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_hello.hex
 
 ..or... the multithreaded version
 
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello_mt.hex --memsize=16384
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_hello_mt.hex --memsize=16384
 
 ...or... the philosophers example
 
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_phil.hex --memsize=32768
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_phil.hex --memsize=32768
 
 ...or... the synchronization example
 
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_sync.hex --memsize=16384
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_sync.hex --memsize=16384
 
 Other applications can be tested by compiling and converting to bin and then hex e.g. with makehex.py found in `$SERV/serv/riscv-target/serv`
 
