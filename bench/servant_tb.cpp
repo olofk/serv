@@ -43,6 +43,7 @@ typedef struct {
 
 void uart_init(uart_context_t *context, uint32_t baud_rate) {
   context->baud_t = 1000*1000*1000/baud_rate;
+  context->state = 0;
 }
 
 void do_uart(uart_context_t *context, bool rx) {
