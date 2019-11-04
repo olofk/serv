@@ -70,7 +70,18 @@ Run the compliance tests
 
 ## Run on hardware
 
-Only supported so far is a single threaded Zephyr hello world example on the icebreaker and tinyFPGA BX boards
+Only supported so far is a single threaded Zephyr hello world example on the icebreaker and tinyFPGA BX boards. Some 
+packages should be installed before running it (and shoud be accessible in your PATH variable):
+- [icestorm](https://github.com/cliffordwolf/icestorm).
+- [nextpnr](https://github.com/YosysHQ/nextpnr).
+
+And do not forget to add fusesoc-cores in your fusesoc lib :
+- locally:
+```fusesoc library add fusesoc-cores https://github.com/fusesoc/fusesoc-cores
+```
+- globally:
+```fusesoc library add --global fusesoc-cores https://github.com/fusesoc/fusesoc-cores
+```
 
 ### TinyFPGA BX
 
