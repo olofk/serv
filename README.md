@@ -77,10 +77,12 @@ packages should be installed before running it (and shoud be accessible in your 
 
 And do not forget to add fusesoc-cores in your fusesoc lib :
 - locally:
-```fusesoc library add fusesoc-cores https://github.com/fusesoc/fusesoc-cores
+```
+ fusesoc library add fusesoc-cores https://github.com/fusesoc/fusesoc-cores
 ```
 - globally:
-```fusesoc library add --global fusesoc-cores https://github.com/fusesoc/fusesoc-cores
+```
+ fusesoc library add --global fusesoc-cores https://github.com/fusesoc/fusesoc-cores
 ```
 
 ### TinyFPGA BX
