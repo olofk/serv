@@ -35,7 +35,7 @@ Check that the CPU passes the linter
 
 ## Running test software
 
-Build and run the single threaded zephyr hello world example with verilator
+Build and run the single threaded zephyr hello world example with verilator (should be stopped with Ctrl-C):
 
     cd $SERV/workspace
     fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_hello.hex
