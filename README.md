@@ -35,22 +35,22 @@ Check that the CPU passes the linter
 
 ## Running test software
 
-Build and run the single threaded zephyr hello world example with verilator
+Build and run the single threaded zephyr hello world example with verilator (should be stopped with Ctrl-C):
 
     cd $SERV/workspace
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello.hex
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_hello.hex
 
 ..or... the multithreaded version
 
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello_mt.hex --memsize=16384
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_hello_mt.hex --memsize=16384
 
 ...or... the philosophers example
 
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_phil.hex --memsize=32768
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_phil.hex --memsize=32768
 
 ...or... the synchronization example
 
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_sync.hex --memsize=16384
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_sync.hex --memsize=16384
 
 Other applications can be tested by compiling and converting to bin and then hex e.g. with makehex.py found in `$SERV/serv/riscv-target/serv`
 
@@ -70,7 +70,20 @@ Run the compliance tests
 
 ## Run on hardware
 
-Only supported so far is a single threaded Zephyr hello world example on the icebreaker and tinyFPGA BX boards
+Only supported so far is a single threaded Zephyr hello world example on the icebreaker and tinyFPGA BX boards. Some 
+packages should be installed before running it (and shoud be accessible in your PATH variable):
+- [icestorm](https://github.com/cliffordwolf/icestorm).
+- [nextpnr](https://github.com/YosysHQ/nextpnr).
+
+And do not forget to add fusesoc-cores in your fusesoc lib :
+- locally:
+```
+ fusesoc library add fusesoc-cores https://github.com/fusesoc/fusesoc-cores
+```
+- globally:
+```
+ fusesoc library add --global fusesoc-cores https://github.com/fusesoc/fusesoc-cores
+```
 
 ### TinyFPGA BX
 
