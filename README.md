@@ -100,7 +100,7 @@ Pin 9 is used for UART output with 57600 baud rate.
     cd $SERV/workspace
     fusesoc run --target=icebreaker servant
 
-Run with `--firmware=$SERV/sw/blinky.hex` as the last argument to run the LED blink example instead
+Run with `--memfile=$SERV/sw/blinky.hex` as the last argument to run the LED blink example instead
 
 ## Other targets
 
