@@ -141,7 +141,7 @@ module serv_mpram
    end
 
 
-   reg [1:0]  memory [0:1023];
+   reg [1:0]  memory [0:575];
 
    always @(posedge i_clk) begin
       if (wen)
