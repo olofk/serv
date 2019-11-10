@@ -4,6 +4,8 @@ module servix_clock_gen
    output wire o_clk,
    output reg  o_rst);
 
+   parameter frequency = 32;
+
    wire   clkfb;
    wire   locked;
    reg 	  locked_r;
@@ -12,7 +14,7 @@ module servix_clock_gen
      #(.BANDWIDTH("OPTIMIZED"),
        .CLKFBOUT_MULT(16),
        .CLKIN1_PERIOD(10.0), //100MHz
-       .CLKOUT0_DIVIDE(50),
+       .CLKOUT0_DIVIDE((frequency == 32) ? 50 : 100),
        .DIVCLK_DIVIDE(1),
        .STARTUP_WAIT("FALSE"))
    PLLE2_BASE_inst

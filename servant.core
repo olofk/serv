@@ -75,7 +75,7 @@ targets:
   nexys_a7:
     default_tool: vivado
     filesets : [mem_files, soc, nexys_a7]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, frequency=32]
     tools:
       vivado: {part : xc7a100tcsg324-1}
     toplevel : servix
@@ -109,6 +109,11 @@ parameters:
     datatype : file
     description : Preload RAM with a hex file at runtime (overrides memfile)
     paramtype : plusarg
+
+  frequency:
+    datatype    : int
+    description : PLL output frequency
+    paramtype   : vlogparam
 
   memfile:
     datatype    : file
