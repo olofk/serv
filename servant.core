@@ -38,6 +38,11 @@ filesets:
       - servant/servix_clock_gen.v : {file_type : verilogSource}
       - servant/servix.v : {file_type : verilogSource}
       - data/nexys_a7.xdc : {file_type : xdc}
+  arty_a7_35t:
+    files:
+      - servant/servix_clock_gen.v : {file_type : verilogSource}
+      - servant/servix.v : {file_type : verilogSource}
+      - data/arty_a7_35t.xdc : {file_type : xdc}
 targets:
   default:
     filesets : [soc]
@@ -78,6 +83,14 @@ targets:
     parameters : [memfile, memsize, frequency=32]
     tools:
       vivado: {part : xc7a100tcsg324-1}
+    toplevel : servix
+
+  arty_a7_35t:
+    default_tool: vivado
+    filesets : [mem_files, soc, arty_a7_35t]
+    parameters : [memfile, memsize, frequency=16]
+    tools:
+      vivado: {part : xc7a35ticsg324-1L}
     toplevel : servix
 
   sim:

@@ -70,7 +70,7 @@ Run the compliance tests
 
 ## Run on hardware
 
-Only supported so far is a single threaded Zephyr hello world example on the icebreaker and tinyFPGA BX boards. Some 
+Only supported so far is a single threaded Zephyr hello world example on the icebreaker tinyFPGA BX and arty A7 35T boards. Some
 packages should be installed before running it (and shoud be accessible in your PATH variable):
 - [icestorm](https://github.com/cliffordwolf/icestorm).
 - [nextpnr](https://github.com/YosysHQ/nextpnr).
@@ -101,6 +101,14 @@ Pin 9 is used for UART output with 57600 baud rate.
 
     cd $SERV/workspace
     fusesoc run --target=icebreaker servant
+
+### Arty A7 35T
+
+Pin D10 (uart_rxd_out) is used for UART output with 57600 baud rate (to use
+blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
+
+    cd $SERV/workspace
+    fusesoc run --target=arty_a7_35t servant
 
 ## Other targets
 
