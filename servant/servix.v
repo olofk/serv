@@ -4,6 +4,7 @@ module servix
  input wire  i_clk,
  output wire q);
 
+   parameter frequency = 32;
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
    parameter PLL = "NONE";
@@ -11,7 +12,9 @@ module servix
    wire      wb_clk;
    wire      wb_rst;
 
-   servix_clock_gen clock_gen
+   servix_clock_gen
+     #(.frequency (frequency))
+   clock_gen
      (.i_clk (i_clk),
       .o_clk (wb_clk),
       .o_rst (wb_rst));
