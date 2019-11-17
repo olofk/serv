@@ -135,7 +135,9 @@ servant_arbiter servant_arbiter
       .o_wb_rdt (wb_mem_rdt),
       .o_wb_ack (wb_mem_ack));
 
-   servant_timer timer
+   servant_timer
+     #(.WIDTH (32))
+   timer
      (.i_clk    (wb_clk),
       .i_rst    (wb_rst),
       .o_irq    (timer_irq),

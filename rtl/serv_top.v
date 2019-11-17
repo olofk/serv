@@ -128,6 +128,8 @@ module serv_top
    parameter RESET_PC = 32'd8;
 
    wire 	 new_irq;
+   wire 	 trap_taken;
+   wire 	 pending_irq;
 
    wire [1:0]   lsb;
    wire [31:0]  bufreg_out;
@@ -137,6 +139,8 @@ module serv_top
       .i_clk (clk),
       .i_rst          (i_rst),
       .i_new_irq      (new_irq),
+      .o_trap_taken   (trap_taken),
+      .o_pending_irq  (pending_irq),
       .i_dbus_ack     (i_dbus_ack),
       .i_ibus_ack     (i_ibus_ack),
       .o_rf_rreq      (rf_rreq),
@@ -375,11 +379,13 @@ module serv_top
       .o_csr_in     (csr_in),
       .i_mtip       (i_timer_irq),
       .o_new_irq    (new_irq),
+      .i_trap_taken (trap_taken),
+      .i_pending_irq (pending_irq),
       .i_mstatus_en (csr_mstatus_en),
       .i_mie_en     (csr_mie_en    ),
       .i_mcause_en  (csr_mcause_en ),
       .i_csr_source (csr_source),
-      .i_trap       (trap),
+      .i_mret       (mret),
       .i_d          (csr_d_sel ? csr_imm : rs1),
       .o_q          (csr_rd));
 

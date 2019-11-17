@@ -15,12 +15,14 @@ module serv_csr
    output wire 	    o_csr_in,
    //Stuff
    input wire 	    i_mtip,
-   output reg 	    o_new_irq,
+   output wire 	    o_new_irq,
+   input wire 	    i_pending_irq,
+   input wire 	    i_trap_taken,
    input wire 	    i_mstatus_en,
    input wire 	    i_mie_en,
    input wire 	    i_mcause_en,
    input wire [1:0] i_csr_source,
-   input wire 	    i_trap,
+   input wire 	    i_mret,
    input wire 	    i_d,
    output wire 	    o_q);
 
@@ -28,6 +30,7 @@ module serv_csr
 
    reg 		    mstatus;
    reg 		    mstatus_mie;
+   reg 		    mstatus_mpie;
    reg 		    mie_mtie;
 
    reg 		mcause31;
@@ -36,6 +39,8 @@ module serv_csr
 
    wire 	csr_in;
    wire 	csr_out;
+
+   reg 		timer_irq_r;
 
    assign csr_in = (i_csr_source == CSR_SOURCE_EXT) ? i_d :
 		   (i_csr_source == CSR_SOURCE_SET) ? csr_out | i_d :
@@ -57,9 +62,14 @@ module serv_csr
 
    assign o_csr_in = csr_in;
 
-   reg 		mtip_r;
+   assign o_new_irq = !timer_irq_r & timer_irq;
+
 
    always @(posedge i_clk) begin
+      /*
+       Note: To save resources mstatus_mpie (mstatus bit 7) is not
+       readable or writable from sw
+       */
       if (i_mstatus_en & (i_cnt[4:2] == 3'd0) & i_cnt_r[3])
 	mstatus_mie <= csr_in;
 
@@ -68,12 +78,17 @@ module serv_csr
 
       mstatus <= (i_cnt[4:2] == 0) & i_cnt_r[2] & mstatus_mie;
 
-      mtip_r <= i_mtip;
-      o_new_irq <= !mtip_r & timer_irq;
+      timer_irq_r <= timer_irq;
 
-      if (i_trap) begin
-	 mcause31  <= timer_irq;
-	 mcause3_0 <= timer_irq ? 4'd7 :
+      if (i_mret) begin
+	 mstatus_mie <= mstatus_mpie;
+      end
+
+      if (i_trap_taken) begin
+	 mstatus_mpie <= mstatus_mie;
+	 mstatus_mie <= 1'b0;
+	 mcause31  <= i_pending_irq;
+	 mcause3_0 <= i_pending_irq ? 4'd7 :
 		      i_e_op ? {!i_ebreak, 3'b011} :
 		      i_mem_misalign ? {2'b01, i_mem_cmd, 1'b0} :
 		      4'd0;

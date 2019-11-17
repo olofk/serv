@@ -3,6 +3,8 @@ module serv_state
    input wire 	     i_clk,
    input wire 	     i_rst,
    input wire 	     i_new_irq,
+   output wire 	     o_trap_taken,
+   output reg 	     o_pending_irq,
    input wire 	     i_dbus_ack,
    input wire 	     i_ibus_ack,
    output wire 	     o_rf_rreq,
@@ -49,7 +51,7 @@ module serv_state
    assign o_cnt_done = cnt_done;
 
    //Update PC in RUN or TRAP states
-   assign o_ctrl_pc_en  = running | o_ctrl_trap;
+   assign o_ctrl_pc_en  = running | (state == TRAP);
 
    assign o_csr_imm = (o_cnt < 5) ? i_rs1_addr[o_cnt[2:0]] : 1'b0;
    assign o_alu_shamt_en = (o_cnt < 5) & (state == INIT);
@@ -64,14 +66,13 @@ module serv_state
    assign running = (state == RUN);
    assign o_run = running;
 
-   assign o_ctrl_trap = (state == TRAP);
-
    //slt*, branch/jump, shift, load/store
    wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
 
    reg 	stage_two_pending;
 
-   reg 	pending_irq;
+   reg 	irq_sync;
+   reg 	misalign_trap_sync;
 
    assign o_dbus_cyc = (state == IDLE) & stage_two_pending & i_mem_op & !i_mem_misalign;
 
@@ -87,6 +88,10 @@ module serv_state
    //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
    assign o_bufreg_hold = !cnt_en & (stage_two_req | ~i_shift_op);
 
+   assign o_ctrl_trap = i_e_op | o_pending_irq | misalign_trap_sync;
+   assign o_trap_taken = i_ibus_ack & o_ctrl_trap;
+
+
    always @(posedge i_clk) begin
       if (cnt_done)
 	o_ctrl_jump <= (state == INIT) & i_take_branch;
@@ -94,13 +99,23 @@ module serv_state
       if (cnt_en)
 	stage_two_pending <= o_init;
 
+      if (i_ibus_ack)
+	irq_sync <= 1'b0;
       if (i_new_irq)
-	pending_irq <= 1'b1;
+	irq_sync <= 1'b1;
+
+      if (i_ibus_ack)
+	o_pending_irq <= irq_sync;
 
       cnt_done <= (o_cnt[4:2] == 3'b111) & o_cnt_r[2];
 
       //Need a strobe for the first cycle in the IDLE state after INIT
       stage_two_req <= cnt_done & (state == INIT);
+
+      if (stage_two_req)
+	misalign_trap_sync <= trap_pending;
+      if (i_ibus_ack)
+	misalign_trap_sync <= 1'b0;
 
       case (state)
         IDLE : begin
@@ -111,7 +126,7 @@ module serv_state
 		state <= TRAP;
 	   end else begin
 	      if (i_rf_ready)
-		if (i_e_op | pending_irq)
+		if (i_e_op | o_pending_irq)
 		  state <= TRAP;
 		else if (two_stage_op)
 		  state <= INIT;
@@ -124,7 +139,6 @@ module serv_state
         RUN : begin
         end
 	TRAP : begin
-	   pending_irq <= 1'b0;
 	end
         default : state <= IDLE;
       endcase
@@ -138,7 +152,6 @@ module serv_state
       if (i_rst) begin
 	 state <= IDLE;
 	 o_cnt   <= 5'd0;
-	 pending_irq <= 1'b0;
 	 stage_two_pending <= 1'b0;
 	 o_ctrl_jump <= 1'b0;
 	 o_cnt_r <= 4'b0001;
