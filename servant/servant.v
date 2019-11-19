@@ -39,7 +39,9 @@ module servant
    wire [31:0] 	wb_mem_rdt;
    wire 	wb_mem_ack;
    wire 	wb_gpio_dat;
+   wire 	wb_gpio_we;
    wire 	wb_gpio_cyc;
+   wire 	wb_gpio_rdt;
    wire [31:0] 	wb_timer_dat;
    wire 	wb_timer_we;
    wire 	wb_timer_cyc;
@@ -94,7 +96,9 @@ servant_arbiter servant_arbiter
    .i_wb_mem_rdt (wb_dmux_mem_rdt),
 
    .o_wb_gpio_dat (wb_gpio_dat),
+   .o_wb_gpio_we  (wb_gpio_we),
    .o_wb_gpio_cyc (wb_gpio_cyc),
+   .i_wb_gpio_rdt (wb_gpio_rdt),
 
    .o_wb_timer_dat (wb_timer_dat),
    .o_wb_timer_we  (wb_timer_we),
@@ -143,7 +147,9 @@ servant_arbiter servant_arbiter
    servant_gpio gpio
      (.i_wb_clk (wb_clk),
       .i_wb_dat (wb_gpio_dat),
+      .i_wb_we  (wb_gpio_we),
       .i_wb_cyc (wb_gpio_cyc),
+      .o_wb_rdt (wb_gpio_rdt),
       .o_gpio   (q));
 
    serv_top
