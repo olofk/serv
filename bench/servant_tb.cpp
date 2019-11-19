@@ -117,12 +117,21 @@ int main(int argc, char **argv, char **env)
 	if (arg_timeout[0])
 	  timeout = atoi(arg_timeout+9);
 
+	vluint64_t vcd_start = 0;
+	const char *arg_vcd_start = Verilated::commandArgsPlusMatch("vcd_start=");
+	if (arg_vcd_start[0])
+	  vcd_start = atoi(arg_vcd_start+11);
+
+	bool dump = false;
 	top->wb_clk = 1;
 	bool q = top->q;
 	while (!(done || Verilated::gotFinish())) {
+	  if (tfp && !dump && (main_time > vcd_start)) {
+	    dump = true;
+	  }
 	  top->wb_rst = main_time < 100;
 	  top->eval();
-	  if (tfp)
+	  if (dump)
 	    tfp->dump(main_time);
 	  if (baud_rate)
 	    do_uart(&uart_context, top->q);

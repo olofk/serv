@@ -102,7 +102,15 @@ targets:
   verilator_tb:
     default_tool: verilator
     filesets : [soc, verilator_tb]
-    parameters : [RISCV_FORMAL, firmware, memsize, signature, timeout, uart_baudrate, vcd]
+    parameters :
+      - RISCV_FORMAL
+      - firmware
+      - memsize
+      - signature
+      - timeout
+      - uart_baudrate
+      - vcd
+      - vcd_start
     tools:
       verilator:
         verilator_options : [--trace]
@@ -154,6 +162,11 @@ parameters:
   vcd:
     datatype : bool
     paramtype : plusarg
+
+  vcd_start:
+    datatype    : int
+    description : Delay start of VCD dumping until the specified time
+    paramtype   : plusarg
 
 generate:
   icebreaker_pll:
