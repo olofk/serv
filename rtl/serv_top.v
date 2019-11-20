@@ -28,6 +28,21 @@ module serv_top
    output reg [31:0]  rvfi_mem_rdata,
    output reg [31:0]  rvfi_mem_wdata,
 `endif
+   //RF Interface
+   output wire 	     o_rf_rreq,
+   output wire 	     o_rf_wreq,
+   input wire 	     i_rf_ready,
+   output wire [5:0] o_wreg0,
+   output wire [5:0] o_wreg1,
+   output wire 	     o_wen0,
+   output wire 	     o_wen1,
+   output wire 	     o_wdata0,
+   output wire 	     o_wdata1,
+   output wire [5:0] o_rreg0,
+   output wire [5:0] o_rreg1,
+   input wire 	     i_rdata0,
+   input wire 	     i_rdata1,
+
    output wire [31:0] o_ibus_adr,
    output wire 	      o_ibus_cyc,
    input wire [31:0]  i_ibus_rdt,
@@ -95,9 +110,6 @@ module serv_top
    wire 	 alu_sh_done;
    wire [1:0]    alu_rd_sel;
 
-   wire 	 rf_rreq;
-   wire 	 rf_wreq;
-   wire 	 rf_ready;
    wire          rs1;
    wire          rs2;
    wire          rd_en;
@@ -124,18 +136,7 @@ module serv_top
    wire [1:0] 	 csr_addr;
    wire 	 csr_pc;
 
-   wire [5:0] 	 wreg0;
-   wire [5:0] 	 wreg1;
-   wire  	 wen0;
-   wire 	 wen1;
-   wire  	 wdata0;
-   wire  	 wdata1;
-   wire [5:0] 	 rreg0;
-   wire [5:0] 	 rreg1;
-   wire 	 rdata0;
-   wire 	 rdata1;
-
-   parameter RESET_PC = 32'd8;
+   parameter RESET_PC = 32'd0;
 
    wire 	 new_irq;
    wire 	 trap_taken;
@@ -153,9 +154,9 @@ module serv_top
       .o_pending_irq  (pending_irq),
       .i_dbus_ack     (i_dbus_ack),
       .i_ibus_ack     (i_ibus_ack),
-      .o_rf_rreq      (rf_rreq),
-      .o_rf_wreq      (rf_wreq),
-      .i_rf_ready     (rf_ready),
+      .o_rf_rreq      (o_rf_rreq),
+      .o_rf_wreq      (o_rf_wreq),
+      .i_rf_ready     (i_rf_ready),
       .i_take_branch  (take_branch),
       .i_branch_op    (branch_op),
       .i_mem_op       (mem_op),
@@ -322,16 +323,16 @@ module serv_top
       .i_clk       (clk),
       .i_rst       (i_rst),
       //RF interface
-      .o_wreg0     (wreg0),
-      .o_wreg1     (wreg1),
-      .o_wen0      (wen0),
-      .o_wen1      (wen1),
-      .o_wdata0    (wdata0),
-      .o_wdata1    (wdata1),
-      .o_rreg0     (rreg0),
-      .o_rreg1     (rreg1),
-      .i_rdata0    (rdata0),
-      .i_rdata1    (rdata1),
+      .o_wreg0     (o_wreg0),
+      .o_wreg1     (o_wreg1),
+      .o_wen0      (o_wen0),
+      .o_wen1      (o_wen1),
+      .o_wdata0    (o_wdata0),
+      .o_wdata1    (o_wdata1),
+      .o_rreg0     (o_rreg0),
+      .o_rreg1     (o_rreg1),
+      .i_rdata0    (i_rdata0),
+      .i_rdata1    (i_rdata1),
 
       .i_run       (run),
       //Trap interface
@@ -366,23 +367,6 @@ module serv_top
       //CSR read port
       .o_csr       (rf_csr_out));
 
-   serv_rf_2bit rf
-     (.i_clk    (clk),
-      .i_rst    (i_rst),
-      .i_wreq   (rf_wreq),
-      .i_rreq   (rf_rreq),
-      .o_rgnt   (rf_ready),
-      .i_wreg0  (wreg0),
-      .i_wreg1  (wreg1),
-      .i_wen0   (wen0),
-      .i_wen1   (wen1),
-      .i_wdata0 (wdata0),
-      .i_wdata1 (wdata1),
-      .i_rreg0  (rreg0),
-      .i_rreg1  (rreg1),
-      .o_rdata0 (rdata0),
-      .o_rdata1 (rdata1));
-      
    serv_mem_if mem_if
      (
       .i_clk    (clk),

@@ -20,6 +20,7 @@ filesets:
       - rtl/serv_rf_2bit.v
       - rtl/serv_state.v
       - rtl/serv_top.v
+      - rtl/serv_rf_top.v
     file_type : verilogSource
 
 targets:

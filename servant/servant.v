@@ -154,7 +154,7 @@ servant_arbiter servant_arbiter
       .o_wb_rdt (wb_gpio_rdt),
       .o_gpio   (q));
 
-   serv_top
+   serv_rf_top
      #(.RESET_PC (32'h0000_0000))
    cpu
      (
