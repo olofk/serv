@@ -7,6 +7,7 @@ module servant
 
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
+   parameter with_csr = 1;
 
    wire 	timer_irq;
 
@@ -135,15 +136,22 @@ servant_arbiter servant_arbiter
       .o_wb_rdt (wb_mem_rdt),
       .o_wb_ack (wb_mem_ack));
 
-   servant_timer
-     #(.WIDTH (32))
-   timer
-     (.i_clk    (wb_clk),
-      .o_irq    (timer_irq),
-      .i_wb_cyc (wb_timer_cyc),
-      .i_wb_we  (wb_timer_we) ,
-      .i_wb_dat (wb_timer_dat),
-      .o_wb_dat (wb_timer_rdt));
+   generate
+      if (with_csr) begin
+	 servant_timer
+	   #(.WIDTH (32))
+	 timer
+	   (.i_clk    (wb_clk),
+	    .o_irq    (timer_irq),
+	    .i_wb_cyc (wb_timer_cyc),
+	    .i_wb_we  (wb_timer_we) ,
+	    .i_wb_dat (wb_timer_dat),
+	    .o_wb_dat (wb_timer_rdt));
+      end else begin
+	 assign wb_timer_rdt = 32'd0;
+	 assign timer_irq = 1'b0;
+      end
+   endgenerate
 
    servant_gpio gpio
      (.i_wb_clk (wb_clk),
@@ -154,7 +162,8 @@ servant_arbiter servant_arbiter
       .o_gpio   (q));
 
    serv_rf_top
-     #(.RESET_PC (32'h0000_0000))
+     #(.RESET_PC (32'h0000_0000),
+       .WITH_CSR (with_csr))
    cpu
      (
       .clk      (wb_clk),

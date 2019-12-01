@@ -42,12 +42,16 @@ module serv_rf_if
    input wire [4:0]  i_rs2_raddr,
    output wire 	     o_rs2);
 
+   parameter WITH_CSR = 1;
+
 `include "serv_params.vh"
 
    /*
     ********** Write side ***********
     */
 
+   generate
+   if (WITH_CSR) begin
    wire 	     rd = (i_ctrl_rd ) |
 			  (i_alu_rd & i_rd_alu_en) |
 			  (i_csr_rd & i_rd_csr_en) |
@@ -57,7 +61,7 @@ module serv_rf_if
 
    assign 	     o_wdata0 = i_trap ? mtval  : rd;
    assign	     o_wdata1 = i_trap ? i_mepc : i_csr;
-   
+
    //port 0 rd mtval
    //port 1 csr mepc
    //mepc  100010
@@ -90,6 +94,28 @@ module serv_rf_if
    assign o_csr = i_rdata1 & i_csr_en;
    assign o_csr_pc = i_rdata1;
 
+   end else begin
+      wire 	     rd = (i_ctrl_rd ) |
+			  (i_alu_rd & i_rd_alu_en) |
+			  (i_mem_rd);
 
+      assign 	     o_wdata0 = rd;
+      assign	     o_wdata1 = 1'b0;
 
+      assign o_wreg0 = {1'b0,i_rd_waddr};
+
+      assign       o_wen0 =i_rd_wen;
+      assign       o_wen1 = 1'b0;
+
+   /*
+    ********** Read side ***********
+    */
+
+      assign o_rreg0 = {1'b0, i_rs1_raddr};
+      assign o_rreg1 = {1'b0, i_rs2_raddr};
+
+      assign o_rs1 = i_rdata0;
+      assign o_rs2 = i_rdata1;
+   end // else: !if(WITH_CSR)
+   endgenerate
 endmodule

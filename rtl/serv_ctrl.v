@@ -25,7 +25,8 @@ module serv_ctrl
    output wire 	      o_ibus_cyc,
    input wire 	      i_ibus_ack);
 
-   parameter RESET_PC = 32'd8;
+   parameter RESET_PC = 32'd0;
+   parameter WITH_CSR = 1;
 
    reg 	      en_pc_r;
 
@@ -66,7 +67,12 @@ module serv_ctrl
       .o_par (o_ibus_adr[31:1])
       );
 
-   assign new_pc = i_trap ? (i_csr_pc & en_pc_r) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
+   generate
+      if (WITH_CSR)
+	assign new_pc = i_trap ? (i_csr_pc & en_pc_r) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
+      else
+	assign new_pc = i_jump ? pc_plus_offset_aligned : pc_plus_4;
+   endgenerate
    assign o_rd  = (i_utype & pc_plus_offset_aligned) | (pc_plus_4 & i_jal_or_jalr);
 
    assign offset_a = i_pc_rel & pc;

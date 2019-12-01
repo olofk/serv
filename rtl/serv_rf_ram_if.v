@@ -1,7 +1,8 @@
 `default_nettype none
 module serv_rf_ram_if
   #(parameter width=8,
-    parameter depth=32*36/width)
+    parameter csr_regs=4,
+    parameter depth=32*(32+csr_regs)/width)
   (
    //SERV side
    input wire 			   i_clk,

@@ -55,6 +55,8 @@ module serv_top
    input wire [31:0]  i_dbus_rdt,
    input wire 	      i_dbus_ack);
 
+   parameter WITH_CSR = 1;
+
    wire [4:0]    rd_addr;
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
@@ -143,7 +145,9 @@ module serv_top
    wire [1:0]   lsb;
    wire [31:0]  bufreg_out;
 
-   serv_state state
+   serv_state
+     #(.WITH_CSR (WITH_CSR))
+   state
      (
       .i_clk (clk),
       .i_rst          (i_rst),
@@ -262,7 +266,8 @@ module serv_top
       .o_q      (bufreg_q));
 
    serv_ctrl
-     #(.RESET_PC (RESET_PC))
+     #(.RESET_PC (RESET_PC),
+       .WITH_CSR (WITH_CSR))
    ctrl
      (
       .clk        (clk),
@@ -317,7 +322,9 @@ module serv_top
    wire 	 csr_in;
    wire 	 rf_csr_out;
 
-   serv_rf_if rf_if
+   serv_rf_if
+     #(.WITH_CSR (WITH_CSR))
+   rf_if
      (//RF interface
       .o_wreg0     (o_wreg0),
       .o_wreg1     (o_wreg1),
@@ -382,29 +389,38 @@ module serv_top
       .i_wb_rdt   (i_dbus_rdt),
       .i_wb_ack   (i_dbus_ack));
 
-   serv_csr csr
-     (
-      .i_clk        (clk),
-      .i_en         (cnt_en),
-      .i_cnt        (cnt[4:2]),
-      .i_cnt_r      (cnt_r[3:2]),
-      .i_e_op       (e_op),
-      .i_ebreak     (ebreak),
-      .i_mem_cmd    (o_dbus_we),
-      .i_mem_misalign (mem_misalign),
-      .i_rf_csr_out (rf_csr_out),
-      .o_csr_in     (csr_in),
-      .i_mtip       (i_timer_irq),
-      .o_new_irq    (new_irq),
-      .i_trap_taken (trap_taken),
-      .i_pending_irq (pending_irq),
-      .i_mstatus_en (csr_mstatus_en),
-      .i_mie_en     (csr_mie_en    ),
-      .i_mcause_en  (csr_mcause_en ),
-      .i_csr_source (csr_source),
-      .i_mret       (mret),
-      .i_d          (csr_d_sel ? csr_imm : rs1),
-      .o_q          (csr_rd));
+   generate
+      if (WITH_CSR) begin
+	 serv_csr csr
+	   (
+	    .i_clk        (clk),
+	    .i_en         (cnt_en),
+	    .i_cnt        (cnt[4:2]),
+	    .i_cnt_r      (cnt_r[3:2]),
+	    .i_e_op       (e_op),
+	    .i_ebreak     (ebreak),
+	    .i_mem_cmd    (o_dbus_we),
+	    .i_mem_misalign (mem_misalign),
+	    .i_rf_csr_out (rf_csr_out),
+	    .o_csr_in     (csr_in),
+	    .i_mtip       (i_timer_irq),
+	    .o_new_irq    (new_irq),
+	    .i_trap_taken (trap_taken),
+	    .i_pending_irq (pending_irq),
+	    .i_mstatus_en (csr_mstatus_en),
+	    .i_mie_en     (csr_mie_en    ),
+	    .i_mcause_en  (csr_mcause_en ),
+	    .i_csr_source (csr_source),
+	    .i_mret       (mret),
+	    .i_d          (csr_d_sel ? csr_imm : rs1),
+	    .o_q          (csr_rd));
+      end else begin
+	 assign csr_in = 1'b0;
+	 assign csr_rd = 1'b0;
+	 assign new_irq = 1'b0;
+      end
+   endgenerate
+
 
 `ifdef RISCV_FORMAL
    reg [31:0] 	 pc = RESET_PC;

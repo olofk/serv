@@ -34,6 +34,8 @@ module serv_state
    output reg 	     o_cnt_done,
    output wire 	     o_bufreg_hold);
 
+   parameter WITH_CSR = 1;
+
    localparam [1:0]
      IDLE     = 2'd0,
      INIT     = 2'd1,
@@ -60,9 +62,6 @@ module serv_state
 
    reg 	stage_two_pending;
 
-   reg 	irq_sync;
-   reg 	misalign_trap_sync;
-
    assign o_dbus_cyc = (state == IDLE) & stage_two_pending & i_mem_op & !i_mem_misalign;
 
    wire trap_pending = (o_ctrl_jump & i_ctrl_misalign) | i_mem_misalign;
@@ -79,8 +78,6 @@ module serv_state
    //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
    assign o_bufreg_hold = !o_cnt_en & (stage_two_req | ~i_shift_op);
 
-   assign o_ctrl_trap = i_e_op | o_pending_irq | misalign_trap_sync;
-   assign o_trap_taken = i_ibus_ack & o_ctrl_trap;
 
 
    always @(posedge i_clk) begin
@@ -90,23 +87,10 @@ module serv_state
       if (o_cnt_en)
 	stage_two_pending <= o_init;
 
-      if (i_ibus_ack)
-	irq_sync <= 1'b0;
-      if (i_new_irq)
-	irq_sync <= 1'b1;
-
-      if (i_ibus_ack)
-	o_pending_irq <= irq_sync;
-
       o_cnt_done <= (o_cnt[4:2] == 3'b111) & o_cnt_r[2];
 
       //Need a strobe for the first cycle in the IDLE state after INIT
       stage_two_req <= o_cnt_done & (state == INIT);
-
-      if (stage_two_req)
-	misalign_trap_sync <= trap_pending;
-      if (i_ibus_ack)
-	misalign_trap_sync <= 1'b0;
 
       if (i_rf_ready && !o_cnt_en)
 	if (i_e_op | o_pending_irq | (stage_two_pending & trap_pending))
@@ -132,4 +116,28 @@ module serv_state
       end
    end
 
+   generate
+      if (WITH_CSR) begin
+   reg 	irq_sync;
+   reg 	misalign_trap_sync;
+
+   assign o_ctrl_trap = i_e_op | o_pending_irq | misalign_trap_sync;
+   assign o_trap_taken = i_ibus_ack & o_ctrl_trap;
+
+   always @(posedge i_clk) begin
+      if (i_ibus_ack)
+	irq_sync <= 1'b0;
+      if (i_new_irq)
+	irq_sync <= 1'b1;
+
+      if (i_ibus_ack)
+	o_pending_irq <= irq_sync;
+
+      if (stage_two_req)
+	misalign_trap_sync <= trap_pending;
+      if (i_ibus_ack)
+	misalign_trap_sync <= 1'b0;
+   end // always @ (posedge i_clk)
+      end // if (WITH_CSR)
+   endgenerate
 endmodule
