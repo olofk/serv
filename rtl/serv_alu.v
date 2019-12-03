@@ -93,7 +93,7 @@ module serv_alu
       .i_clk (clk),
       .i_a   (i_rs1),
       .i_b   (i_op_b),
-      .i_clr (!i_init),
+      .i_clr (!i_en),
       .i_sign (i_cnt_done & !i_cmp_uns),
       .o_q   (result_lt));
 
@@ -112,12 +112,10 @@ module serv_alu
    reg 	eq_r;
 
    always @(posedge clk) begin
-      if (i_init) begin
+      if (i_en) begin
 	 result_lt_r <= result_lt;
-	 eq_r <= result_eq;
-      end else begin
-	 eq_r <= 1'b1;
       end
+      eq_r <= result_eq | ~i_en;
       en_r <= i_en;
    end
 
