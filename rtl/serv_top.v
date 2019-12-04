@@ -422,8 +422,8 @@ module serv_top
       rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
       if (o_ibus_cyc & i_ibus_ack)
 	rvfi_insn <= i_ibus_rdt;
-      if (wen0)
-        rvfi_rd_wdata <= {wdata0,rvfi_rd_wdata[31:1]};
+      if (o_wen0)
+        rvfi_rd_wdata <= {o_wdata0,rvfi_rd_wdata[31:1]};
       if (cnt_done & ctrl_pc_en) begin
          rvfi_pc_rdata <= pc;
 	 if (!rd_en)
@@ -441,7 +441,7 @@ module serv_top
       rvfi_intr <= 1'b0;
       rvfi_mode <= 2'd3;
       rvfi_ixl = 2'd1;
-      if (rf_ready) begin
+      if (i_rf_ready) begin
 	 rvfi_rs1_addr <= rs1_addr;
          rvfi_rs2_addr <= rs2_addr;
 	 rvfi_rd_addr  <= rd_addr;
