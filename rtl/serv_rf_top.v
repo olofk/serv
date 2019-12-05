@@ -41,6 +41,8 @@ module serv_rf_top
    input wire 	      i_dbus_ack);
 
    parameter RESET_PC = 32'd0;
+   parameter RF_WIDTH = 2;
+   localparam RF_L2W = $clog2(RF_WIDTH);
 
    wire 	      rf_wreq;
    wire 	      rf_rreq;
@@ -56,7 +58,13 @@ module serv_rf_top
    wire 	      rdata0;
    wire 	      rdata1;
 
-   serv_rf_2bit rf
+   wire [10-RF_L2W:0] waddr;
+   wire [RF_WIDTH-1:0] wdata;
+   wire 	      wen;
+   wire [10-RF_L2W:0] raddr;
+   wire [RF_WIDTH-1:0] rdata;
+
+   serv_rf_ram_if #(.width (RF_WIDTH)) rf_ram_if
      (.i_clk    (clk),
       .i_rst    (i_rst),
       .i_wreq   (rf_wreq),
@@ -71,7 +79,20 @@ module serv_rf_top
       .i_rreg0  (rreg0),
       .i_rreg1  (rreg1),
       .o_rdata0 (rdata0),
-      .o_rdata1 (rdata1));
+      .o_rdata1 (rdata1),
+      .o_waddr  (waddr),
+      .o_wdata  (wdata),
+      .o_wen    (wen),
+      .o_raddr  (raddr),
+      .i_rdata  (rdata));
+
+   serv_rf_ram #(.width (RF_WIDTH)) rf_ram
+     (.i_clk    (clk),
+      .i_waddr (waddr),
+      .i_wdata (wdata),
+      .i_wen   (wen),
+      .i_raddr (raddr),
+      .o_rdata (rdata));
 
    serv_top
      #(.RESET_PC (RESET_PC))

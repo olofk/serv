@@ -17,7 +17,8 @@ filesets:
       - rtl/serv_decode.v
       - rtl/serv_mem_if.v
       - rtl/serv_rf_if.v
-      - rtl/serv_rf_2bit.v
+      - rtl/serv_rf_ram_if.v
+      - rtl/serv_rf_ram.v
       - rtl/serv_state.v
       - rtl/serv_top.v
       - rtl/serv_rf_top.v
