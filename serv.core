@@ -27,7 +27,7 @@ targets:
   default:
     filesets : [core]
     parameters : [RISCV_FORMAL, SERV_CLEAR_RAM]
-    toplevel : ["is_toplevel? (serv_top)"]
+    toplevel : ["is_toplevel? (serv_rf_top)"]
 
   lint:
     default_tool : verilator
@@ -35,7 +35,7 @@ targets:
     tools:
       verilator:
         mode : lint-only
-    toplevel : serv_top
+    toplevel : serv_rf_top
 
 parameters:
   RISCV_FORMAL:
