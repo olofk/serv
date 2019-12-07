@@ -69,7 +69,7 @@ module serv_rf_top
       .i_rst    (i_rst),
       .i_wreq   (rf_wreq),
       .i_rreq   (rf_rreq),
-      .o_rgnt   (rf_ready),
+      .o_ready  (rf_ready),
       .i_wreg0  (wreg0),
       .i_wreg1  (wreg1),
       .i_wen0   (wen0),

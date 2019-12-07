@@ -83,7 +83,7 @@ module serv_state
    assign o_rf_rreq = i_ibus_ack | (stage_two_req & trap_pending);
 
    //Prepare RF for writes when everything is ready to enter stage two
-   assign o_rf_wreq = ((i_shift_op & i_alu_sh_done & stage_two_pending) | (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op))) & !trap_pending | i_rf_ready;
+   assign o_rf_wreq = ((i_shift_op & i_alu_sh_done & stage_two_pending) | (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op))) & !trap_pending;
 
    //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
    assign o_bufreg_hold = !cnt_en & (stage_two_req | ~i_shift_op);
@@ -117,31 +117,14 @@ module serv_state
       if (i_ibus_ack)
 	misalign_trap_sync <= 1'b0;
 
-      case (state)
-        IDLE : begin
-	   if (stage_two_pending) begin
-	      if (o_rf_wreq)
-		state <= RUN;
-	      if (trap_pending & i_rf_ready)
-		state <= TRAP;
-	   end else begin
-	      if (i_rf_ready)
-		if (i_e_op | o_pending_irq)
-		  state <= TRAP;
-		else if (two_stage_op)
-		  state <= INIT;
-		else
-		  state <= RUN;
-           end
-	end
-        INIT : begin
-        end
-        RUN : begin
-        end
-	TRAP : begin
-	end
-        default : state <= IDLE;
-      endcase
+      if (i_rf_ready && !cnt_en)
+	if (i_e_op | o_pending_irq | (stage_two_pending & trap_pending))
+	  state <= TRAP;
+	else if (two_stage_op & !stage_two_pending)
+	  state <= INIT;
+	else
+	  state <= RUN;
+
       if (cnt_done)
         state <= IDLE;
 

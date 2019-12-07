@@ -8,7 +8,7 @@ module serv_rf_ram_if
    input wire 			   i_rst,
    input wire 			   i_wreq,
    input wire 			   i_rreq,
-   output reg 			   o_rgnt,
+   output wire 			   o_ready,
    input wire [5:0] 		   i_wreg0,
    input wire [5:0] 		   i_wreg1,
    input wire 			   i_wen0,
@@ -27,6 +27,9 @@ module serv_rf_ram_if
    input wire [width-1:0] 	   i_rdata);
 
    localparam l2w = $clog2(width);
+
+   reg 				   rgnt;
+   assign o_ready = rgnt | i_wreq;
 
    /*
     ********** Write side ***********
@@ -80,7 +83,7 @@ module serv_rf_ram_if
    always @(posedge i_clk) begin
       wen0_r    <= i_wen0;
       wen1_r    <= i_wen1;
-      wreq_r    <= i_wreq;
+      wreq_r    <= i_wreq | rgnt;
       wreq_edge <= i_wreq & !wreq_r;
 
       wdata1_r  <= {i_wdata1,wdata1_r[width-1:1]};
@@ -143,14 +146,14 @@ module serv_rf_ram_if
 	 rcnt <= 5'd0;
 
       rreq_r <= i_rreq;
-      o_rgnt <= rreq_r;
+      rgnt <= rreq_r;
 
       rdata0 <= {1'b0,rdata0[width-1:1]};
       if (rtrig0)
 	rdata0 <= i_rdata;
 
       if (i_rst) begin
-	 o_rgnt <= 1'b0;
+	 rgnt <= 1'b0;
 	 rreq_r <= 1'b0;
       end
    end
