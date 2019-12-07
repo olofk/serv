@@ -55,8 +55,6 @@ module serv_top
    input wire [31:0]  i_dbus_rdt,
    input wire 	      i_dbus_ack);
 
-`include "serv_params.vh"
-
    wire [4:0]    rd_addr;
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
@@ -212,6 +210,7 @@ module serv_top
       .o_ctrl_pc_rel      (pc_rel),
       .o_ctrl_mret        (mret),
       //To alu
+      .o_op_b_source      (op_b_source),
       .o_alu_sub          (alu_sub),
       .o_alu_bool_op      (alu_bool_op),
       .o_alu_cmp_eq       (alu_cmp_eq),
@@ -239,7 +238,6 @@ module serv_top
       .o_csr_d_sel        (csr_d_sel),
       //To top
       .o_imm              (imm),
-      .o_op_b_source      (op_b_source),
       .o_rd_csr_en        (rd_csr_en),
       .o_rd_alu_en        (rd_alu_en));
 
@@ -291,7 +289,6 @@ module serv_top
       .o_ibus_cyc (o_ibus_cyc),
       .i_ibus_ack (i_ibus_ack));
 
-   assign op_b = (op_b_source == OP_B_SOURCE_IMM) ? imm : rs2;
 
    serv_alu alu
      (
@@ -299,7 +296,9 @@ module serv_top
       .i_rst      (i_rst),
       .i_en       (cnt_en),
       .i_rs1      (rs1),
-      .i_op_b     (op_b),
+      .i_rs2      (rs2),
+      .i_imm      (imm),
+      .i_op_b_rs2 (op_b_source),
       .i_buf      (bufreg_q),
       .i_init     (init),
       .i_cnt_done (cnt_done),

@@ -1,7 +1,3 @@
-localparam [0:0]
-  OP_B_SOURCE_IMM = 1'd0,
-  OP_B_SOURCE_RS2 = 1'd1;
-
 localparam[1:0]
   ALU_RESULT_ADD  = 2'd0,
   ALU_RESULT_SR   = 2'd1,

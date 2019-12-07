@@ -5,7 +5,9 @@ module serv_alu
    input wire 	    i_rst,
    input wire 	    i_en,
    input wire 	    i_rs1,
-   input wire 	    i_op_b,
+   input wire 	    i_rs2,
+   input wire 	    i_imm,
+   input wire 	    i_op_b_rs2,
    input wire 	    i_buf,
    input wire 	    i_init,
    input wire 	    i_cnt_done,
@@ -38,7 +40,8 @@ module serv_alu
    wire        plus_1;
    wire        b_inv_plus_1;
 
-   assign shamt_ser = i_sh_right ? i_op_b : b_inv_plus_1;
+   wire op_b = i_op_b_rs2 ? i_rs2 : i_imm;
+   assign shamt_ser = i_sh_right ? op_b : b_inv_plus_1;
 
    shift_reg #(.LEN (5)) shamt_reg
      (.clk (clk),
@@ -70,13 +73,13 @@ module serv_alu
      (
       .clk (clk),
       .rst (i_rst),
-      .a   (~i_op_b),
+      .a   (~op_b),
       .b   (plus_1),
       .clr (!i_en),
       .q   (b_inv_plus_1),
       .o_v (b_inv_plus_1_cy));
 
-   wire       add_b = i_sub ? b_inv_plus_1 : i_op_b;
+   wire       add_b = i_sub ? b_inv_plus_1 : op_b;
 
    ser_add ser_add
      (
@@ -92,7 +95,7 @@ module serv_alu
      (
       .i_clk (clk),
       .i_a   (i_rs1),
-      .i_b   (i_op_b),
+      .i_b   (op_b),
       .i_clr (!i_en),
       .i_sign (i_cnt_done & !i_cmp_uns),
       .o_q   (result_lt));
@@ -101,7 +104,7 @@ module serv_alu
    assign o_cmp = i_cmp_eq ? result_eq : result_lt;
 
    localparam [15:0] BOOL_LUT = 16'h8E96;//And, Or, =, xor
-   wire result_bool = BOOL_LUT[{i_bool_op, i_rs1, i_op_b}];
+   wire result_bool = BOOL_LUT[{i_bool_op, i_rs1, op_b}];
 
    assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
                  (i_rd_sel == ALU_RESULT_SR)  ? result_sh :
@@ -119,6 +122,6 @@ module serv_alu
       en_r <= i_en;
    end
 
-   assign result_eq = eq_r & (i_rs1 == i_op_b);
+   assign result_eq = eq_r & (i_rs1 == op_b);
 
 endmodule
