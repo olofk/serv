@@ -20,10 +20,8 @@ module serv_alu
    input wire 	    i_sh_right,
    input wire 	    i_sh_signed,
    output wire 	    o_sh_done,
-   input wire [1:0] i_rd_sel,
+   input wire [3:0] i_rd_sel,
    output wire 	    o_rd);
-
-`include "serv_params.vh"
 
    wire        result_add;
    wire        result_eq;
@@ -106,10 +104,10 @@ module serv_alu
    localparam [15:0] BOOL_LUT = 16'h8E96;//And, Or, =, xor
    wire result_bool = BOOL_LUT[{i_bool_op, i_rs1, op_b}];
 
-   assign o_rd = (i_rd_sel == ALU_RESULT_ADD) ? result_add :
-                 (i_rd_sel == ALU_RESULT_SR)  ? result_sh :
-                 (i_rd_sel == ALU_RESULT_LT)  ? result_lt_r & plus_1:
-                 (i_rd_sel == ALU_RESULT_BOOL) ? result_bool : 1'bx;
+   assign o_rd = (i_rd_sel[0] & result_add) |
+                 (i_rd_sel[1] & result_sh) |
+                 (i_rd_sel[2] & result_lt_r & plus_1) |
+                 (i_rd_sel[3] & result_bool);
 
 
    reg 	eq_r;

@@ -106,7 +106,7 @@ module serv_top
    wire          alu_sh_signed;
    wire          alu_sh_right;
    wire 	 alu_sh_done;
-   wire [1:0]    alu_rd_sel;
+   wire [3:0]    alu_rd_sel;
 
    wire          rs1;
    wire          rs2;

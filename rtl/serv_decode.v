@@ -33,7 +33,7 @@ module serv_decode
    output wire 	     o_alu_cmp_uns,
    output wire 	     o_alu_sh_signed,
    output wire 	     o_alu_sh_right,
-   output reg [1:0]  o_alu_rd_sel,
+   output wire [3:0]  o_alu_rd_sel,
    //To RF
    output wire 	     o_rf_rd_en,
    output reg [4:0]  o_rf_rd_addr,
@@ -175,16 +175,10 @@ module serv_decode
    reg [4:0]  imm24_20;
    reg [4:0]  imm11_7;
 
-   always @(funct3)
-      casez(funct3)
-        3'b000  : o_alu_rd_sel = ALU_RESULT_ADD;
-        3'b001  : o_alu_rd_sel = ALU_RESULT_SR;
-        3'b01?  : o_alu_rd_sel = ALU_RESULT_LT;
-        3'b100  : o_alu_rd_sel = ALU_RESULT_BOOL;
-        3'b101  : o_alu_rd_sel = ALU_RESULT_SR;
-        3'b11?  : o_alu_rd_sel = ALU_RESULT_BOOL;
-      endcase
-
+   assign o_alu_rd_sel[0] = (funct3 == 3'b000); // Add/sub
+   assign o_alu_rd_sel[1] = (funct3[1:0] == 2'b01); //Shift
+   assign o_alu_rd_sel[2] = (funct3[2:1] == 2'b01); //SLT*
+   assign o_alu_rd_sel[3] = (funct3[2] & !(funct3[1:0] == 2'b01)); //Bool
    always @(posedge clk) begin
       if (i_wb_en) begin
          o_rf_rd_addr  <= i_wb_rdt[11:7];
