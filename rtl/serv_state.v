@@ -10,15 +10,16 @@ module serv_state
    output wire 	     o_rf_rreq,
    output wire 	     o_rf_wreq,
    input wire 	     i_rf_ready,
+   output wire 	     o_rf_rd_en,
    input wire 	     i_take_branch,
    input wire 	     i_branch_op,
    input wire 	     i_mem_op,
    input wire 	     i_shift_op,
    input wire 	     i_slt_op,
    input wire 	     i_e_op,
+   input wire 	     i_rd_op,
    input wire [4:0]  i_rs1_addr,
    output wire 	     o_init,
-   output wire 	     o_run,
    output wire 	     o_cnt_en,
    output reg [4:0]  o_cnt,
    output reg [3:0]  o_cnt_r,
@@ -46,12 +47,11 @@ module serv_state
    reg 	cnt_done;
    reg 	stage_two_req;
    wire cnt_en;
-   wire running;
 
    assign o_cnt_done = cnt_done;
 
    //Update PC in RUN or TRAP states
-   assign o_ctrl_pc_en  = running | (state == TRAP);
+   assign o_ctrl_pc_en  = cnt_en & !o_init;
 
    assign o_csr_imm = (o_cnt < 5) ? i_rs1_addr[o_cnt[2:0]] : 1'b0;
    assign o_alu_shamt_en = (o_cnt < 5) & (state == INIT);
@@ -62,9 +62,6 @@ module serv_state
    assign o_cnt_en   = cnt_en;
 
    assign o_init = (state == INIT);
-
-   assign running = (state == RUN);
-   assign o_run = running;
 
    //slt*, branch/jump, shift, load/store
    wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
@@ -84,6 +81,8 @@ module serv_state
 
    //Prepare RF for writes when everything is ready to enter stage two
    assign o_rf_wreq = ((i_shift_op & i_alu_sh_done & stage_two_pending) | (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op))) & !trap_pending;
+
+   assign o_rf_rd_en = i_rd_op & cnt_en & !o_init;
 
    //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
    assign o_bufreg_hold = !cnt_en & (stage_two_req | ~i_shift_op);

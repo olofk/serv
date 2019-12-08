@@ -66,6 +66,7 @@ module serv_top
    wire          mem_op;
    wire 	 shift_op;
    wire 	 slt_op;
+   wire 	 rd_op;
 
    wire 	 rd_alu_en;
    wire 	 rd_csr_en;
@@ -84,7 +85,6 @@ module serv_top
    wire 	 pc_rel;
 
    wire          init;
-   wire          run;
    wire          cnt_en;
    wire [4:0] 	 cnt;
    wire [3:0] 	 cnt_r;
@@ -155,15 +155,16 @@ module serv_top
       .o_rf_rreq      (o_rf_rreq),
       .o_rf_wreq      (o_rf_wreq),
       .i_rf_ready     (i_rf_ready),
+      .o_rf_rd_en     (rd_en),
       .i_take_branch  (take_branch),
       .i_branch_op    (branch_op),
       .i_mem_op       (mem_op),
       .i_shift_op     (shift_op),
       .i_slt_op       (slt_op),
       .i_e_op         (e_op),
+      .i_rd_op        (rd_op),
       .i_rs1_addr     (rs1_addr),
       .o_init         (init),
-      .o_run          (run),
       .o_cnt_en       (cnt_en),
       .o_cnt          (cnt),
       .o_cnt_r        (cnt_r),
@@ -199,6 +200,7 @@ module serv_top
       .o_mem_op           (mem_op),
       .o_shift_op         (shift_op),
       .o_slt_op           (slt_op),
+      .o_rd_op            (rd_op),
       //To bufreg
       .o_bufreg_loop      (bufreg_loop),
       .o_bufreg_rs1_en    (bufreg_rs1_en),
@@ -219,7 +221,6 @@ module serv_top
       .o_alu_sh_right     (alu_sh_right),
       .o_alu_rd_sel       (alu_rd_sel),
       //To RF
-      .o_rf_rd_en         (rd_en),
       .o_rf_rd_addr       (rd_addr),
       .o_rf_rs1_addr      (rs1_addr),
       .o_rf_rs2_addr      (rs2_addr),
@@ -333,7 +334,6 @@ module serv_top
       .i_rdata0    (i_rdata0),
       .i_rdata1    (i_rdata1),
 
-      .i_run       (run),
       //Trap interface
       .i_trap      (trap),
       .i_mret      (mret),
@@ -347,7 +347,7 @@ module serv_top
       .i_csr_addr  (csr_addr),
       .i_csr       (csr_in),
       //RD write port
-      .i_rd_wen    (rd_en & (|rd_addr)),
+      .i_rd_wen    (rd_en),
       .i_rd_waddr  (rd_addr),
       .i_ctrl_rd   (ctrl_rd),
       .i_alu_rd    (alu_rd),
@@ -390,7 +390,7 @@ module serv_top
    serv_csr csr
      (
       .i_clk        (clk),
-      .i_run        (run),
+      .i_en         (cnt_en),
       .i_cnt        (cnt[4:2]),
       .i_cnt_r      (cnt_r[3:2]),
       .i_e_op       (e_op),

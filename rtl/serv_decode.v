@@ -16,6 +16,7 @@ module serv_decode
    output wire 	     o_mem_op,
    output wire 	     o_shift_op,
    output wire 	     o_slt_op,
+   output wire 	     o_rd_op,
    //To bufreg
    output wire 	     o_bufreg_loop,
    output wire 	     o_bufreg_rs1_en,
@@ -35,7 +36,6 @@ module serv_decode
    output wire 	     o_alu_sh_right,
    output wire [3:0]  o_alu_rd_sel,
    //To RF
-   output wire 	     o_rf_rd_en,
    output reg [4:0]  o_rf_rd_addr,
    output reg [4:0]  o_rf_rs1_addr,
    output reg [4:0]  o_rf_rs2_addr,
@@ -116,9 +116,12 @@ module serv_decode
 
    assign o_ctrl_mret = (opcode[4] & opcode[2] & op21 & !(|funct3));
 
-   assign o_rf_rd_en = (opcode[2] |
-			(!opcode[2] & opcode[4] & opcode[0]) |
-			(!opcode[2] & !opcode[3] & !opcode[0]));
+   //Write to RD
+   //True for OP-IMM, AUIPC, OP, LUI, SYSTEM, JALR, JAL, LOAD
+   //False for STORE, BRANCH, MISC-MEM
+   assign o_rd_op = (opcode[2] |
+		     (!opcode[2] & opcode[4] & opcode[0]) |
+		     (!opcode[2] & !opcode[3] & !opcode[0])) & (|o_rf_rd_addr);
 
    assign o_alu_sub = opcode[3] & imm30/*alu_sub_r*/;
 
