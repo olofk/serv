@@ -1,10 +1,6 @@
 `default_nettype none
 module serv_rf_if
-  (
-   input wire 	     i_clk,
-   input wire 	     i_rst,
-
-   //RF Interface
+  (//RF Interface
    output wire [5:0] o_wreg0,
    output wire [5:0] o_wreg1,
    output wire 	     o_wen0,

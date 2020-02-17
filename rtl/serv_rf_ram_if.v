@@ -72,7 +72,6 @@ module serv_rf_ram_if
    assign o_wen = wgo & ((wtrig0 & wen0_r) | (wtrig1 & wen1_r));
 
    reg 	      wreq_r;
-   reg 	      wreq_edge;
 
    generate if (width > 2)
      always @(posedge i_clk) wdata0_r  <= {i_wdata0, wdata0_r[width-2:1]};
@@ -84,7 +83,6 @@ module serv_rf_ram_if
       wen0_r    <= i_wen0;
       wen1_r    <= i_wen1;
       wreq_r    <= i_wreq | rgnt;
-      wreq_edge <= i_wreq & !wreq_r;
 
       wdata1_r  <= {i_wdata1,wdata1_r[width-1:1]};
 

@@ -5,7 +5,7 @@ module serv_decode
    //Input
    input wire 	     i_cnt_en,
    input wire 	     i_cnt_done,
-   input wire [31:0] i_wb_rdt,
+   input wire [31:2] i_wb_rdt,
    input wire 	     i_wb_en,
    input wire 	     i_alu_cmp,
    //To state

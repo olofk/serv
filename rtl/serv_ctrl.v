@@ -6,7 +6,7 @@ module serv_ctrl
    //State
    input wire 	      i_pc_en,
    input wire [4:2]   i_cnt,
-   input wire [2:1]   i_cnt_r,
+   input wire [2:2]   i_cnt_r,
    input wire 	      i_cnt_done,
    //Control
    input wire 	      i_jump,

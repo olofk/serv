@@ -189,7 +189,7 @@ module serv_top
       //Input
       .i_cnt_en           (cnt_en),
       .i_cnt_done         (cnt_done),
-      .i_wb_rdt           (i_ibus_rdt),
+      .i_wb_rdt           (i_ibus_rdt[31:2]),
       .i_wb_en            (o_ibus_cyc & i_ibus_ack),
       .i_alu_cmp          (alu_cmp),
       //To state
@@ -271,7 +271,7 @@ module serv_top
       //State
       .i_pc_en    (ctrl_pc_en),
       .i_cnt      (cnt[4:2]),
-      .i_cnt_r    (cnt_r[2:1]),
+      .i_cnt_r    (cnt_r[2]),
       .i_cnt_done (cnt_done),
       //Control
       .i_jump     (jump),
@@ -319,10 +319,7 @@ module serv_top
    wire 	 rf_csr_out;
 
    serv_rf_if rf_if
-     (
-      .i_clk       (clk),
-      .i_rst       (i_rst),
-      //RF interface
+     (//RF interface
       .o_wreg0     (o_wreg0),
       .o_wreg1     (o_wreg1),
       .o_wen0      (o_wen0),
@@ -369,7 +366,6 @@ module serv_top
    serv_mem_if mem_if
      (
       .i_clk    (clk),
-      .i_rst    (i_rst),
       .i_en     (cnt_en),
       .i_init   (init),
       .i_mem_op (mem_op),

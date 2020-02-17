@@ -5,7 +5,7 @@ module servant_ram
     parameter aw    = $clog2(depth),
     parameter memfile = "")
    (input wire 		i_wb_clk,
-    input wire [aw-1:0] i_wb_adr,
+    input wire [aw-1:2] i_wb_adr,
     input wire [31:0] 	i_wb_dat,
     input wire [3:0] 	i_wb_sel,
     input wire 		i_wb_we,

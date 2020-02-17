@@ -3,7 +3,6 @@ module servant_timer
   #(parameter WIDTH = 16,
     parameter DIVIDER = 0)
   (input wire 	     i_clk,
-   input wire 	     i_rst,
    output reg 	     o_irq,
    input wire [31:0] i_wb_dat,
    input wire 	     i_wb_we,
