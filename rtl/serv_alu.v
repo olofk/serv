@@ -71,14 +71,14 @@ module serv_alu
    assign {add_cy,result_add}   = i_rs1+add_b+add_cy_r;
    assign {b_inv_plus_1_cy,b_inv_plus_1} = {1'b0,~op_b}+plus_1+b_inv_plus_1_cy_r;
 
-   ser_lt ser_lt
-     (
-      .i_clk (clk),
-      .i_a   (i_rs1),
-      .i_b   (op_b),
-      .i_clr (!i_en),
-      .i_sign (i_cnt_done & !i_cmp_uns),
-      .o_q   (result_lt));
+   reg        lt_r;
+
+   wire       lt_sign = i_cnt_done & !i_cmp_uns;
+
+   wire       eq = (i_rs1 == op_b);
+
+   assign result_eq = eq & eq_r;
+   assign result_lt = eq ? lt_r : op_b^lt_sign;
 
    assign plus_1 = i_en & !en_r;
    assign o_cmp = i_cmp_eq ? result_eq : result_lt;
@@ -98,6 +98,8 @@ module serv_alu
       add_cy_r <= i_en & add_cy;
       b_inv_plus_1_cy_r <= i_en & b_inv_plus_1_cy;
 
+      lt_r <= result_lt & i_en;
+
       if (i_en) begin
 	 result_lt_r <= result_lt;
       end
@@ -107,7 +109,5 @@ module serv_alu
       if (i_shamt_en)
 	shamt_msb <= b_inv_plus_1_cy;
    end
-
-   assign result_eq = eq_r & (i_rs1 == op_b);
 
 endmodule
