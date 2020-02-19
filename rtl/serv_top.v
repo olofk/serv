@@ -163,7 +163,6 @@ module serv_top
       .i_slt_op       (slt_op),
       .i_e_op         (e_op),
       .i_rd_op        (rd_op),
-      .i_rs1_addr     (rs1_addr),
       .o_init         (init),
       .o_cnt_en       (cnt_en),
       .o_cnt          (cnt),
@@ -178,8 +177,7 @@ module serv_top
       .i_alu_sh_done  (alu_sh_done),
       .o_dbus_cyc     (o_dbus_cyc),
       .o_mem_bytecnt  (mem_bytecnt),
-      .i_mem_misalign (mem_misalign),
-      .o_csr_imm      (csr_imm));
+      .i_mem_misalign (mem_misalign));
 
    wire 	bufreg_clr_lsb;
 
@@ -237,6 +235,7 @@ module serv_top
       .o_csr_mcause_en    (csr_mcause_en),
       .o_csr_source       (csr_source),
       .o_csr_d_sel        (csr_d_sel),
+      .o_csr_imm          (csr_imm),
       //To top
       .o_imm              (imm),
       .o_rd_csr_en        (rd_csr_en),

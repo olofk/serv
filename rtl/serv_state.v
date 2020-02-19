@@ -18,7 +18,6 @@ module serv_state
    input wire 	     i_slt_op,
    input wire 	     i_e_op,
    input wire 	     i_rd_op,
-   input wire [4:0]  i_rs1_addr,
    output wire 	     o_init,
    output wire 	     o_cnt_en,
    output reg [4:0]  o_cnt,
@@ -33,8 +32,7 @@ module serv_state
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
    output reg 	     o_cnt_done,
-   output wire 	     o_bufreg_hold,
-   output wire 	     o_csr_imm);
+   output wire 	     o_bufreg_hold);
 
    localparam [1:0]
      IDLE     = 2'd0,
@@ -49,7 +47,6 @@ module serv_state
    //Update PC in RUN or TRAP states
    assign o_ctrl_pc_en  = o_cnt_en & !o_init;
 
-   assign o_csr_imm = (o_cnt < 5) ? i_rs1_addr[o_cnt[2:0]] : 1'b0;
    assign o_alu_shamt_en = (o_cnt < 5) & o_init;
 
    assign o_mem_bytecnt = o_cnt[4:3];

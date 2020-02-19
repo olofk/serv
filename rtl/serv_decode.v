@@ -52,6 +52,7 @@ module serv_decode
    output wire 	     o_csr_mcause_en,
    output wire [1:0] o_csr_source,
    output wire 	     o_csr_d_sel,
+   output wire 	     o_csr_imm,
    //To top
    output wire 	     o_imm,
    output wire 	     o_op_b_source,
@@ -151,6 +152,7 @@ module serv_decode
 
    assign o_csr_source = funct3[1:0];
    assign o_csr_d_sel = funct3[2];
+   assign o_csr_imm = o_rf_rs1_addr[0];
 
    assign o_csr_addr = (op26 & !op20) ? CSR_MSCRATCH :
 		       (op26 & !op21) ? CSR_MEPC :
@@ -209,6 +211,8 @@ module serv_decode
 	 imm30_25    <= {m2[1] ? imm7 : m2[0] ? signbit : imm19_12_20[0], imm30_25[5:1]};
 	 imm24_20    <= {imm30_25[0], imm24_20[4:1]};
 	 imm11_7     <= {imm30_25[0], imm11_7[4:1]};
+	 if (csr_op & o_csr_d_sel)
+	   o_rf_rs1_addr <= {1'b0,o_rf_rs1_addr[4:1]};
       end
    end
 
