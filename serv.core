@@ -7,7 +7,6 @@ filesets:
     files:
       - rtl/serv_params.vh : {is_include_file : true}
       - rtl/shift_reg.v
-      - rtl/ser_add.v
       - rtl/ser_lt.v
       - rtl/ser_shift.v
       - rtl/serv_bufreg.v

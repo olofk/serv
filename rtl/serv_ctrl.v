@@ -30,7 +30,11 @@ module serv_ctrl
    reg 	      en_pc_r;
 
    wire       pc_plus_4;
+   wire       pc_plus_4_cy;
+   reg 	      pc_plus_4_cy_r;
    wire       pc_plus_offset;
+   wire       pc_plus_offset_cy;
+   reg 	      pc_plus_offset_cy_r;
    wire       pc_plus_offset_aligned;
    wire       plus_4;
 
@@ -46,15 +50,7 @@ module serv_ctrl
    assign o_ibus_adr[0] = pc;
    assign o_bad_pc = pc_plus_offset_aligned;
 
-   ser_add ser_add_pc_plus_4
-     (
-      .clk (clk),
-      .rst (i_rst),
-      .a   (pc),
-      .b   (plus_4),
-      .clr (i_cnt_done),
-      .q   (pc_plus_4),
-      .o_v ());
+   assign {pc_plus_4_cy,pc_plus_4} = pc+plus_4+pc_plus_4_cy_r;
 
    shift_reg
      #(
@@ -75,22 +71,16 @@ module serv_ctrl
 
    assign offset_a = i_pc_rel & pc;
    assign offset_b = i_utype ? (i_imm & (i_cnt[4] | (i_cnt[3:2] == 2'b11))): i_buf;
-
-   ser_add ser_add_pc_plus_offset
-     (
-      .clk (clk),
-      .rst (i_rst),
-      .a   (offset_a),
-      .b   (offset_b),
-      .clr (!i_pc_en),
-      .q   (pc_plus_offset),
-      .o_v ());
+   assign {pc_plus_offset_cy,pc_plus_offset} = offset_a+offset_b+pc_plus_offset_cy_r;
 
    assign pc_plus_offset_aligned = pc_plus_offset & en_pc_r;
 
    assign o_ibus_cyc = en_pc_r & !i_pc_en;
 
    always @(posedge clk) begin
+      pc_plus_4_cy_r <= i_pc_en & pc_plus_4_cy;
+      pc_plus_offset_cy_r <= i_pc_en & pc_plus_offset_cy;
+
       if (i_pc_en)
 	en_pc_r <= 1'b1;
       else if (o_ibus_cyc & i_ibus_ack)

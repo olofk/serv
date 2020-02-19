@@ -36,7 +36,13 @@ module serv_alu
    reg         en_r;
    wire        shamt_ser;
    wire        plus_1;
+
+   wire        add_cy;
+   reg 	       add_cy_r;
+
    wire        b_inv_plus_1;
+   wire        b_inv_plus_1_cy;
+   reg 	       b_inv_plus_1_cy_r;
 
    wire op_b = i_op_b_rs2 ? i_rs2 : i_imm;
    assign shamt_ser = i_sh_right ? op_b : b_inv_plus_1;
@@ -61,33 +67,9 @@ module serv_alu
       .i_d (i_buf),
       .o_q (result_sh));
 
-   wire        b_inv_plus_1_cy;
-
-   always @(posedge clk)
-     if (i_shamt_en)
-       shamt_msb <= b_inv_plus_1_cy;
-
-   ser_add ser_add_inv_plus_1
-     (
-      .clk (clk),
-      .rst (i_rst),
-      .a   (~op_b),
-      .b   (plus_1),
-      .clr (!i_en),
-      .q   (b_inv_plus_1),
-      .o_v (b_inv_plus_1_cy));
-
-   wire       add_b = i_sub ? b_inv_plus_1 : op_b;
-
-   ser_add ser_add
-     (
-      .clk (clk),
-      .rst (i_rst),
-      .a   (i_rs1),
-      .b   (add_b),
-      .clr (!i_en),
-      .q   (result_add),
-      .o_v ());
+   wire add_b = i_sub ? b_inv_plus_1 : op_b;
+   assign {add_cy,result_add}   = i_rs1+add_b+add_cy_r;
+   assign {b_inv_plus_1_cy,b_inv_plus_1} = {1'b0,~op_b}+plus_1+b_inv_plus_1_cy_r;
 
    ser_lt ser_lt
      (
@@ -113,11 +95,17 @@ module serv_alu
    reg 	eq_r;
 
    always @(posedge clk) begin
+      add_cy_r <= i_en & add_cy;
+      b_inv_plus_1_cy_r <= i_en & b_inv_plus_1_cy;
+
       if (i_en) begin
 	 result_lt_r <= result_lt;
       end
       eq_r <= result_eq | ~i_en;
       en_r <= i_en;
+
+      if (i_shamt_en)
+	shamt_msb <= b_inv_plus_1_cy;
    end
 
    assign result_eq = eq_r & (i_rs1 == op_b);
