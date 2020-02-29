@@ -25,7 +25,8 @@ filesets:
       - servant/servant_gpio.v
       - servant/servant_arbiter.v
       - servant/servant_mux.v
-      - servant/servant_ram.v
+      -  "tool_quartus? (servant/servant_ram_quartus.sv)" : {file_type : systemVerilogSource}
+      - "!tool_quartus? (servant/servant_ram.v)"
       - servant/servant.v
     file_type : verilogSource
     depend : [serv]
