@@ -39,10 +39,12 @@ module servant
    wire 	wb_mem_cyc;
    wire [31:0] 	wb_mem_rdt;
    wire 	wb_mem_ack;
+
    wire 	wb_gpio_dat;
    wire 	wb_gpio_we;
    wire 	wb_gpio_cyc;
    wire 	wb_gpio_rdt;
+
    wire [31:0] 	wb_timer_dat;
    wire 	wb_timer_we;
    wire 	wb_timer_cyc;
@@ -78,32 +80,32 @@ module servant
 `endif
    servant_mux #(sim) servant_mux
   (
-   .i_clk (wb_clk),
-   .i_rst (wb_rst),
-   .i_wb_cpu_adr (wb_dbus_adr),
-   .i_wb_cpu_dat (wb_dbus_dat),
-   .i_wb_cpu_sel (wb_dbus_sel),
-   .i_wb_cpu_we  (wb_dbus_we),
-   .i_wb_cpu_cyc (wb_dbus_cyc),
-   .o_wb_cpu_rdt (wb_dbus_rdt),
-   .o_wb_cpu_ack (wb_dbus_ack),
+      .i_clk (wb_clk),
+      .i_rst (wb_rst),
+      .i_wb_cpu_adr (wb_dbus_adr),
+      .i_wb_cpu_dat (wb_dbus_dat),
+      .i_wb_cpu_sel (wb_dbus_sel),
+      .i_wb_cpu_we  (wb_dbus_we),
+      .i_wb_cpu_cyc (wb_dbus_cyc),
+      .o_wb_cpu_rdt (wb_dbus_rdt),
+      .o_wb_cpu_ack (wb_dbus_ack),
 
-   .o_wb_mem_adr (wb_dmem_adr),
-   .o_wb_mem_dat (wb_dmem_dat),
-   .o_wb_mem_sel (wb_dmem_sel),
-   .o_wb_mem_we  (wb_dmem_we),
-   .o_wb_mem_cyc (wb_dmem_cyc),
-   .i_wb_mem_rdt (wb_dmem_rdt),
+      .o_wb_mem_adr (wb_dmem_adr),
+      .o_wb_mem_dat (wb_dmem_dat),
+      .o_wb_mem_sel (wb_dmem_sel),
+      .o_wb_mem_we  (wb_dmem_we),
+      .o_wb_mem_cyc (wb_dmem_cyc),
+      .i_wb_mem_rdt (wb_dmem_rdt),
 
-   .o_wb_gpio_dat (wb_gpio_dat),
-   .o_wb_gpio_we  (wb_gpio_we),
-   .o_wb_gpio_cyc (wb_gpio_cyc),
-   .i_wb_gpio_rdt (wb_gpio_rdt),
+      .o_wb_gpio_dat (wb_gpio_dat),
+      .o_wb_gpio_we  (wb_gpio_we),
+      .o_wb_gpio_cyc (wb_gpio_cyc),
+      .i_wb_gpio_rdt (wb_gpio_rdt),
 
-   .o_wb_timer_dat (wb_timer_dat),
-   .o_wb_timer_we  (wb_timer_we),
-   .o_wb_timer_cyc (wb_timer_cyc),
-   .i_wb_timer_rdt (wb_timer_rdt));
+      .o_wb_timer_dat (wb_timer_dat),
+      .o_wb_timer_we  (wb_timer_we),
+      .o_wb_timer_cyc (wb_timer_cyc),
+      .i_wb_timer_rdt (wb_timer_rdt));
 
 `ifndef SYNTHESIS
 //synthesis translate_off
