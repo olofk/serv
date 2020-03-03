@@ -250,7 +250,6 @@ module serv_top
    serv_bufreg bufreg
      (
       .i_clk    (clk),
-      .i_rst    (i_rst),
       .i_cnt    (cnt[4:2]),
       .i_cnt_r  (cnt_r[1:0]),
       .i_en     (!bufreg_hold),
