@@ -15,7 +15,12 @@ filesets:
     file_type : user
 
   servant_tb:
-    files: [bench/servant_tb.v : {file_type : verilogSource}]
+    files:
+      - bench/servant_sim.v
+      - "!tool_verilator? (bench/uart_decoder.v)"
+      - "!tool_verilator? (bench/servant_tb.v)"
+      - "tool_verilator? (bench/servant_tb.cpp)" : {file_type : cppSource}
+    file_type : verilogSource
     depend : [vlog_tb_utils]
 
   soc:
@@ -40,7 +45,7 @@ filesets:
 
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
-  verilator_tb: {files: [bench/servant_tb.cpp : {file_type : cppSource}]}
+
   nexys_a7:
     files:
       - servant/servix_clock_gen.v : {file_type : verilogSource}
@@ -115,12 +120,16 @@ targets:
   sim:
     default_tool: icarus
     filesets : [soc, servant_tb]
-    parameters : [RISCV_FORMAL=true, firmware]
+    parameters :
+      - RISCV_FORMAL
+      - SERV_CLEAR_RAM=true
+      - firmware
+      - memsize
     toplevel : servant_tb
 
   verilator_tb:
     default_tool: verilator
-    filesets : [soc, verilator_tb]
+    filesets : [soc, servant_tb]
     parameters :
       - RISCV_FORMAL
       - firmware
@@ -133,7 +142,7 @@ targets:
     tools:
       verilator:
         verilator_options : [--trace]
-    toplevel : servant
+    toplevel : servant_sim
 
 parameters:
   PLL:
@@ -142,6 +151,10 @@ parameters:
     paramtype : vlogparam
 
   RISCV_FORMAL:
+    datatype  : bool
+    paramtype : vlogdefine
+
+  SERV_CLEAR_RAM:
     datatype  : bool
     paramtype : vlogdefine
 

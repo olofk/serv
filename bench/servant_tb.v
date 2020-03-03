@@ -2,24 +2,23 @@
 module servant_tb;
 
    parameter memfile = "";
+   parameter memsize = 8192;
+   parameter with_csr = 1;
 
    reg wb_clk = 1'b0;
    reg wb_rst = 1'b1;
-
-   reg q_r = 1'b0;
-   wire q;
 
    always  #31 wb_clk <= !wb_clk;
    initial #62 wb_rst <= 1'b0;
 
    vlog_tb_utils vtu();
 
-   servant #(memfile) dut(wb_clk, wb_rst, q);
+   uart_decoder #(57600) uart_decoder (q);
 
-   always @(posedge wb_clk)
-     if (q != q_r) begin
-	$display("%0t : q is %s", $time, q ? "ON" : "OFF");
-	q_r <= q;
-     end
+   servant_sim
+     #(.memfile  (memfile),
+       .memsize  (memsize),
+       .with_csr (with_csr))
+   dut(wb_clk, wb_rst, q);
 
 endmodule

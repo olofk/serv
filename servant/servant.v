@@ -7,6 +7,7 @@ module servant
 
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
+   parameter sim = 0;
    parameter with_csr = 1;
 
    wire 	timer_irq;
@@ -72,14 +73,8 @@ module servant
       .i_wb_cpu_rdt (wb_mem_rdt),
       .i_wb_cpu_ack (wb_mem_ack));
 
-
-`ifdef VERILATOR
-   parameter sim = 1;
-`else
-   parameter sim = 0;
-`endif
    servant_mux #(sim) servant_mux
-  (
+     (
       .i_clk (wb_clk),
       .i_rst (wb_rst),
       .i_wb_cpu_adr (wb_dbus_adr),
@@ -107,24 +102,8 @@ module servant
       .o_wb_timer_cyc (wb_timer_cyc),
       .i_wb_timer_rdt (wb_timer_rdt));
 
-`ifndef SYNTHESIS
-//synthesis translate_off
-   reg [1023:0] firmware_file;
-   initial
-     /* verilator lint_off WIDTH */
-     if ($value$plusargs("firmware=%s", firmware_file)) begin
-	$display("Loading RAM from %0s", firmware_file);
-	$readmemh(firmware_file, ram.mem);
-     end
-     /* verilator lint_on WIDTH */
-//synthesis translate_on
-`endif
-
    servant_ram
-     #(
-`ifndef VERILATOR
-.memfile (memfile),
-`endif
+     #(.memfile (memfile),
        .depth (memsize))
    ram
      (// Wishbone interface

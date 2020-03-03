@@ -2,7 +2,7 @@
 #include <signal.h>
 
 #include "verilated_vcd_c.h"
-#include "Vservant.h"
+#include "Vservant_sim.h"
 
 using namespace std;
 
@@ -91,7 +91,7 @@ int main(int argc, char **argv, char **env)
 	uart_context_t uart_context;
 	Verilated::commandArgs(argc, argv);
 
-	Vservant* top = new Vservant;
+	Vservant_sim* top = new Vservant_sim;
 
 	const char *arg = Verilated::commandArgsPlusMatch("uart_baudrate=");
 	if (arg[0]) {
