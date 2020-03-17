@@ -1,61 +1,61 @@
 `default_nettype none
 
 module serv_top
-  (
-   input wire 	      clk,
-   input wire 	      i_rst,
-   input wire 	      i_timer_irq,
+  #(parameter WITH_CSR = 1,
+    parameter RESET_PC = 32'd0)
+   (
+   input wire 		      clk,
+   input wire 		      i_rst,
+   input wire 		      i_timer_irq,
 `ifdef RISCV_FORMAL
-   output reg 	      rvfi_valid = 1'b0,
-   output reg [63:0]  rvfi_order = 64'd0,
-   output reg [31:0]  rvfi_insn = 32'd0,
-   output reg 	      rvfi_trap = 1'b0,
-   output reg 	      rvfi_halt = 1'b0,
-   output reg 	      rvfi_intr = 1'b0,
-   output reg [1:0]   rvfi_mode = 2'b11,
-   output reg [1:0]   rvfi_ixl = 2'b01,
-   output reg [4:0]   rvfi_rs1_addr,
-   output reg [4:0]   rvfi_rs2_addr,
-   output reg [31:0]  rvfi_rs1_rdata,
-   output reg [31:0]  rvfi_rs2_rdata,
-   output reg [4:0]   rvfi_rd_addr,
-   output reg [31:0]  rvfi_rd_wdata,
-   output reg [31:0]  rvfi_pc_rdata,
-   output reg [31:0]  rvfi_pc_wdata,
-   output reg [31:0]  rvfi_mem_addr,
-   output reg [3:0]   rvfi_mem_rmask,
-   output reg [3:0]   rvfi_mem_wmask,
-   output reg [31:0]  rvfi_mem_rdata,
-   output reg [31:0]  rvfi_mem_wdata,
+   output reg 		      rvfi_valid = 1'b0,
+   output reg [63:0] 	      rvfi_order = 64'd0,
+   output reg [31:0] 	      rvfi_insn = 32'd0,
+   output reg 		      rvfi_trap = 1'b0,
+   output reg 		      rvfi_halt = 1'b0,
+   output reg 		      rvfi_intr = 1'b0,
+   output reg [1:0] 	      rvfi_mode = 2'b11,
+   output reg [1:0] 	      rvfi_ixl = 2'b01,
+   output reg [4:0] 	      rvfi_rs1_addr,
+   output reg [4:0] 	      rvfi_rs2_addr,
+   output reg [31:0] 	      rvfi_rs1_rdata,
+   output reg [31:0] 	      rvfi_rs2_rdata,
+   output reg [4:0] 	      rvfi_rd_addr,
+   output reg [31:0] 	      rvfi_rd_wdata,
+   output reg [31:0] 	      rvfi_pc_rdata,
+   output reg [31:0] 	      rvfi_pc_wdata,
+   output reg [31:0] 	      rvfi_mem_addr,
+   output reg [3:0] 	      rvfi_mem_rmask,
+   output reg [3:0] 	      rvfi_mem_wmask,
+   output reg [31:0] 	      rvfi_mem_rdata,
+   output reg [31:0] 	      rvfi_mem_wdata,
 `endif
    //RF Interface
-   output wire 	     o_rf_rreq,
-   output wire 	     o_rf_wreq,
-   input wire 	     i_rf_ready,
-   output wire [5:0] o_wreg0,
-   output wire [5:0] o_wreg1,
-   output wire 	     o_wen0,
-   output wire 	     o_wen1,
-   output wire 	     o_wdata0,
-   output wire 	     o_wdata1,
-   output wire [5:0] o_rreg0,
-   output wire [5:0] o_rreg1,
-   input wire 	     i_rdata0,
-   input wire 	     i_rdata1,
+   output wire 		      o_rf_rreq,
+   output wire 		      o_rf_wreq,
+   input wire 		      i_rf_ready,
+   output wire [4+WITH_CSR:0] o_wreg0,
+   output wire [4+WITH_CSR:0] o_wreg1,
+   output wire 		      o_wen0,
+   output wire 		      o_wen1,
+   output wire 		      o_wdata0,
+   output wire 		      o_wdata1,
+   output wire [4+WITH_CSR:0] o_rreg0,
+   output wire [4+WITH_CSR:0] o_rreg1,
+   input wire 		      i_rdata0,
+   input wire 		      i_rdata1,
 
-   output wire [31:0] o_ibus_adr,
-   output wire 	      o_ibus_cyc,
-   input wire [31:0]  i_ibus_rdt,
-   input wire 	      i_ibus_ack,
-   output wire [31:0] o_dbus_adr,
-   output wire [31:0] o_dbus_dat,
-   output wire [3:0]  o_dbus_sel,
-   output wire 	      o_dbus_we ,
-   output wire 	      o_dbus_cyc,
-   input wire [31:0]  i_dbus_rdt,
-   input wire 	      i_dbus_ack);
-
-   parameter WITH_CSR = 1;
+   output wire [31:0] 	      o_ibus_adr,
+   output wire 		      o_ibus_cyc,
+   input wire [31:0] 	      i_ibus_rdt,
+   input wire 		      i_ibus_ack,
+   output wire [31:0] 	      o_dbus_adr,
+   output wire [31:0] 	      o_dbus_dat,
+   output wire [3:0] 	      o_dbus_sel,
+   output wire 		      o_dbus_we ,
+   output wire 		      o_dbus_cyc,
+   input wire [31:0] 	      i_dbus_rdt,
+   input wire 		      i_dbus_ack);
 
    wire [4:0]    rd_addr;
    wire [4:0]    rs1_addr;
@@ -136,7 +136,6 @@ module serv_top
    wire [1:0] 	 csr_addr;
    wire 	 csr_pc;
 
-   parameter RESET_PC = 32'd0;
 
    wire 	 new_irq;
    wire 	 trap_taken;

@@ -1,6 +1,9 @@
 `default_nettype none
 
 module serv_rf_top
+  #(parameter RESET_PC = 32'd0,
+    parameter WITH_CSR = 1,
+    parameter RF_WIDTH = 2)
   (
    input wire 	      clk,
    input wire 	      i_rst,
@@ -40,34 +43,32 @@ module serv_rf_top
    input wire [31:0]  i_dbus_rdt,
    input wire 	      i_dbus_ack);
 
-   parameter RESET_PC = 32'd0;
-   parameter WITH_CSR = 1;
-   parameter RF_WIDTH = 2;
-   localparam RF_L2W = $clog2(RF_WIDTH);
+   localparam CSR_REGS = WITH_CSR*4;
+   localparam RF_L2D = $clog2((32+CSR_REGS)*32/RF_WIDTH);
 
    wire 	      rf_wreq;
    wire 	      rf_rreq;
-   wire [5:0]	      wreg0;
-   wire [5:0]	      wreg1;
+   wire [4+WITH_CSR:0] wreg0;
+   wire [4+WITH_CSR:0] wreg1;
    wire 	      wen0;
    wire 	      wen1;
    wire 	      wdata0;
    wire 	      wdata1;
-   wire [5:0]	      rreg0;
-   wire [5:0] 	      rreg1;
+   wire [4+WITH_CSR:0] rreg0;
+   wire [4+WITH_CSR:0] rreg1;
    wire 	      rf_ready;
    wire 	      rdata0;
    wire 	      rdata1;
 
-   wire [10-RF_L2W:0] waddr;
+   wire [RF_L2D-1:0]   waddr;
    wire [RF_WIDTH-1:0] wdata;
-   wire 	      wen;
-   wire [10-RF_L2W:0] raddr;
+   wire 	       wen;
+   wire [RF_L2D-1:0]   raddr;
    wire [RF_WIDTH-1:0] rdata;
 
    serv_rf_ram_if
      #(.width    (RF_WIDTH),
-       .csr_regs (WITH_CSR*4))
+       .csr_regs (CSR_REGS))
    rf_ram_if
      (.i_clk    (clk),
       .i_rst    (i_rst),
@@ -92,7 +93,7 @@ module serv_rf_top
 
    serv_rf_ram
      #(.width (RF_WIDTH),
-       .csr_regs (WITH_CSR*4))
+       .csr_regs (CSR_REGS))
    rf_ram
      (.i_clk    (clk),
       .i_waddr (waddr),

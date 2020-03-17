@@ -138,6 +138,9 @@ module serv_state
       if (i_ibus_ack)
 	misalign_trap_sync <= 1'b0;
    end // always @ (posedge i_clk)
-      end // if (WITH_CSR)
+      end else begin
+	 always @(*)
+	   o_pending_irq = 1'b0;
+      end
    endgenerate
 endmodule

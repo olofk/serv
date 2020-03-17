@@ -1,14 +1,15 @@
 `default_nettype none
 module serv_rf_if
+  #(parameter WITH_CSR = 1)
   (//RF Interface
-   output wire [5:0] o_wreg0,
-   output wire [5:0] o_wreg1,
+   output wire [4+WITH_CSR:0] o_wreg0,
+   output wire [4+WITH_CSR:0] o_wreg1,
    output wire 	     o_wen0,
    output wire 	     o_wen1,
    output wire 	     o_wdata0,
    output wire 	     o_wdata1,
-   output wire [5:0] o_rreg0,
-   output wire [5:0] o_rreg1,
+   output wire [4+WITH_CSR:0] o_rreg0,
+   output wire [4+WITH_CSR:0] o_rreg1,
    input wire 	     i_rdata0,
    input wire 	     i_rdata1,
 
@@ -42,7 +43,6 @@ module serv_rf_if
    input wire [4:0]  i_rs2_raddr,
    output wire 	     o_rs2);
 
-   parameter WITH_CSR = 1;
 
 `include "serv_params.vh"
 
@@ -102,7 +102,8 @@ module serv_rf_if
       assign 	     o_wdata0 = rd;
       assign	     o_wdata1 = 1'b0;
 
-      assign o_wreg0 = {1'b0,i_rd_waddr};
+      assign o_wreg0 = i_rd_waddr;
+      assign o_wreg1 = 5'd0;
 
       assign       o_wen0 =i_rd_wen;
       assign       o_wen1 = 1'b0;
@@ -111,8 +112,8 @@ module serv_rf_if
     ********** Read side ***********
     */
 
-      assign o_rreg0 = {1'b0, i_rs1_raddr};
-      assign o_rreg1 = {1'b0, i_rs2_raddr};
+      assign o_rreg0 = i_rs1_raddr;
+      assign o_rreg1 = i_rs2_raddr;
 
       assign o_rs1 = i_rdata0;
       assign o_rs2 = i_rdata1;

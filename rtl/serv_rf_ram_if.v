@@ -5,27 +5,27 @@ module serv_rf_ram_if
     parameter depth=32*(32+csr_regs)/width)
   (
    //SERV side
-   input wire 			   i_clk,
-   input wire 			   i_rst,
-   input wire 			   i_wreq,
-   input wire 			   i_rreq,
-   output wire 			   o_ready,
-   input wire [5:0] 		   i_wreg0,
-   input wire [5:0] 		   i_wreg1,
-   input wire 			   i_wen0,
-   input wire 			   i_wen1,
-   input wire 			   i_wdata0,
-   input wire 			   i_wdata1,
-   input wire [5:0] 		   i_rreg0,
-   input wire [5:0] 		   i_rreg1,
-   output wire 			   o_rdata0,
-   output wire 			   o_rdata1,
+   input wire 				i_clk,
+   input wire 				i_rst,
+   input wire 				i_wreq,
+   input wire 				i_rreq,
+   output wire 				o_ready,
+   input wire [$clog2(32+csr_regs)-1:0] i_wreg0,
+   input wire [$clog2(32+csr_regs)-1:0] i_wreg1,
+   input wire 				i_wen0,
+   input wire 				i_wen1,
+   input wire 				i_wdata0,
+   input wire 				i_wdata1,
+   input wire [$clog2(32+csr_regs)-1:0] i_rreg0,
+   input wire [$clog2(32+csr_regs)-1:0] i_rreg1,
+   output wire 				o_rdata0,
+   output wire 				o_rdata1,
    //RAM side
-   output wire [$clog2(depth)-1:0] o_waddr,
-   output wire [width-1:0] 	   o_wdata,
-   output wire 			   o_wen,
-   output wire [$clog2(depth)-1:0] o_raddr,
-   input wire [width-1:0] 	   i_rdata);
+   output wire [$clog2(depth)-1:0] 	o_waddr,
+   output wire [width-1:0] 		o_wdata,
+   output wire 				o_wen,
+   output wire [$clog2(depth)-1:0] 	o_raddr,
+   input wire [width-1:0] 		i_rdata);
 
    localparam l2w = $clog2(width);
 
@@ -63,7 +63,7 @@ module serv_rf_ram_if
 			       wdata1_r :
 			       {i_wdata0, wdata0_r};
 
-   wire [5:0] wreg  = wtrig1 ? i_wreg1 : i_wreg0;
+   wire [$clog2(32+csr_regs)-1:0] wreg  = wtrig1 ? i_wreg1 : i_wreg0;
    generate if (width == 32)
      assign o_waddr = wreg;
    else
@@ -111,7 +111,7 @@ module serv_rf_ram_if
    wire 	  rtrig0;
    reg 		  rtrig1;
 
-   wire [5:0] 	  rreg = rtrig0 ? i_rreg1 : i_rreg0;
+   wire [$clog2(32+csr_regs)-1:0] rreg = rtrig0 ? i_rreg1 : i_rreg0;
    generate if (width == 32)
      assign o_raddr = rreg;
    else
