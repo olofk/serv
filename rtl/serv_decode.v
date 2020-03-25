@@ -180,6 +180,13 @@ module serv_decode
    reg [4:0]  imm24_20;
    reg [4:0]  imm11_7;
 
+   wire [1:0] m2;
+   //True for OP-IMM, LOAD, STORE, JALR
+   //False for LUI, AUIPC, JAL
+   assign m2[0] = (opcode[1:0] == 2'b00) | (opcode[2:1] == 2'b00);
+   assign m2[1] = opcode[4] & !opcode[0];
+   wire m3 = opcode[4];
+
    assign o_alu_rd_sel[0] = (funct3 == 3'b000); // Add/sub
    assign o_alu_rd_sel[1] = (funct3[1:0] == 2'b01); //Shift
    assign o_alu_rd_sel[2] = (funct3[2:1] == 2'b01); //SLT*
@@ -219,14 +226,6 @@ module serv_decode
    //True for S (STORE) or B (BRANCH) type instructions
    //False for J type instructions
    wire m1 = opcode[3:0] == 4'b1000;
-
-   wire [1:0] m2;
-   assign m2[1] = opcode[4] & !opcode[0];
-
-   //True for OP-IMM, LOAD, STORE, JALR
-   //False for LUI, AUIPC, JAL
-   assign m2[0] = (opcode[1:0] == 2'b00) | (opcode[2:1] == 2'b00);
-   wire m3 = opcode[4];
 
    assign o_imm = i_cnt_done ? signbit : m1 ? imm11_7[0] : imm24_20[0];
 

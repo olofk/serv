@@ -73,6 +73,8 @@ module serv_alu
 
    reg        lt_r;
 
+   reg        eq_r;
+
    wire       lt_sign = i_cnt_done & !i_cmp_uns;
 
    wire       eq = (i_rs1 == op_b);
@@ -91,8 +93,6 @@ module serv_alu
                  (i_rd_sel[2] & result_lt_r & plus_1) |
                  (i_rd_sel[3] & result_bool);
 
-
-   reg 	eq_r;
 
    always @(posedge clk) begin
       add_cy_r <= i_en & add_cy;
