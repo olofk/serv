@@ -64,7 +64,7 @@ module serv_state
 
    assign o_dbus_cyc = (state == IDLE) & stage_two_pending & i_mem_op & !i_mem_misalign;
 
-   wire trap_pending = (o_ctrl_jump & i_ctrl_misalign) | i_mem_misalign;
+   wire trap_pending = WITH_CSR & ((o_ctrl_jump & i_ctrl_misalign) | i_mem_misalign);
 
    //Prepare RF for reads when a new instruction is fetched
    // or when stage one caused an exception (rreq implies a write request too)

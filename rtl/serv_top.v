@@ -367,7 +367,9 @@ module serv_top
       //CSR read port
       .o_csr       (rf_csr_out));
 
-   serv_mem_if mem_if
+   serv_mem_if
+     #(.WITH_CSR (WITH_CSR))
+   mem_if
      (
       .i_clk    (clk),
       .i_en     (cnt_en),

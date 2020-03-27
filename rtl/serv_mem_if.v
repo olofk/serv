@@ -1,5 +1,6 @@
 `default_nettype none
 module serv_mem_if
+  #(parameter WITH_CSR = 1)
   (
    input wire 	      i_clk,
    input wire 	      i_en,
@@ -20,7 +21,6 @@ module serv_mem_if
    input wire 	      i_wb_ack);
 
    reg           signbit;
-   reg 		 misalign;
 
    reg [7:0] 	 dat0;
    reg [7:0] 	 dat1;
@@ -57,8 +57,6 @@ module serv_mem_if
 
    assign o_wb_dat = {dat3,dat2,dat1,dat0};
 
-   assign o_misalign = misalign & i_mem_op;
-
    always @(posedge i_clk) begin
 
       if (dat0_en)
@@ -73,9 +71,18 @@ module serv_mem_if
       if (i_wb_ack)
 	{dat3,dat2,dat1,dat0} <= i_wb_rdt;
 
-      misalign <= (i_lsb[0] & (i_word | i_half)) | (i_lsb[1] & i_word);
       if (dat_valid)
         signbit <= dat_cur;
-
    end
+   generate
+      if (WITH_CSR) begin
+	 reg 		 misalign;
+	 always @(posedge i_clk)
+	   misalign <= (i_lsb[0] & (i_word | i_half)) | (i_lsb[1] & i_word);
+	 assign o_misalign = misalign & i_mem_op;
+      end else begin
+	 assign o_misalign = 1'b0;
+      end
+   endgenerate
+
 endmodule
