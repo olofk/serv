@@ -1,0 +1,25 @@
+CAPI=2:
+
+name : ::serving:0
+
+filesets:
+  rtl:
+    files:
+      - serving/serving_arbiter.v
+      - serving/serving_mux.v
+      - serving/serving_ram.v
+      - serving/serving.v
+    file_type : verilogSource
+    depend : [serv]
+
+targets:
+  default:
+    filesets : [rtl]
+
+  lint:
+    default_tool : verilator
+    filesets : [rtl]
+    tools:
+      verilator:
+        mode : lint-only
+    toplevel : serving
