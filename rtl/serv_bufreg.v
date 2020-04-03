@@ -12,7 +12,7 @@ module serv_bufreg
    input wire 	      i_imm_en,
    input wire 	      i_clr_lsb,
    output reg [1:0]   o_lsb,
-   output wire [31:0] o_reg,
+   output wire [31:0] o_dbus_adr,
    output wire 	      o_q);
 
    wire 	      c, q;
@@ -37,6 +37,6 @@ module serv_bufreg
    end
 
    assign o_q = data[0];
-   assign o_reg = data;
+   assign o_dbus_adr = {data[31:2], 2'b00};
 
 endmodule

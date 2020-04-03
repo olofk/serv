@@ -142,7 +142,6 @@ module serv_top
    wire 	 pending_irq;
 
    wire [1:0]   lsb;
-   wire [31:0]  bufreg_out;
 
    serv_state
      #(.WITH_CSR (WITH_CSR))
@@ -244,8 +243,6 @@ module serv_top
       .o_rd_csr_en        (rd_csr_en),
       .o_rd_alu_en        (rd_alu_en));
 
-   assign o_dbus_adr = {bufreg_out[31:2], 2'b00};
-
    serv_bufreg bufreg
      (
       .i_clk    (clk),
@@ -260,7 +257,7 @@ module serv_top
       .i_imm_en (bufreg_imm_en),
       .i_clr_lsb (bufreg_clr_lsb),
       .o_lsb    (lsb),
-      .o_reg    (bufreg_out),
+      .o_dbus_adr (o_dbus_adr),
       .o_q      (bufreg_q));
 
    serv_ctrl
