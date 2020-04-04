@@ -62,7 +62,7 @@ module serv_state
 
    reg 	stage_two_pending;
 
-   assign o_dbus_cyc = (state == IDLE) & stage_two_pending & i_mem_op & !i_mem_misalign;
+   assign o_dbus_cyc = !o_cnt_en & stage_two_pending & i_mem_op & !i_mem_misalign;
 
    wire trap_pending = WITH_CSR & ((o_ctrl_jump & i_ctrl_misalign) | i_mem_misalign);
 
@@ -90,7 +90,7 @@ module serv_state
       o_cnt_done <= (o_cnt[4:2] == 3'b111) & o_cnt_r[2];
 
       //Need a strobe for the first cycle in the IDLE state after INIT
-      stage_two_req <= o_cnt_done & (state == INIT);
+      stage_two_req <= o_cnt_done & o_init;
 
       if (i_rf_ready && !o_cnt_en)
 	if (i_e_op | o_pending_irq | (stage_two_pending & trap_pending))
