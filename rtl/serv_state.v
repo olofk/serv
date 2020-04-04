@@ -18,8 +18,8 @@ module serv_state
    input wire 	     i_slt_op,
    input wire 	     i_e_op,
    input wire 	     i_rd_op,
-   output wire 	     o_init,
-   output wire 	     o_cnt_en,
+   output reg 	     o_init,
+   output reg 	     o_cnt_en,
    output reg [4:0]  o_cnt,
    output reg [3:0]  o_cnt_r,
    output wire 	     o_ctrl_pc_en,
@@ -36,14 +36,6 @@ module serv_state
 
    parameter WITH_CSR = 1;
 
-   localparam [1:0]
-     IDLE     = 2'd0,
-     INIT     = 2'd1,
-     RUN      = 2'd2,
-     TRAP     = 2'd3;
-
-   reg [1:0]    state;
-
    reg 	stage_two_req;
 
    //Update PC in RUN or TRAP states
@@ -52,10 +44,6 @@ module serv_state
    assign o_alu_shamt_en = (o_cnt < 5) & o_init;
 
    assign o_mem_bytecnt = o_cnt[4:3];
-
-   assign o_cnt_en = (state != IDLE);
-
-   assign o_init = (state == INIT);
 
    //slt*, branch/jump, shift, load/store
    wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
@@ -78,8 +66,6 @@ module serv_state
    //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
    assign o_bufreg_hold = !o_cnt_en & (stage_two_req | ~i_shift_op);
 
-
-
    always @(posedge i_clk) begin
       if (o_cnt_done)
 	o_ctrl_jump <= o_init & i_take_branch;
@@ -92,23 +78,23 @@ module serv_state
       //Need a strobe for the first cycle in the IDLE state after INIT
       stage_two_req <= o_cnt_done & o_init;
 
-      if (i_rf_ready && !o_cnt_en)
-	if (i_e_op | o_pending_irq | (stage_two_pending & trap_pending))
-	  state <= TRAP;
-	else if (two_stage_op & !stage_two_pending)
-	  state <= INIT;
-	else
-	  state <= RUN;
+      if (i_rf_ready & !stage_two_pending)
+	o_init <= two_stage_op & !o_pending_irq;
 
       if (o_cnt_done)
-        state <= IDLE;
+	o_init <= 1'b0;
+
+      if (i_rf_ready)
+	o_cnt_en <= 1'b1;
+
+      if (o_cnt_done)
+        o_cnt_en <= 1'b0;
 
       o_cnt <= o_cnt + {4'd0,o_cnt_en};
       if (o_cnt_en)
 	o_cnt_r <= {o_cnt_r[2:0],o_cnt_r[3]};
 
       if (i_rst) begin
-	 state <= IDLE;
 	 o_cnt   <= 5'd0;
 	 stage_two_pending <= 1'b0;
 	 o_ctrl_jump <= 1'b0;
