@@ -3,8 +3,11 @@ module serv_csr
   (
    input wire 	    i_clk,
    input wire 	    i_en,
-   input wire [4:2] i_cnt,
-   input wire [3:2] i_cnt_r,
+   input wire 	    i_cnt0to3,
+   input wire 	    i_cnt2,
+   input wire 	    i_cnt3,
+   input wire 	    i_cnt7,
+   input wire 	    i_cnt_done,
    input wire 	    i_e_op,
    input wire 	    i_ebreak,
    input wire 	    i_mem_cmd,
@@ -56,8 +59,8 @@ module serv_csr
 
    wire 	timer_irq = i_mtip & mstatus_mie & mie_mtie;
 
-   assign mcause = (i_cnt[4:2] == 3'd0) ? mcause3_0[0] : //[3:0]
-		   ((i_cnt[4:2] == 3'd7) & i_cnt_r[3]) ? mcause31 //[31]
+   assign mcause = i_cnt0to3 ? mcause3_0[0] : //[3:0]
+		   i_cnt_done ? mcause31 //[31]
 		   : 1'b0;
 
    assign o_csr_in = csr_in;
@@ -70,13 +73,13 @@ module serv_csr
        Note: To save resources mstatus_mpie (mstatus bit 7) is not
        readable or writable from sw
        */
-      if (i_mstatus_en & (i_cnt[4:2] == 3'd0) & i_cnt_r[3])
+      if (i_mstatus_en & i_cnt3)
 	mstatus_mie <= csr_in;
 
-      if (i_mie_en & (i_cnt[4:2] == 3'd1) & i_cnt_r[3])
+      if (i_mie_en & i_cnt7)
 	mie_mtie <= csr_in;
 
-      mstatus <= (i_cnt[4:2] == 0) & i_cnt_r[2] & mstatus_mie;
+      mstatus <= i_cnt2 & mstatus_mie;
 
       timer_irq_r <= timer_irq;
 
@@ -95,9 +98,9 @@ module serv_csr
       end
 
       if (i_mcause_en & i_en) begin
-	 if (i_cnt[4:2] == 3'd0)
+	 if (i_cnt0to3)
 	   mcause3_0 <= {csr_in, mcause3_0[3:1]};
-	 if ((i_cnt[4:2] == 3'd7) & i_cnt_r[3])
+	 if (i_cnt_done)
 	   mcause31 <= csr_in;
       end
    end

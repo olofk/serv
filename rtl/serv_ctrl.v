@@ -5,8 +5,8 @@ module serv_ctrl
    input wire 	      i_rst,
    //State
    input wire 	      i_pc_en,
-   input wire [4:2]   i_cnt,
-   input wire [2:2]   i_cnt_r,
+   input wire 	      i_cnt12to31,
+   input wire 	      i_cnt2,
    input wire 	      i_cnt_done,
    //Control
    input wire 	      i_jump,
@@ -46,7 +46,7 @@ module serv_ctrl
    wire       offset_a;
    wire       offset_b;
 
-   assign plus_4        = i_cnt_r[2] & (i_cnt[4:2] == 3'd0);
+   assign plus_4        = i_cnt2;
 
    assign o_ibus_adr[0] = pc;
    assign o_bad_pc = pc_plus_offset_aligned;
@@ -76,7 +76,7 @@ module serv_ctrl
    assign o_rd  = (i_utype & pc_plus_offset_aligned) | (pc_plus_4 & i_jal_or_jalr);
 
    assign offset_a = i_pc_rel & pc;
-   assign offset_b = i_utype ? (i_imm & (i_cnt[4] | (i_cnt[3:2] == 2'b11))): i_buf;
+   assign offset_b = i_utype ? (i_imm & i_cnt12to31): i_buf;
    assign {pc_plus_offset_cy,pc_plus_offset} = offset_a+offset_b+pc_plus_offset_cy_r;
 
    assign pc_plus_offset_aligned = pc_plus_offset & en_pc_r;

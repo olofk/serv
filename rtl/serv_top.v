@@ -88,8 +88,13 @@ module serv_top
 
    wire          init;
    wire          cnt_en;
-   wire [4:0] 	 cnt;
-   wire [3:0] 	 cnt_r;
+   wire 	 cnt0to3;
+   wire 	 cnt12to31;
+   wire          cnt0;
+   wire          cnt1;
+   wire          cnt2;
+   wire          cnt3;
+   wire          cnt7;
 
    wire 	 cnt_done;
 
@@ -167,8 +172,13 @@ module serv_top
       .i_rd_op        (rd_op),
       .o_init         (init),
       .o_cnt_en       (cnt_en),
-      .o_cnt          (cnt),
-      .o_cnt_r        (cnt_r),
+      .o_cnt0to3      (cnt0to3),
+      .o_cnt12to31    (cnt12to31),
+      .o_cnt0         (cnt0),
+      .o_cnt1         (cnt1),
+      .o_cnt2         (cnt2),
+      .o_cnt3         (cnt3),
+      .o_cnt7         (cnt7),
       .o_cnt_done     (cnt_done),
       .o_bufreg_hold  (bufreg_hold),
       .o_ctrl_pc_en   (ctrl_pc_en),
@@ -246,8 +256,8 @@ module serv_top
    serv_bufreg bufreg
      (
       .i_clk    (clk),
-      .i_cnt    (cnt[4:2]),
-      .i_cnt_r  (cnt_r[1:0]),
+      .i_cnt0   (cnt0),
+      .i_cnt1   (cnt1),
       .i_en     (!bufreg_hold),
       .i_init   (init),
       .i_loop   (bufreg_loop),
@@ -269,8 +279,8 @@ module serv_top
       .i_rst      (i_rst),
       //State
       .i_pc_en    (ctrl_pc_en),
-      .i_cnt      (cnt[4:2]),
-      .i_cnt_r    (cnt_r[2]),
+      .i_cnt12to31 (cnt12to31),
+      .i_cnt2     (cnt2),
       .i_cnt_done (cnt_done),
       //Control
       .i_jump     (jump),
@@ -295,6 +305,7 @@ module serv_top
       .clk        (clk),
       .i_rst      (i_rst),
       .i_en       (cnt_en),
+      .i_cnt0     (cnt0),
       .i_rs1      (rs1),
       .i_rs2      (rs2),
       .i_imm      (imm),
@@ -392,8 +403,11 @@ module serv_top
 	   (
 	    .i_clk        (clk),
 	    .i_en         (cnt_en),
-	    .i_cnt        (cnt[4:2]),
-	    .i_cnt_r      (cnt_r[3:2]),
+	    .i_cnt0to3    (cnt0to3),
+	    .i_cnt2       (cnt2),
+	    .i_cnt3       (cnt3),
+	    .i_cnt7       (cnt7),
+	    .i_cnt_done   (cnt_done),
 	    .i_e_op       (e_op),
 	    .i_ebreak     (ebreak),
 	    .i_mem_cmd    (o_dbus_we),

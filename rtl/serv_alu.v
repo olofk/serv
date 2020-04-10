@@ -4,6 +4,7 @@ module serv_alu
    input wire 	    clk,
    input wire 	    i_rst,
    input wire 	    i_en,
+   input wire 	    i_cnt0,
    input wire 	    i_rs1,
    input wire 	    i_rs2,
    input wire 	    i_imm,
@@ -33,7 +34,6 @@ module serv_alu
    wire [4:0]  shamt;
    reg 	       shamt_msb;
 
-   reg         en_r;
    wire        shamt_ser;
    wire        plus_1;
 
@@ -82,7 +82,7 @@ module serv_alu
    assign result_eq = eq & eq_r;
    assign result_lt = eq ? lt_r : op_b^lt_sign;
 
-   assign plus_1 = i_en & !en_r;
+   assign plus_1 = i_cnt0;
    assign o_cmp = i_cmp_eq ? result_eq : result_lt;
 
    localparam [15:0] BOOL_LUT = 16'h8E96;//And, Or, =, xor
@@ -104,7 +104,6 @@ module serv_alu
 	 result_lt_r <= result_lt;
       end
       eq_r <= result_eq | ~i_en;
-      en_r <= i_en;
 
       if (i_shamt_en)
 	shamt_msb <= b_inv_plus_1_cy;

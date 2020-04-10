@@ -1,8 +1,8 @@
 module serv_bufreg
   (
    input wire 	      i_clk,
-   input wire [4:2]   i_cnt,
-   input wire [1:0]   i_cnt_r,
+   input wire 	      i_cnt0,
+   input wire 	      i_cnt1,
    input wire 	      i_en,
    input wire 	      i_init,
    input wire 	      i_loop,
@@ -19,7 +19,7 @@ module serv_bufreg
    reg 		      c_r;
    reg [31:0] 	      data;
 
-   wire 	      clr_lsb = (i_cnt[4:2] == 3'd0) & i_cnt_r[0] & i_clr_lsb;
+   wire 	      clr_lsb = i_cnt0 & i_clr_lsb;
 
    assign {c,q} = {1'b0,(i_rs1 & i_rs1_en)} + {1'b0,(i_imm & i_imm_en & !clr_lsb)} + c_r;
 
@@ -30,9 +30,9 @@ module serv_bufreg
       if (i_en)
 	data <= {(i_loop & !i_init) ? o_q : q, data[31:1]};
 
-      if ((i_cnt[4:2] == 3'd0) & i_cnt_r[0] & i_init)
+      if (i_cnt0 & i_init)
 	o_lsb[0] <= q;
-      if ((i_cnt[4:2] == 3'd0) & i_cnt_r[1] & i_init)
+      if (i_cnt1 & i_init)
 	o_lsb[1] <= q;
    end
 

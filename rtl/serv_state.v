@@ -20,8 +20,13 @@ module serv_state
    input wire 	     i_rd_op,
    output reg 	     o_init,
    output reg 	     o_cnt_en,
-   output reg [4:0]  o_cnt,
-   output reg [3:0]  o_cnt_r,
+   output wire 	     o_cnt0,
+   output wire 	     o_cnt0to3,
+   output wire 	     o_cnt12to31,
+   output wire 	     o_cnt1,
+   output wire 	     o_cnt2,
+   output wire 	     o_cnt3,
+   output wire 	     o_cnt7,
    output wire 	     o_ctrl_pc_en,
    output reg 	     o_ctrl_jump,
    output wire 	     o_ctrl_trap,
@@ -36,14 +41,30 @@ module serv_state
 
    parameter WITH_CSR = 1;
 
+   wire 	     cnt4;
+
    reg 	stage_two_req;
+
+   reg [4:2] o_cnt;
+   reg [3:0] o_cnt_r;
 
    //Update PC in RUN or TRAP states
    assign o_ctrl_pc_en  = o_cnt_en & !o_init;
 
-   assign o_alu_shamt_en = (o_cnt < 5) & o_init;
 
    assign o_mem_bytecnt = o_cnt[4:3];
+
+   assign o_cnt0to3   = (o_cnt[4:2] == 3'd0);
+   assign o_cnt12to31 = (o_cnt[4] | (o_cnt[3:2] == 2'b11));
+   assign o_cnt0 = (o_cnt[4:2] == 3'd0) & o_cnt_r[0];
+   assign o_cnt1 = (o_cnt[4:2] == 3'd0) & o_cnt_r[1];
+   assign o_cnt2 = (o_cnt[4:2] == 3'd0) & o_cnt_r[2];
+   assign o_cnt3 = (o_cnt[4:2] == 3'd0) & o_cnt_r[3];
+   assign cnt4   = (o_cnt[4:2] == 3'd1) & o_cnt_r[0];
+   assign o_cnt7 = (o_cnt[4:2] == 3'd1) & o_cnt_r[3];
+   
+   assign o_alu_shamt_en = (o_cnt0to3 | cnt4) & o_init;
+
 
    //slt*, branch/jump, shift, load/store
    wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
@@ -90,12 +111,12 @@ module serv_state
       if (o_cnt_done)
         o_cnt_en <= 1'b0;
 
-      o_cnt <= o_cnt + {4'd0,o_cnt_en};
+      o_cnt <= o_cnt + {2'd0,o_cnt_r[3]};
       if (o_cnt_en)
 	o_cnt_r <= {o_cnt_r[2:0],o_cnt_r[3]};
 
       if (i_rst) begin
-	 o_cnt   <= 5'd0;
+	 o_cnt   <= 3'd0;
 	 stage_two_pending <= 1'b0;
 	 o_ctrl_jump <= 1'b0;
 	 o_cnt_r <= 4'b0001;
