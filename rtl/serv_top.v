@@ -381,7 +381,6 @@ module serv_top
      (
       .i_clk    (clk),
       .i_en     (cnt_en),
-      .i_init   (init),
       .i_mem_op (mem_op),
       .i_signed (mem_signed),
       .i_word   (mem_word),
