@@ -1,6 +1,6 @@
 CAPI=2:
 
-name : ::servant:1.0
+name : ::servant:1.0.1
 
 filesets:
   service:
@@ -56,6 +56,13 @@ filesets:
       - servant/servix_clock_gen.v : {file_type : verilogSource}
       - servant/servix.v : {file_type : verilogSource}
       - data/arty_a7_35t.xdc : {file_type : xdc}
+
+  zcu106:
+    files:
+      - servant/servus_clock_gen.v : {file_type : verilogSource}
+      - servant/servus.v : {file_type : verilogSource}
+      - data/zcu106.xdc : {file_type : xdc}
+
 targets:
   default:
     filesets : [soc]
@@ -143,6 +150,15 @@ targets:
       verilator:
         verilator_options : [--trace]
     toplevel : servant_sim
+
+  zcu106:
+    default_tool: vivado
+    description : Zynq UltraScale+ MPSoC ZCU106 Evaluation Kit
+    filesets : [mem_files, soc, zcu106]
+    parameters : [memfile, memsize]
+    tools:
+      vivado: {part : xczu7ev-ffvc1156-2-e}
+    toplevel : servus
 
 parameters:
   PLL:
