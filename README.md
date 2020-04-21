@@ -66,26 +66,23 @@ Download the tests repo
 
 Run the compliance tests
 
-`cd $SERV/riscv-compliance && make TARGETDIR=$SERV/serv/riscv-target RISCV_TARGET=serv RISCV_DECICE=rv32i RISCV_ISA=rv32i TARGET_SIM=$SERV/workspace/build/serv_0/verilator_tb-verilator/Vserv_wrapper`
+`cd $SERV/riscv-compliance && make TARGETDIR=$SERV/serv/riscv-target RISCV_TARGET=serv RISCV_DECICE=rv32i RISCV_ISA=rv32i TARGET_SIM=$SERV/workspace/build/servant_1.0.1/verilator_tb-verilator/Vservant_sim`
 
 ## Run on hardware
 
-Only supported so far is a single threaded Zephyr hello world example on the icebreaker tinyFPGA BX and arty A7 35T boards. Some
-packages should be installed before running it (and shoud be accessible in your PATH variable):
-- [icestorm](https://github.com/cliffordwolf/icestorm).
-- [nextpnr](https://github.com/YosysHQ/nextpnr).
+The servant SoC has been ported to a number of different FPGA boards. To see all currently supported targets run
 
-And do not forget to add fusesoc-cores in your fusesoc lib :
-- locally:
-```
- fusesoc library add fusesoc-cores https://github.com/fusesoc/fusesoc-cores
-```
-- globally:
-```
- fusesoc library add --global fusesoc-cores https://github.com/fusesoc/fusesoc-cores
-```
+    fusesoc core show servant
 
-Run with `--memfile=$SERV/sw/blinky.hex` as the last argument to run the LED blink example instead of hello world.
+By default, these targets have the program memory preloaded with a small Zephyr hello world example that writes its output on a UART pin. Don't forget to install the appropriate toolchain (e.g. icestorm, Vivado, Quartus...) and add to your PATH
+
+Some targets also depend on functionality in the FuseSoC base library (fusesoc-cores). Running `fusesoc library list` should tell you if fusesoc-cores is already available. If not, add it to your workspace with 
+
+    fusesoc library add fusesoc-cores https://github.com/fusesoc/fusesoc-cores
+
+Now we're ready to build. Note, for all the cases below, it's possible to run with `--memfile=$SERV/sw/blinky.hex`
+(or any other suitable program) as the last argument to preload the LED blink example
+instead of hello world.
 
 ### TinyFPGA BX
 
@@ -93,7 +90,7 @@ Pin A6 is used for UART output with 115200 baud rate.
 
     cd $SERV/workspace
     fusesoc run --target=tinyfpga_bx servant
-    tinyprog --program build/serv_0/tinyfpga_bx-icestorm/serv_0.bin
+    tinyprog --program build/servant_1.0.1/tinyfpga_bx-icestorm/servant_1.0.1.bin
 
 ### Icebreaker
 
@@ -109,6 +106,7 @@ blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
 
     cd $SERV/workspace
     fusesoc run --target=arty_a7_35t servant
+
 
 ## Other targets
 
@@ -128,7 +126,6 @@ This will synthesize for the default Vivado part. To synthesise for a specific d
 
     fusesoc run --tool=vivado serv --pnr=none --part=xc7a100tcsg324-1
 
-At the time of writing, only the icestorm and vivado backends support running synthesis only.
 
 ## Good to know
 
