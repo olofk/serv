@@ -45,6 +45,7 @@ filesets:
 
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
+  alhambra   : {files: [data/alhambra_bx.pcf : {file_type : PCF}]}
 
   nexys_a7:
     files:
@@ -100,6 +101,17 @@ targets:
     default_tool : icestorm
     filesets : [mem_files, soc, service, tinyfpga_bx]
     generate: [tinyfpga_bx_pll]
+    parameters : [memfile, memsize, PLL=ICE40_CORE]
+    tools:
+      icestorm:
+        nextpnr_options : [--lp8k, --package, cm81, --freq, 32]
+        pnr: next
+    toplevel : service
+
+  alhambra:
+    default_tool : icestorm
+    filesets : [mem_files, soc, service, alhambra]
+    generate: [alhambra_pll]
     parameters : [memfile, memsize, PLL=ICE40_CORE]
     tools:
       icestorm:
@@ -242,6 +254,12 @@ generate:
       freq_out : 16
 
   tinyfpga_bx_pll:
+    generator: icepll
+    parameters:
+      freq_in  : 16
+      freq_out : 32
+
+  alhambra_pll:
     generator: icepll
     parameters:
       freq_in  : 16
