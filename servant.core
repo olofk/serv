@@ -116,7 +116,7 @@ targets:
     parameters : [memfile, memsize, PLL=ICE40_CORE]
     tools:
       icestorm:
-        nextpnr_options : [--hx8k, --package, tq144:4k, --freq, 32]
+        nextpnr_options : [--hx8k, --package, tq144:4k, --freq, 16]
         pnr: next
     toplevel : service
 
@@ -263,5 +263,5 @@ generate:
   alhambra_pll:
     generator: icepll
     parameters:
-      freq_in  : 16
-      freq_out : 32
+      freq_in  : 12
+      freq_out : 16
