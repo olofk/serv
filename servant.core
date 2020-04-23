@@ -45,6 +45,7 @@ filesets:
 
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
+  alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
 
   nexys_a7:
     files:
@@ -104,6 +105,18 @@ targets:
     tools:
       icestorm:
         nextpnr_options : [--lp8k, --package, cm81, --freq, 32]
+        pnr: next
+    toplevel : service
+
+  alhambra:
+    default_tool : icestorm
+    description: Open-hardware iCE40HX4K FPGA board
+    filesets : [mem_files, soc, service, alhambra]
+    generate: [alhambra_pll]
+    parameters : [memfile, memsize, PLL=ICE40_CORE]
+    tools:
+      icestorm:
+        nextpnr_options : [--hx8k, --package, tq144:4k, --freq, 16]
         pnr: next
     toplevel : service
 
@@ -246,3 +259,9 @@ generate:
     parameters:
       freq_in  : 16
       freq_out : 32
+
+  alhambra_pll:
+    generator: icepll
+    parameters:
+      freq_in  : 12
+      freq_out : 16

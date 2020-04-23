@@ -76,7 +76,7 @@ The servant SoC has been ported to a number of different FPGA boards. To see all
 
 By default, these targets have the program memory preloaded with a small Zephyr hello world example that writes its output on a UART pin. Don't forget to install the appropriate toolchain (e.g. icestorm, Vivado, Quartus...) and add to your PATH
 
-Some targets also depend on functionality in the FuseSoC base library (fusesoc-cores). Running `fusesoc library list` should tell you if fusesoc-cores is already available. If not, add it to your workspace with 
+Some targets also depend on functionality in the FuseSoC base library (fusesoc-cores). Running `fusesoc library list` should tell you if fusesoc-cores is already available. If not, add it to your workspace with
 
     fusesoc library add fusesoc-cores https://github.com/fusesoc/fusesoc-cores
 
@@ -107,6 +107,13 @@ blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
     cd $SERV/workspace
     fusesoc run --target=arty_a7_35t servant
 
+### Alhambra II
+
+Pin 61 is used for UART output with 38400 baud rate (note that it works with non-standard 43200 value too). This pin is connected to a FT2232H chip in board, that manages the communications between the FPGA and the computer.
+
+    cd $SERV/workspace
+    fusesoc run --target=alhambra servant
+    iceprog -d i:0x0403:0x6010:0 build/servant_1.0.1/alhambra-icestorm/servant_1.0.1.bin
 
 ## Other targets
 
