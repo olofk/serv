@@ -65,6 +65,11 @@ filesets:
       - servant/servant_ecp5_clock_gen.v : {file_type : verilogSource}
       - servant/servant_ecp5.v : {file_type : verilogSource}
 
+  upduino2:
+    files:
+      - servant/servant_upduino2.v : {file_type : verilogSource}
+      - data/upduino2.pcf : {file_type : PCF}
+
   zcu106:
     files:
       - servant/servus_clock_gen.v : {file_type : verilogSource}
@@ -165,6 +170,16 @@ targets:
       trellis:
         nextpnr_options : [--package, CABGA381, --85k]
     toplevel: servant_ecp5
+
+  upduino2:
+    default_tool : icestorm
+    filesets : [mem_files, soc, upduino2]
+    parameters : [memfile, memsize]
+    tools:
+      icestorm:
+        nextpnr_options: [--package, sg48, --up5k, --freq, 24]
+        pnr: next
+    toplevel : servant_upduino2
 
   verilator_tb:
     default_tool: verilator
