@@ -112,30 +112,6 @@ blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
 Pin A10 (usb_data<1>) is used for UART output with 57600 baud rate (to use
 blinky.hex change A10 to V16 (led[0]) in data/pipistrello.ucf).
 
-ISE parser has some bug:
-
-in *rtl/serv_rf_ram_if.v* change:
-```
-localparam l2w = $clog2(width);
-```
-by
-```
-localparam l2w = 1;
-```
-In *rtl/serv_rf_top.v*
-change
-```
-localparam RF_L2D = $clog2((32+CSR_REGS)*32/RF_WIDTH);
-```
-by
-```
-localparam RF_L2D = 10;
-```
-And finaly in *servant/servant_ram.v* comment line
-```
-$display("Preloading %m from %s", memfile);
-```
-
     cd $SERV/workspace
     fusesoc run --target=pipistrello servant
 
