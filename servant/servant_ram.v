@@ -32,7 +32,9 @@ module servant_ram
 
    initial
      if(|memfile) begin
+`ifndef ISE
 	$display("Preloading %m from %s", memfile);
+`endif
 	$readmemh(memfile, mem);
      end
 
