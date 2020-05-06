@@ -3,7 +3,8 @@
 module serv_rf_top
   #(parameter RESET_PC = 32'd0,
     parameter WITH_CSR = 1,
-    parameter RF_WIDTH = 2)
+    parameter RF_WIDTH = 2,
+	parameter RF_L2D   = $clog2((32+(WITH_CSR*4))*32/RF_WIDTH))
   (
    input wire 	      clk,
    input wire 	      i_rst,
@@ -44,7 +45,6 @@ module serv_rf_top
    input wire 	      i_dbus_ack);
 
    localparam CSR_REGS = WITH_CSR*4;
-   localparam RF_L2D = $clog2((32+CSR_REGS)*32/RF_WIDTH);
 
    wire 	      rf_wreq;
    wire 	      rf_rreq;
