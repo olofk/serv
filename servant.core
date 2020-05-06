@@ -47,6 +47,12 @@ filesets:
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
   alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
 
+  lx9_microboard:
+    files:
+      - servant/servant_lx9_clock_gen.v : {file_type : verilogSource}
+      - servant/servant_lx9.v : {file_type : verilogSource}
+      - data/lx9_microboard.ucf : {file_type : UCF}
+
   nexys_a7:
     files:
       - servant/servix_clock_gen.v : {file_type : verilogSource}
@@ -108,6 +114,20 @@ targets:
         pnr: next
     toplevel : service
 
+  lx9_microboard:
+    default_tool: ise
+    description : LX9 Microboard
+    filesets : [mem_files, soc, lx9_microboard]
+    parameters : [memfile, memsize]
+    tools:
+      ise:
+        family  : Spartan6
+        device  : xc6slx9
+        package : csg324
+        speed   : -2
+    toplevel : servant_lx9
+
+    
   tinyfpga_bx:
     default_tool : icestorm
     filesets : [mem_files, soc, service, tinyfpga_bx]
