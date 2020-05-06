@@ -107,6 +107,14 @@ blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
     cd $SERV/workspace
     fusesoc run --target=arty_a7_35t servant
 
+### Saanlima Pipistrello (Spartan6 LX45)
+
+Pin A10 (usb_data<1>) is used for UART output with 57600 baud rate (to use
+blinky.hex change A10 to V16 (led[0]) in data/pipistrello.ucf).
+
+    cd $SERV/workspace
+    fusesoc run --target=pipistrello servant
+
 ### Alhambra II
 
 Pin 61 is used for UART output with 38400 baud rate (note that it works with non-standard 43200 value too). This pin is connected to a FT2232H chip in board, that manages the communications between the FPGA and the computer.
