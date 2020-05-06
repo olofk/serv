@@ -58,6 +58,12 @@ filesets:
       - servant/servix.v : {file_type : verilogSource}
       - data/arty_a7_35t.xdc : {file_type : xdc}
 
+  pipistrello:
+    files:
+      - servant/servis_clock_gen.v : {file_type : verilogSource}
+      - servant/servis.v : {file_type : verilogSource}
+      - data/pipistrello.ucf : {file_type : UCF}
+
   ulx3s:
     files:
       - data/ulx3s.lpf : {file_type : LPF}
@@ -148,6 +154,19 @@ targets:
     tools:
       vivado: {part : xc7a35ticsg324-1L}
     toplevel : servix
+
+  pipistrello:
+    default_tool: ise
+    description : Saanlima pipistrello
+    filesets : [mem_files, soc, pipistrello]
+    parameters : [memfile, memsize]
+    tools:
+      ise:
+        family  : Spartan6
+        device  : xc6slx45
+        package : csg324
+        speed   : -3
+    toplevel : servis
 
   sim:
     default_tool: icarus
