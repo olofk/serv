@@ -2,7 +2,8 @@
 module serv_rf_ram_if
   #(parameter width=8,
     parameter csr_regs=4,
-    parameter depth=32*(32+csr_regs)/width)
+    parameter depth=32*(32+csr_regs)/width,
+    parameter l2w = $clog2(width))
   (
    //SERV side
    input wire 				i_clk,
@@ -26,8 +27,6 @@ module serv_rf_ram_if
    output wire 				o_wen,
    output wire [$clog2(depth)-1:0] 	o_raddr,
    input wire [width-1:0] 		i_rdata);
-
-   localparam l2w = $clog2(width);
 
    reg 				   rgnt;
    assign o_ready = rgnt | i_wreq;
