@@ -117,7 +117,7 @@ blinky.hex change A10 to V16 (led[0]) in data/pipistrello.ucf).
 
 ### Alhambra II
 
-Pin 61 is used for UART output with 38400 baud rate (note that it works with non-standard 43200 value too). This pin is connected to a FT2232H chip in board, that manages the communications between the FPGA and the computer.
+Pin 61 is used for UART output with 115200 baud rate. This pin is connected to a FT2232H chip in board, that manages the communications between the FPGA and the computer.
 
     cd $SERV/workspace
     fusesoc run --target=alhambra servant
