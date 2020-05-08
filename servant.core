@@ -127,7 +127,7 @@ targets:
         speed   : -2
     toplevel : servant_lx9
 
-    
+
   tinyfpga_bx:
     default_tool : icestorm
     filesets : [mem_files, soc, service, tinyfpga_bx]
@@ -147,7 +147,7 @@ targets:
     parameters : [memfile, memsize, PLL=ICE40_CORE]
     tools:
       icestorm:
-        nextpnr_options : [--hx8k, --package, tq144:4k, --freq, 16]
+        nextpnr_options : [--hx8k, --package, "tq144:4k", --freq, 16]
         pnr: next
     toplevel : service
 
@@ -318,4 +318,4 @@ generate:
     generator: icepll
     parameters:
       freq_in  : 12
-      freq_out : 16
+      freq_out : 32
