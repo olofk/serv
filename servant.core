@@ -147,7 +147,7 @@ targets:
     parameters : [memfile, memsize, PLL=ICE40_CORE]
     tools:
       icestorm:
-        nextpnr_options : [--hx8k, --package, "tq144:4k", --freq, 16]
+        nextpnr_options : [--hx8k, --package, "tq144:4k", --freq, 32]
         pnr: next
     toplevel : service
 
