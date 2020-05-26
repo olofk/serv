@@ -1,6 +1,6 @@
 CAPI=2:
 
-name : ::serv:1.0.1
+name : ::serv:1.0.2
 
 filesets:
   core:
