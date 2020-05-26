@@ -161,3 +161,4 @@ module serv_rf_top
       .i_dbus_ack   (i_dbus_ack));
 
 endmodule
+`default_nettype wire

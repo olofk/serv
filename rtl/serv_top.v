@@ -492,3 +492,4 @@ module serv_top
 `endif
 
 endmodule
+`default_nettype wire
