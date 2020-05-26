@@ -47,7 +47,7 @@ module serv_alu
    wire op_b = i_op_b_rs2 ? i_rs2 : i_imm;
    assign shamt_ser = i_sh_right ? op_b : b_inv_plus_1;
 
-   ser_shift shift
+   serv_shift shift
      (
       .i_clk (clk),
       .i_load (i_init),
