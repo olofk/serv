@@ -21,7 +21,7 @@ module serv_ctrl
    output wire 	      o_rd,
    output wire 	      o_bad_pc,
    //External
-   output wire [31:0] o_ibus_adr,
+   output reg [31:0] o_ibus_adr,
    output wire 	      o_ibus_cyc,
    input wire 	      i_ibus_ack);
 
@@ -39,7 +39,7 @@ module serv_ctrl
    wire       pc_plus_offset_aligned;
    wire       plus_4;
 
-   wire       pc;
+   wire       pc = o_ibus_adr[0];
 
    wire       new_pc;
 
@@ -48,24 +48,9 @@ module serv_ctrl
 
    assign plus_4        = i_cnt2;
 
-   assign o_ibus_adr[0] = pc;
    assign o_bad_pc = pc_plus_offset_aligned;
 
    assign {pc_plus_4_cy,pc_plus_4} = pc+plus_4+pc_plus_4_cy_r;
-
-   shift_reg
-     #(
-       .LEN  (32),
-       .INIT (RESET_PC))
-   pc_reg
-     (
-      .clk (clk),
-      .i_rst (i_rst),
-      .i_en (i_pc_en),
-      .i_d  (new_pc),
-      .o_q  (pc),
-      .o_par (o_ibus_adr[31:1])
-      );
 
    generate
       if (WITH_CSR)
@@ -87,13 +72,15 @@ module serv_ctrl
       pc_plus_4_cy_r <= i_pc_en & pc_plus_4_cy;
       pc_plus_offset_cy_r <= i_pc_en & pc_plus_offset_cy;
 
-      if (i_pc_en)
-	en_pc_r <= 1'b1;
-      else if (o_ibus_cyc & i_ibus_ack)
+      if (i_pc_en) begin
+	 en_pc_r <= 1'b1;
+	 o_ibus_adr <= {new_pc, o_ibus_adr[31:1]};
+      end else if (o_ibus_cyc & i_ibus_ack)
         en_pc_r <= 1'b0;
 
       if (i_rst) begin
 	 en_pc_r <= 1'b1;
+	 o_ibus_adr <= RESET_PC;
       end
    end
 
