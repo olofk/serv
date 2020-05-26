@@ -31,7 +31,7 @@ module serv_alu
 
    reg 	       result_lt_r;
 
-   wire [4:0]  shamt;
+   reg [4:0]   shamt;
    reg 	       shamt_msb;
 
    wire        shamt_ser;
@@ -46,14 +46,6 @@ module serv_alu
 
    wire op_b = i_op_b_rs2 ? i_rs2 : i_imm;
    assign shamt_ser = i_sh_right ? op_b : b_inv_plus_1;
-
-   shift_reg #(.LEN (5)) shamt_reg
-     (.clk (clk),
-      .i_rst (i_rst),
-      .i_en (i_shamt_en),
-      .i_d  (shamt_ser),
-      .o_q  (shamt[0]),
-      .o_par (shamt[4:1]));
 
    ser_shift shift
      (
@@ -105,8 +97,10 @@ module serv_alu
       end
       eq_r <= result_eq | ~i_en;
 
-      if (i_shamt_en)
-	shamt_msb <= b_inv_plus_1_cy;
+      if (i_shamt_en) begin
+	 shamt_msb <= b_inv_plus_1_cy;
+	 shamt <= {shamt_ser,shamt[4:1]};
+      end
    end
 
 endmodule
