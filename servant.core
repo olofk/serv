@@ -1,6 +1,6 @@
 CAPI=2:
 
-name : ::servant:1.0.1
+name : ::servant:1.0.2
 
 filesets:
   service:

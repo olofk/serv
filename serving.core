@@ -1,6 +1,6 @@
 CAPI=2:
 
-name : ::serving:0
+name : ::serving:1.0.2
 
 filesets:
   rtl:
