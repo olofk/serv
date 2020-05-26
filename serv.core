@@ -6,7 +6,7 @@ filesets:
   core:
     files:
       - rtl/serv_params.vh : {is_include_file : true}
-      - rtl/ser_shift.v
+      - rtl/serv_shift.v
       - rtl/serv_bufreg.v
       - rtl/serv_alu.v
       - rtl/serv_csr.v

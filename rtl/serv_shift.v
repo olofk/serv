@@ -1,5 +1,5 @@
 `default_nettype none
-module ser_shift
+module serv_shift
   (
    input wire 	    i_clk,
    input wire 	    i_load,
