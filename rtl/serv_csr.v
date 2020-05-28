@@ -29,7 +29,11 @@ module serv_csr
    input wire 	    i_d,
    output wire 	    o_q);
 
-`include "serv_params.vh"
+   localparam [1:0]
+     CSR_SOURCE_CSR = 2'b00,
+     CSR_SOURCE_EXT = 2'b01,
+     CSR_SOURCE_SET = 2'b10,
+     CSR_SOURCE_CLR = 2'b11;
 
    reg 		    mstatus;
    reg 		    mstatus_mie;
