@@ -4,7 +4,6 @@ module serv_decode
    input wire 	     clk,
    //Input
    input wire 	     i_cnt_en,
-   input wire 	     i_cnt_done,
    input wire [31:2] i_wb_rdt,
    input wire 	     i_wb_en,
    input wire 	     i_alu_cmp,
@@ -54,7 +53,7 @@ module serv_decode
    output wire 	     o_csr_d_sel,
    output wire 	     o_csr_imm,
    //To top
-   output wire 	     o_imm,
+   output wire [3:0] o_immdec_ctrl,
    output wire 	     o_op_b_source,
    output wire 	     o_rd_csr_en,
    output wire 	     o_rd_alu_en);
@@ -172,20 +171,14 @@ module serv_decode
 
    assign o_alu_bool_op = funct3[1:0];
 
-   reg 	      signbit;
-
-   reg [8:0]  imm19_12_20;
-   reg 	      imm7;
-   reg [5:0]  imm30_25;
-   reg [4:0]  imm24_20;
-   reg [4:0]  imm11_7;
-
-   wire [1:0] m2;
+   //True for S (STORE) or B (BRANCH) type instructions
+   //False for J type instructions
+   assign o_immdec_ctrl[0] = opcode[3:0] == 4'b1000;
    //True for OP-IMM, LOAD, STORE, JALR
    //False for LUI, AUIPC, JAL
-   assign m2[0] = (opcode[1:0] == 2'b00) | (opcode[2:1] == 2'b00);
-   assign m2[1] = opcode[4] & !opcode[0];
-   wire m3 = opcode[4];
+   assign o_immdec_ctrl[1] = (opcode[1:0] == 2'b00) | (opcode[2:1] == 2'b00);
+   assign o_immdec_ctrl[2] = opcode[4] & !opcode[0];
+   assign o_immdec_ctrl[3] = opcode[4];
 
    assign o_alu_rd_sel[0] = (funct3 == 3'b000); // Add/sub
    assign o_alu_rd_sel[1] = (funct3[1:0] == 2'b01); //Shift
@@ -204,30 +197,12 @@ module serv_decode
 	 op22 <= i_wb_rdt[22];
 	 op26 <= i_wb_rdt[26];
 
-	 //Immediate decoder
-	 signbit     <= i_wb_rdt[31];
-	 imm19_12_20 <= {i_wb_rdt[19:12],i_wb_rdt[20]};
-	 imm7        <= i_wb_rdt[7];
-	 imm30_25    <= i_wb_rdt[30:25];
-	 imm24_20    <= i_wb_rdt[24:20];
-	 imm11_7     <= i_wb_rdt[11:7];
       end
       if (i_cnt_en) begin
-	 imm19_12_20 <= {m3 ? signbit : imm24_20[0], imm19_12_20[8:1]};
-	 imm7        <= signbit;
-	 imm30_25    <= {m2[1] ? imm7 : m2[0] ? signbit : imm19_12_20[0], imm30_25[5:1]};
-	 imm24_20    <= {imm30_25[0], imm24_20[4:1]};
-	 imm11_7     <= {imm30_25[0], imm11_7[4:1]};
 	 if (csr_op & o_csr_d_sel)
 	   o_rf_rs1_addr <= {1'b0,o_rf_rs1_addr[4:1]};
       end
    end
-
-   //True for S (STORE) or B (BRANCH) type instructions
-   //False for J type instructions
-   wire m1 = opcode[3:0] == 4'b1000;
-
-   assign o_imm = i_cnt_done ? signbit : m1 ? imm11_7[0] : imm24_20[0];
 
    //0 (OP_B_SOURCE_IMM) when OPIMM
    //1 (OP_B_SOURCE_RS2) when BRANCH or OP

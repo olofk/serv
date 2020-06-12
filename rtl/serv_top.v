@@ -61,6 +61,8 @@ module serv_top
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
 
+   wire [3:0] 	 immdec_ctrl;
+
    wire 	 take_branch;
    wire 	 e_op;
    wire 	 ebreak;
@@ -198,7 +200,6 @@ module serv_top
       .clk (clk),
       //Input
       .i_cnt_en           (cnt_en),
-      .i_cnt_done         (cnt_done),
       .i_wb_rdt           (i_ibus_rdt[31:2]),
       .i_wb_en            (o_ibus_cyc & i_ibus_ack),
       .i_alu_cmp          (alu_cmp),
@@ -249,9 +250,19 @@ module serv_top
       .o_csr_d_sel        (csr_d_sel),
       .o_csr_imm          (csr_imm),
       //To top
-      .o_imm              (imm),
+      .o_immdec_ctrl      (immdec_ctrl),
       .o_rd_csr_en        (rd_csr_en),
       .o_rd_alu_en        (rd_alu_en));
+
+   serv_immdec immdec
+     (
+      .i_clk      (clk),
+      .i_cnt_en   (cnt_en),
+      .i_wb_rdt   (i_ibus_rdt[31:2]),
+      .i_wb_en    (o_ibus_cyc & i_ibus_ack),
+      .i_ctrl     (immdec_ctrl),
+      .i_cnt_done (cnt_done),
+      .o_imm      (imm));
 
    serv_bufreg bufreg
      (
