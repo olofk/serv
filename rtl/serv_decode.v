@@ -6,9 +6,9 @@ module serv_decode
    input wire 	     i_cnt_en,
    input wire [31:2] i_wb_rdt,
    input wire 	     i_wb_en,
-   input wire 	     i_alu_cmp,
    //To state
-   output wire 	     o_take_branch,
+   output wire 	     o_bne_or_bge,
+   output wire 	     o_cond_branch,
    output wire 	     o_e_op,
    output wire 	     o_ebreak,
    output wire 	     o_branch_op,
@@ -33,7 +33,7 @@ module serv_decode
    output wire 	     o_alu_cmp_uns,
    output wire 	     o_alu_sh_signed,
    output wire 	     o_alu_sh_right,
-   output wire [3:0]  o_alu_rd_sel,
+   output wire [3:0] o_alu_rd_sel,
    //To RF
    output reg [4:0]  o_rf_rd_addr,
    output reg [4:0]  o_rf_rs1_addr,
@@ -97,13 +97,8 @@ module serv_decode
    //False for JALR/LOAD/STORE/OP/OPIMM?
    assign o_bufreg_clr_lsb = opcode[4] & ((opcode[1:0] == 2'b00) | (opcode[1:0] == 2'b11));
 
-   //Take branch for jump or branch instructions (opcode == 1x0xx) if
-   //a) It's an unconditional branch (opcode[0] == 1)
-   //b) It's a conditional branch (opcode[0] == 0) of type beq,blt,bltu (funct3[0] == 0) and ALU compare is true
-   //c) It's a conditional branch (opcode[0] == 0) of type bne,bge,bgeu (funct3[0] == 1) and ALU compare is false
-   //Only valid during the last cycle of INIT, when the branch condition has
-   //been calculated.
-   assign o_take_branch = opcode[4] & !opcode[2] & (opcode[0] | (i_alu_cmp^funct3[0]));
+   assign o_bne_or_bge = funct3[0];
+   assign o_cond_branch = !opcode[0];
 
    assign o_ctrl_utype       = !opcode[4] & opcode[2] & opcode[0];
    assign o_ctrl_jal_or_jalr = opcode[4] & opcode[0];

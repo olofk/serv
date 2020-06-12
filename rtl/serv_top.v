@@ -63,7 +63,8 @@ module serv_top
 
    wire [3:0] 	 immdec_ctrl;
 
-   wire 	 take_branch;
+   wire 	 bne_or_bge;
+   wire 	 cond_branch;
    wire 	 e_op;
    wire 	 ebreak;
    wire 	 branch_op;
@@ -165,7 +166,9 @@ module serv_top
       .o_rf_wreq      (o_rf_wreq),
       .i_rf_ready     (i_rf_ready),
       .o_rf_rd_en     (rd_en),
-      .i_take_branch  (take_branch),
+      .i_bne_or_bge   (bne_or_bge),
+      .i_cond_branch  (cond_branch),
+      .i_alu_cmp      (alu_cmp),
       .i_branch_op    (branch_op),
       .i_mem_op       (mem_op),
       .i_shift_op     (shift_op),
@@ -202,9 +205,9 @@ module serv_top
       .i_cnt_en           (cnt_en),
       .i_wb_rdt           (i_ibus_rdt[31:2]),
       .i_wb_en            (o_ibus_cyc & i_ibus_ack),
-      .i_alu_cmp          (alu_cmp),
       //To state
-      .o_take_branch      (take_branch),
+      .o_bne_or_bge       (bne_or_bge),
+      .o_cond_branch      (cond_branch),
       .o_e_op             (e_op),
       .o_ebreak           (ebreak),
       .o_branch_op        (branch_op),

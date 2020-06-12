@@ -11,7 +11,9 @@ module serv_state
    output wire 	     o_rf_wreq,
    input wire 	     i_rf_ready,
    output wire 	     o_rf_rd_en,
-   input wire 	     i_take_branch,
+   input wire 	     i_cond_branch,
+   input wire 	     i_bne_or_bge,
+   input wire 	     i_alu_cmp,
    input wire 	     i_branch_op,
    input wire 	     i_mem_op,
    input wire 	     i_shift_op,
@@ -65,6 +67,13 @@ module serv_state
    
    assign o_alu_shamt_en = (o_cnt0to3 | cnt4) & o_init;
 
+   //Take branch for jump or branch instructions (opcode == 1x0xx) if
+   //a) It's an unconditional branch (opcode[0] == 1)
+   //b) It's a conditional branch (opcode[0] == 0) of type beq,blt,bltu (funct3[0] == 0) and ALU compare is true
+   //c) It's a conditional branch (opcode[0] == 0) of type bne,bge,bgeu (funct3[0] == 1) and ALU compare is false
+   //Only valid during the last cycle of INIT, when the branch condition has
+   //been calculated.
+   wire      take_branch = i_branch_op & (!i_cond_branch | (i_alu_cmp^i_bne_or_bge));
 
    //slt*, branch/jump, shift, load/store
    wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
@@ -89,7 +98,7 @@ module serv_state
 
    always @(posedge i_clk) begin
       if (o_cnt_done)
-	o_ctrl_jump <= o_init & i_take_branch;
+	o_ctrl_jump <= o_init & take_branch;
 
       if (o_cnt_en)
 	stage_two_pending <= o_init;
