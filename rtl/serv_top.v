@@ -143,7 +143,7 @@ module serv_top
    wire 	 csr_en;
    wire [1:0] 	 csr_addr;
    wire 	 csr_pc;
-
+   wire 	csr_imm_en;
 
    wire 	 new_irq;
    wire 	 trap_taken;
@@ -202,7 +202,6 @@ module serv_top
      (
       .clk (clk),
       //Input
-      .i_cnt_en           (cnt_en),
       .i_wb_rdt           (i_ibus_rdt[31:2]),
       .i_wb_en            (o_ibus_cyc & i_ibus_ack),
       //To state
@@ -251,7 +250,7 @@ module serv_top
       .o_csr_mcause_en    (csr_mcause_en),
       .o_csr_source       (csr_source),
       .o_csr_d_sel        (csr_d_sel),
-      .o_csr_imm          (csr_imm),
+      .o_csr_imm_en       (csr_imm_en),
       //To top
       .o_immdec_ctrl      (immdec_ctrl),
       .o_rd_csr_en        (rd_csr_en),
@@ -261,6 +260,8 @@ module serv_top
      (
       .i_clk      (clk),
       .i_cnt_en   (cnt_en),
+      .i_csr_imm_en (csr_imm_en),
+      .o_csr_imm  (csr_imm),
       .i_wb_rdt   (i_ibus_rdt[31:2]),
       .i_wb_en    (o_ibus_cyc & i_ibus_ack),
       .i_ctrl     (immdec_ctrl),

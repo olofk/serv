@@ -3,7 +3,6 @@ module serv_decode
   (
    input wire 	     clk,
    //Input
-   input wire 	     i_cnt_en,
    input wire [31:2] i_wb_rdt,
    input wire 	     i_wb_en,
    //To state
@@ -51,7 +50,7 @@ module serv_decode
    output wire 	     o_csr_mcause_en,
    output wire [1:0] o_csr_source,
    output wire 	     o_csr_d_sel,
-   output wire 	     o_csr_imm,
+   output wire 	     o_csr_imm_en,
    //To top
    output wire [3:0] o_immdec_ctrl,
    output wire 	     o_op_b_source,
@@ -146,7 +145,7 @@ module serv_decode
 
    assign o_csr_source = funct3[1:0];
    assign o_csr_d_sel = funct3[2];
-   assign o_csr_imm = o_rf_rs1_addr[0];
+   assign o_csr_imm_en = csr_op & o_csr_d_sel;
 
    assign o_csr_addr = (op26 & !op20) ? CSR_MSCRATCH :
 		       (op26 & !op21) ? CSR_MEPC :
@@ -191,11 +190,6 @@ module serv_decode
 	 op21 <= i_wb_rdt[21];
 	 op22 <= i_wb_rdt[22];
 	 op26 <= i_wb_rdt[26];
-
-      end
-      if (i_cnt_en) begin
-	 if (csr_op & o_csr_d_sel)
-	   o_rf_rs1_addr <= {1'b0,o_rf_rs1_addr[4:1]};
       end
    end
 

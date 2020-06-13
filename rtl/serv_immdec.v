@@ -4,6 +4,8 @@ module serv_immdec
    input wire 	     i_clk,
    //Input   
    input wire 	     i_cnt_en,
+   input wire 	     i_csr_imm_en,
+   output wire 	     o_csr_imm,
    input wire [31:2] i_wb_rdt,
    input wire 	     i_wb_en,
    input wire 	     i_cnt_done,
@@ -20,10 +22,11 @@ module serv_immdec
 
 
    assign o_imm = i_cnt_done ? signbit : i_ctrl[0] ? imm11_7[0] : imm24_20[0];
+   assign o_csr_imm = imm19_12_20[4];
 
    always @(posedge i_clk) begin
       if (i_wb_en) begin
-	 signbit     <= i_wb_rdt[31];
+	 signbit     <= i_wb_rdt[31] & !i_csr_imm_en;
 	 imm19_12_20 <= {i_wb_rdt[19:12],i_wb_rdt[20]};
 	 imm7        <= i_wb_rdt[7];
 	 imm30_25    <= i_wb_rdt[30:25];
