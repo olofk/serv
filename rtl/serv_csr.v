@@ -71,10 +71,13 @@ module serv_csr
    always @(posedge i_clk) begin
       /*
        Note: To save resources mstatus_mpie (mstatus bit 7) is not
-       readable or writable from sw
+       readable from sw
        */
       if (i_mstatus_en & i_cnt3)
 	mstatus_mie <= csr_in;
+
+      if (i_mstatus_en & i_cnt7)
+	mstatus_mpie <= csr_in;
 
       if (i_mie_en & i_cnt7)
 	mie_mtie <= csr_in;
