@@ -6,9 +6,7 @@ module servant_orangecrab
  output wire r,
  output wire g,
  output wire b,
- output wire tx,
- output io_5,
- output io_6
+ output wire tx
 );
 
    parameter memfile = "zephyr_hello.hex";
@@ -95,6 +93,4 @@ module servant_orangecrab
    assign g = q;
    assign b = q;
    assign tx = q;
-   assign io_5 = wb_clk;
-   assign io_6 = wb_rst;
 endmodule
