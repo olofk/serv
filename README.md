@@ -101,6 +101,14 @@ Pin 9 is used for UART output with 57600 baud rate.
     cd $SERV/workspace
     fusesoc run --target=icebreaker servant
 
+### OrangeCrab R0.2
+
+Pin D1 is used for UART output with 115200 baud rate.
+
+    cd $SERV/workspace
+    fusesoc run --target=orangecrab_r0.2 servant
+    dfu-util -d 1209:5af0 -D build/servant_1.0.2/orangecrab_r0.2-trellis/servant_1.0.2.bit
+
 ### Arty A7 35T
 
 Pin D10 (uart_rxd_out) is used for UART output with 57600 baud rate (to use
