@@ -64,6 +64,11 @@ filesets:
       - servant/servix.v : {file_type : verilogSource}
       - data/arty_a7_35t.xdc : {file_type : xdc}
 
+  orangecrab:
+    files:
+      - data/orangecrab_r02.lpf : {file_type : LPF}
+      - servant/servant_orangecrab.v : {file_type : verilogSource}
+
   pipistrello:
     files:
       - servant/servis_clock_gen.v : {file_type : verilogSource}
@@ -174,6 +179,16 @@ targets:
     tools:
       vivado: {part : xc7a35ticsg324-1L}
     toplevel : servix
+
+  orangecrab_r0.2:
+    default_tool: trellis
+    description : OrangeCrab R0.2
+    filesets : [mem_files, soc, orangecrab]
+    parameters : [memfile, memsize]
+    tools:
+      trellis:
+        nextpnr_options : [--package, CSFBGA285, --25k]
+    toplevel: servant_orangecrab
 
   pipistrello:
     default_tool: ise
