@@ -133,6 +133,14 @@ Pin 61 is used for UART output with 115200 baud rate. This pin is connected to a
     fusesoc run --target=alhambra servant
     iceprog -d i:0x0403:0x6010:0 build/servant_1.0.1/alhambra-icestorm/servant_1.0.1.bin
 
+### iCEstick
+
+Pin 95 is used as the GPIO output which is connected to the board's green LED. Due to this board's limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.
+
+    cd $SERV/workspace
+    fusesoc run --target=icestick servant
+    iceprog build/servant_1.0.2/icestick-icestorm/servant_1.0.2.bin
+
 ## Other targets
 
 The above targets are run on the servant SoC, but there are some targets defined for the CPU itself. Verilator can be run in lint mode to check for design problems by running
