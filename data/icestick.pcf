@@ -1,8 +1,8 @@
-# 12 MHz clock
+# 12 MHz clock input
 set_io i_clk 	21
 
 # Onboard LED (Green)
-#set_io q 			95
+set_io q 			95
 
 # UART TX
-set_io q			62
+#set_io q			62
