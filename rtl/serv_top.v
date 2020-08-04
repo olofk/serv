@@ -110,7 +110,7 @@ module serv_top
    wire          alu_sub;
    wire [1:0] 	 alu_bool_op;
    wire          alu_cmp_eq;
-   wire          alu_cmp_uns;
+   wire          alu_cmp_sig;
    wire          alu_cmp;
    wire          alu_shamt_en;
    wire          alu_sh_signed;
@@ -229,7 +229,7 @@ module serv_top
       .o_alu_sub          (alu_sub),
       .o_alu_bool_op      (alu_bool_op),
       .o_alu_cmp_eq       (alu_cmp_eq),
-      .o_alu_cmp_uns      (alu_cmp_uns),
+      .o_alu_cmp_sig      (alu_cmp_sig),
       .o_alu_sh_signed    (alu_sh_signed),
       .o_alu_sh_right     (alu_sh_right),
       .o_alu_rd_sel       (alu_rd_sel),
@@ -319,6 +319,7 @@ module serv_top
      (
       .clk        (clk),
       .i_rst      (i_rst),
+      .i_shift_op (shift_op),
       .i_en       (cnt_en),
       .i_cnt0     (cnt0),
       .i_rs1      (rs1),
@@ -331,7 +332,7 @@ module serv_top
       .i_sub      (alu_sub),
       .i_bool_op  (alu_bool_op),
       .i_cmp_eq   (alu_cmp_eq),
-      .i_cmp_uns  (alu_cmp_uns),
+      .i_cmp_sig  (alu_cmp_sig),
       .o_cmp      (alu_cmp),
       .i_shamt_en (alu_shamt_en),
       .i_sh_right (alu_sh_right),
