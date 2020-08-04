@@ -29,7 +29,7 @@ module serv_decode
    output wire 	     o_alu_sub,
    output wire [1:0] o_alu_bool_op,
    output wire 	     o_alu_cmp_eq,
-   output wire 	     o_alu_cmp_uns,
+   output wire 	     o_alu_cmp_sig,
    output wire 	     o_alu_sh_signed,
    output wire 	     o_alu_sh_right,
    output wire [3:0] o_alu_rd_sel,
@@ -117,7 +117,10 @@ module serv_decode
 		     (!opcode[2] & opcode[4] & opcode[0]) |
 		     (!opcode[2] & !opcode[3] & !opcode[0])) & (|o_rf_rd_addr);
 
-   assign o_alu_sub = opcode[3] & imm30/*alu_sub_r*/;
+   //True for sub, sll*, b*, slt*
+   //False for add*, sr*
+   assign o_alu_sub = (!funct3[2] & (funct3[0] | (opcode[3] & imm30))) | funct3[1] | opcode[4];
+   
 
    /*
     300 0_000 mstatus RWSC
@@ -154,7 +157,7 @@ module serv_decode
 
    assign o_alu_cmp_eq = funct3[2:1] == 2'b00;
 
-   assign o_alu_cmp_uns = (funct3[0] & funct3[1]) | (funct3[1] & funct3[2]);
+   assign o_alu_cmp_sig = ~((funct3[0] & funct3[1]) | (funct3[1] & funct3[2]));
    assign o_alu_sh_signed = imm30;
    assign o_alu_sh_right = funct3[2];
 
