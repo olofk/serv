@@ -50,6 +50,8 @@ module serv_rf_if
     ********** Write side ***********
     */
 
+   wire 	     rd_wen = i_rd_wen & (|i_rd_waddr);
+
    generate
    if (WITH_CSR) begin
    wire 	     rd = (i_ctrl_rd ) |
@@ -71,7 +73,7 @@ module serv_rf_if
    assign o_wreg0 = i_trap ? {4'b1000,CSR_MTVAL} : {1'b0,i_rd_waddr};
    assign o_wreg1 = i_trap ? {4'b1000,CSR_MEPC}  : {4'b1000,i_csr_addr};
 
-   assign       o_wen0 = i_trap | i_rd_wen;
+   assign       o_wen0 = i_trap | rd_wen;
    assign       o_wen1 = i_trap | i_csr_en;
 
    /*
@@ -105,7 +107,7 @@ module serv_rf_if
       assign o_wreg0 = i_rd_waddr;
       assign o_wreg1 = 5'd0;
 
-      assign       o_wen0 =i_rd_wen;
+      assign       o_wen0 = rd_wen;
       assign       o_wen1 = 1'b0;
 
    /*
