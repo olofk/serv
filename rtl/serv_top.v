@@ -233,10 +233,6 @@ module serv_top
       .o_alu_sh_signed    (alu_sh_signed),
       .o_alu_sh_right     (alu_sh_right),
       .o_alu_rd_sel       (alu_rd_sel),
-      //To RF
-      .o_rf_rd_addr       (rd_addr),
-      .o_rf_rs1_addr      (rs1_addr),
-      .o_rf_rs2_addr      (rs2_addr),
       //To mem IF
       .o_mem_cmd          (o_dbus_we),
       .o_mem_signed       (mem_signed),
@@ -266,6 +262,10 @@ module serv_top
       .i_wb_en    (o_ibus_cyc & i_ibus_ack),
       .i_ctrl     (immdec_ctrl),
       .i_cnt_done (cnt_done),
+      //To RF
+      .o_rf_rd_addr       (rd_addr),
+      .o_rf_rs1_addr      (rs1_addr),
+      .o_rf_rs2_addr      (rs2_addr),
       .o_imm      (imm));
 
    serv_bufreg bufreg
@@ -462,10 +462,10 @@ module serv_top
         rvfi_rd_wdata <= {o_wdata0,rvfi_rd_wdata[31:1]};
       if (cnt_done & ctrl_pc_en) begin
          rvfi_pc_rdata <= pc;
-	 if (!rd_en)
+	 if (!(rd_en & (|rd_addr))) begin
 	   rvfi_rd_addr <= 5'd0;
-	 if (!rd_en | !(|rd_addr))
 	   rvfi_rd_wdata <= 32'd0;
+	 end
       end
       rvfi_trap <= trap;
       if (rvfi_valid) begin

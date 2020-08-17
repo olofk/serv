@@ -33,10 +33,6 @@ module serv_decode
    output wire 	     o_alu_sh_signed,
    output wire 	     o_alu_sh_right,
    output wire [3:0] o_alu_rd_sel,
-   //To RF
-   output reg [4:0]  o_rf_rd_addr,
-   output reg [4:0]  o_rf_rs1_addr,
-   output reg [4:0]  o_rf_rs2_addr,
    //To mem IF
    output wire 	     o_mem_signed,
    output wire 	     o_mem_word,
@@ -115,12 +111,12 @@ module serv_decode
    //False for STORE, BRANCH, MISC-MEM
    assign o_rd_op = (opcode[2] |
 		     (!opcode[2] & opcode[4] & opcode[0]) |
-		     (!opcode[2] & !opcode[3] & !opcode[0])) & (|o_rf_rd_addr);
+		     (!opcode[2] & !opcode[3] & !opcode[0]));
 
    //True for sub, sll*, b*, slt*
    //False for add*, sr*
    assign o_alu_sub = (!funct3[2] & (funct3[0] | (opcode[3] & imm30))) | funct3[1] | opcode[4];
-   
+
 
    /*
     300 0_000 mstatus RWSC
@@ -183,9 +179,6 @@ module serv_decode
    assign o_alu_rd_sel[3] = (funct3[2] & !(funct3[1:0] == 2'b01)); //Bool
    always @(posedge clk) begin
       if (i_wb_en) begin
-         o_rf_rd_addr  <= i_wb_rdt[11:7];
-         o_rf_rs1_addr <= i_wb_rdt[19:15];
-         o_rf_rs2_addr <= i_wb_rdt[24:20];
          funct3        <= i_wb_rdt[14:12];
          imm30         <= i_wb_rdt[30];
          opcode        <= i_wb_rdt[6:2];
