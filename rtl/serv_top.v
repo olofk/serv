@@ -419,7 +419,6 @@ module serv_top
 	    .i_clk        (clk),
 	    .i_en         (cnt_en),
 	    .i_cnt0to3    (cnt0to3),
-	    .i_cnt2       (cnt2),
 	    .i_cnt3       (cnt3),
 	    .i_cnt7       (cnt7),
 	    .i_cnt_done   (cnt_done),
