@@ -48,6 +48,7 @@ module serv_decode
    output wire 	     o_csr_imm_en,
    //To top
    output wire [3:0] o_immdec_ctrl,
+   output wire [3:0] o_immdec_en,
    output wire 	     o_op_b_source,
    output wire 	     o_rd_csr_en,
    output wire 	     o_rd_alu_en);
@@ -201,6 +202,11 @@ module serv_decode
    assign o_immdec_ctrl[1] = (opcode[1:0] == 2'b00) | (opcode[2:1] == 2'b00);
    assign o_immdec_ctrl[2] = opcode[4] & !opcode[0];
    assign o_immdec_ctrl[3] = opcode[4];
+
+   assign o_immdec_en[3] = opcode[4] | opcode[3] | opcode[2] | !opcode[0];                 //B I J S U
+   assign o_immdec_en[2] = (opcode[4] & opcode[2]) | !opcode[3] | opcode[0];               //  I J   U
+   assign o_immdec_en[1] = (opcode[2:1] == 2'b01) | (opcode[2] & opcode[0]) | o_csr_imm_en;//    J   U
+   assign o_immdec_en[0] = ~o_rd_op;                                                       //B     S
 
    assign o_alu_rd_sel[0] = (funct3 == 3'b000); // Add/sub
    assign o_alu_rd_sel[1] = (funct3[2:1] == 2'b01); //SLT*
