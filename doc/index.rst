@@ -70,6 +70,8 @@ serv_csr
 
 serv_csr handles CSR accesses and all status related to (timer) interrupts. Out of the eight CSRs supported by SERV, only four resides in serv_csr (mstatus, mie, mcause and mip) and for those registers, SERV only implement the bits required for ecall, ebreak, misalignment and timer interrupts. The four remaining CSRs are commonly stored in the RF
 
+.. image:: serv_csr_int.png
+
 serv_ctrl
 ^^^^^^^^^
 
