@@ -144,7 +144,7 @@ module serv_decode
 
    assign o_csr_source = funct3[1:0];
    assign o_csr_d_sel = funct3[2];
-   assign o_csr_imm_en = csr_op & o_csr_d_sel;
+   assign o_csr_imm_en = opcode[4] & opcode[2] & funct3[2];
 
    assign o_csr_addr = (op26 & !op20) ? CSR_MSCRATCH :
 		       (op26 & !op21) ? CSR_MEPC :
