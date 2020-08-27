@@ -30,6 +30,7 @@ module serv_immdec
 
    always @(posedge i_clk) begin
       if (i_wb_en) begin
+	 /* CSR immediates are always zero-extended, hence clear the signbit */
 	 signbit     <= i_wb_rdt[31] & !i_csr_imm_en;
 	 imm19_12_20 <= {i_wb_rdt[19:12],i_wb_rdt[20]};
 	 imm7        <= i_wb_rdt[7];
