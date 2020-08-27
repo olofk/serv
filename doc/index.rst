@@ -91,7 +91,9 @@ serv_decode
 
 .. image:: serv_decode.png
 
-serv_decode is responsible for decoding the operation word coming from ibus into a set of control signals that are used internally in SERV. It also assembles the 32-bit immediate used by some instructions. During the life cycle of an operation all control signals (except one) are static and the immediate is streamed out during the first run stage
+serv_decode is responsible for decoding the operation word coming from ibus into a set of control signals that are used internally in SERV.
+
+.. image:: serv_decode_int.png
 
 serv_mem_if
 ^^^^^^^^^^^
