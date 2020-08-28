@@ -38,6 +38,9 @@ module serving_ram
     output wire [31:0] 	o_wb_rdt,
     output reg 		o_wb_ack);
 
+   reg [1:0] 		bsel;
+   reg [7:0] rdata;
+
    wire 		wb_en = i_wb_stb & !i_wen & !o_wb_ack;
 
    wire 		wb_we = i_wb_we & i_wb_sel[bsel];
@@ -50,23 +53,16 @@ module serving_ram
    wire [7:0] 		wdata = wb_en ? i_wb_dat[bsel*8+:8]     : i_wdata;
    wire [aw-1:0] 	raddr = wb_en ? {i_wb_adr[aw-1:2],bsel} : i_raddr;
 
-   reg [2:0] 		wb_en_r;
-
-   reg [1:0] 		bsel;
-
    reg [23:0] 		wb_rdt;
    assign o_wb_rdt = {rdata, wb_rdt};
 
    always @(posedge i_clk) begin
       if (wb_en) bsel <= bsel + 2'd1;
-      wb_en_r <= {wb_en_r[1:0], wb_en};
       o_wb_ack <= wb_en & &bsel;
       if (bsel == 2'b01) wb_rdt[7:0]   <= rdata;
       if (bsel == 2'b10) wb_rdt[15:8]  <= rdata;
       if (bsel == 2'b11) wb_rdt[23:16] <= rdata;
    end
-
-   reg [7:0] rdata;
 
    always @(posedge i_clk) begin
       if (we) mem[waddr]   <= wdata;

@@ -119,6 +119,8 @@ module serv_rf_if
 
       assign o_rs1 = i_rdata0;
       assign o_rs2 = i_rdata1;
+      assign o_csr = 1'b0;
+      assign o_csr_pc = 1'b0;
    end // else: !if(WITH_CSR)
    endgenerate
 endmodule

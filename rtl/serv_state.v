@@ -155,6 +155,8 @@ module serv_state
 	misalign_trap_sync <= 1'b0;
    end // always @ (posedge i_clk)
       end else begin
+	 assign o_trap_taken = 0;
+	 assign o_ctrl_trap = 0;
 	 always @(*)
 	   o_pending_irq = 1'b0;
       end
