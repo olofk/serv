@@ -263,9 +263,9 @@ module serv_top
       .i_ctrl     (immdec_ctrl),
       .i_cnt_done (cnt_done),
       //To RF
-      .o_rf_rd_addr       (rd_addr),
-      .o_rf_rs1_addr      (rs1_addr),
-      .o_rf_rs2_addr      (rs2_addr),
+      .o_rd_addr  (rd_addr),
+      .o_rs1_addr (rs1_addr),
+      .o_rs2_addr (rs2_addr),
       .o_imm      (imm));
 
    serv_bufreg bufreg
