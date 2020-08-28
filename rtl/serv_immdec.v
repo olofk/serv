@@ -11,9 +11,9 @@ module serv_immdec
    input wire 	     i_cnt_done,
    input wire [3:0]  i_ctrl,
    //To RF
-   output reg [4:0]  o_rf_rd_addr,
-   output reg [4:0]  o_rf_rs1_addr,
-   output reg [4:0]  o_rf_rs2_addr,
+   output wire [4:0] o_rd_addr,
+   output wire [4:0] o_rs1_addr,
+   output wire [4:0] o_rs2_addr,
    output wire 	     o_imm);
 
    reg 	      signbit;
@@ -24,6 +24,13 @@ module serv_immdec
    reg [4:0]  imm24_20;
    reg [4:0]  imm11_7;
 
+   reg [4:0]  rd_addr;
+   reg [4:0]  rs1_addr;
+   reg [4:0]  rs2_addr;
+
+   assign o_rd_addr  = rd_addr;
+   assign o_rs1_addr = rs1_addr;
+   assign o_rs2_addr = rs2_addr;
 
    assign o_imm = i_cnt_done ? signbit : i_ctrl[0] ? imm11_7[0] : imm24_20[0];
    assign o_csr_imm = imm19_12_20[4];
@@ -38,9 +45,9 @@ module serv_immdec
 	 imm24_20    <= i_wb_rdt[24:20];
 	 imm11_7     <= i_wb_rdt[11:7];
 
-         o_rf_rd_addr  <= i_wb_rdt[11:7];
-         o_rf_rs1_addr <= i_wb_rdt[19:15];
-         o_rf_rs2_addr <= i_wb_rdt[24:20];
+         rd_addr  <= i_wb_rdt[11:7];
+         rs1_addr <= i_wb_rdt[19:15];
+         rs2_addr <= i_wb_rdt[24:20];
       end
       if (i_cnt_en) begin
 	 imm19_12_20 <= {i_ctrl[3] ? signbit : imm24_20[0], imm19_12_20[8:1]};
