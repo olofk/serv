@@ -64,18 +64,11 @@ module serv_decode
 
    reg       imm30;
 
+   //opcode
    wire      op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
 
    assign o_mem_op   = !opcode[4] & !opcode[2] & !opcode[0];
-   assign o_shift_op = op_or_opimm & (funct3[1:0] == 2'b01);
-   assign o_slt_op   = op_or_opimm & (funct3[2:1] == 2'b01);
    assign o_branch_op = opcode[4] & !opcode[2];
-
-   //Matches system opcodes except CSR accesses (funct3 == 0)
-   //No idea anymore why the !op21 condition is needed here
-   assign o_e_op = opcode[4] & opcode[2] & !op21 & !(|funct3);
-
-   assign o_ebreak = op20;
 
    //jal,branch =     imm
    //jalr       = rs1+imm
@@ -83,6 +76,7 @@ module serv_decode
    //shift      = rs1
    assign o_bufreg_rs1_en = !opcode[4] | (!opcode[1] & opcode[0]);
    assign o_bufreg_imm_en = !opcode[2];
+
 
    //Loop bufreg contents for shift operations
    assign o_bufreg_loop   = op_or_opimm;
@@ -92,20 +86,20 @@ module serv_decode
    //False for JALR/LOAD/STORE/OP/OPIMM?
    assign o_bufreg_clr_lsb = opcode[4] & ((opcode[1:0] == 2'b00) | (opcode[1:0] == 2'b11));
 
-   assign o_bne_or_bge = funct3[0];
+   //Conditional branch
+   //True for BRANCH
+   //False for JAL/JALR
    assign o_cond_branch = !opcode[0];
 
    assign o_ctrl_utype       = !opcode[4] & opcode[2] & opcode[0];
    assign o_ctrl_jal_or_jalr = opcode[4] & opcode[0];
 
+   //PC-relative operations
    //True for jal, b* auipc
    //False for jalr, lui
    assign o_ctrl_pc_rel = (opcode[2:0] == 3'b000) |
 			  (opcode[1:0] == 2'b11) |
 			  (opcode[4:3] == 2'b00);
-
-   assign o_ctrl_mret = (opcode[4] & opcode[2] & op21 & !(|funct3));
-
    //Write to RD
    //True for OP-IMM, AUIPC, OP, LUI, SYSTEM, JALR, JAL, LOAD
    //False for STORE, BRANCH, MISC-MEM
@@ -113,28 +107,66 @@ module serv_decode
 		     (!opcode[2] & opcode[4] & opcode[0]) |
 		     (!opcode[2] & !opcode[3] & !opcode[0]));
 
+   //
+   //funct3
+   //
+
+   assign o_bne_or_bge = funct3[0];
+   
+   //
+   // opcode & funct3
+   //
+
+   assign o_shift_op = op_or_opimm & (funct3[1:0] == 2'b01);
+   assign o_slt_op   = op_or_opimm & (funct3[2:1] == 2'b01);
+
+   //Matches system ops except eceall/ebreak/mret
+   wire csr_op = opcode[4] & opcode[2] & (|funct3);
+
+
+   //op20
+   assign o_ebreak = op20;
+
+
+   //opcode & funct3 & op21
+
+   assign o_ctrl_mret = opcode[4] & opcode[2] & op21 & !(|funct3);
+   //Matches system opcodes except CSR accesses (funct3 == 0)
+   //and mret (!op21)
+   assign o_e_op = opcode[4] & opcode[2] & !op21 & !(|funct3);
+
+   //opcode & funct3 & imm30
    //True for sub, sll*, b*, slt*
    //False for add*, sr*
    assign o_alu_sub = (!funct3[2] & (funct3[0] | (opcode[3] & imm30))) | funct3[1] | opcode[4];
 
 
    /*
-    300 0_000 mstatus RWSC
-    304 0_100 mie SCWi
-    305 0_101 mtvec RW
-    340 1_000 mscratch
-    341 1_001 mepc  RW
-    342 1_010 mcause R
-    343 1_011 mtval
-    344 1_100 mip CWi
+    Bits 26, 22, 21 and 20 are enough to uniquely identify the eight supported CSR regs
+    mtvec, mscratch, mepc and mtval are stored externally (normally in the RF) and are
+    treated differently from mstatus, mie, mcause and mip which are stored in serv_csr.
+    
+    The former get a 2-bit address (as found in serv_params.vh) while the latter get a
+    one-hot enable signal each.
+    
+    Hex|2 222|Reg
+    adr|6 210|name
+    ---|-----|-------
+    300|0_000|mstatus
+    304|0_100|mie
+    305|0_101|mtvec
+    340|1_000|mscratch
+    341|1_001|mepc
+    342|1_010|mcause
+    343|1_011|mtval
+    344|1_100|mip
+    
     */
 
    //true  for mtvec,mscratch,mepc and mtval
    //false for mstatus, mie, mcause, mip
    wire csr_valid = op20 | (op26 & !op22 & !op21);
 
-   //Matches system ops except eceall/ebreak
-   wire csr_op = opcode[4] & opcode[2] & (|funct3);
    assign o_rd_csr_en = csr_op;
 
    assign o_csr_en         = csr_op & csr_valid;
