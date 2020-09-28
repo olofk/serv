@@ -46,6 +46,7 @@ filesets:
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
   alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
+  icestick : {files: [data/icestick.pcf  : {file_type : PCF}]}
 
   lx9_microboard:
     files:
@@ -131,7 +132,6 @@ targets:
         package : csg324
         speed   : -2
     toplevel : servant_lx9
-
 
   tinyfpga_bx:
     default_tool : icestorm
@@ -261,6 +261,17 @@ targets:
       vivado: {part : xczu7ev-ffvc1156-2-e}
     toplevel : servus
 
+  icestick:
+    default_tool : icestorm
+    filesets : [mem_files, soc, service, icestick]
+    generate: [icestick_pll]
+    parameters : [memfile=blinky.hex, memsize=7168, PLL=ICE40_CORE]
+    tools:
+      icestorm:
+        nextpnr_options : [--hx1k, --package, tq144, --freq, 32]
+        pnr: next
+    toplevel : service
+
 parameters:
   PLL:
     datatype : str
@@ -330,6 +341,12 @@ generate:
       freq_out : 32
 
   alhambra_pll:
+    generator: icepll
+    parameters:
+      freq_in  : 12
+      freq_out : 32
+
+  icestick_pll:
     generator: icepll
     parameters:
       freq_in  : 12
