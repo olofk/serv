@@ -417,27 +417,32 @@ module serv_top
 	 serv_csr csr
 	   (
 	    .i_clk        (clk),
+	    //State
 	    .i_en         (cnt_en),
 	    .i_cnt0to3    (cnt0to3),
 	    .i_cnt3       (cnt3),
 	    .i_cnt7       (cnt7),
 	    .i_cnt_done   (cnt_done),
+	    .i_mem_misalign (mem_misalign),
+	    .i_mtip       (i_timer_irq),
+	    .i_trap_taken (trap_taken),
+	    .i_pending_irq (pending_irq),
+	    .o_new_irq    (new_irq),
+	    //Control
 	    .i_e_op       (e_op),
 	    .i_ebreak     (ebreak),
 	    .i_mem_cmd    (o_dbus_we),
-	    .i_mem_misalign (mem_misalign),
-	    .i_rf_csr_out (rf_csr_out),
-	    .o_csr_in     (csr_in),
-	    .i_mtip       (i_timer_irq),
-	    .o_new_irq    (new_irq),
-	    .i_trap_taken (trap_taken),
-	    .i_pending_irq (pending_irq),
 	    .i_mstatus_en (csr_mstatus_en),
 	    .i_mie_en     (csr_mie_en    ),
 	    .i_mcause_en  (csr_mcause_en ),
 	    .i_csr_source (csr_source),
 	    .i_mret       (mret),
-	    .i_d          (csr_d_sel ? csr_imm : rs1),
+	    .i_csr_d_sel  (csr_d_sel),
+	    //Data
+	    .i_rf_csr_out (rf_csr_out),
+	    .o_csr_in     (csr_in),
+	    .i_csr_imm    (csr_imm),
+	    .i_rs1        (rs1),
 	    .o_q          (csr_rd));
       end else begin
 	 assign csr_in = 1'b0;
