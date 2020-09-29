@@ -41,7 +41,7 @@ module serv_state
    output reg 	     o_cnt_done,
    output wire 	     o_bufreg_hold);
 
-   parameter WITH_CSR = 1;
+   parameter [0:0] WITH_CSR = 1;
 
    wire 	     cnt4;
 
