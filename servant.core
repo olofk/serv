@@ -43,6 +43,13 @@ filesets:
       - servant/servclone10_clock_gen.v : {file_type : verilogSource}
       - servant/servclone10.v : {file_type : verilogSource}
 
+  de0_nano:
+    files:
+      - data/de0_nano.sdc : {file_type : SDC}
+      - data/de0_nano.tcl : {file_type : tclSource}
+      - servant/servive_clock_gen.v : {file_type : verilogSource}
+      - servant/servive.v : {file_type : verilogSource}
+
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
   alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
@@ -108,6 +115,16 @@ targets:
         family : Cyclone 10 LP
         device : 10CL025YU256C8G
     toplevel : servclone10
+
+  de0_nano:
+    default_tool : quartus
+    filesets : [mem_files, soc, de0_nano]
+    parameters : [memfile, memsize]
+    tools:
+      quartus:
+        family : Cyclone IV E
+        device : EP4CE22F17C6
+    toplevel: servive
 
   icebreaker:
     default_tool : icestorm

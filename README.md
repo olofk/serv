@@ -119,6 +119,13 @@ blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
     cd $SERV/workspace
     fusesoc run --target=arty_a7_35t servant
 
+### DE0 Nano
+
+FPGA Pin D11 (Connector JP1, pin 38) is used for UART output with 57600 baud rate. DE0 Nano needs an external 3.3V UART to connect to this pin
+
+    cd $SERV/workspace
+    fusesoc run --target=de0_nano servant
+
 ### Saanlima Pipistrello (Spartan6 LX45)
 
 Pin A10 (usb_data<1>) is used for UART output with 57600 baud rate (to use
