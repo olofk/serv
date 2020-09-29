@@ -2,30 +2,32 @@
 module serv_csr
   (
    input wire 	    i_clk,
+   //State
    input wire 	    i_en,
    input wire 	    i_cnt0to3,
    input wire 	    i_cnt3,
    input wire 	    i_cnt7,
    input wire 	    i_cnt_done,
+   input wire 	    i_mem_misalign,
+   input wire 	    i_mtip,
+   input wire 	    i_trap_taken,
+   input wire 	    i_pending_irq,
+   output wire 	    o_new_irq,
+   //Control
    input wire 	    i_e_op,
    input wire 	    i_ebreak,
    input wire 	    i_mem_cmd,
-   input wire 	    i_mem_misalign,
-   //From mpram
-   input wire 	    i_rf_csr_out,
-   //to mpram
-   output wire 	    o_csr_in,
-   //Stuff
-   input wire 	    i_mtip,
-   output wire 	    o_new_irq,
-   input wire 	    i_pending_irq,
-   input wire 	    i_trap_taken,
    input wire 	    i_mstatus_en,
    input wire 	    i_mie_en,
    input wire 	    i_mcause_en,
    input wire [1:0] i_csr_source,
    input wire 	    i_mret,
-   input wire 	    i_d,
+   input wire 	    i_csr_d_sel,
+   //Data
+   input wire 	    i_rf_csr_out,
+   output wire 	    o_csr_in,
+   input wire 	    i_csr_imm,
+   input wire 	    i_rs1,
    output wire 	    o_q);
 
    localparam [1:0]
@@ -47,9 +49,11 @@ module serv_csr
 
    reg 		timer_irq_r;
 
-   assign csr_in = (i_csr_source == CSR_SOURCE_EXT) ? i_d :
-		   (i_csr_source == CSR_SOURCE_SET) ? csr_out | i_d :
-		   (i_csr_source == CSR_SOURCE_CLR) ? csr_out & ~i_d :
+   wire 	d = i_csr_d_sel ? i_csr_imm : i_rs1;
+
+   assign csr_in = (i_csr_source == CSR_SOURCE_EXT) ? d :
+		   (i_csr_source == CSR_SOURCE_SET) ? csr_out | d :
+		   (i_csr_source == CSR_SOURCE_CLR) ? csr_out & ~d :
 		   (i_csr_source == CSR_SOURCE_CSR) ? csr_out :
 		   1'bx;
 
