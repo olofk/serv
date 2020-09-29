@@ -27,7 +27,6 @@ module serv_alu
 
    wire        result_add;
    wire        result_eq;
-   wire        result_lt;
    wire        result_sh;
 
    reg 	       result_lt_r;
