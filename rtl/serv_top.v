@@ -105,6 +105,7 @@ module serv_top
    wire 	 bufreg_rs1_en;
    wire 	 bufreg_imm_en;
    wire 	 bufreg_loop;
+   wire 	 bufreg_clr_lsb;
    wire 	 bufreg_q;
 
    wire          alu_sub;
@@ -143,7 +144,9 @@ module serv_top
    wire 	 csr_en;
    wire [1:0] 	 csr_addr;
    wire 	 csr_pc;
-   wire 	csr_imm_en;
+   wire 	 csr_imm_en;
+   wire 	 csr_in;
+   wire 	 rf_csr_out;
 
    wire 	 new_irq;
    wire 	 trap_taken;
@@ -157,24 +160,11 @@ module serv_top
      (
       .i_clk (clk),
       .i_rst          (i_rst),
+      //State
       .i_new_irq      (new_irq),
       .o_trap_taken   (trap_taken),
       .o_pending_irq  (pending_irq),
-      .i_dbus_ack     (i_dbus_ack),
-      .i_ibus_ack     (i_ibus_ack),
-      .o_rf_rreq      (o_rf_rreq),
-      .o_rf_wreq      (o_rf_wreq),
-      .i_rf_ready     (i_rf_ready),
-      .o_rf_rd_en     (rd_en),
-      .i_bne_or_bge   (bne_or_bge),
-      .i_cond_branch  (cond_branch),
       .i_alu_cmp      (alu_cmp),
-      .i_branch_op    (branch_op),
-      .i_mem_op       (mem_op),
-      .i_shift_op     (shift_op),
-      .i_slt_op       (slt_op),
-      .i_e_op         (e_op),
-      .i_rd_op        (rd_op),
       .o_init         (init),
       .o_cnt_en       (cnt_en),
       .o_cnt0to3      (cnt0to3),
@@ -192,11 +182,26 @@ module serv_top
       .i_ctrl_misalign(lsb[1]),
       .o_alu_shamt_en (alu_shamt_en),
       .i_alu_sh_done  (alu_sh_done),
-      .o_dbus_cyc     (o_dbus_cyc),
       .o_mem_bytecnt  (mem_bytecnt),
-      .i_mem_misalign (mem_misalign));
-
-   wire 	bufreg_clr_lsb;
+      .i_mem_misalign (mem_misalign),
+      //Control
+      .i_bne_or_bge   (bne_or_bge),
+      .i_cond_branch  (cond_branch),
+      .i_branch_op    (branch_op),
+      .i_mem_op       (mem_op),
+      .i_shift_op     (shift_op),
+      .i_slt_op       (slt_op),
+      .i_e_op         (e_op),
+      .i_rd_op        (rd_op),
+      //External
+      .o_dbus_cyc     (o_dbus_cyc),
+      .i_dbus_ack     (i_dbus_ack),
+      .i_ibus_ack     (i_ibus_ack),
+      //RF Interface
+      .o_rf_rreq      (o_rf_rreq),
+      .o_rf_wreq      (o_rf_wreq),
+      .i_rf_ready     (i_rf_ready),
+      .o_rf_rd_en     (rd_en));
 
    serv_decode decode
      (
@@ -271,19 +276,23 @@ module serv_top
    serv_bufreg bufreg
      (
       .i_clk    (clk),
+      //State
       .i_cnt0   (cnt0),
       .i_cnt1   (cnt1),
       .i_en     (!bufreg_hold),
       .i_init   (init),
+      .o_lsb    (lsb),
+      //Control
       .i_loop   (bufreg_loop),
-      .i_rs1    (rs1),
       .i_rs1_en (bufreg_rs1_en),
-      .i_imm    (imm),
       .i_imm_en (bufreg_imm_en),
       .i_clr_lsb (bufreg_clr_lsb),
-      .o_lsb    (lsb),
-      .o_dbus_adr (o_dbus_adr),
-      .o_q      (bufreg_q));
+      //Data
+      .i_rs1    (rs1),
+      .i_imm    (imm),
+      .o_q      (bufreg_q),
+      //External
+      .o_dbus_adr (o_dbus_adr));
 
    serv_ctrl
      #(.RESET_PC (RESET_PC),
@@ -319,30 +328,30 @@ module serv_top
      (
       .clk        (clk),
       .i_rst      (i_rst),
-      .i_shift_op (shift_op),
+      //State
       .i_en       (cnt_en),
       .i_cnt0     (cnt0),
-      .i_rs1      (rs1),
-      .i_rs2      (rs2),
-      .i_imm      (imm),
-      .i_op_b_rs2 (op_b_source),
-      .i_buf      (bufreg_q),
       .i_init     (init),
       .i_cnt_done (cnt_done),
+      .i_shamt_en (alu_shamt_en),
+      .o_cmp      (alu_cmp),
+      .o_sh_done  (alu_sh_done),
+      //Control
+      .i_shift_op (shift_op),
+      .i_op_b_rs2 (op_b_source),
       .i_sub      (alu_sub),
       .i_bool_op  (alu_bool_op),
       .i_cmp_eq   (alu_cmp_eq),
       .i_cmp_sig  (alu_cmp_sig),
-      .o_cmp      (alu_cmp),
-      .i_shamt_en (alu_shamt_en),
       .i_sh_right (alu_sh_right),
       .i_sh_signed (alu_sh_signed),
-      .o_sh_done  (alu_sh_done),
       .i_rd_sel   (alu_rd_sel),
+      //Data
+      .i_rs1      (rs1),
+      .i_rs2      (rs2),
+      .i_imm      (imm),
+      .i_buf      (bufreg_q),
       .o_rd       (alu_rd));
-
-   wire 	 csr_in;
-   wire 	 rf_csr_out;
 
    serv_rf_if
      #(.WITH_CSR (WITH_CSR))
@@ -396,16 +405,19 @@ module serv_top
    mem_if
      (
       .i_clk    (clk),
+      //State
       .i_en     (cnt_en),
+      .i_bytecnt (mem_bytecnt),
+      .i_lsb      (lsb),
+      .o_misalign (mem_misalign),
+      //Control
       .i_mem_op (mem_op),
       .i_signed (mem_signed),
       .i_word   (mem_word),
       .i_half   (mem_half),
-      .i_bytecnt (mem_bytecnt),
+      //Data
       .i_rs2    (rs2),
       .o_rd     (mem_rd),
-      .i_lsb      (lsb),
-      .o_misalign (mem_misalign),
       //External interface
       .o_wb_dat   (o_dbus_dat),
       .o_wb_sel   (o_dbus_sel),
