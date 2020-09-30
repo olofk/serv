@@ -327,7 +327,6 @@ module serv_top
    serv_alu alu
      (
       .clk        (clk),
-      .i_rst      (i_rst),
       //State
       .i_en       (cnt_en),
       .i_cnt0     (cnt0),
