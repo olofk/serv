@@ -2,7 +2,6 @@
 module serv_alu
   (
    input wire 	    clk,
-   input wire 	    i_rst,
    input wire 	    i_en,
    input wire 	    i_shift_op,
    input wire 	    i_cnt0,
