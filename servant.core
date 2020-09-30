@@ -72,6 +72,12 @@ filesets:
       - servant/servix.v : {file_type : verilogSource}
       - data/arty_a7_35t.xdc : {file_type : xdc}
 
+  ac701:
+    files:
+      - servant/servix.v : {file_type : verilogSource}
+      - servant/servant_ac701.v : {file_type : verilogSource}
+      - data/ac701.xdc : {file_type : xdc}
+
   orangecrab:
     files:
       - data/orangecrab_r02.lpf : {file_type : LPF}
@@ -196,6 +202,14 @@ targets:
     tools:
       vivado: {part : xc7a35ticsg324-1L}
     toplevel : servix
+
+  ac701:
+    default_tool: vivado
+    filesets : [mem_files, soc, ac701]
+    parameters : [memfile, memsize, frequency=32]
+    tools:
+      vivado: {part : xc7a200t-fbg676-2}
+    toplevel : servant_ac701
 
   orangecrab_r0.2:
     default_tool: trellis
