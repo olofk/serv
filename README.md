@@ -86,7 +86,8 @@ Some targets also depend on functionality in the FuseSoC base library (fusesoc-c
 
 Now we're ready to build. Note, for all the cases below, it's possible to run with `--memfile=$SERV/sw/blinky.hex`
 (or any other suitable program) as the last argument to preload the LED blink example
-instead of hello world.
+instead of hello world. If the `--memfile` option doesn't work, try upgrading
+FuseSOC with `pip install --upgrade fusesoc`.
 
 ### TinyFPGA BX
 
@@ -102,6 +103,15 @@ Pin 9 is used for UART output with 57600 baud rate.
 
     cd $SERV/workspace
     fusesoc run --target=icebreaker servant
+
+### iCESugar
+
+Pin 6 is used for UART output with 115200 baud rate. Thanks to the onboard
+debugger, you can just connect the USB Type-C connector to the PC, and a
+serial console will show up.
+
+    cd $SERV/workspace
+    fusesoc run --target=icesugar servant
 
 ### OrangeCrab R0.2
 
