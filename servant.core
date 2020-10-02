@@ -52,6 +52,7 @@ filesets:
 
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
+  icesugar   : {files: [data/icesugar.pcf : {file_type : PCF}]}
   alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
   icestick : {files: [data/icestick.pcf  : {file_type : PCF}]}
 
@@ -140,6 +141,18 @@ targets:
     tools:
       icestorm:
         nextpnr_options: [--up5k, --freq, 16]
+        pnr: next
+    toplevel : service
+
+  icesugar:
+    default_tool : icestorm
+    description : iCE40UP5K Development Board by MuseLab
+    filesets : [mem_files, soc, service, icesugar]
+    generate: [icesugar_pll]
+    parameters : [memfile, memsize, PLL=ICE40_PAD]
+    tools:
+      icestorm:
+        nextpnr_options: [--up5k, --package, sg48, --freq, 32]
         pnr: next
     toplevel : service
 
@@ -364,6 +377,12 @@ generate:
     generator: icepll
     parameters:
       freq_out : 16
+
+  icesugar_pll:
+    generator: icepll
+    parameters:
+      freq_in  : 12
+      freq_out : 32
 
   tinyfpga_bx_pll:
     generator: icepll
