@@ -7,6 +7,7 @@ module servant
 
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
+   parameter reset_strategy = "MINI";
    parameter sim = 0;
    parameter with_csr = 1;
 
@@ -76,7 +77,7 @@ module servant
    servant_mux #(sim) servant_mux
      (
       .i_clk (wb_clk),
-      .i_rst (wb_rst),
+      .i_rst (wb_rst & (reset_strategy != "NONE")),
       .i_wb_cpu_adr (wb_dbus_adr),
       .i_wb_cpu_dat (wb_dbus_dat),
       .i_wb_cpu_sel (wb_dbus_sel),
@@ -143,6 +144,7 @@ module servant
 
    serv_rf_top
      #(.RESET_PC (32'h0000_0000),
+       .RESET_STRATEGY (reset_strategy),
        .WITH_CSR (with_csr))
    cpu
      (

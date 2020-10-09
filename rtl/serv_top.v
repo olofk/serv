@@ -2,6 +2,7 @@
 
 module serv_top
   #(parameter WITH_CSR = 1,
+    parameter RESET_STRATEGY = "MINI",
     parameter RESET_PC = 32'd0)
    (
    input wire 		      clk,
@@ -155,7 +156,8 @@ module serv_top
    wire [1:0]   lsb;
 
    serv_state
-     #(.WITH_CSR (WITH_CSR))
+     #(.RESET_STRATEGY (RESET_STRATEGY),
+       .WITH_CSR (WITH_CSR))
    state
      (
       .i_clk (clk),
@@ -296,6 +298,7 @@ module serv_top
 
    serv_ctrl
      #(.RESET_PC (RESET_PC),
+       .RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR))
    ctrl
      (

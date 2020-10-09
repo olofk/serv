@@ -34,6 +34,7 @@ module serving
 
    parameter memfile = "";
    parameter memsize = 8192;
+   parameter RESET_STRATEGY = "NONE";
    parameter WITH_CSR = 1;
    localparam regs = 32+WITH_CSR*4;
 
@@ -104,7 +105,7 @@ module serving
 
    serving_mux mux
      (.i_clk        (i_clk),
-      .i_rst        (i_rst),
+      .i_rst        (i_rst & (RESET_STRATEGY != "NONE")),
 
       .i_wb_cpu_adr (wb_dbus_adr),
       .i_wb_cpu_dat (wb_dbus_dat),
@@ -168,6 +169,7 @@ module serving
 
    serv_rf_ram_if
      #(.width    (rf_width),
+       .reset_strategy (RESET_STRATEGY),
        .csr_regs (WITH_CSR*4))
    rf_ram_if
      (.i_clk    (i_clk),
@@ -193,6 +195,7 @@ module serving
 
    serv_top
      #(.RESET_PC (32'h0000_0000),
+       .RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR))
    cpu
      (

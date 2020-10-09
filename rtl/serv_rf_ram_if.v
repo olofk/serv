@@ -1,6 +1,7 @@
 `default_nettype none
 module serv_rf_ram_if
   #(parameter width=8,
+    parameter reset_strategy="MINI",
     parameter csr_regs=4,
     parameter depth=32*(32+csr_regs)/width,
     parameter l2w = $clog2(width))
@@ -97,7 +98,8 @@ module serv_rf_ram_if
 	wgo <= 1'b0;
 
       if (i_rst) begin
-	 wcnt <= 5'd0;
+	 if (reset_strategy != "NONE")
+	   wcnt <= 5'd0;
       end
    end
 
@@ -151,8 +153,10 @@ module serv_rf_ram_if
 	rdata0 <= i_rdata;
 
       if (i_rst) begin
-	 rgnt <= 1'b0;
-	 rreq_r <= 1'b0;
+	 if (reset_strategy != "NONE") begin
+	    rgnt <= 1'b0;
+	    rreq_r <= 1'b0;
+	 end
       end
    end
 
