@@ -1,4 +1,5 @@
 module serv_state
+  #(parameter RESET_STRATEGY = "MINI")
   (
    input wire 	     i_clk,
    input wire 	     i_rst,
@@ -96,6 +97,8 @@ module serv_state
    //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
    assign o_bufreg_hold = !o_cnt_en & (stage_two_req | ~i_shift_op);
 
+   initial if (RESET_STRATEGY == "NONE") o_cnt_r = 4'b0001;
+
    always @(posedge i_clk) begin
       if (o_cnt_done)
 	o_ctrl_jump <= o_init & take_branch;
@@ -125,10 +128,12 @@ module serv_state
 	o_cnt_r <= {o_cnt_r[2:0],o_cnt_r[3]};
 
       if (i_rst) begin
-	 o_cnt   <= 3'd0;
-	 stage_two_pending <= 1'b0;
-	 o_ctrl_jump <= 1'b0;
-	 o_cnt_r <= 4'b0001;
+	 if (RESET_STRATEGY != "NONE") begin
+	    o_cnt   <= 3'd0;
+	    stage_two_pending <= 1'b0;
+	    o_ctrl_jump <= 1'b0;
+	    o_cnt_r <= 4'b0001;
+	 end
       end
    end
 

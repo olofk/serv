@@ -1,5 +1,6 @@
 `default_nettype none
 module serv_ctrl
+  #(parameter RESET_STRATEGY = "MINI")
   (
    input wire 	      clk,
    input wire 	      i_rst,
@@ -68,6 +69,8 @@ module serv_ctrl
 
    assign o_ibus_cyc = en_pc_r & !i_pc_en;
 
+   initial if (RESET_STRATEGY == "NONE") o_ibus_adr = RESET_PC;
+
    always @(posedge clk) begin
       pc_plus_4_cy_r <= i_pc_en & pc_plus_4_cy;
       pc_plus_offset_cy_r <= i_pc_en & pc_plus_offset_cy;
@@ -75,8 +78,12 @@ module serv_ctrl
       if (o_ibus_cyc & i_ibus_ack | i_pc_en | i_rst)
 	en_pc_r <= i_pc_en | i_rst;
 
-      if (i_pc_en | i_rst) begin
-	 o_ibus_adr <= i_rst ? RESET_PC : {new_pc, o_ibus_adr[31:1]};
+      if (RESET_STRATEGY == "NONE") begin
+	 if (i_pc_en)
+	   o_ibus_adr <= {new_pc, o_ibus_adr[31:1]};
+      end else begin
+	 if (i_pc_en | i_rst)
+	   o_ibus_adr <= i_rst ? RESET_PC : {new_pc, o_ibus_adr[31:1]};
       end
    end
 endmodule
