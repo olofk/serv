@@ -116,6 +116,12 @@ filesets:
       - servant/servis.v : {file_type : verilogSource}
       - data/pipistrello.ucf : {file_type : UCF}
 
+  qf:
+    files:
+      - data/eos_s3.pcf : {file_type : PCF}
+      - data/eos_s3.sdc : {file_type : SDC}
+      - servant/servant_qf.v : {file_type : verilogSource}
+
   ulx3s:
     files:
       - data/ulx3s.lpf : {file_type : LPF}
@@ -180,6 +186,18 @@ targets:
         family : Cyclone IV E
         device : EP4CE22F17C6
     toplevel: servive
+
+  quickfeather:
+    default_tool : symbiflow
+    filesets : [mem_files, soc, qf]
+    parameters : [memfile, memsize]
+    tools:
+      symbiflow:
+        vendor : quicklogic
+        package : PU64
+        part : ql-eos-s3
+        pnr : vtr
+    toplevel: servant_qf
 
   icebreaker:
     default_tool : icestorm

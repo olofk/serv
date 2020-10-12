@@ -1,0 +1,2 @@
+set_io i_rst_n 62
+set_io o_uart_tx 39
