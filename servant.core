@@ -67,6 +67,13 @@ filesets:
       - servant/servix_clock_gen.v : {file_type : verilogSource}
       - servant/servix.v : {file_type : verilogSource}
       - data/nexys_a7.xdc : {file_type : xdc}
+
+  cmod_a7_35t:
+    files:
+      - servant/servix_clock_gen.v : {file_type : verilogSource}
+      - servant/servix.v : {file_type : verilogSource}
+      - data/cmod_a7_35t.xdc : {file_type : xdc}
+
   arty_a7_35t:
     files:
       - servant/servix_clock_gen.v : {file_type : verilogSource}
@@ -206,6 +213,14 @@ targets:
     parameters : [memfile, memsize, frequency=32]
     tools:
       vivado: {part : xc7a100tcsg324-1}
+    toplevel : servix
+
+  cmod_a7_35t:
+    default_tool: vivado
+    filesets : [mem_files, soc, cmod_a7_35t]
+    parameters : [memfile=blinky.hex, memsize, frequency=12]
+    tools:
+      vivado: {part : xc7a35tcpg236-1}
     toplevel : servix
 
   arty_a7_35t:
