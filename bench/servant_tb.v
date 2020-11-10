@@ -8,6 +8,8 @@ module servant_tb;
    reg wb_clk = 1'b0;
    reg wb_rst = 1'b1;
 
+   wire q;
+
    always  #31 wb_clk <= !wb_clk;
    initial #62 wb_rst <= 1'b0;
 

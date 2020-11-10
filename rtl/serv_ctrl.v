@@ -1,6 +1,8 @@
 `default_nettype none
 module serv_ctrl
-  #(parameter RESET_STRATEGY = "MINI")
+  #(parameter RESET_STRATEGY = "MINI",
+    parameter RESET_PC = 32'd0,
+    parameter WITH_CSR = 1)
   (
    input wire 	      clk,
    input wire 	      i_rst,
@@ -25,9 +27,6 @@ module serv_ctrl
    output reg [31:0] o_ibus_adr,
    output wire 	      o_ibus_cyc,
    input wire 	      i_ibus_ack);
-
-   parameter RESET_PC = 32'd0;
-   parameter WITH_CSR = 1;
 
    reg 	      en_pc_r;
 

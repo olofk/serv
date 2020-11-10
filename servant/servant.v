@@ -105,10 +105,12 @@ module servant
 
    servant_ram
      #(.memfile (memfile),
-       .depth (memsize))
+       .depth (memsize),
+       .RESET_STRATEGY (reset_strategy))
    ram
      (// Wishbone interface
       .i_wb_clk (wb_clk),
+      .i_wb_rst (wb_rst),
       .i_wb_adr (wb_mem_adr[$clog2(memsize)-1:2]),
       .i_wb_cyc (wb_mem_cyc),
       .i_wb_we  (wb_mem_we) ,
@@ -120,9 +122,11 @@ module servant
    generate
       if (with_csr) begin
 	 servant_timer
-	   #(.WIDTH (32))
+	   #(.RESET_STRATEGY (reset_strategy),
+	     .WIDTH (32))
 	 timer
 	   (.i_clk    (wb_clk),
+	    .i_rst    (wb_rst),
 	    .o_irq    (timer_irq),
 	    .i_wb_cyc (wb_timer_cyc),
 	    .i_wb_we  (wb_timer_we) ,
