@@ -125,7 +125,6 @@ module serv_top
    wire          rd_en;
 
    wire          op_b_source;
-   wire          op_b;
 
    wire          mem_signed;
    wire          mem_word;
