@@ -17,11 +17,16 @@ filesets:
   servant_tb:
     files:
       - bench/servant_sim.v
-      - "!tool_verilator? (bench/uart_decoder.v)"
-      - "!tool_verilator? (bench/servant_tb.v)"
-      - "tool_verilator? (bench/servant_tb.cpp)" : {file_type : cppSource}
+      - bench/uart_decoder.v
+      - bench/servant_tb.v
     file_type : verilogSource
     depend : [vlog_tb_utils]
+
+  verilator_tb:
+    files:
+      - bench/servant_sim.v
+      - bench/servant_tb.cpp : {file_type : cppSource}
+    file_type : verilogSource
 
   soc:
     files:
@@ -281,7 +286,7 @@ targets:
 
   verilator_tb:
     default_tool: verilator
-    filesets : [soc, servant_tb]
+    filesets : [soc, verilator_tb]
     parameters :
       - RISCV_FORMAL
       - firmware
