@@ -209,7 +209,7 @@ module serv_top
       .clk (clk),
       //Input
       .i_wb_rdt           (i_ibus_rdt[31:2]),
-      .i_wb_en            (o_ibus_cyc & i_ibus_ack),
+      .i_wb_en            (i_ibus_ack),
       //To state
       .o_bne_or_bge       (bne_or_bge),
       .o_cond_branch      (cond_branch),
@@ -265,7 +265,7 @@ module serv_top
       .i_csr_imm_en (csr_imm_en),
       .o_csr_imm  (csr_imm),
       .i_wb_rdt   (i_ibus_rdt[31:2]),
-      .i_wb_en    (o_ibus_cyc & i_ibus_ack),
+      .i_wb_en    (i_ibus_ack),
       .i_ctrl     (immdec_ctrl),
       .i_cnt_done (cnt_done),
       //To RF
