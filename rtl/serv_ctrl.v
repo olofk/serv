@@ -74,7 +74,7 @@ module serv_ctrl
       pc_plus_4_cy_r <= i_pc_en & pc_plus_4_cy;
       pc_plus_offset_cy_r <= i_pc_en & pc_plus_offset_cy;
 
-      if (o_ibus_cyc & i_ibus_ack | i_pc_en | i_rst)
+      if (i_ibus_ack | i_pc_en | i_rst)
 	en_pc_r <= i_pc_en | i_rst;
 
       if (RESET_STRATEGY == "NONE") begin
