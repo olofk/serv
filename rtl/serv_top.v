@@ -306,6 +306,7 @@ module serv_top
       //State
       .i_pc_en    (ctrl_pc_en),
       .i_cnt12to31 (cnt12to31),
+      .i_cnt0     (cnt0),
       .i_cnt2     (cnt2),
       .i_cnt_done (cnt_done),
       //Control
