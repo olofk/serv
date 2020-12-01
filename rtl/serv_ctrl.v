@@ -9,6 +9,7 @@ module serv_ctrl
    //State
    input wire 	      i_pc_en,
    input wire 	      i_cnt12to31,
+   input wire 	      i_cnt0,
    input wire 	      i_cnt2,
    input wire 	      i_cnt_done,
    //Control
@@ -54,7 +55,7 @@ module serv_ctrl
 
    generate
       if (WITH_CSR)
-	assign new_pc = i_trap ? (i_csr_pc & en_pc_r) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
+	assign new_pc = i_trap ? (i_csr_pc & !i_cnt0) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
       else
 	assign new_pc = i_jump ? pc_plus_offset_aligned : pc_plus_4;
    endgenerate
@@ -64,7 +65,7 @@ module serv_ctrl
    assign offset_b = i_utype ? (i_imm & i_cnt12to31): i_buf;
    assign {pc_plus_offset_cy,pc_plus_offset} = offset_a+offset_b+pc_plus_offset_cy_r;
 
-   assign pc_plus_offset_aligned = pc_plus_offset & en_pc_r;
+   assign pc_plus_offset_aligned = pc_plus_offset & !i_cnt0;
 
    assign o_ibus_cyc = en_pc_r & !i_pc_en;
 
