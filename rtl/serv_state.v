@@ -42,7 +42,7 @@ module serv_state
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
    output reg 	     o_cnt_done,
-   output wire 	     o_bufreg_hold);
+   output wire 	     o_bufreg_en);
 
    wire 	     cnt4;
 
@@ -96,7 +96,7 @@ module serv_state
    assign o_rf_rd_en = i_rd_op & o_cnt_en & !o_init;
 
    //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
-   assign o_bufreg_hold = !o_cnt_en & (stage_two_req | ~i_shift_op);
+   assign o_bufreg_en = o_cnt_en | (!stage_two_req & i_shift_op);
 
    initial if (RESET_STRATEGY == "NONE") o_cnt_r = 4'b0001;
 

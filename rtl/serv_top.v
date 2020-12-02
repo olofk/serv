@@ -102,7 +102,7 @@ module serv_top
 
    wire 	 cnt_done;
 
-   wire 	 bufreg_hold;
+   wire 	 bufreg_en;
    wire 	 bufreg_rs1_en;
    wire 	 bufreg_imm_en;
    wire 	 bufreg_loop;
@@ -176,7 +176,7 @@ module serv_top
       .o_cnt3         (cnt3),
       .o_cnt7         (cnt7),
       .o_cnt_done     (cnt_done),
-      .o_bufreg_hold  (bufreg_hold),
+      .o_bufreg_en    (bufreg_en),
       .o_ctrl_pc_en   (ctrl_pc_en),
       .o_ctrl_jump    (jump),
       .o_ctrl_trap    (trap),
@@ -281,7 +281,7 @@ module serv_top
       //State
       .i_cnt0   (cnt0),
       .i_cnt1   (cnt1),
-      .i_en     (!bufreg_hold),
+      .i_en     (bufreg_en),
       .i_init   (init),
       .o_lsb    (lsb),
       //Control
