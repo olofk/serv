@@ -197,6 +197,7 @@ module serv_top
       //External
       .o_dbus_cyc     (o_dbus_cyc),
       .i_dbus_ack     (i_dbus_ack),
+      .o_ibus_cyc     (o_ibus_cyc),
       .i_ibus_ack     (i_ibus_ack),
       //RF Interface
       .o_rf_rreq      (o_rf_rreq),
@@ -322,10 +323,7 @@ module serv_top
       .o_rd       (ctrl_rd),
       .o_bad_pc   (bad_pc),
       //External
-      .o_ibus_adr (o_ibus_adr),
-      .o_ibus_cyc (o_ibus_cyc),
-      .i_ibus_ack (i_ibus_ack));
-
+      .o_ibus_adr (o_ibus_adr));
 
    serv_alu alu
      (
