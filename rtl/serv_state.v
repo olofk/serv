@@ -8,6 +8,7 @@ module serv_state
    output wire 	     o_trap_taken,
    output reg 	     o_pending_irq,
    input wire 	     i_dbus_ack,
+   output wire 	     o_ibus_cyc,
    input wire 	     i_ibus_ack,
    output wire 	     o_rf_rreq,
    output wire 	     o_rf_wreq,
@@ -50,6 +51,7 @@ module serv_state
    reg [4:2] o_cnt;
    reg [3:0] o_cnt_r;
 
+   reg 	     ibus_cyc;
    //Update PC in RUN or TRAP states
    assign o_ctrl_pc_en  = o_cnt_en & !o_init;
 
@@ -98,7 +100,22 @@ module serv_state
 
    initial if (RESET_STRATEGY == "NONE") o_cnt_r = 4'b0001;
 
+
+   assign o_ibus_cyc = ibus_cyc & !i_rst;
+
    always @(posedge i_clk) begin
+      //ibus_cyc changes on three conditions.
+      //1. i_rst is asserted. Together with the async gating above, o_ibus_cyc
+      //   will be asserted as soon as the reset is released. This is how the
+      //   first instruction is fetced
+      //2. o_cnt_done and o_ctrl_pc_en are asserted. This means that SERV just
+      //   finished updating the PC, is done with the current instruction and
+      //   o_ibus_cyc gets asserted to fetch a new instruction
+      //3. When i_ibus_ack, a new instruction is fetched and o_ibus_cyc gets
+      //   deasserted to finish the transaction
+      if (i_ibus_ack | o_cnt_done | i_rst)
+	ibus_cyc <= o_ctrl_pc_en | i_rst;
+
       if (o_cnt_done)
 	o_ctrl_jump <= o_init & take_branch;
 
