@@ -1,0 +1,7 @@
+# Copyright (c) 2020 Olof Kindgren <olof.kindgren@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD
+	default "service"
+	depends on BOARD_SERVICE

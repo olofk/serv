@@ -1,0 +1,9 @@
+# Copyright (c) 2020 Olof Kindgren <olof.kindgren@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+config SERV_TIMER
+	bool "SERV Timer"
+#	select TICKLESS_CAPABLE
+	help
+	  This module implements a kernel device driver for the SERV
+	  timer driver. It provides the standard "system clock driver" interfaces.

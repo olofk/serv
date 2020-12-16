@@ -1,0 +1,5 @@
+build:
+  settings:
+    board_root: zephyr
+    dts_root: zephyr
+    soc_root: zephyr
