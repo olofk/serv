@@ -1,0 +1,26 @@
+# Copyright (c) 2020 Olof Kindgren <olof.kindgren@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+if SOC_RISCV32_SERVANT
+
+config SOC
+	string
+	default "servant"
+
+config SYS_CLOCK_HW_CYCLES_PER_SEC
+	int
+	default 16000000
+
+config RISCV_SOC_INTERRUPT_INIT
+	bool
+	default y
+
+config NUM_IRQS
+	int
+	default 8
+
+config SERV_TIMER
+	bool
+	default y
+
+endif # SOC_RISCV32_SERVANT

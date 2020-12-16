@@ -11,70 +11,83 @@ There's also an official [SERV user manual](https://serv.readthedocs.io/en/lates
 ## Prerequisites
 
 Create a directory to keep all the different parts of the project together. We
-will refer to this directory as `$SERV` from now on.
-
-Download the main serv repo
-
-`cd $SERV && git clone https://github.com/olofk/serv`
+will refer to this directory as `$WORKSPACE` from now on. All commands will be run from this directory unless otherwise stated.
 
 Install FuseSoC
 
 `pip install fusesoc`
 
-Initialize the FuseSoC standard libraries
+Add the FuseSoC standard library
 
-`fusesoc init`
+`fusesoc library add fusesoc_cores https://github.com/fusesoc/fusesoc_cores`
 
-Create a workspace directory for FuseSoC
+The FuseSoC standard library already contain a version of SERV, but if we want to make changes to SERV, run the bundled example or use the Zephyr support, it is better to add SERV as a separate library into the workspace
 
-`mkdir $SERV/workspace`
+`fusesoc library add serv https://github.com/olofk/serv`
 
-Register the serv repo as a core library
+The SERV repo will now be available in $WORKSPACE/fusesoc_libraries/serv. To save some typing, we will refer to that directory as `$SERV`. 
 
-`cd $SERV/workspace && fusesoc library add serv $SERV`
+We are now ready to do our first exercises with SERV
 
-Check that the CPU passes the linter
+If [Verilator](https://www.veripool.org/wiki/verilator) is installed, we can use that as a linter to check the SERV source code
 
-`cd $SERV/workspace && fusesoc run --target=lint serv`
+`fusesoc run --target=lint serv`
 
-## Running test software
+If everything worked, the output should look like
+
+    INFO: Preparing ::serv:1.0.2
+    INFO: Setting up project
+    
+    INFO: Building simulation model
+    verilator -f serv_1.0.2.vc 
+    INFO: Running
+
+## Running pre-built test software
 
 Build and run the single threaded zephyr hello world example with verilator (should be stopped with Ctrl-C):
 
-    cd $SERV/workspace
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_hello.hex
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello.hex
 
 ..or... the multithreaded version
 
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_hello_mt.hex --memsize=16384
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello_mt.hex --memsize=16384
 
-...or... the philosophers example
+Both should yield an output ending with
 
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_phil.hex --memsize=32768
+    ***** Booting Zephyr OS zephyr-v1.14.1-4-gc7c2d62513fe *****
+    Hello World! service
+
+For a more advanced example, we can also run the Dining philosophers demo
+
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_phil.hex --memsize=32768
 
 ...or... the synchronization example
 
-    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/serv/sw/zephyr_sync.hex --memsize=16384
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_sync.hex --memsize=16384
 
-Other applications can be tested by compiling and converting to bin and then hex e.g. with makehex.py found in `$SERV/serv/riscv-target/serv`
+Other applications can be tested by compiling and converting to bin and then hex e.g. with makehex.py found in `$SERV/sw`
 
-## Run the compliance tests
+## Run RISC-V compliance tests
 
 Build the verilator model (if not already done)
 
-`cd $SERV/workspace && fusesoc run --target=verilator_tb --setup --build servant`
+    fusesoc run --target=verilator_tb --build servant
 
 Download the tests repo
 
-`cd $SERV && git clone https://github.com/riscv/riscv-compliance`
+    git clone https://github.com/riscv/riscv-compliance
+
+To run the RISC-V compliance tests, we need to supply the SERV-specific support files and point the test suite to where it can find a target to run (i.e. the previously built Verilator model)
 
 Run the compliance tests
 
-`cd $SERV/riscv-compliance && make TARGETDIR=$SERV/serv/riscv-target RISCV_TARGET=serv RISCV_DECICE=rv32i RISCV_ISA=rv32i TARGET_SIM=$SERV/workspace/build/servant_1.0.1/verilator_tb-verilator/Vservant_sim`
+    cd riscv-compliance && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DECICE=rv32i RISCV_ISA=rv32i TARGET_SIM=$SERV/build/servant_1.0.2/verilator_tb-verilator/Vservant_sim
+
+The above will run all tests in the rv32i test suite. Since SERV also implement the `rv32Zicsr` and `rv32Zifencei` extensions, these can also be tested by choosing any of them instead of rv32i as the `RISCV_ISA` variable.
 
 ## Run on hardware
 
-The servant SoC has been ported to a number of different FPGA boards. To see all currently supported targets run
+The servant SoC has been ported to an increasing number of different FPGA boards. To see all currently supported targets run
 
     fusesoc core show servant
 
@@ -86,14 +99,12 @@ Some targets also depend on functionality in the FuseSoC base library (fusesoc-c
 
 Now we're ready to build. Note, for all the cases below, it's possible to run with `--memfile=$SERV/sw/blinky.hex`
 (or any other suitable program) as the last argument to preload the LED blink example
-instead of hello world. If the `--memfile` option doesn't work, try upgrading
-FuseSOC with `pip install --upgrade fusesoc`.
+instead of hello world.
 
 ### TinyFPGA BX
 
 Pin A6 is used for UART output with 115200 baud rate.
 
-    cd $SERV/workspace
     fusesoc run --target=tinyfpga_bx servant
     tinyprog --program build/servant_1.0.1/tinyfpga_bx-icestorm/servant_1.0.1.bin
 
@@ -101,7 +112,6 @@ Pin A6 is used for UART output with 115200 baud rate.
 
 Pin 9 is used for UART output with 57600 baud rate.
 
-    cd $SERV/workspace
     fusesoc run --target=icebreaker servant
 
 ### iCESugar
@@ -110,14 +120,12 @@ Pin 6 is used for UART output with 115200 baud rate. Thanks to the onboard
 debugger, you can just connect the USB Type-C connector to the PC, and a
 serial console will show up.
 
-    cd $SERV/workspace
     fusesoc run --target=icesugar servant
 
 ### OrangeCrab R0.2
 
 Pin D1 is used for UART output with 115200 baud rate.
 
-    cd $SERV/workspace
     fusesoc run --target=orangecrab_r0.2 servant
     dfu-util -d 1209:5af0 -D build/servant_1.0.2/orangecrab_r0.2-trellis/servant_1.0.2.bit
 
@@ -126,14 +134,12 @@ Pin D1 is used for UART output with 115200 baud rate.
 Pin D10 (uart_rxd_out) is used for UART output with 57600 baud rate (to use
 blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
 
-    cd $SERV/workspace
     fusesoc run --target=arty_a7_35t servant
 
 ### DE0 Nano
 
 FPGA Pin D11 (Connector JP1, pin 38) is used for UART output with 57600 baud rate. DE0 Nano needs an external 3.3V UART to connect to this pin
 
-    cd $SERV/workspace
     fusesoc run --target=de0_nano servant
 
 ### Saanlima Pipistrello (Spartan6 LX45)
@@ -141,14 +147,12 @@ FPGA Pin D11 (Connector JP1, pin 38) is used for UART output with 57600 baud rat
 Pin A10 (usb_data<1>) is used for UART output with 57600 baud rate (to use
 blinky.hex change A10 to V16 (led[0]) in data/pipistrello.ucf).
 
-    cd $SERV/workspace
     fusesoc run --target=pipistrello servant
 
 ### Alhambra II
 
 Pin 61 is used for UART output with 115200 baud rate. This pin is connected to a FT2232H chip in board, that manages the communications between the FPGA and the computer.
 
-    cd $SERV/workspace
     fusesoc run --target=alhambra servant
     iceprog -d i:0x0403:0x6010:0 build/servant_1.0.1/alhambra-icestorm/servant_1.0.1.bin
 
@@ -156,7 +160,6 @@ Pin 61 is used for UART output with 115200 baud rate. This pin is connected to a
 
 Pin 95 is used as the GPIO output which is connected to the board's green LED. Due to this board's limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.
 
-    cd $SERV/workspace
     fusesoc run --target=icestick servant
     iceprog build/servant_1.0.2/icestick-icestorm/servant_1.0.2.bin
 
@@ -178,6 +181,42 @@ This will synthesize for the default Vivado part. To synthesise for a specific d
 
     fusesoc run --tool=vivado serv --pnr=none --part=xc7a100tcsg324-1
 
+## Zephyr support
+
+SERV, or rather the Servant SoC, can run the [Zephyr RTOS](https://www.zephyrproject.org). The Servant-specific drivers and BSP is located in the zephyr subdirectory of the SERV repository. In order to use Zephyr on Servant, a project directory structure must be set up that allows Zephyr to load the Servant-specific files as a module.
+
+First, the Zephyr SDK and the "west" build too must be installed. The [Zephyr getting started guide](https://docs.zephyrproject.org/latest/getting_started/index.html) describes these steps in more detail.
+
+Assuming that SERV was installed into `$WORKSPACE/fusesoc_libraries/serv` as per the prerequisites, run the following command to make the workspace also work as a Zephyr workspace.
+
+    west init
+
+Specify the SERV repository as the manifest repository, meaning it will be the main entry point when Zephyr is looking for modules.
+
+    west config manifest.path $SERV
+
+Get the right versions of all Zephyr submodules
+
+    west update
+
+It should now be possible to build Zephyr applications for the Servant SoC within the workspace. This can be tested e.g. by building the Zephyr Hello world samples application
+
+    cd zephyr/samples/hello_world
+    west build -b service
+
+After a successful build, Zephyr will create an elf and a bin file of the application in `build/zephyr/zephyr.{elf,bin}`. The bin file can be converted to a verilog hex file, which in turn can be preloaded to FPGA on-chip memories and run on a target board, or loaded into simulated RAM model when running simulations.
+
+To convert the newly built hello world example into a Verilog hex file, run
+
+    python3 $SERV/sw/makehex.py zephyr/samples/hello_world/build/zephyr/zephyr.bin 4096 > hello.hex
+
+4096 is the number of 32-bit words to write and must be at least the size of the application binary. `hello.hex` is the resulting hex file. Running a simulation can now be done as described in [Running pre-built test software](#running-pre-built-test-software), e.g.
+
+    fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=/path/to/hello.hex
+
+Or to create an FPGA image with the application preloaded to on-chip RAM, e.g. for a Nexys A7 board, run
+
+    fusesoc run --target=nexys_a7 servant --memfile=/path/to/hello.hex
 
 ## Good to know
 
@@ -190,5 +229,4 @@ Don't go changing the clock frequency on a whim when running Zephyr. Or well, it
 ## TODO
 
 - Applications have to be preloaded to RAM at compile-time
-- Store bootloader and register file together in a RAM
 - Make it faster and smaller
