@@ -19,7 +19,7 @@ Install FuseSoC
 
 Add the FuseSoC standard library
 
-`fusesoc library add fusesoc_cores https://github.com/fusesoc/fusesoc_cores`
+`fusesoc library add fusesoc_cores https://github.com/fusesoc/fusesoc-cores`
 
 The FuseSoC standard library already contain a version of SERV, but if we want to make changes to SERV, run the bundled example or use the Zephyr support, it is better to add SERV as a separate library into the workspace
 
