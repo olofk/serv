@@ -10,7 +10,6 @@ module serv_alu
    input wire 	    i_imm,
    input wire 	    i_op_b_rs2,
    input wire 	    i_buf,
-   input wire 	    i_init,
    input wire 	    i_cnt_done,
    input wire 	    i_sub,
    input wire [1:0] i_bool_op,
@@ -41,7 +40,7 @@ module serv_alu
    serv_shift shift
      (
       .i_clk (clk),
-      .i_load (i_init),
+      .i_load (i_cnt_done),
       .i_shamt (shamt),
       .i_shamt_msb (shamt_msb),
       .i_signbit (i_sh_signed & i_rs1),

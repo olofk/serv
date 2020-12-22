@@ -23,7 +23,7 @@ module serv_state
    input wire 	     i_slt_op,
    input wire 	     i_e_op,
    input wire 	     i_rd_op,
-   output reg 	     o_init,
+   output wire 	     o_init,
    output reg 	     o_cnt_en,
    output wire 	     o_cnt0,
    output wire 	     o_cnt0to3,
@@ -80,9 +80,7 @@ module serv_state
    //slt*, branch/jump, shift, load/store
    wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
 
-   reg 	stage_two_pending;
-
-   assign o_dbus_cyc = !o_cnt_en & stage_two_pending & i_mem_op & !i_mem_misalign;
+   assign o_dbus_cyc = !o_cnt_en & init_done & i_mem_op & !i_mem_misalign;
 
    wire trap_pending = WITH_CSR & ((o_ctrl_jump & i_ctrl_misalign) | i_mem_misalign);
 
@@ -91,7 +89,7 @@ module serv_state
    assign o_rf_rreq = i_ibus_ack | (stage_two_req & trap_pending);
 
    //Prepare RF for writes when everything is ready to enter stage two
-   assign o_rf_wreq = ((i_shift_op & i_alu_sh_done & stage_two_pending) | (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op))) & !trap_pending;
+   assign o_rf_wreq = ((i_shift_op & i_alu_sh_done & init_done) | (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op))) & !trap_pending;
 
    assign o_rf_rd_en = i_rd_op & o_cnt_en & !o_init;
 
@@ -102,6 +100,9 @@ module serv_state
 
 
    assign o_ibus_cyc = ibus_cyc & !i_rst;
+
+   assign o_init = two_stage_op & !o_pending_irq & !init_done;
+   reg 	init_done;
 
    always @(posedge i_clk) begin
       //ibus_cyc changes on three conditions.
@@ -116,22 +117,14 @@ module serv_state
       if (i_ibus_ack | o_cnt_done | i_rst)
 	ibus_cyc <= o_ctrl_pc_en | i_rst;
 
-      if (o_cnt_done)
-	o_ctrl_jump <= o_init & take_branch;
-
-      if (o_cnt_en)
-	stage_two_pending <= o_init;
-
+      if (o_cnt_done) begin
+	 init_done <= o_init & !init_done;
+	 o_ctrl_jump <= o_init & take_branch;
+      end
       o_cnt_done <= (o_cnt[4:2] == 3'b111) & o_cnt_r[2];
 
       //Need a strobe for the first cycle in the IDLE state after INIT
       stage_two_req <= o_cnt_done & o_init;
-
-      if (i_rf_ready & !stage_two_pending)
-	o_init <= two_stage_op & !o_pending_irq;
-
-      if (o_cnt_done)
-	o_init <= 1'b0;
 
       if (i_rf_ready)
 	o_cnt_en <= 1'b1;
@@ -147,7 +140,7 @@ module serv_state
 	 if (RESET_STRATEGY != "NONE") begin
 	    o_cnt_en <= 1'b0;
 	    o_cnt   <= 3'd0;
-	    stage_two_pending <= 1'b0;
+	    init_done <= 1'b0;
 	    o_ctrl_jump <= 1'b0;
 	    o_cnt_r <= 4'b0001;
 	 end

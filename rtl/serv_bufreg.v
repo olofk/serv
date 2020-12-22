@@ -24,8 +24,8 @@ module serv_bufreg
    assign {c,q} = {1'b0,(i_rs1 & i_rs1_en)} + {1'b0,(i_imm & i_imm_en & !clr_lsb)} + c_r;
 
    always @(posedge i_clk) begin
-      //Clear carry when not in INIT state
-      c_r <= c & i_init;
+      //Make sure carry is cleared before loading new data
+      c_r <= c & i_en;
 
       if (i_en)
 	data <= {(i_loop & !i_init) ? o_q : q, data[31:1]};
