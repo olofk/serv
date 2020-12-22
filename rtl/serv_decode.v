@@ -16,7 +16,6 @@ module serv_decode
    output wire 	     o_slt_op,
    output wire 	     o_rd_op,
    //To bufreg
-   output wire 	     o_bufreg_loop,
    output wire 	     o_bufreg_rs1_en,
    output wire 	     o_bufreg_imm_en,
    output wire 	     o_bufreg_clr_lsb,
@@ -76,10 +75,6 @@ module serv_decode
    //shift      = rs1
    assign o_bufreg_rs1_en = !opcode[4] | (!opcode[1] & opcode[0]);
    assign o_bufreg_imm_en = !opcode[2];
-
-
-   //Loop bufreg contents for shift operations
-   assign o_bufreg_loop   = op_or_opimm;
 
    //Clear LSB of immediate for BRANCH and JAL ops
    //True for BRANCH and JAL

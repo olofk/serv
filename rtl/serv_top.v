@@ -105,7 +105,6 @@ module serv_top
    wire 	 bufreg_en;
    wire 	 bufreg_rs1_en;
    wire 	 bufreg_imm_en;
-   wire 	 bufreg_loop;
    wire 	 bufreg_clr_lsb;
    wire 	 bufreg_q;
 
@@ -222,7 +221,6 @@ module serv_top
       .o_slt_op           (slt_op),
       .o_rd_op            (rd_op),
       //To bufreg
-      .o_bufreg_loop      (bufreg_loop),
       .o_bufreg_rs1_en    (bufreg_rs1_en),
       .o_bufreg_imm_en    (bufreg_imm_en),
       .o_bufreg_clr_lsb   (bufreg_clr_lsb),
@@ -285,7 +283,6 @@ module serv_top
       .i_init   (init),
       .o_lsb    (lsb),
       //Control
-      .i_loop   (bufreg_loop),
       .i_rs1_en (bufreg_rs1_en),
       .i_imm_en (bufreg_imm_en),
       .i_clr_lsb (bufreg_clr_lsb),

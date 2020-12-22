@@ -5,7 +5,6 @@ module serv_bufreg
    input wire 	      i_cnt1,
    input wire 	      i_en,
    input wire 	      i_init,
-   input wire 	      i_loop,
    input wire 	      i_rs1,
    input wire 	      i_rs1_en,
    input wire 	      i_imm,
@@ -28,7 +27,7 @@ module serv_bufreg
       c_r <= c & i_en;
 
       if (i_en)
-	data <= {(i_loop & !i_init) ? o_q : q, data[31:1]};
+	data <= {i_init ? q : o_q, data[31:1]};
 
       if (i_cnt0 & i_init)
 	o_lsb[0] <= q;
