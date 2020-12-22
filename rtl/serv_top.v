@@ -331,7 +331,6 @@ module serv_top
       //State
       .i_en       (cnt_en),
       .i_cnt0     (cnt0),
-      .i_init     (init),
       .i_cnt_done (cnt_done),
       .i_shamt_en (alu_shamt_en),
       .o_cmp      (alu_cmp),
