@@ -3,8 +3,10 @@ module servant_ram
   #(//Memory parameters
     parameter depth = 256,
     parameter aw    = $clog2(depth),
+    parameter RESET_STRATEGY = "",
     parameter memfile = "")
    (input wire 		i_wb_clk,
+    input wire 		i_wb_rst,
     input wire [aw-1:2] i_wb_adr,
     input wire [31:0] 	i_wb_dat,
     input wire [3:0] 	i_wb_sel,
@@ -20,7 +22,10 @@ module servant_ram
    wire [aw-3:0] 	addr = i_wb_adr[aw-1:2];
 
    always @(posedge i_wb_clk)
-     o_wb_ack <= i_wb_cyc & !o_wb_ack;
+     if (i_wb_rst & (RESET_STRATEGY != "NONE"))
+       o_wb_ack <= 1'b0;
+     else
+       o_wb_ack <= i_wb_cyc & !o_wb_ack;
 
    always_ff @(posedge i_wb_clk) begin
       if(we) begin
