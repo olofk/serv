@@ -2,19 +2,21 @@
 module serv_immdec
   (
    input wire 	     i_clk,
-   //Input
+   //State
    input wire 	     i_cnt_en,
-   input wire 	     i_csr_imm_en,
-   output wire 	     o_csr_imm,
-   input wire [31:2] i_wb_rdt,
-   input wire 	     i_wb_en,
    input wire 	     i_cnt_done,
+   //Control
+   input wire 	     i_csr_imm_en,
    input wire [3:0]  i_ctrl,
-   //To RF
    output wire [4:0] o_rd_addr,
    output wire [4:0] o_rs1_addr,
    output wire [4:0] o_rs2_addr,
-   output wire 	     o_imm);
+   //Data
+   output wire 	     o_csr_imm,
+   output wire 	     o_imm,
+   //External
+   input wire 	     i_wb_en,
+   input wire [31:7] i_wb_rdt);
 
    reg 	      signbit;
 
