@@ -259,19 +259,22 @@ module serv_top
 
    serv_immdec immdec
      (
-      .i_clk      (clk),
-      .i_cnt_en   (cnt_en),
+      .i_clk        (clk),
+      //State
+      .i_cnt_en     (cnt_en),
+      .i_cnt_done   (cnt_done),
+      //Control
       .i_csr_imm_en (csr_imm_en),
-      .o_csr_imm  (csr_imm),
-      .i_wb_rdt   (i_ibus_rdt[31:2]),
-      .i_wb_en    (i_ibus_ack),
-      .i_ctrl     (immdec_ctrl),
-      .i_cnt_done (cnt_done),
-      //To RF
-      .o_rd_addr  (rd_addr),
-      .o_rs1_addr (rs1_addr),
-      .o_rs2_addr (rs2_addr),
-      .o_imm      (imm));
+      .i_ctrl       (immdec_ctrl),
+      .o_rd_addr    (rd_addr),
+      .o_rs1_addr   (rs1_addr),
+      .o_rs2_addr   (rs2_addr),
+      //Data
+      .o_csr_imm    (csr_imm),
+      .o_imm        (imm),
+      //External
+      .i_wb_en      (i_ibus_ack),
+      .i_wb_rdt     (i_ibus_rdt[31:7]));
 
    serv_bufreg bufreg
      (

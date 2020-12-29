@@ -95,6 +95,17 @@ serv_decode is responsible for decoding the operation word coming from ibus into
 
 .. image:: serv_decode_int.png
 
+serv_immdec
+^^^^^^^^^^^
+
+.. image:: serv_immdec.png
+
+The main responsibility of serv_immdec is to stitch together the pieces of immediates from the instruction word and push it out in the correct order. When a new instruction arrives, the relevant parts are placed into a number of shift registers, and the connections between the registers are setup differently depending on the type of operation.
+
+serv_immdec also extracts the register addresses from the operation word.
+
+.. image:: serv_immdec_int.png
+
 serv_mem_if
 ^^^^^^^^^^^
 
