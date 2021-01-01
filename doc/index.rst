@@ -105,6 +105,38 @@ serv_mem_if
 
 serv_mem_if prepares the data to be sent out on the dbus during store operations and serializes the incoming data during loads
 
+The memory interface is centered around four byte-wide shift registers connected in series. During store operations, the `dat_en` signal is asserted long enough to shift in the data from rs2 to the right place in the shift registers and the parallel output of the shift registers is then presented to the data bus as a 32-bit word together with a byte mask. The `Data bus byte mask`_ table summarizes the logic for when the individual byte select signals are asserted depending on the two LSB of the data address together with the size (byte, halfword, word) of the write operation.
+
+During load operations, the data from the bus is latched into the shift registers. `dat_en` is again asserted to shift out data from the registers. `i_lsb` decides from which byte stage of the shift register to tap the data, depending on the alignment of the received data. The `dat_valid` signal makes sure to only present valid data to `o_rd` and otherwise fill in with zeros or sign extension.
+
+When SERV is built with `WITH_CSR`, there is also logic to detect misaligned accesses which asserts the o_misalign flag to the core.
+
+.. image:: serv_mem_if_int.png
+
+.. _`Data bus byte mask`:
+
++-------+---+---------------------+-----------------+----------------------+-------------+
+|op type|lsb|                    3|                2|                     1|            0|
++=======+===+=====================+=================+======================+=============+
+|sb     | 00|                    0|                0|                     0|            1|
++-------+---+---------------------+-----------------+----------------------+-------------+
+|sb     | 01|                    0|                0|                     1|            0|
++-------+---+---------------------+-----------------+----------------------+-------------+
+|sb     | 10|                    0|                1|                     0|            0|
++-------+---+---------------------+-----------------+----------------------+-------------+
+|sb     | 11|                    1|                0|                     0|            0|
++-------+---+---------------------+-----------------+----------------------+-------------+
+|sh     | 00|                    0|                0|                     1|            1|
++-------+---+---------------------+-----------------+----------------------+-------------+
+|sh     | 10|                    1|                1|                     0|            0|
++-------+---+---------------------+-----------------+----------------------+-------------+
+|sw     | 00|                    1|                1|                     1|            1|
++-------+---+---------------------+-----------------+----------------------+-------------+
+|Logic      |`(i_lsb == 11) |`    |`(i_lsb == 10 |)`|`(i_lsb == 01) |`     |`i_lsb == 0` |
+|expression |`i_word |`           |`i_word`         |`i_word |`            |             |
+|	    |`(i_half & i_lsb[1])`|                 |`(i_half & !i_lsb[1])`|             |
++-------+---+---------------------+-----------------+----------------------+-------------+
+
 serv_rf_if
 ^^^^^^^^^^
 

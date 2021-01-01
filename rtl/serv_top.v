@@ -403,17 +403,17 @@ module serv_top
      #(.WITH_CSR (WITH_CSR))
    mem_if
      (
-      .i_clk    (clk),
+      .i_clk      (clk),
       //State
-      .i_en     (cnt_en),
-      .i_bytecnt (mem_bytecnt),
+      .i_en       (cnt_en),
+      .i_bytecnt  (mem_bytecnt),
       .i_lsb      (lsb),
       .o_misalign (mem_misalign),
       //Control
-      .i_mem_op (mem_op),
-      .i_signed (mem_signed),
-      .i_word   (mem_word),
-      .i_half   (mem_half),
+      .i_mem_op   (mem_op),
+      .i_signed   (mem_signed),
+      .i_word     (mem_word),
+      .i_half     (mem_half),
       //Data
       .i_rs2    (rs2),
       .o_rd     (mem_rd),
