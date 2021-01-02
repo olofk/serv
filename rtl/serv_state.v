@@ -24,7 +24,7 @@ module serv_state
    input wire 	     i_e_op,
    input wire 	     i_rd_op,
    output wire 	     o_init,
-   output reg 	     o_cnt_en,
+   output wire 	     o_cnt_en,
    output wire 	     o_cnt0,
    output wire 	     o_cnt0to3,
    output wire 	     o_cnt12to31,
@@ -55,6 +55,7 @@ module serv_state
    //Update PC in RUN or TRAP states
    assign o_ctrl_pc_en  = o_cnt_en & !o_init;
 
+   assign o_cnt_en = |o_cnt_r;
 
    assign o_mem_bytecnt = o_cnt[4:3];
 
@@ -96,9 +97,6 @@ module serv_state
    //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
    assign o_bufreg_en = o_cnt_en | (!stage_two_req & i_shift_op);
 
-   initial if (RESET_STRATEGY == "NONE") o_cnt_r = 4'b0001;
-
-
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
    assign o_init = two_stage_op & !o_pending_irq & !init_done;
@@ -126,23 +124,36 @@ module serv_state
       //Need a strobe for the first cycle in the IDLE state after INIT
       stage_two_req <= o_cnt_done & o_init;
 
-      if (i_rf_ready)
-	o_cnt_en <= 1'b1;
+      /*
+       Because SERV is 32-bit bit-serial we need a counter than can count 0-31
+       to keep track of which bit we are currently processing. o_cnt and o_cnt_r
+       are used together to create such a counter.
+       The top three bits (o_cnt) are implemented as a normal counter, but
+       instead of the two LSB, o_cnt_r is a 4-bit shift register which loops 0-3
+       When o_cnt_r[3] is 1, o_cnt will be increased.
 
-      if (o_cnt_done)
-        o_cnt_en <= 1'b0;
+       The counting starts when the core is idle and the i_rf_ready signal
+       comes in from the RF module by shifting in the i_rf_ready bit as LSB of
+       the shift register. Counting is stopped by using o_cnt_done to block the
+       bit that was supposed to be shifted into bit 0 of o_cnt_r.
 
+       There are two benefit of doing the counter this way
+       1. We only need to check four bits instead of five when we want to check
+       if the counter is at a certain value. For 4-LUT architectures this means
+       we only need one LUT instead of two for each comparison.
+       2. We don't need a separate enable signal to turn on and off the counter
+       between stages, which saves an extra FF and a unique control signal. We
+       just need to check if o_cnt_r is not zero to see if the counter is
+       currently running
+       */
       o_cnt <= o_cnt + {2'd0,o_cnt_r[3]};
-      if (o_cnt_en)
-	o_cnt_r <= {o_cnt_r[2:0],o_cnt_r[3]};
-
+      o_cnt_r <= {o_cnt_r[2:0],(o_cnt_r[3] & !o_cnt_done) | (i_rf_ready & !o_cnt_en)};
       if (i_rst) begin
 	 if (RESET_STRATEGY != "NONE") begin
-	    o_cnt_en <= 1'b0;
 	    o_cnt   <= 3'd0;
 	    init_done <= 1'b0;
 	    o_ctrl_jump <= 1'b0;
-	    o_cnt_r <= 4'b0001;
+	    o_cnt_r <= 4'b0000;
 	 end
       end
    end
