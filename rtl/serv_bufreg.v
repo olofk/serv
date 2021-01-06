@@ -20,7 +20,7 @@ module serv_bufreg
 
    wire 	      c, q;
    reg 		      c_r;
-   reg [31:0] 	      data;
+   reg [31:2] 	      data;
 
    wire 	      clr_lsb = i_cnt0 & i_clr_lsb;
 
@@ -31,13 +31,14 @@ module serv_bufreg
       c_r <= c & i_en;
 
       if (i_en)
-	data <= {i_init ? q : o_q, data[31:1]};
+	data <= {i_init ? q : o_q, data[31:3]};
 
-      if ((i_cnt0 | i_cnt1) & i_init)
-	o_lsb <= {q,o_lsb[1]};
+      if (i_init ? (i_cnt0 | i_cnt1) : i_en)
+	o_lsb <= {i_init ? q : data[2],o_lsb[1]};
+
    end
 
-   assign o_q = data[0];
-   assign o_dbus_adr = {data[31:2], 2'b00};
+   assign o_q = o_lsb[0];
+   assign o_dbus_adr = {data, 2'b00};
 
 endmodule
