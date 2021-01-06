@@ -2,25 +2,28 @@
 module serv_alu
   (
    input wire 	    clk,
+   //State
    input wire 	    i_en,
-   input wire 	    i_shift_op,
    input wire 	    i_cnt0,
-   input wire 	    i_rs1,
-   input wire 	    i_rs2,
-   input wire 	    i_imm,
-   input wire 	    i_op_b_rs2,
-   input wire 	    i_buf,
    input wire 	    i_cnt_done,
+   input wire 	    i_shamt_en,
+   output wire 	    o_cmp,
+   output wire 	    o_sh_done,
+   //Control
+   input wire 	    i_shift_op,
+   input wire 	    i_op_b_rs2,
    input wire 	    i_sub,
    input wire [1:0] i_bool_op,
    input wire 	    i_cmp_eq,
    input wire 	    i_cmp_sig,
-   output wire 	    o_cmp,
-   input wire 	    i_shamt_en,
    input wire 	    i_sh_right,
    input wire 	    i_sh_signed,
-   output wire 	    o_sh_done,
    input wire [3:0] i_rd_sel,
+   //Data
+   input wire 	    i_rs1,
+   input wire 	    i_rs2,
+   input wire 	    i_imm,
+   input wire 	    i_buf,
    output wire 	    o_rd);
 
    wire        result_add;
@@ -28,6 +31,7 @@ module serv_alu
    wire        result_sh;
 
    reg 	       result_lt_r;
+   reg 	       eq_r;
 
    reg [4:0]   shamt;
    reg 	       shamt_msb;
@@ -59,8 +63,6 @@ module serv_alu
    wire add_b = op_b^i_sub;
 
    assign {add_cy,result_add}   = add_a+add_b+add_cy_r;
-
-   reg        eq_r;
 
    assign result_eq = !result_add & eq_r;
 
