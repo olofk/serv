@@ -1,18 +1,22 @@
 module serv_bufreg
   (
    input wire 	      i_clk,
+   //State
    input wire 	      i_cnt0,
    input wire 	      i_cnt1,
    input wire 	      i_en,
    input wire 	      i_init,
-   input wire 	      i_rs1,
+   output reg [1:0]   o_lsb,
+   //Control
    input wire 	      i_rs1_en,
-   input wire 	      i_imm,
    input wire 	      i_imm_en,
    input wire 	      i_clr_lsb,
-   output reg [1:0]   o_lsb,
-   output wire [31:0] o_dbus_adr,
-   output wire 	      o_q);
+   //Data
+   input wire 	      i_rs1,
+   input wire 	      i_imm,
+   output wire 	      o_q,
+   //External
+   output wire [31:0] o_dbus_adr);
 
    wire 	      c, q;
    reg 		      c_r;
@@ -29,10 +33,8 @@ module serv_bufreg
       if (i_en)
 	data <= {i_init ? q : o_q, data[31:1]};
 
-      if (i_cnt0 & i_init)
-	o_lsb[0] <= q;
-      if (i_cnt1 & i_init)
-	o_lsb[1] <= q;
+      if ((i_cnt0 | i_cnt1) & i_init)
+	o_lsb <= {q,o_lsb[1]};
    end
 
    assign o_q = data[0];
