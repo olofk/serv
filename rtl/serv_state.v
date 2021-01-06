@@ -67,7 +67,7 @@ module serv_state
    assign o_cnt3 = (o_cnt[4:2] == 3'd0) & o_cnt_r[3];
    assign cnt4   = (o_cnt[4:2] == 3'd1) & o_cnt_r[0];
    assign o_cnt7 = (o_cnt[4:2] == 3'd1) & o_cnt_r[3];
-   
+
    assign o_alu_shamt_en = (o_cnt0to3 | cnt4) & o_init;
 
    //Take branch for jump or branch instructions (opcode == 1x0xx) if
@@ -94,8 +94,18 @@ module serv_state
 
    assign o_rf_rd_en = i_rd_op & o_cnt_en & !o_init;
 
-   //Shift operations require bufreg to hold for one cycle between INIT and RUN before shifting
-   assign o_bufreg_en = o_cnt_en | (!stage_two_req & i_shift_op);
+   /*
+    bufreg is used during mem. branch and shift operations
+
+    mem : bufreg is used for dbus address. Shift in data during phase 1.
+          Shift out during phase 2 if there was an misalignment exception.
+
+    branch : Shift in during phase 1. Shift out during phase 2
+
+    shift : Shift in during phase 1. Continue shifting between phases (except
+            for the first cycle after init). Shift out during phase 2
+    */
+   assign o_bufreg_en = (o_cnt_en & (o_init | o_ctrl_trap | i_branch_op)) | (!stage_two_req & i_shift_op);
 
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
