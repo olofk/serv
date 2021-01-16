@@ -131,10 +131,18 @@ module serv_decode
    assign o_e_op = opcode[4] & opcode[2] & !op21 & !(|funct3);
 
    //opcode & funct3 & imm30
-   //True for sub, sll*, b*, slt*
-   //False for add*, sr*
-   assign o_alu_sub = (!funct3[2] & (funct3[0] | (opcode[3] & imm30))) | funct3[1] | opcode[4];
 
+   /*
+    True for sub, b*, slt*
+    False for add*
+    op    opcode f3  i30
+    b*    11000  xxx x   t
+    addi  00100  000 x   f
+    slt*  0x100  01x x   t
+    add   01100  000 0   f
+    sub   01100  000 1   t
+    */
+   assign o_alu_sub = funct3[1] | funct3[0] | (opcode[3] & imm30) | opcode[4];
 
    /*
     Bits 26, 22, 21 and 20 are enough to uniquely identify the eight supported CSR regs
