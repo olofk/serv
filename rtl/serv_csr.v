@@ -8,9 +8,9 @@ module serv_csr
    input wire 	    i_cnt3,
    input wire 	    i_cnt7,
    input wire 	    i_cnt_done,
-   input wire 	    i_mem_misalign,
+   input wire 	    i_mem_op,
    input wire 	    i_mtip,
-   input wire 	    i_trap_taken,
+   input wire 	    i_trap,
    input wire 	    i_pending_irq,
    output wire 	    o_new_irq,
    //Control
@@ -90,14 +90,14 @@ module serv_csr
 
        These conditions are all mutually exclusibe
        */
-      if (i_trap_taken | i_mstatus_en & i_cnt3 | i_mret)
-	mstatus_mie <= !i_trap_taken & (i_mret ?  mstatus_mpie : csr_in);
+      if ((i_trap & i_cnt_done) | i_mstatus_en & i_cnt3 | i_mret)
+	mstatus_mie <= !i_trap & (i_mret ?  mstatus_mpie : csr_in);
 
       /*
        Note: To save resources mstatus_mpie (mstatus bit 7) is not
        readable or writable from sw
        */
-      if (i_trap_taken)
+      if (i_trap & i_cnt_done)
 	mstatus_mpie <= mstatus_mie;
 
       /*
@@ -115,16 +115,21 @@ module serv_csr
        if it was caused by an ebreak instruction (3),
        ecall instruction (11), misaligned load (4), misaligned store (6)
        or misaligned jump (0)
-       */
-      if (i_mcause_en & i_en & i_cnt0to3 | i_trap_taken)
-	mcause3_0 <= !i_trap_taken ? {csr_in, mcause3_0[3:1]} :
-		     i_pending_irq ? 4'd7 :
-		     i_e_op ? {!i_ebreak, 3'b011} :
-		     i_mem_misalign ? {2'b01, i_mem_cmd, 1'b0} :
-		     4'd0;
 
-      if (i_mcause_en & i_cnt_done | i_trap_taken)
-	mcause31 <= i_trap_taken ? i_pending_irq : csr_in;
+       The expressions below are derived from the following truth table
+       irq  => 0111 (timer=7)
+       e_op => x011 (ebreak=3, ecall=11)
+       mem  => 01x0 (store=6, load=4)
+       ctrl => 0000 (jump=0)
+       */
+      if (i_mcause_en & i_en & i_cnt0to3 | (i_trap & i_cnt_done)) begin
+	 mcause3_0[3] <= (i_e_op & !i_ebreak) | (!i_trap & csr_in);
+	 mcause3_0[2] <= i_pending_irq | i_mem_op | (!i_trap & mcause3_0[3]);
+	 mcause3_0[1] <= i_pending_irq | i_e_op | (i_mem_op & i_mem_cmd) | (!i_trap & mcause3_0[2]);
+	 mcause3_0[0] <= i_pending_irq | i_e_op | (!i_trap & mcause3_0[1]);
+      end
+      if (i_mcause_en & i_cnt_done | i_trap)
+	mcause31 <= i_trap ? i_pending_irq : csr_in;
    end
 
 endmodule

@@ -17,7 +17,7 @@ module serv_rf_if
    input wire 	     i_trap,
    input wire 	     i_mret,
    input wire 	     i_mepc,
-   input wire 	     i_mem_misalign,
+   input wire 	     i_mem_op,
    input wire 	     i_bufreg_q,
    input wire 	     i_bad_pc,
    output wire 	     o_csr_pc,
@@ -59,7 +59,7 @@ module serv_rf_if
 			  (i_csr_rd & i_rd_csr_en) |
 			  (i_mem_rd);
 
-   wire 	     mtval = i_mem_misalign ? i_bufreg_q : i_bad_pc;
+   wire 	     mtval = i_mem_op ? i_bufreg_q : i_bad_pc;
 
    assign 	     o_wdata0 = i_trap ? mtval  : rd;
    assign	     o_wdata1 = i_trap ? i_mepc : i_csr;
