@@ -19,6 +19,7 @@ module serv_state
    input wire 	     i_branch_op,
    input wire 	     i_mem_op,
    input wire 	     i_shift_op,
+   input wire 	     i_sh_right,
    input wire 	     i_slt_op,
    input wire 	     i_e_op,
    input wire 	     i_rd_op,
@@ -37,6 +38,7 @@ module serv_state
    input wire 	     i_ctrl_misalign,
    output wire 	     o_alu_shamt_en,
    input wire 	     i_alu_sh_done,
+   input wire 	     i_alu_sh_done_r,
    output wire 	     o_dbus_cyc,
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
@@ -67,7 +69,8 @@ module serv_state
    assign cnt4   = (o_cnt[4:2] == 3'd1) & o_cnt_r[0];
    assign o_cnt7 = (o_cnt[4:2] == 3'd1) & o_cnt_r[3];
 
-   assign o_alu_shamt_en = (o_cnt0to3 | cnt4) & o_init;
+   
+   assign o_alu_shamt_en = o_cnt0to3 | cnt4 | !o_init;
 
    //Take branch for jump or branch instructions (opcode == 1x0xx) if
    //a) It's an unconditional branch (opcode[0] == 1)
@@ -89,7 +92,7 @@ module serv_state
    assign o_rf_rreq = i_ibus_ack | (stage_two_req & trap_pending);
 
    //Prepare RF for writes when everything is ready to enter stage two
-   assign o_rf_wreq = ((i_shift_op & i_alu_sh_done & init_done) | (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op))) & !trap_pending;
+   assign o_rf_wreq = ((i_shift_op & (i_alu_sh_done | !i_sh_right) & init_done) | (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op))) & !trap_pending;
 
    assign o_rf_rd_en = i_rd_op & o_cnt_en & !o_init;
 
@@ -104,7 +107,7 @@ module serv_state
     shift : Shift in during phase 1. Continue shifting between phases (except
             for the first cycle after init). Shift out during phase 2
     */
-   assign o_bufreg_en = (o_cnt_en & (o_init | o_ctrl_trap | i_branch_op)) | (!stage_two_req & i_shift_op);
+   assign o_bufreg_en = (o_cnt_en & (o_init | o_ctrl_trap | i_branch_op)) | (i_shift_op & !stage_two_req & (i_sh_right | i_alu_sh_done_r));
 
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 

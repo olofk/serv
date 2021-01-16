@@ -117,6 +117,7 @@ module serv_top
    wire          alu_sh_signed;
    wire          alu_sh_right;
    wire 	 alu_sh_done;
+   wire 	 alu_sh_done_r;
    wire [3:0]    alu_rd_sel;
 
    wire          rs1;
@@ -180,6 +181,7 @@ module serv_top
       .i_ctrl_misalign(lsb[1]),
       .o_alu_shamt_en (alu_shamt_en),
       .i_alu_sh_done  (alu_sh_done),
+      .i_alu_sh_done_r (alu_sh_done_r),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
       //Control
@@ -188,6 +190,7 @@ module serv_top
       .i_branch_op    (branch_op),
       .i_mem_op       (mem_op),
       .i_shift_op     (shift_op),
+      .i_sh_right (alu_sh_right),
       .i_slt_op       (slt_op),
       .i_e_op         (e_op),
       .i_rd_op        (rd_op),
@@ -284,6 +287,7 @@ module serv_top
       .i_init   (init),
       .o_lsb    (lsb),
       //Control
+      .i_sh_signed (alu_sh_signed),
       .i_rs1_en (bufreg_rs1_en),
       .i_imm_en (bufreg_imm_en),
       .i_clr_lsb (bufreg_clr_lsb),
@@ -328,20 +332,18 @@ module serv_top
       .clk        (clk),
       //State
       .i_en       (cnt_en),
+      .i_init       (init),
       .i_cnt0     (cnt0),
-      .i_cnt_done (cnt_done),
       .i_shamt_en (alu_shamt_en),
       .o_cmp      (alu_cmp),
       .o_sh_done  (alu_sh_done),
+      .o_sh_done_r (alu_sh_done_r),
       //Control
-      .i_shift_op (shift_op),
       .i_op_b_rs2 (op_b_source),
       .i_sub      (alu_sub),
       .i_bool_op  (alu_bool_op),
       .i_cmp_eq   (alu_cmp_eq),
       .i_cmp_sig  (alu_cmp_sig),
-      .i_sh_right (alu_sh_right),
-      .i_sh_signed (alu_sh_signed),
       .i_rd_sel   (alu_rd_sel),
       //Data
       .i_rs1      (rs1),
