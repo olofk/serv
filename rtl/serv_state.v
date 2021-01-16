@@ -5,7 +5,6 @@ module serv_state
    input wire 	     i_clk,
    input wire 	     i_rst,
    input wire 	     i_new_irq,
-   output wire 	     o_trap_taken,
    output reg 	     o_pending_irq,
    input wire 	     i_dbus_ack,
    output wire 	     o_ibus_cyc,
@@ -83,7 +82,7 @@ module serv_state
 
    assign o_dbus_cyc = !o_cnt_en & init_done & i_mem_op & !i_mem_misalign;
 
-   wire trap_pending = WITH_CSR & ((o_ctrl_jump & i_ctrl_misalign) | i_mem_misalign);
+   wire trap_pending = WITH_CSR & ((o_ctrl_jump & i_ctrl_misalign) | (i_mem_op & i_mem_misalign));
 
    //Prepare RF for reads when a new instruction is fetched
    // or when stage one caused an exception (rreq implies a write request too)
@@ -174,7 +173,6 @@ module serv_state
    reg 	misalign_trap_sync;
 
    assign o_ctrl_trap = i_e_op | o_pending_irq | misalign_trap_sync;
-   assign o_trap_taken = i_ibus_ack & o_ctrl_trap;
 
    always @(posedge i_clk) begin
       if (i_ibus_ack)
@@ -187,7 +185,7 @@ module serv_state
 
       if (stage_two_req)
 	misalign_trap_sync <= trap_pending;
-      if (i_ibus_ack)
+      if (o_cnt_done)
 	misalign_trap_sync <= 1'b0;
       if (i_rst)
 	if (RESET_STRATEGY != "NONE") begin
@@ -198,7 +196,6 @@ module serv_state
 
    end // always @ (posedge i_clk)
       end else begin
-	 assign o_trap_taken = 0;
 	 assign o_ctrl_trap = 0;
 	 always @(*)
 	   o_pending_irq = 1'b0;

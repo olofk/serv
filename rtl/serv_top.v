@@ -148,7 +148,6 @@ module serv_top
    wire 	 rf_csr_out;
 
    wire 	 new_irq;
-   wire 	 trap_taken;
    wire 	 pending_irq;
 
    wire [1:0]   lsb;
@@ -162,7 +161,6 @@ module serv_top
       .i_rst          (i_rst),
       //State
       .i_new_irq      (new_irq),
-      .o_trap_taken   (trap_taken),
       .o_pending_irq  (pending_irq),
       .i_alu_cmp      (alu_cmp),
       .o_init         (init),
@@ -371,7 +369,7 @@ module serv_top
       .i_trap      (trap),
       .i_mret      (mret),
       .i_mepc      (o_ibus_adr[0]),
-      .i_mem_misalign (mem_misalign),
+      .i_mem_op    (mem_op),
       .i_bufreg_q  (bufreg_q),
       .i_bad_pc    (bad_pc),
       .o_csr_pc    (csr_pc),
@@ -434,9 +432,9 @@ module serv_top
 	    .i_cnt3       (cnt3),
 	    .i_cnt7       (cnt7),
 	    .i_cnt_done   (cnt_done),
-	    .i_mem_misalign (mem_misalign),
+	    .i_mem_op     (mem_op),
 	    .i_mtip       (i_timer_irq),
-	    .i_trap_taken (trap_taken),
+	    .i_trap       (trap),
 	    .i_pending_irq (pending_irq),
 	    .o_new_irq    (new_irq),
 	    //Control

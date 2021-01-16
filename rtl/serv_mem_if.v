@@ -59,15 +59,12 @@ module serv_mem_if
       if (dat_valid)
         signbit <= dat_cur;
    end
-   generate
-      if (WITH_CSR) begin
-	 reg 		 misalign;
-	 always @(posedge i_clk)
-	   misalign <= (i_lsb[0] & (i_word | i_half)) | (i_lsb[1] & i_word);
-	 assign o_misalign = misalign & i_mem_op;
-      end else begin
-	 assign o_misalign = 1'b0;
-      end
-   endgenerate
+
+   /*
+    mem_misalign is checked after the init stage to decide whether to do a data
+    bus transaction or go to the trap state. It is only guaranteed to be correct
+    at this time
+    */
+   assign o_misalign = WITH_CSR & ((i_lsb[0] & (i_word | i_half)) | (i_lsb[1] & i_word));
 
 endmodule
