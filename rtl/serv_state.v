@@ -48,6 +48,7 @@ module serv_state
    wire 	     cnt4;
 
    reg 	stage_two_req;
+   reg 	init_done;
 
    reg [4:2] o_cnt;
    reg [3:0] o_cnt_r;
@@ -112,7 +113,6 @@ module serv_state
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
    assign o_init = two_stage_op & !o_pending_irq & !init_done;
-   reg 	init_done;
 
    always @(posedge i_clk) begin
       //ibus_cyc changes on three conditions.

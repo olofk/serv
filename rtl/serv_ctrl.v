@@ -11,7 +11,6 @@ module serv_ctrl
    input wire 	     i_cnt12to31,
    input wire 	     i_cnt0,
    input wire 	     i_cnt2,
-   input wire 	     i_cnt_done,
    //Control
    input wire 	     i_jump,
    input wire 	     i_jal_or_jalr,
