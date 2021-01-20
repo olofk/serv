@@ -140,7 +140,11 @@ When SERV is built with `WITH_CSR`, there is also logic to detect misaligned acc
 serv_rf_if
 ^^^^^^^^^^
 
-serv_rf_if is the gateway between the core and an RF implementation. It transforms all control signals that affect register reads or writes and exposes two read and write ports to the RF. This allows implementors to plug in an RF implementation that is best suited for the technology to be used.
+.. image:: serv_rf_if.png
+
+serv_rf_if is the gateway between the core and an RF implementation. It transforms all control signals that affect register reads or writes and exposes two read and write ports to the RF. This allows implementors to plug in an RF implementation that is best suited for the technology to be used. The general purpose registers are allocated to address 0-31. In addition, four CSR are defined at addresses 32-35.
+
+.. image:: serv_rf_if_int.png
 
 serv_rf_ram
 ^^^^^^^^^^^
