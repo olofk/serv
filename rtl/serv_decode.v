@@ -147,28 +147,27 @@ module serv_decode
    /*
     Bits 26, 22, 21 and 20 are enough to uniquely identify the eight supported CSR regs
     mtvec, mscratch, mepc and mtval are stored externally (normally in the RF) and are
-    treated differently from mstatus, mie, mcause and mip which are stored in serv_csr.
+    treated differently from mstatus, mie and mcause which are stored in serv_csr.
     
-    The former get a 2-bit address (as found in serv_params.vh) while the latter get a
+    The former get a 2-bit address as seen below while the latter get a
     one-hot enable signal each.
     
-    Hex|2 222|Reg
-    adr|6 210|name
-    ---|-----|-------
-    300|0_000|mstatus
-    304|0_100|mie
-    305|0_101|mtvec
-    340|1_000|mscratch
-    341|1_001|mepc
-    342|1_010|mcause
-    343|1_011|mtval
-    344|1_100|mip
+    Hex|2 222|Reg     |csr
+    adr|6 210|name    |addr
+    ---|-----|--------|----
+    300|0_000|mstatus | xx
+    304|0_100|mie     | xx
+    305|0_101|mtvec   | 01
+    340|1_000|mscratch| 00
+    341|1_001|mepc    | 10
+    342|1_010|mcause  | xx
+    343|1_011|mtval   | 11
     
     */
 
    //true  for mtvec,mscratch,mepc and mtval
-   //false for mstatus, mie, mcause, mip
-   wire csr_valid = op20 | (op26 & !op22 & !op21);
+   //false for mstatus, mie, mcause
+   wire csr_valid = op20 | (op26 & !op21);
 
    assign o_rd_csr_en = csr_op;
 
@@ -180,11 +179,7 @@ module serv_decode
    assign o_csr_source = funct3[1:0];
    assign o_csr_d_sel = funct3[2];
    assign o_csr_imm_en = opcode[4] & opcode[2] & funct3[2];
-
-   assign o_csr_addr = (op26 & !op20) ? CSR_MSCRATCH :
-		       (op26 & !op21) ? CSR_MEPC :
-		       (op26)         ? CSR_MTVAL :
-		       CSR_MTVEC;
+   assign o_csr_addr = {op26 & op20, !op26 | op21};
 
    assign o_alu_cmp_eq = funct3[2:1] == 2'b00;
 
