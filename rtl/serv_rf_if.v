@@ -83,13 +83,31 @@ module serv_rf_if
    //0 : RS1
    //1 : RS2 / CSR
 
-
    assign o_rreg0 = {1'b0, i_rs1_raddr};
-   assign o_rreg1 =
-		 i_trap   ? {4'b1000, CSR_MTVEC} :
-		 i_mret   ? {4'b1000, CSR_MEPC} :
-		 i_csr_en ? {4'b1000, i_csr_addr} :
-		 {1'b0,i_rs2_raddr};
+
+   /*
+    The address of the second read port (o_rreg1) can get assigned from four
+    different sources
+
+    Normal operations : i_rs2_raddr
+    CSR access        : i_csr_addr
+    trap              : MTVEC
+    mret              : MEPC
+
+    Address 0-31 in the RF are assigned to the GPRs. After that follows the four
+    CSRs on addresses 32-35
+
+    32 MSCRATCH
+    33 MTVEC
+    34 MEPC
+    35 MTVAL
+
+    The expression below is an optimized version of this logic
+    */
+   wire sel_rs2 = !(i_trap | i_mret | i_csr_en);
+   assign o_rreg1 = {~sel_rs2,
+		     i_rs2_raddr[4:2] & {3{sel_rs2}},
+		     {1'b0,i_trap} | {i_mret,1'b0} | ({2{i_csr_en}} & i_csr_addr) | ({2{sel_rs2}} & i_rs2_raddr[1:0])};
 
    assign o_rs1 = i_rdata0;
    assign o_rs2 = i_rdata1;
