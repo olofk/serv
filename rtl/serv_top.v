@@ -149,7 +149,6 @@ module serv_top
    wire 	 rf_csr_out;
 
    wire 	 new_irq;
-   wire 	 pending_irq;
 
    wire [1:0]   lsb;
 
@@ -162,7 +161,6 @@ module serv_top
       .i_rst          (i_rst),
       //State
       .i_new_irq      (new_irq),
-      .o_pending_irq  (pending_irq),
       .i_alu_cmp      (alu_cmp),
       .o_init         (init),
       .o_cnt_en       (cnt_en),
@@ -428,6 +426,7 @@ module serv_top
 	   (
 	    .i_clk        (clk),
 	    //State
+	    .i_init       (init),
 	    .i_en         (cnt_en),
 	    .i_cnt0to3    (cnt0to3),
 	    .i_cnt3       (cnt3),
@@ -436,7 +435,6 @@ module serv_top
 	    .i_mem_op     (mem_op),
 	    .i_mtip       (i_timer_irq),
 	    .i_trap       (trap),
-	    .i_pending_irq (pending_irq),
 	    .o_new_irq    (new_irq),
 	    //Control
 	    .i_e_op       (e_op),
