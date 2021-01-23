@@ -3,6 +3,7 @@ module serv_csr
   (
    input wire 	    i_clk,
    //State
+   input wire 	    i_init,
    input wire 	    i_en,
    input wire 	    i_cnt0to3,
    input wire 	    i_cnt3,
@@ -11,8 +12,7 @@ module serv_csr
    input wire 	    i_mem_op,
    input wire 	    i_mtip,
    input wire 	    i_trap,
-   input wire 	    i_pending_irq,
-   output wire 	    o_new_irq,
+   output reg 	    o_new_irq,
    //Control
    input wire 	    i_e_op,
    input wire 	    i_ebreak,
@@ -71,14 +71,14 @@ module serv_csr
 
    assign o_csr_in = csr_in;
 
-   assign o_new_irq = !timer_irq_r & timer_irq;
-
-
    always @(posedge i_clk) begin
+      if (!i_init & i_cnt_done) begin
+	 timer_irq_r <= timer_irq;
+	 o_new_irq   <= timer_irq & !timer_irq_r;
+      end
+	 
       if (i_mie_en & i_cnt7)
 	mie_mtie <= csr_in;
-
-      timer_irq_r <= timer_irq;
 
       /*
        The mie bit in mstatus gets updated under three conditions
@@ -124,12 +124,12 @@ module serv_csr
        */
       if (i_mcause_en & i_en & i_cnt0to3 | (i_trap & i_cnt_done)) begin
 	 mcause3_0[3] <= (i_e_op & !i_ebreak) | (!i_trap & csr_in);
-	 mcause3_0[2] <= i_pending_irq | i_mem_op | (!i_trap & mcause3_0[3]);
-	 mcause3_0[1] <= i_pending_irq | i_e_op | (i_mem_op & i_mem_cmd) | (!i_trap & mcause3_0[2]);
-	 mcause3_0[0] <= i_pending_irq | i_e_op | (!i_trap & mcause3_0[1]);
+	 mcause3_0[2] <= o_new_irq | i_mem_op | (!i_trap & mcause3_0[3]);
+	 mcause3_0[1] <= o_new_irq | i_e_op | (i_mem_op & i_mem_cmd) | (!i_trap & mcause3_0[2]);
+	 mcause3_0[0] <= o_new_irq | i_e_op | (!i_trap & mcause3_0[1]);
       end
       if (i_mcause_en & i_cnt_done | i_trap)
-	mcause31 <= i_trap ? i_pending_irq : csr_in;
+	mcause31 <= i_trap ? o_new_irq : csr_in;
    end
 
 endmodule
