@@ -24,7 +24,11 @@ filesets:
 targets:
   default:
     filesets : [core]
-    parameters : [RISCV_FORMAL, SERV_CLEAR_RAM]
+    parameters :
+      - "is_toplevel? (RESET_STRATEGY)"
+      - RISCV_FORMAL
+      - SERV_CLEAR_RAM
+      - "is_toplevel? (WITH_CSR)"
     toplevel : ["is_toplevel? (serv_rf_top)"]
 
   lint:
@@ -36,6 +40,10 @@ targets:
     toplevel : serv_rf_top
 
 parameters:
+  RESET_STRATEGY:
+    datatype : str
+    paramtype : vlogparam
+
   RISCV_FORMAL:
     datatype  : bool
     paramtype : vlogdefine
@@ -44,3 +52,6 @@ parameters:
     datatype  : bool
     paramtype : vlogdefine
 
+  WITH_CSR:
+    datatype  : int
+    paramtype : vlogparam
