@@ -48,6 +48,13 @@ filesets:
       - servant/servclone10_clock_gen.v : {file_type : verilogSource}
       - servant/servclone10.v : {file_type : verilogSource}
 
+  sockit:
+    files:
+      - data/sockit.sdc : {file_type : SDC}
+      - data/sockit.tcl : {file_type : tclSource}
+      - servant/servive_clock_gen_sockit.v : {file_type : verilogSource}
+      - servant/servive.v : {file_type : verilogSource}
+      
   de0_nano:
     files:
       - data/de0_nano.sdc : {file_type : SDC}
@@ -135,6 +142,16 @@ targets:
         device : 10CL025YU256C8G
     toplevel : servclone10
 
+  sockit:
+    default_tool : quartus
+    filesets : [mem_files, soc, sockit]
+    parameters : [memfile, memsize]
+    tools:
+      quartus:
+        family : CycloneV
+        device : 5CSXFC6D6F31C6
+    toplevel: servive
+    
   de0_nano:
     default_tool : quartus
     filesets : [mem_files, soc, de0_nano]
