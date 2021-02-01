@@ -25,10 +25,8 @@ module serv_alu
    output wire 	    o_rd);
 
    wire        result_add;
-   wire        result_eq;
 
-   reg 	       result_lt_r;
-   reg 	       eq_r;
+   reg 	       cmp_r;
 
    reg [5:0]   shamt_r;
 
@@ -41,13 +39,13 @@ module serv_alu
    wire rs1_sx  = i_rs1 & i_cmp_sig;
    wire op_b_sx = op_b  & i_cmp_sig;
 
-   wire result_lt = rs1_sx + ~op_b_sx + add_cy;
-
    wire add_b = op_b^i_sub;
 
    assign {add_cy,result_add}   = i_rs1+add_b+add_cy_r;
 
-   assign result_eq = !result_add & eq_r;
+   wire result_lt = rs1_sx + ~op_b_sx + add_cy;
+
+   wire result_eq = !result_add & (cmp_r | i_cnt0);
 
    assign o_cmp = i_cmp_eq ? result_eq : result_lt;
 
@@ -56,7 +54,7 @@ module serv_alu
 
    assign o_rd = (i_rd_sel[0] & result_add) |
                  (i_rd_sel[1] & i_buf) |
-                 (i_rd_sel[2] & result_lt_r & i_cnt0) |
+                 (i_rd_sel[2] & cmp_r & i_cnt0) |
                  (i_rd_sel[3] & result_bool);
 
 
@@ -67,10 +65,8 @@ module serv_alu
    always @(posedge clk) begin
       add_cy_r <= i_en ? add_cy : i_sub;
 
-      if (i_en) begin
-	 result_lt_r <= result_lt;
-      end
-      eq_r <= result_eq | ~i_en;
+      if (i_en)
+	cmp_r <= o_cmp;
 
       if (i_shamt_en)
 	 shamt_r <= shamt;
