@@ -35,9 +35,8 @@ module serv_state
    output reg 	     o_ctrl_jump,
    output wire 	     o_ctrl_trap,
    input wire 	     i_ctrl_misalign,
-   output wire 	     o_alu_shamt_en,
-   input wire 	     i_alu_sh_done,
-   input wire 	     i_alu_sh_done_r,
+   input wire 	     i_sh_done,
+   input wire 	     i_sh_done_r,
    output wire 	     o_dbus_cyc,
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
@@ -70,9 +69,6 @@ module serv_state
    assign cnt4   = (o_cnt[4:2] == 3'd1) & o_cnt_r[0];
    assign o_cnt7 = (o_cnt[4:2] == 3'd1) & o_cnt_r[3];
 
-
-   assign o_alu_shamt_en = o_cnt0to3 | cnt4 | !o_init;
-
    //Take branch for jump or branch instructions (opcode == 1x0xx) if
    //a) It's an unconditional branch (opcode[0] == 1)
    //b) It's a conditional branch (opcode[0] == 0) of type beq,blt,bltu (funct3[0] == 0) and ALU compare is true
@@ -93,7 +89,7 @@ module serv_state
    //Prepare RF for writes when everything is ready to enter stage two
    // and the first stage didn't cause a misalign exception
    assign o_rf_wreq = !misalign_trap_sync &
-		      ((i_shift_op & (i_alu_sh_done | !i_sh_right) & init_done) |
+		      ((i_shift_op & (i_sh_done | !i_sh_right) & init_done) |
 		       (i_mem_op & i_dbus_ack) |
 		       (stage_two_req & (i_slt_op | i_branch_op)));
 
@@ -110,7 +106,7 @@ module serv_state
     shift : Shift in during phase 1. Continue shifting between phases (except
             for the first cycle after init). Shift out during phase 2
     */
-   assign o_bufreg_en = (o_cnt_en & (o_init | o_ctrl_trap | i_branch_op)) | (i_shift_op & !stage_two_req & (i_sh_right | i_alu_sh_done_r));
+   assign o_bufreg_en = (o_cnt_en & (o_init | o_ctrl_trap | i_branch_op)) | (i_shift_op & !stage_two_req & (i_sh_right | i_sh_done_r));
 
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
