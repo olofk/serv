@@ -6,6 +6,7 @@ module serv_decode
    input wire [31:2] i_wb_rdt,
    input wire 	     i_wb_en,
    //To state
+   output wire 	     o_sh_right,
    output wire 	     o_bne_or_bge,
    output wire 	     o_cond_branch,
    output wire 	     o_e_op,
@@ -19,6 +20,7 @@ module serv_decode
    output wire 	     o_bufreg_rs1_en,
    output wire 	     o_bufreg_imm_en,
    output wire 	     o_bufreg_clr_lsb,
+   output wire 	     o_bufreg_sh_signed,
    //To ctrl
    output wire 	     o_ctrl_jal_or_jalr,
    output wire 	     o_ctrl_utype,
@@ -29,8 +31,6 @@ module serv_decode
    output wire [1:0] o_alu_bool_op,
    output wire 	     o_alu_cmp_eq,
    output wire 	     o_alu_cmp_sig,
-   output wire 	     o_alu_sh_signed,
-   output wire 	     o_alu_sh_right,
    output wire [3:0] o_alu_rd_sel,
    //To mem IF
    output wire 	     o_mem_signed,
@@ -106,6 +106,7 @@ module serv_decode
    //funct3
    //
 
+   assign o_sh_right   = funct3[2];
    assign o_bne_or_bge = funct3[0];
    
    //
@@ -131,6 +132,8 @@ module serv_decode
    assign o_e_op = opcode[4] & opcode[2] & !op21 & !(|funct3);
 
    //opcode & funct3 & imm30
+
+   assign o_bufreg_sh_signed = imm30;
 
    /*
     True for sub, b*, slt*
@@ -184,8 +187,6 @@ module serv_decode
    assign o_alu_cmp_eq = funct3[2:1] == 2'b00;
 
    assign o_alu_cmp_sig = ~((funct3[0] & funct3[1]) | (funct3[1] & funct3[2]));
-   assign o_alu_sh_signed = imm30;
-   assign o_alu_sh_right = funct3[2];
 
    assign o_mem_cmd  = opcode[3];
    assign o_mem_signed = ~funct3[2];

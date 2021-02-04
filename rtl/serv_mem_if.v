@@ -5,16 +5,21 @@ module serv_mem_if
    input wire 	      i_clk,
    //State
    input wire 	      i_en,
+   input wire 	      i_init,
+   input wire 	      i_cnt_done,
    input wire [1:0]   i_bytecnt,
    input wire [1:0]   i_lsb,
    output wire 	      o_misalign,
+   output wire 	      o_sh_done,
+   output wire 	      o_sh_done_r,
    //Control
    input wire 	      i_mem_op,
+   input wire 	      i_shift_op,
    input wire 	      i_signed,
    input wire 	      i_word,
    input wire 	      i_half,
    //Data
-   input wire 	      i_rs2,
+   input wire 	      i_op_b,
    output wire 	      o_rd,
    //External interface
    output wire [31:0] o_wb_dat,
@@ -27,7 +32,7 @@ module serv_mem_if
 
    wire [2:0] 	 tmp = {1'b0,i_bytecnt}+{1'b0,i_lsb};
 
-   wire 	 dat_en = i_en & !tmp[2];
+   wire 	 dat_en = i_shift_op | (i_en & !tmp[2]);
 
    wire 	 dat_cur =
 		 ((i_lsb == 2'd3) & dat[24]) |
@@ -49,12 +54,30 @@ module serv_mem_if
 
    assign o_wb_dat = dat;
 
-   always @(posedge i_clk) begin
-      if (dat_en)
-	dat <= {i_rs2, dat[31:1]};
+   /* The dat register has three different use cases for store, load and
+    shift operations.
+    store : Data to be written is shifted to the correct position in dat during
+            init by dat_en and is presented on the data bus as o_wb_dat
+    load  : Data from the bus gets latched into dat during i_wb_ack and is then
+            shifted out at the appropriate time to end up in the correct
+            position in rd
+    shift : Data is shifted in during init. After that, the six LSB are used as
+            a downcounter (with bit 5 initially set to 0) that triggers
+            o_sh_done and o_sh_done_r when they wrap around to indicate that
+            the requested number of shifts have been performed
+    */
+   wire [5:0] dat_shamt = (i_shift_op & !i_init) ?
+	      //Down counter mode
+	      dat[5:0]-1 :
+	      //Shift reg mode with optional clearing of bit 5
+	      {dat[6] & !(i_shift_op & i_cnt_done),dat[5:1]};
 
-      if (i_wb_ack)
-	dat <= i_wb_rdt;
+   assign o_sh_done = dat_shamt[5];
+   assign o_sh_done_r = dat[5];
+
+   always @(posedge i_clk) begin
+      if (dat_en | i_wb_ack)
+	dat <= i_wb_ack ? i_wb_rdt : {i_op_b, dat[31:7], dat_shamt};
 
       if (dat_valid)
         signbit <= dat_cur;

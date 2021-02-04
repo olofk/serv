@@ -64,6 +64,7 @@ module serv_top
 
    wire [3:0] 	 immdec_ctrl;
 
+   wire          sh_right;
    wire 	 bne_or_bge;
    wire 	 cond_branch;
    wire 	 e_op;
@@ -103,6 +104,7 @@ module serv_top
    wire 	 cnt_done;
 
    wire 	 bufreg_en;
+   wire          bufreg_sh_signed;
    wire 	 bufreg_rs1_en;
    wire 	 bufreg_imm_en;
    wire 	 bufreg_clr_lsb;
@@ -113,11 +115,6 @@ module serv_top
    wire          alu_cmp_eq;
    wire          alu_cmp_sig;
    wire          alu_cmp;
-   wire          alu_shamt_en;
-   wire          alu_sh_signed;
-   wire          alu_sh_right;
-   wire 	 alu_sh_done;
-   wire 	 alu_sh_done_r;
    wire [3:0]    alu_rd_sel;
 
    wire          rs1;
@@ -130,6 +127,8 @@ module serv_top
    wire          mem_word;
    wire          mem_half;
    wire [1:0] 	 mem_bytecnt;
+   wire 	 mem_sh_done;
+   wire 	 mem_sh_done_r;
 
    wire 	 mem_misalign;
 
@@ -151,6 +150,8 @@ module serv_top
    wire 	 new_irq;
 
    wire [1:0]   lsb;
+
+   wire 	op_b = op_b_source ? rs2 : imm;
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
@@ -177,9 +178,8 @@ module serv_top
       .o_ctrl_jump    (jump),
       .o_ctrl_trap    (trap),
       .i_ctrl_misalign(lsb[1]),
-      .o_alu_shamt_en (alu_shamt_en),
-      .i_alu_sh_done  (alu_sh_done),
-      .i_alu_sh_done_r (alu_sh_done_r),
+      .i_sh_done      (mem_sh_done),
+      .i_sh_done_r    (mem_sh_done_r),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
       //Control
@@ -188,7 +188,7 @@ module serv_top
       .i_branch_op    (branch_op),
       .i_mem_op       (mem_op),
       .i_shift_op     (shift_op),
-      .i_sh_right (alu_sh_right),
+      .i_sh_right     (sh_right),
       .i_slt_op       (slt_op),
       .i_e_op         (e_op),
       .i_rd_op        (rd_op),
@@ -219,10 +219,12 @@ module serv_top
       .o_shift_op         (shift_op),
       .o_slt_op           (slt_op),
       .o_rd_op            (rd_op),
+      .o_sh_right         (sh_right),
       //To bufreg
       .o_bufreg_rs1_en    (bufreg_rs1_en),
       .o_bufreg_imm_en    (bufreg_imm_en),
       .o_bufreg_clr_lsb   (bufreg_clr_lsb),
+      .o_bufreg_sh_signed (bufreg_sh_signed),
       //To ctrl
       .o_ctrl_jal_or_jalr (jal_or_jalr),
       .o_ctrl_utype       (utype),
@@ -234,8 +236,6 @@ module serv_top
       .o_alu_bool_op      (alu_bool_op),
       .o_alu_cmp_eq       (alu_cmp_eq),
       .o_alu_cmp_sig      (alu_cmp_sig),
-      .o_alu_sh_signed    (alu_sh_signed),
-      .o_alu_sh_right     (alu_sh_right),
       .o_alu_rd_sel       (alu_rd_sel),
       //To mem IF
       .o_mem_cmd          (o_dbus_we),
@@ -285,10 +285,10 @@ module serv_top
       .i_init   (init),
       .o_lsb    (lsb),
       //Control
-      .i_sh_signed (alu_sh_signed),
-      .i_rs1_en (bufreg_rs1_en),
-      .i_imm_en (bufreg_imm_en),
-      .i_clr_lsb (bufreg_clr_lsb),
+      .i_sh_signed (bufreg_sh_signed),
+      .i_rs1_en    (bufreg_rs1_en),
+      .i_imm_en    (bufreg_imm_en),
+      .i_clr_lsb   (bufreg_clr_lsb),
       //Data
       .i_rs1    (rs1),
       .i_imm    (imm),
@@ -329,14 +329,9 @@ module serv_top
       .clk        (clk),
       //State
       .i_en       (cnt_en),
-      .i_init       (init),
       .i_cnt0     (cnt0),
-      .i_shamt_en (alu_shamt_en),
       .o_cmp      (alu_cmp),
-      .o_sh_done  (alu_sh_done),
-      .o_sh_done_r (alu_sh_done_r),
       //Control
-      .i_op_b_rs2 (op_b_source),
       .i_sub      (alu_sub),
       .i_bool_op  (alu_bool_op),
       .i_cmp_eq   (alu_cmp_eq),
@@ -344,8 +339,7 @@ module serv_top
       .i_rd_sel   (alu_rd_sel),
       //Data
       .i_rs1      (rs1),
-      .i_rs2      (rs2),
-      .i_imm      (imm),
+      .i_op_b     (op_b),
       .i_buf      (bufreg_q),
       .o_rd       (alu_rd));
 
@@ -403,17 +397,22 @@ module serv_top
       .i_clk      (clk),
       //State
       .i_en       (cnt_en),
+      .i_init     (init),
+      .i_cnt_done (cnt_done),
       .i_bytecnt  (mem_bytecnt),
       .i_lsb      (lsb),
       .o_misalign (mem_misalign),
+      .o_sh_done   (mem_sh_done),
+      .o_sh_done_r (mem_sh_done_r),
       //Control
       .i_mem_op   (mem_op),
+      .i_shift_op (shift_op),
       .i_signed   (mem_signed),
       .i_word     (mem_word),
       .i_half     (mem_half),
       //Data
-      .i_rs2    (rs2),
-      .o_rd     (mem_rd),
+      .i_op_b     (op_b),
+      .o_rd       (mem_rd),
       //External interface
       .o_wb_dat   (o_dbus_dat),
       .o_wb_sel   (o_dbus_sel),
