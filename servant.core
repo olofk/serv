@@ -52,9 +52,16 @@ filesets:
     files:
       - data/sockit.sdc : {file_type : SDC}
       - data/sockit.tcl : {file_type : tclSource}
-      - servant/servive_clock_gen_sockit.v : {file_type : verilogSource}
+      - servant/servive_clock_gen.v : {file_type : verilogSource}
       - servant/servive.v : {file_type : verilogSource}
-      
+
+  deca:
+    files:
+      - data/deca.sdc : {file_type : SDC}
+      - data/deca.tcl : {file_type : tclSource}
+      - servant/servive_clock_gen.v : {file_type : verilogSource}
+      - servant/servive.v : {file_type : verilogSource}
+
   de0_nano:
     files:
       - data/de0_nano.sdc : {file_type : SDC}
@@ -144,6 +151,7 @@ targets:
 
   sockit:
     default_tool : quartus
+    description: SoCKit development kit by Arrow / Terasic
     filesets : [mem_files, soc, sockit]
     parameters : [memfile, memsize]
     tools:
@@ -151,7 +159,18 @@ targets:
         family : CycloneV
         device : 5CSXFC6D6F31C6
     toplevel: servive
-    
+
+  deca:
+    default_tool : quartus
+    description: DECA development kit by Arrow / Terasic
+    filesets : [mem_files, soc, deca]
+    parameters : [memfile, memsize]
+    tools:
+      quartus:
+        family : MAX 10
+        device : 10M50DAF484C6GES
+    toplevel: servive
+   
   de0_nano:
     default_tool : quartus
     filesets : [mem_files, soc, de0_nano]
