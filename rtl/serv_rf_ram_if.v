@@ -31,12 +31,13 @@ module serv_rf_ram_if
 
    reg 				   rgnt;
    assign o_ready = rgnt | i_wreq;
+   reg [4:0] 	  rcnt;
 
    /*
     ********** Write side ***********
     */
 
-   reg [4:0] 	     wcnt;
+   wire [4:0] 	     wcnt;
    reg 		     wgo;
 
 
@@ -70,9 +71,7 @@ module serv_rf_ram_if
      assign o_waddr = {wreg, wcnt[4:l2w]};
    endgenerate
 
-   assign o_wen = wgo & ((wtrig0 & wen0_r) | (wtrig1 & wen1_r));
-
-   reg 	      wreq_r;
+   assign o_wen = (wtrig0 & wen0_r) | (wtrig1 & wen1_r);
 
    generate if (width > 2)
      always @(posedge i_clk) wdata0_r  <= {i_wdata0, wdata0_r[width-2:1]};
@@ -80,34 +79,20 @@ module serv_rf_ram_if
      always @(posedge i_clk) wdata0_r  <= i_wdata0;
    endgenerate
 
+   assign wcnt = rcnt-3;
+
    always @(posedge i_clk) begin
       wen0_r    <= i_wen0;
       wen1_r    <= i_wen1;
-      wreq_r    <= i_wreq | rgnt;
 
       wdata1_r  <= {i_wdata1,wdata1_r[width-1:1]};
 
-      if (wgo)
-	wcnt <= wcnt+5'd1;
-
-      if (wreq_r) begin
-	 wgo <= 1'b1;
-      end
-
-      if (wcnt == 5'b11111)
-	wgo <= 1'b0;
-
-      if (i_rst) begin
-	 if (reset_strategy != "NONE")
-	   wcnt <= 5'd0;
-      end
    end
 
    /*
     ********** Read side ***********
     */
 
-   reg [4:0] 	  rcnt;
 
    wire 	  rtrig0;
    reg 		  rtrig1;
@@ -144,6 +129,8 @@ module serv_rf_ram_if
       rcnt <= rcnt+5'd1;
       if (i_rreq)
 	 rcnt <= 5'd0;
+      if (i_wreq)
+	 rcnt <= 5'd2;
 
       rreq_r <= i_rreq;
       rgnt <= rreq_r;

@@ -89,11 +89,11 @@ module serv_state
    //Prepare RF for writes when everything is ready to enter stage two
    // and the first stage didn't cause a misalign exception
    assign o_rf_wreq = !misalign_trap_sync &
-		      ((i_shift_op & (i_sh_done | !i_sh_right) & init_done) |
+		      ((i_shift_op & (i_sh_done | !i_sh_right) & !o_cnt_en & init_done) |
 		       (i_mem_op & i_dbus_ack) |
 		       (stage_two_req & (i_slt_op | i_branch_op)));
 
-   assign o_rf_rd_en = i_rd_op & o_cnt_en & !o_init;
+   assign o_rf_rd_en = i_rd_op & !o_init;
 
    /*
     bufreg is used during mem. branch and shift operations
