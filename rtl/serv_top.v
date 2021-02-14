@@ -347,6 +347,7 @@ module serv_top
      #(.WITH_CSR (WITH_CSR))
    rf_if
      (//RF interface
+      .i_cnt_en    (cnt_en),
       .o_wreg0     (o_wreg0),
       .o_wreg1     (o_wreg1),
       .o_wen0      (o_wen0),
