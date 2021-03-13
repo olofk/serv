@@ -207,7 +207,7 @@ module serv_decode
    assign o_alu_rd_sel[0] = (funct3 == 3'b000); // Add/sub
    assign o_alu_rd_sel[1] = (funct3[1:0] == 2'b01); //Shift
    assign o_alu_rd_sel[2] = (funct3[2:1] == 2'b01); //SLT*
-   assign o_alu_rd_sel[3] = (funct3[2] & !(funct3[1:0] == 2'b01)); //Bool
+   assign o_alu_rd_sel[3] = funct3[2]; //Bool
    always @(posedge clk) begin
       if (i_wb_en) begin
          funct3        <= i_wb_rdt[14:12];
