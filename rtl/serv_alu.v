@@ -39,7 +39,7 @@ module serv_alu
 
    assign o_cmp = i_cmp_eq ? result_eq : result_lt;
 
-   localparam [15:0] BOOL_LUT = 16'h8E96;//And, Or, =, xor
+   localparam [15:0] BOOL_LUT = 16'h8E06;//And, Or, 0, xor
    wire result_bool = BOOL_LUT[{i_bool_op, i_rs1, i_op_b}];
 
    assign o_rd = (i_rd_sel[0] & result_add) |
