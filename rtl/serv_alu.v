@@ -11,7 +11,7 @@ module serv_alu
    input wire [1:0] i_bool_op,
    input wire 	    i_cmp_eq,
    input wire 	    i_cmp_sig,
-   input wire [3:0] i_rd_sel,
+   input wire [2:0] i_rd_sel,
    //Data
    input wire 	    i_rs1,
    input wire 	    i_op_b,
@@ -42,10 +42,10 @@ module serv_alu
    localparam [15:0] BOOL_LUT = 16'h8E06;//And, Or, 0, xor
    wire result_bool = BOOL_LUT[{i_bool_op, i_rs1, i_op_b}];
 
-   assign o_rd = (i_rd_sel[0] & result_add) |
-                 (i_rd_sel[1] & i_buf) |
-                 (i_rd_sel[2] & cmp_r & i_cnt0) |
-                 (i_rd_sel[3] & result_bool);
+   assign o_rd = i_buf |
+                 (i_rd_sel[0] & result_add) |
+                 (i_rd_sel[1] & cmp_r & i_cnt0) |
+                 (i_rd_sel[2] & result_bool);
 
    always @(posedge clk) begin
       add_cy_r <= i_en ? add_cy : i_sub;

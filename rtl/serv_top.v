@@ -115,7 +115,7 @@ module serv_top
    wire          alu_cmp_eq;
    wire          alu_cmp_sig;
    wire          alu_cmp;
-   wire [3:0]    alu_rd_sel;
+   wire [2:0]    alu_rd_sel;
 
    wire          rs1;
    wire          rs2;
