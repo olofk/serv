@@ -31,7 +31,7 @@ module serv_decode
    output wire [1:0] o_alu_bool_op,
    output wire 	     o_alu_cmp_eq,
    output wire 	     o_alu_cmp_sig,
-   output wire [3:0] o_alu_rd_sel,
+   output wire [2:0] o_alu_rd_sel,
    //To mem IF
    output wire 	     o_mem_signed,
    output wire 	     o_mem_word,
@@ -205,9 +205,8 @@ module serv_decode
    assign o_immdec_ctrl[3] = opcode[4];
 
    assign o_alu_rd_sel[0] = (funct3 == 3'b000); // Add/sub
-   assign o_alu_rd_sel[1] = (funct3[1:0] == 2'b01); //Shift
-   assign o_alu_rd_sel[2] = (funct3[2:1] == 2'b01); //SLT*
-   assign o_alu_rd_sel[3] = funct3[2]; //Bool
+   assign o_alu_rd_sel[1] = (funct3[2:1] == 2'b01); //SLT*
+   assign o_alu_rd_sel[2] = funct3[2]; //Bool
    always @(posedge clk) begin
       if (i_wb_en) begin
          funct3        <= i_wb_rdt[14:12];
