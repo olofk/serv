@@ -21,6 +21,11 @@ filesets:
       - rtl/serv_rf_top.v
     file_type : verilogSource
 
+  openlane:
+    files:
+      - data/params.tcl : {file_type : tclSource}
+      - rtl/serv_synth_wrapper.v : {file_type : verilogSource}
+
 targets:
   default:
     filesets : [core]
@@ -42,6 +47,11 @@ targets:
         verilator_options:
           - "-Wall"
     toplevel : serv_rf_top
+
+  sky130:
+    default_tool : openlane
+    filesets : [core, openlane]
+    toplevel : serv_synth_wrapper
 
 parameters:
   MDU:
