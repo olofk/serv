@@ -14,7 +14,7 @@ module servde1_soc_revF
 
    assign uart_txd = q;
 
-   servive_clock_gen clock_gen
+   servde1_soc_revF_clock_gen clock_gen
      (.i_clk (i_clk),
       .i_rst (!i_rst_n),
       .o_clk (wb_clk),
