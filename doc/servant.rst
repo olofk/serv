@@ -83,6 +83,14 @@ FPGA Pin Y15 (Connector JP7, pin 1) is used for UART output with 57600 baud rate
 
     fusesoc run --target=de10_nano servant
 
+
+DE1 SoC revF
+^^^^^^^^^^^^
+
+FPGA PIN_AC18 (Connector GPIO0, pin 0) is used for UART output with 57600 baud rate. DE1 SoC revF needs an external 3.3V UART to connect to this pin. The UART pin has not been tested.
+
+    fusesoc run --target=de1_soc_revF servant
+
 DECA development kit
 ^^^^^^^^^^^^^^^^^^^^
 
