@@ -126,7 +126,7 @@ module serv_rf_if
       assign o_wreg0 = i_rd_waddr;
       assign o_wreg1 = 5'd0;
 
-      assign       o_wen0 = rd_wen;
+      assign       o_wen0 = i_cnt_en & rd_wen;
       assign       o_wen1 = 1'b0;
 
    /*
