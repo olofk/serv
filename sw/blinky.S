@@ -29,6 +29,8 @@ _start:
 	/* Set timer value to control blink speed */
 	li t1, DELAY
 
+	/* Clear t0 */
+	addi	t0, zero, 0
 bl1:
 	/* Write to LEDs */
 	sb t0, 0(a0)
