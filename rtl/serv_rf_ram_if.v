@@ -38,8 +38,6 @@ module serv_rf_ram_if
     */
 
    wire [4:0] 	     wcnt;
-   reg 		     wgo;
-
 
    reg [width-2:0]   wdata0_r;
    reg [width-1:0]   wdata1_r;
