@@ -172,3 +172,69 @@ serv_shift
 ^^^^^^^^^^
 
 serv_shift lives inside the ALU and contains the control logic for shift operations
+
+Instruction life cycle
+----------------------
+
+The life cycle of an instruction starts by the core issuing a request for a new instruction on the ibus and ends when the PC has been updated with the address of the next instruction. This section goes through what happens between those points for the various types of instructions. SERV distinguishes between two-stage and one-stage operations with the former category being all jump (branch), shift, slt and load/store instructions and the latter all other operations. In addition to this, exceptions are a special case. Only two-stage operations (jump, load/store) can cause an exception. Regardless of instruction type, they all start out the same way.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"       , wave: "0P|......"},
+          { name: "o_ibus_cyc", wave: "01|.0.....", node: ".a..."},
+          { name: "i_ibus_ack", wave: "0.|10.....", node: "...b", data: "r0"},
+          { name: "rf_rreq"   , wave: "0.|10.....", node: "...c.", data: "r1"},
+          { name: "i_ibus_rdt", wave: "x.|2x.....", node: "...", data: "i0"},
+          { name: "opcode"    , wave: "x.|.2.....", data: "i0[6:2]"},
+          { name: "funct3"    , wave: "x.|.2.....", data: "i0[14:12]"},
+          { name: "imm30"     , wave: "x.|.2.....", data: "i0[30]"},
+          {},
+          { name: "r*_addr"   , wave: "x.|.2.....", data: "i0[24:15,11:7]"},
+          { name: "imm*"      , wave: "x.|.2.....", data: "i0[31:7]"},
+
+          ],
+          edge : [
+          "a~>b","b~>c"]
+        }
+
+The bus requests begin by SERV raising o_ibus_cyc until the memory responds with an i_ibus_ack and presents the instruction on i_ibus_rdt. Upon seeing the ack, SERV will ower cyc to indicate the end of the bus cycle.
+
+When the ack appears, two things happen in SERV. The relevant portions of the instruction such as opcode, funct3 and immediate value are saved in serv_decode and serv_immdec. The saved bits of the instruction is then decoded to create the internal control signals that corresponds to the current instruction.
+
+The other thing to happen is that request to start accessing the register file is sent by strobing rf_rreq which prepares the register file for both read and write access.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"    , wave: "0P.|....."},
+          { name: "rreq"   , wave: "010|.....", node: ".a..."},
+          { name: "rreg0"  , wave: "x.2|.....", node: "....", data: "r0"},
+          { name: "rreg1"  , wave: "x.2|.....", node: "....", data: "r1"},
+          { name: "ready"  , wave: "0..|10...", node: "....b."},
+          { name: "rdata0" , wave: "-..|12345", data: "0 1 2 3 4"},
+          { name: "rdata1" , wave: "-..|12345", data: "0 1 2 3 4"},
+          ],
+          edge : [
+          "a~>b"]
+        }
+
+The interface between the core and the register file is described in a protocol where the core strobes rreq and present the registers to read on the following cycle. The register file will prepare to stream out data bit from the two requested registers. The cycle before it sends out the first bit (LSB) it will strobe rf_ready. Writes work in a similar way in that the registers to write has to be presented the cycle after rf_wreq is strobed and that the register file will start accepting data the cycle after it has strobed rf_ready. Note that the delay between rf_wreq and rf_ready does not have to be the same as from rf_rreq to rf_ready. Also note that register data will only be written to a register if the corresponding write enable signal is asserted. In the diagram below, only register r0 will be written to.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"    , wave: "0P......"},
+          { name: "wreq"   , wave: "010.....", node: ".a..."},
+          { name: "ready"  , wave: "010.....", node: ".b."},
+          { name: "wreg0"  , wave: "x.2.....", node: "....", data: "r0"},
+          { name: "wreg1"  , wave: "x.2.....", node: "....", data: "r1"},
+          { name: "wen0"   , wave: "0.1.....", node: "....", data: "r0"},
+          { name: "wen1"   , wave: "0.......", node: "....", data: "r1"},
+          { name: "wdata0" , wave: "-..12345", data: "0 1 2 3 4"},
+          { name: "wdata1" , wave: "-.......", data: "0 1 2 3 4"},
+          ],
+          edge : [
+          "a~>b"]
+        }
+
