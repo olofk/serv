@@ -30,9 +30,22 @@ module serv_mem_if
    reg           signbit;
    reg [31:0] 	 dat;
 
-   wire [2:0] 	 tmp = {1'b0,i_bytecnt}+{1'b0,i_lsb};
+   /*
+    Before a store operation, the data to be written needs to be shifted into
+    place. Depending on the address alignment, we need to shift different
+    amounts. One formula for calculating this is to say that we shift when
+    i_lsb + i_bytecnt < 4. Unfortunately, the synthesis tools don't seem to be
+    clever enough so the hideous expression below is used to achieve the same
+    thing in a more optimal way.
+    */
+   wire 	 byte_valid =
+		 (!i_lsb[0] & !i_lsb[1])         |
+		 (!i_bytecnt[0] & !i_bytecnt[1]) |
+		 (!i_bytecnt[1] & !i_lsb[1])     |
+		 (!i_bytecnt[1] & !i_lsb[0])     |
+		 (!i_bytecnt[0] & !i_lsb[1]);
 
-   wire 	 dat_en = i_shift_op | (i_en & !tmp[2]);
+   wire 	 dat_en = i_shift_op | (i_en & byte_valid);
 
    wire 	 dat_cur =
 		 ((i_lsb == 2'd3) & dat[24]) |
