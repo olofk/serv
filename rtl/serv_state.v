@@ -43,8 +43,6 @@ module serv_state
    output reg 	     o_cnt_done,
    output wire 	     o_bufreg_en);
 
-   wire 	     cnt4;
-
    reg 	stage_two_req;
    reg 	init_done;
    reg 	misalign_trap_sync;
@@ -66,7 +64,6 @@ module serv_state
    assign o_cnt1 = (o_cnt[4:2] == 3'd0) & o_cnt_r[1];
    assign o_cnt2 = (o_cnt[4:2] == 3'd0) & o_cnt_r[2];
    assign o_cnt3 = (o_cnt[4:2] == 3'd0) & o_cnt_r[3];
-   assign cnt4   = (o_cnt[4:2] == 3'd1) & o_cnt_r[0];
    assign o_cnt7 = (o_cnt[4:2] == 3'd1) & o_cnt_r[3];
 
    //Take branch for jump or branch instructions (opcode == 1x0xx) if
