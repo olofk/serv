@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>SERV user manual &#8212; SERV  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="http://wavedrom.com/skins/default.js"></script>
+    <script src="http://wavedrom.com/wavedrom.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="serv-user-manual">
+<h1>SERV user manual<a class="headerlink" href="#serv-user-manual" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="modules">
+<h2>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h2>
+<p>SERV is a bit-serial CPU which means that the internal datapath is one bit wide. <a class="reference internal" href="#dataflow"><span class="std std-ref">SERV internal dataflow</span></a> show the internal dataflow. For each instruction, data is read from the register file or the immediate fields of the instruction word and the result of the operation is stored back into the register file. Reading and writing memory is handled through the memory interface module.</p>
+<div class="figure align-default" id="id1">
+<span id="dataflow"></span><img alt="_images/serv_dataflow.png" src="_images/serv_dataflow.png" />
+<p class="caption"><span class="caption-text">SERV internal dataflow</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<div class="section" id="serv-rf-top">
+<h3>serv_rf_top<a class="headerlink" href="#serv-rf-top" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/serv_rf_top.png" src="_images/serv_rf_top.png" />
+<p>serv_rf_top is a top-level convenience wrapper that includes SERV and the default RF implementation and just exposes the timer IRQ and instruction/data wishbone buses.</p>
+</div>
+<div class="section" id="serv-top">
+<h3>serv_top<a class="headerlink" href="#serv-top" title="Permalink to this headline">¶</a></h3>
+<p>serv_top is the top-level of the SERV core without an RF</p>
+</div>
+<div class="section" id="serv-alu">
+<h3>serv_alu<a class="headerlink" href="#serv-alu" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/serv_alu.png" src="_images/serv_alu.png" />
+<p>serv_alu handles alu operations. The first input operand (A) comes from i_rs1 and the second operand (B) comes from i_rs2 or i_imm depending on the type of operation. The data passes through the add/sub or bool logic unit and finally ends up in o_rd to be written to the destination register. The output o_cmp is used for conditional branches to decide whether or not to take the branch.</p>
+<p>The add/sub unit can do additions A+B or subtractions A-B by converting it to A+B̅+1. Subtraction mode (i_sub = 1) is also used for the comparisions in the slt* and conditional branch instructions. The +1 used in subtraction mode is done by preloading the carry input with 1. Less-than comparisons are handled by converting the expression A&lt;B to A-B&lt;0 and checking the MSB, which will be set when the result is less than 0. This however requires sign-extending the operands to 33-bit inputs. For signed operands (when i_cmp_sig is set), the extra bit is the same as the MSB. For unsigned, the extra bit is always 0. Because the ALU is only active for 32 cycles, the 33rd bit must be calculated in parallel to the ordinary addition. The result from this operations is available in result_lt. For equality checks, result_eq checks that all bits are 0 from the subtraction.</p>
+<img alt="_images/serv_alu_int.png" src="_images/serv_alu_int.png" />
+</div>
+<div class="section" id="serv-bufreg">
+<h3>serv_bufreg<a class="headerlink" href="#serv-bufreg" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/serv_bufreg.png" src="_images/serv_bufreg.png" />
+<p>For two-stage operations, serv_bufreg holds data between stages. This data can be the effective address for branches or load/stores or data to be shifted for shift ops. It has a serial output for streaming out results during stage two and a parallel output that forms the dbus address. serv_bufreg also keeps track of the two lsb when calculating adresses. This is used to check for alignment errors. In order to support these different modes, the input to the shift register can come from rs1, the immediate (imm), rs1+imm or looped back from the shift register output. The latter is used for shift operations. For some operations, the LSB of the immediate is cleared before written to the shift register. The two LSB of the shift register are special. When the shift register is loaded, these two get written first before the rest of the register is filled up. This allows the memory interface to check data/address alignment early.</p>
+<img alt="_images/serv_bufreg_int.png" src="_images/serv_bufreg_int.png" />
+</div>
+<div class="section" id="serv-csr">
+<h3>serv_csr<a class="headerlink" href="#serv-csr" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/serv_csr.png" src="_images/serv_csr.png" />
+<p>serv_csr handles CSR accesses and all status related to (timer) interrupts. Out of the eight CSRs supported by SERV, only four resides in serv_csr (mstatus, mie, mcause and mip) and for those registers, SERV only implement the bits required for ecall, ebreak, misalignment and timer interrupts. The four remaining CSRs are commonly stored in the RF</p>
+<img alt="_images/serv_csr_int.png" src="_images/serv_csr_int.png" />
+</div>
+<div class="section" id="serv-ctrl">
+<h3>serv_ctrl<a class="headerlink" href="#serv-ctrl" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/serv_ctrl.png" src="_images/serv_ctrl.png" />
+<p>serv_ctrl keeps track of the current PC and contains the logic needed to calculate the next PC. The PC is stored in shift register with a parellel output connected to the instruction bus.</p>
+<p>The new PC can come from three sources. For normal instructions, it is incremented by four, which is the next 32-bit address. Jumps can be absolute or relative to the current PC. Absolute jumps are precalculated in serv_bufreg and written directly to the PC. PC relative jumps have the offset part precalculated in serv_bufreg which gets added to the current PC before storing as the new PC. The third source for the new PC comes from the CSR registers when entering or returning traps.</p>
+<p>Some operations (LUI, AUIPC, jumps, entering or returning from traps) also update the destination register through o_rd. In the case of misaligned instruction traps, the invalid PC is written to o_bad_pc to be passed to mtval.</p>
+<img alt="_images/serv_ctrl_int.png" src="_images/serv_ctrl_int.png" />
+</div>
+<div class="section" id="serv-decode">
+<h3>serv_decode<a class="headerlink" href="#serv-decode" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/serv_decode.png" src="_images/serv_decode.png" />
+<p>serv_decode is responsible for decoding the operation word coming from ibus into a set of control signals that are used internally in SERV.</p>
+<img alt="_images/serv_decode_int.png" src="_images/serv_decode_int.png" />
+</div>
+<div class="section" id="serv-immdec">
+<h3>serv_immdec<a class="headerlink" href="#serv-immdec" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/serv_immdec.png" src="_images/serv_immdec.png" />
+<p>The main responsibility of serv_immdec is to stitch together the pieces of immediates from the instruction word and push it out in the correct order. When a new instruction arrives, the relevant parts are placed into a number of shift registers, and the connections between the registers are setup differently depending on the type of operation.</p>
+<p>serv_immdec also extracts the register addresses from the operation word.</p>
+<img alt="_images/serv_immdec_int.png" src="_images/serv_immdec_int.png" />
+</div>
+<div class="section" id="serv-mem-if">
+<h3>serv_mem_if<a class="headerlink" href="#serv-mem-if" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/serv_mem_if.png" src="_images/serv_mem_if.png" />
+<p>serv_mem_if prepares the data to be sent out on the dbus during store operations and serializes the incoming data during loads</p>
+<p>The memory interface is centered around four byte-wide shift registers connected in series. During store operations, the <cite>dat_en</cite> signal is asserted long enough to shift in the data from rs2 to the right place in the shift registers and the parallel output of the shift registers is then presented to the data bus as a 32-bit word together with a byte mask. The <a class="reference internal" href="#data-bus-byte-mask">Data bus byte mask</a> table summarizes the logic for when the individual byte select signals are asserted depending on the two LSB of the data address together with the size (byte, halfword, word) of the write operation.</p>
+<p>During load operations, the data from the bus is latched into the shift registers. <cite>dat_en</cite> is again asserted to shift out data from the registers. <cite>i_lsb</cite> decides from which byte stage of the shift register to tap the data, depending on the alignment of the received data. The <cite>dat_valid</cite> signal makes sure to only present valid data to <cite>o_rd</cite> and otherwise fill in with zeros or sign extension.</p>
+<p>When SERV is built with <cite>WITH_CSR</cite>, there is also logic to detect misaligned accesses which asserts the o_misalign flag to the core.</p>
+<p>The shift register used for stores and loads are also used to keep track of the number of steps to shift for left/right shift operations. In this mode, the six LSB of the register is loaded with the shift amount during the init stage and the used as a down counter which raises o_sh_done and o_sh_done_r when the number of shift steps have been completed.</p>
+<img alt="_images/serv_mem_if_int.png" src="_images/serv_mem_if_int.png" />
+<table class="docutils align-default" id="data-bus-byte-mask">
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 4%" />
+<col style="width: 25%" />
+<col style="width: 20%" />
+<col style="width: 27%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>op type</p></th>
+<th class="head"><p>lsb</p></th>
+<th class="head"><p>3</p></th>
+<th class="head"><p>2</p></th>
+<th class="head"><p>1</p></th>
+<th class="head"><p>0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>sb</p></td>
+<td><p>00</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb</p></td>
+<td><p>01</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>sb</p></td>
+<td><p>10</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>sb</p></td>
+<td><p>11</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>sh</p></td>
+<td><p>00</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>sh</p></td>
+<td><p>10</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>sw</p></td>
+<td><p>00</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td colspan="2"><p>Logic
+expression</p></td>
+<td><p><cite>(i_lsb == 11) |</cite>
+<cite>i_word |</cite>
+<cite>(i_half &amp; i_lsb[1])</cite></p></td>
+<td><p><cite>(i_lsb == 10 |)</cite>
+<cite>i_word</cite></p></td>
+<td><p><cite>(i_lsb == 01) |</cite>
+<cite>i_word |</cite>
+<cite>(i_half &amp; !i_lsb[1])</cite></p></td>
+<td><p><cite>i_lsb == 0</cite></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="serv-rf-if">
+<h3>serv_rf_if<a class="headerlink" href="#serv-rf-if" title="Permalink to this headline">¶</a></h3>
+<img alt="_images/serv_rf_if.png" src="_images/serv_rf_if.png" />
+<p>serv_rf_if is the gateway between the core and an RF implementation. It transforms all control signals that affect register reads or writes and exposes two read and write ports to the RF. This allows implementors to plug in an RF implementation that is best suited for the technology to be used. The general purpose registers are allocated to address 0-31. In addition, four CSR are defined at addresses 32-35.</p>
+<img alt="_images/serv_rf_if_int.png" src="_images/serv_rf_if_int.png" />
+</div>
+<div class="section" id="serv-rf-ram">
+<h3>serv_rf_ram<a class="headerlink" href="#serv-rf-ram" title="Permalink to this headline">¶</a></h3>
+<p>serv_rf_ram is the default RF implementation using an SRAM-like interface. Suitable for FPGA implementations</p>
+</div>
+<div class="section" id="serv-rf-ram-if">
+<h3>serv_rf_ram_if<a class="headerlink" href="#serv-rf-ram-if" title="Permalink to this headline">¶</a></h3>
+<p>serv_rf_ram_if converts between the SERV RF IF and the serv_rf_ram interface</p>
+</div>
+<div class="section" id="serv-state">
+<h3>serv_state<a class="headerlink" href="#serv-state" title="Permalink to this headline">¶</a></h3>
+<p>serv_state keeps track of the state for the core and contains all dynamic control signals during an operations life time. Also controls the accesses towards the RF, ibus and dbus</p>
+<p>New instructions are fetched by asserting o_ibus_cyc until there is a response on i_ibus_ack. Instruction fetches occur when the reset signal is deasserted, which is what gets SERV started, or when the PC has finished updating its value.</p>
+</div>
+<div class="section" id="shift-reg">
+<h3>shift_reg<a class="headerlink" href="#shift-reg" title="Permalink to this headline">¶</a></h3>
+<p>shift_reg is a shift register implementation used in various places in SERV</p>
+</div>
+<div class="section" id="serv-shift">
+<h3>serv_shift<a class="headerlink" href="#serv-shift" title="Permalink to this headline">¶</a></h3>
+<p>serv_shift lives inside the ALU and contains the control logic for shift operations</p>
+</div>
+</div>
+<div class="section" id="instruction-life-cycle">
+<h2>Instruction life cycle<a class="headerlink" href="#instruction-life-cycle" title="Permalink to this headline">¶</a></h2>
+<p>The life cycle of an instruction starts by the core issuing a request for a new instruction on the ibus and ends when the PC has been updated with the address of the next instruction. This section goes through what happens between those points for the various types of instructions. SERV distinguishes between two-stage and one-stage operations with the former category being all jump (branch), shift, slt and load/store instructions and the latter all other operations. In addition to this, exceptions are a special case. Only two-stage operations (jump, load/store) can cause an exception. Regardless of instruction type, they all start out the same way.</p>
+
+<div style="overflow-x:auto">
+<script type="WaveDrom">
+{ signal: [
+  { name: "clk"       , wave: "0P|......"},
+  { name: "o_ibus_cyc", wave: "01|.0.....", node: ".a..."},
+  { name: "i_ibus_ack", wave: "0.|10.....", node: "...b", data: "r0"},
+  { name: "rf_rreq"   , wave: "0.|10.....", node: "...c.", data: "r1"},
+  { name: "i_ibus_rdt", wave: "x.|2x.....", node: "...", data: "i0"},
+  { name: "opcode"    , wave: "x.|.2.....", data: "i0[6:2]"},
+  { name: "funct3"    , wave: "x.|.2.....", data: "i0[14:12]"},
+  { name: "imm30"     , wave: "x.|.2.....", data: "i0[30]"},
+  {},
+  { name: "r*_addr"   , wave: "x.|.2.....", data: "i0[24:15,11:7]"},
+  { name: "imm*"      , wave: "x.|.2.....", data: "i0[31:7]"},
+
+  ],
+  edge : [
+  "a~>b","b~>c"]
+}
+</script>
+</div>
+<p>The bus requests begin by SERV raising o_ibus_cyc until the memory responds with an i_ibus_ack and presents the instruction on i_ibus_rdt. Upon seeing the ack, SERV will ower cyc to indicate the end of the bus cycle.</p>
+<p>When the ack appears, two things happen in SERV. The relevant portions of the instruction such as opcode, funct3 and immediate value are saved in serv_decode and serv_immdec. The saved bits of the instruction is then decoded to create the internal control signals that corresponds to the current instruction.</p>
+<p>The other thing to happen is that request to start accessing the register file is sent by strobing rf_rreq which prepares the register file for both read and write access.</p>
+
+<div style="overflow-x:auto">
+<script type="WaveDrom">
+{ signal: [
+  { name: "clk"    , wave: "0P.|....."},
+  { name: "rreq"   , wave: "010|.....", node: ".a..."},
+  { name: "rreg0"  , wave: "x.2|.....", node: "....", data: "r0"},
+  { name: "rreg1"  , wave: "x.2|.....", node: "....", data: "r1"},
+  { name: "ready"  , wave: "0..|10...", node: "....b."},
+  { name: "rdata0" , wave: "-..|12345", data: "0 1 2 3 4"},
+  { name: "rdata1" , wave: "-..|12345", data: "0 1 2 3 4"},
+  ],
+  edge : [
+  "a~>b"]
+}
+</script>
+</div>
+<p>The interface between the core and the register file is described in a protocol where the core strobes rreq and present the registers to read on the following cycle. The register file will prepare to stream out data bit from the two requested registers. The cycle before it sends out the first bit (LSB) it will strobe rf_ready. Writes work in a similar way in that the registers to write has to be presented the cycle after rf_wreq is strobed and that the register file will start accepting data the cycle after it has strobed rf_ready. Note that the delay between rf_wreq and rf_ready does not have to be the same as from rf_rreq to rf_ready. Also note that register data will only be written to a register if the corresponding write enable signal is asserted. In the diagram below, only register r0 will be written to.</p>
+
+<div style="overflow-x:auto">
+<script type="WaveDrom">
+{ signal: [
+  { name: "clk"    , wave: "0P......"},
+  { name: "wreq"   , wave: "010.....", node: ".a..."},
+  { name: "ready"  , wave: "010.....", node: ".b."},
+  { name: "wreg0"  , wave: "x.2.....", node: "....", data: "r0"},
+  { name: "wreg1"  , wave: "x.2.....", node: "....", data: "r1"},
+  { name: "wen0"   , wave: "0.1.....", node: "....", data: "r0"},
+  { name: "wen1"   , wave: "0.......", node: "....", data: "r1"},
+  { name: "wdata0" , wave: "-..12345", data: "0 1 2 3 4"},
+  { name: "wdata1" , wave: "-.......", data: "0 1 2 3 4"},
+  ],
+  edge : [
+  "a~>b"]
+}
+</script>
+</div>
+</div>
+</div>
+
+    <script type="text/javascript">
+        function init() {
+            WaveDrom.ProcessAll();
+        }
+        window.onload = init;
+    </script>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">SERV</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Olof Kindgren.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.4.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
