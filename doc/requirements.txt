@@ -1,1 +1,1 @@
-sphinxcontrib-wavedrom
+git+https://github.com/bavovanachte/sphinx-wavedrom@master#egg=sphinxcontrib-wavedrom
