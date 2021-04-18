@@ -33,11 +33,6 @@ jobs:
         cd $SERV/workspace
         fusesoc library add serv $SERV
 
-    - name: lint
-      run: |
-        cd $SERV/workspace
-        fusesoc run --target=lint serv
-
     - name: build servant
       run: |
         cd $SERV/workspace

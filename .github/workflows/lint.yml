@@ -1,0 +1,16 @@
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: Linter
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Lint Verilog source files with Verilator
+        uses: librecores/ci-fusesoc-action@master
+        with:
+          command: 'run'
+          core: 'serv'
+          target: 'lint'
+          tool: 'verilator'

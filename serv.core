@@ -38,6 +38,8 @@ targets:
     tools:
       verilator:
         mode : lint-only
+        verilator_options:
+          - "-Wall"
     toplevel : serv_rf_top
 
 parameters:
