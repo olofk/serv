@@ -202,7 +202,7 @@ The bus requests begin by SERV raising o_ibus_cyc until the memory responds with
           "a~>b","b~>c"]
         }
 
-When the ack appears, two things happen in SERV. The relevant portions of the instruction such as opcode, funct3 and immediate value are saved in serv_decode and serv_immdec. The saved bits of the instruction is then decoded to create the internal control signals that corresponds to the current instruction.
+When the ack appears, two things happen in SERV. The relevant portions of the instruction such as opcode, funct3 and immediate value are saved in serv_decode and serv_immdec. The saved bits of the instruction is then decoded to create the internal control signals that corresponds to the current instruction. The decoded control signals remain static throughout the instruction life cycle.
 
 The other thing to happen is that a request to start accessing the register file is sent by strobing rf_rreq which prepares the register file for both read and write access.
 
@@ -235,6 +235,30 @@ The interface between the core and the register file is described in a protocol 
           { name: "wen1"   , wave: "0......"},
           { name: "wdata0" , wave: "-123456", node: "..c.", data: "0 1 2 3 4"},
           { name: "wdata1" , wave: "-123456", node: "..d.", data: "0 1 2 3 4"},
+          ],
+          edge : [
+          "a~>b", "b~>c", "b~>d"]
+        }
+
+After the instruction has been decoded and the register file prepared for reads (and possibly writes) the core knows whether it is a one-stage or two-stage instruction. These are handled differently and we will begin by looking at one-stage instructions. A stage in SERV is 32 consecutive cycles during which the core is active and processes inputs and creates results one bit at a time, starting with the LSB.
+
+One-stage instructions
+^^^^^^^^^^^^^^^^^^^^^^
+
+Most operations are one-stage operations which finish in 32 cycles + fetch overhead. During a one-stage operation, the RF is read and written simultaneously as well as the PC which is increased by four to point to the next instruction. trap and init signals are low to distinguish from other stages.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"     , wave: "0P..|..."},
+          { name: "cnt_en"  , wave: "01..|..0", node: "...."},
+          { name: "init"    , wave: "0...|...", node: "....", data: "r0"},
+          { name: "trap"    , wave: "0...|...", node: "....", data: "r1"},
+          { name: "pc_en"   , wave: "01..|..0"},
+          { name: "rs1"     , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
+          { name: "rs2"     , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
+          { name: "imm"     , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
+          { name: "rd"      , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
           ],
           edge : [
           "a~>b", "b~>c", "b~>d"]
