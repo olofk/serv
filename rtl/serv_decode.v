@@ -52,8 +52,6 @@ module serv_decode
    output wire 	     o_rd_csr_en,
    output wire 	     o_rd_alu_en);
 
-`include "serv_params.vh"
-
    reg [4:0] opcode;
    reg [2:0] funct3;
    reg 	      op20;

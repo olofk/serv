@@ -45,8 +45,6 @@ module serv_rf_if
    output wire 		      o_rs2);
 
 
-`include "serv_params.vh"
-
    /*
     ********** Write side ***********
     */
@@ -65,14 +63,19 @@ module serv_rf_if
    assign 	     o_wdata0 = i_trap ? mtval  : rd;
    assign	     o_wdata1 = i_trap ? i_mepc : i_csr;
 
-   //port 0 rd mtval
-   //port 1 csr mepc
-   //mepc  100010
-   //mtval 100011
-   //csr   1000xx
-   //rd    0xxxxx
-   assign o_wreg0 = i_trap ? {4'b1000,CSR_MTVAL} : {1'b0,i_rd_waddr};
-   assign o_wreg1 = i_trap ? {4'b1000,CSR_MEPC}  : {4'b1000,i_csr_addr};
+   /* Port 0 handles writes to mtval during traps and rd otherwise
+    * Port 1 handles writes to mepc during traps and csr accesses otherwise
+    *
+    * GPR registers are mapped to address 0-31 (bits 0xxxxx).
+    * Following that are four CSR registers
+    * mscratch 100000
+    * mtvec    100001
+    * mepc     100010
+    * mtval    100011
+    */
+
+   assign o_wreg0 = i_trap ? {6'b100011} : {1'b0,i_rd_waddr};
+   assign o_wreg1 = i_trap ? {6'b100010} : {4'b1000,i_csr_addr};
 
    assign       o_wen0 = i_cnt_en & (i_trap | rd_wen);
    assign       o_wen1 = i_cnt_en & (i_trap | i_csr_en);
