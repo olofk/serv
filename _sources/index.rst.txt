@@ -224,17 +224,16 @@ The interface between the core and the register file is described in a protocol 
 .. wavedrom::
 
         { signal: [
-          { name: "clk"    , wave: "0P......"},
-          { name: "wreq"   , wave: "010.....", node: ".a..."},
-          { name: "ready"  , wave: "010.....", node: ".b."},
-          { name: "wreg0"  , wave: "x.2.....", node: "....", data: "r0"},
-          { name: "wreg1"  , wave: "x.2.....", node: "....", data: "r1"},
-          { name: "wen0"   , wave: "0.1.....", node: "....", data: "r0"},
-          { name: "wen1"   , wave: "0.......", node: "....", data: "r1"},
-          { name: "wdata0" , wave: "-..12345", data: "0 1 2 3 4"},
-          { name: "wdata1" , wave: "-.......", data: "0 1 2 3 4"},
+          { name: "clk"    , wave: "0P....."},
+          { name: "wreq"   , wave: "010....", node: ".a..."},
+          { name: "ready"  , wave: "010....", node: ".b."},
+          { name: "wreg0"  , wave: "x.2....", node: "....", data: "r0"},
+          { name: "wreg1"  , wave: "x.2....", node: "....", data: "r1"},
+          { name: "wen0"   , wave: "0.1...."},
+          { name: "wen1"   , wave: "0......"},
+          { name: "wdata0" , wave: "-123456", node: "..c.", data: "0 1 2 3 4"},
+          { name: "wdata1" , wave: "-123456", node: "..d.", data: "0 1 2 3 4"},
           ],
           edge : [
-          "a~>b"]
+          "a~>b", "b~>c", "b~>d"]
         }
-
