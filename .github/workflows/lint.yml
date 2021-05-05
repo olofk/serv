@@ -8,7 +8,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Lint Verilog source files with Verilator
-        uses: librecores/ci-fusesoc-action@master
+        uses: librecores/ci-fusesoc-action@main
         with:
           command: 'run'
           core: 'serv'
