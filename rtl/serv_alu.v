@@ -39,8 +39,19 @@ module serv_alu
 
    assign o_cmp = i_cmp_eq ? result_eq : result_lt;
 
-   localparam [15:0] BOOL_LUT = 16'h8E06;//And, Or, 0, xor
-   wire result_bool = BOOL_LUT[{i_bool_op, i_rs1, i_op_b}];
+   /*
+    The result_bool expression implements the following operations between
+    i_rs1 and i_op_b depending on the value of i_bool_op
+
+    00 xor
+    01 0
+    10 or
+    11 and
+
+    i_bool_op will be 01 during shift operations, so by outputting zero under
+    this condition we can safely or result_bool with i_buf
+    */
+   wire result_bool = ((i_rs1 ^ i_op_b) & ~ i_bool_op[0]) | (i_bool_op[1] & i_op_b & i_rs1);
 
    assign o_rd = i_buf |
                  (i_rd_sel[0] & result_add) |
