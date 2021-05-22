@@ -6,7 +6,7 @@ module servis_clock_gen
 
    wire   clkfb;
    wire   locked;
-   reg 	  locked_r;
+   reg    locked_r;
 
    PLL_BASE
      #(.BANDWIDTH("OPTIMIZED"),

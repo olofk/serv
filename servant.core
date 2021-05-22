@@ -170,7 +170,7 @@ targets:
         family : MAX 10
         device : 10M50DAF484C6GES
     toplevel: servive
-   
+
   de0_nano:
     default_tool : quartus
     filesets : [mem_files, soc, de0_nano]

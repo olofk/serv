@@ -1,64 +1,64 @@
 `default_nettype none
 module serv_decode
   (
-   input wire 	     clk,
+   input wire        clk,
    //Input
    input wire [31:2] i_wb_rdt,
-   input wire 	     i_wb_en,
+   input wire        i_wb_en,
    //To state
-   output wire 	     o_sh_right,
-   output wire 	     o_bne_or_bge,
-   output wire 	     o_cond_branch,
-   output wire 	     o_e_op,
-   output wire 	     o_ebreak,
-   output wire 	     o_branch_op,
-   output wire 	     o_mem_op,
-   output wire 	     o_shift_op,
-   output wire 	     o_slt_op,
-   output wire 	     o_rd_op,
+   output wire       o_sh_right,
+   output wire       o_bne_or_bge,
+   output wire       o_cond_branch,
+   output wire       o_e_op,
+   output wire       o_ebreak,
+   output wire       o_branch_op,
+   output wire       o_mem_op,
+   output wire       o_shift_op,
+   output wire       o_slt_op,
+   output wire       o_rd_op,
    //To bufreg
-   output wire 	     o_bufreg_rs1_en,
-   output wire 	     o_bufreg_imm_en,
-   output wire 	     o_bufreg_clr_lsb,
-   output wire 	     o_bufreg_sh_signed,
+   output wire       o_bufreg_rs1_en,
+   output wire       o_bufreg_imm_en,
+   output wire       o_bufreg_clr_lsb,
+   output wire       o_bufreg_sh_signed,
    //To ctrl
-   output wire 	     o_ctrl_jal_or_jalr,
-   output wire 	     o_ctrl_utype,
-   output wire 	     o_ctrl_pc_rel,
-   output wire 	     o_ctrl_mret,
+   output wire       o_ctrl_jal_or_jalr,
+   output wire       o_ctrl_utype,
+   output wire       o_ctrl_pc_rel,
+   output wire       o_ctrl_mret,
    //To alu
-   output wire 	     o_alu_sub,
+   output wire       o_alu_sub,
    output wire [1:0] o_alu_bool_op,
-   output wire 	     o_alu_cmp_eq,
-   output wire 	     o_alu_cmp_sig,
+   output wire       o_alu_cmp_eq,
+   output wire       o_alu_cmp_sig,
    output wire [2:0] o_alu_rd_sel,
    //To mem IF
-   output wire 	     o_mem_signed,
-   output wire 	     o_mem_word,
-   output wire 	     o_mem_half,
-   output wire 	     o_mem_cmd,
+   output wire       o_mem_signed,
+   output wire       o_mem_word,
+   output wire       o_mem_half,
+   output wire       o_mem_cmd,
    //To CSR
-   output wire 	     o_csr_en,
+   output wire       o_csr_en,
    output wire [1:0] o_csr_addr,
-   output wire 	     o_csr_mstatus_en,
-   output wire 	     o_csr_mie_en,
-   output wire 	     o_csr_mcause_en,
+   output wire       o_csr_mstatus_en,
+   output wire       o_csr_mie_en,
+   output wire       o_csr_mcause_en,
    output wire [1:0] o_csr_source,
-   output wire 	     o_csr_d_sel,
-   output wire 	     o_csr_imm_en,
+   output wire       o_csr_d_sel,
+   output wire       o_csr_imm_en,
    //To top
    output wire [3:0] o_immdec_ctrl,
    output wire [3:0] o_immdec_en,
-   output wire 	     o_op_b_source,
-   output wire 	     o_rd_csr_en,
-   output wire 	     o_rd_alu_en);
+   output wire       o_op_b_source,
+   output wire       o_rd_csr_en,
+   output wire       o_rd_alu_en);
 
    reg [4:0] opcode;
    reg [2:0] funct3;
-   reg 	      op20;
-   reg 	      op21;
-   reg 	      op22;
-   reg 	      op26;
+   reg        op20;
+   reg        op21;
+   reg        op22;
+   reg        op26;
 
    reg       imm30;
 
@@ -92,14 +92,14 @@ module serv_decode
    //True for jal, b* auipc
    //False for jalr, lui
    assign o_ctrl_pc_rel = (opcode[2:0] == 3'b000) |
-			  (opcode[1:0] == 2'b11) |
-			  (opcode[4:3] == 2'b00);
+                          (opcode[1:0] == 2'b11) |
+                          (opcode[4:3] == 2'b00);
    //Write to RD
    //True for OP-IMM, AUIPC, OP, LUI, SYSTEM, JALR, JAL, LOAD
    //False for STORE, BRANCH, MISC-MEM
    assign o_rd_op = (opcode[2] |
-		     (!opcode[2] & opcode[4] & opcode[0]) |
-		     (!opcode[2] & !opcode[3] & !opcode[0]));
+                     (!opcode[2] & opcode[4] & opcode[0]) |
+                     (!opcode[2] & !opcode[3] & !opcode[0]));
 
    //
    //funct3
@@ -107,7 +107,7 @@ module serv_decode
 
    assign o_sh_right   = funct3[2];
    assign o_bne_or_bge = funct3[0];
-   
+
    //
    // opcode & funct3
    //
@@ -150,10 +150,10 @@ module serv_decode
     Bits 26, 22, 21 and 20 are enough to uniquely identify the eight supported CSR regs
     mtvec, mscratch, mepc and mtval are stored externally (normally in the RF) and are
     treated differently from mstatus, mie and mcause which are stored in serv_csr.
-    
+
     The former get a 2-bit address as seen below while the latter get a
     one-hot enable signal each.
-    
+
     Hex|2 222|Reg     |csr
     adr|6 210|name    |addr
     ---|-----|--------|----
@@ -164,7 +164,7 @@ module serv_decode
     341|1_001|mepc    | 10
     342|1_010|mcause  | xx
     343|1_011|mtval   | 11
-    
+
     */
 
    //true  for mtvec,mscratch,mepc and mtval
@@ -198,7 +198,7 @@ module serv_decode
    //False for J type instructions
    assign o_immdec_ctrl[0] = opcode[3:0] == 4'b1000;
    //True for OP-IMM, LOAD, STORE, JALR  (I S)
-   //False for LUI, AUIPC, JAL           (U J) 
+   //False for LUI, AUIPC, JAL           (U J)
    assign o_immdec_ctrl[1] = (opcode[1:0] == 2'b00) | (opcode[2:1] == 2'b00);
    assign o_immdec_ctrl[2] = opcode[4] & !opcode[0];
    assign o_immdec_ctrl[3] = opcode[4];
@@ -216,10 +216,10 @@ module serv_decode
          funct3        <= i_wb_rdt[14:12];
          imm30         <= i_wb_rdt[30];
          opcode        <= i_wb_rdt[6:2];
-	 op20 <= i_wb_rdt[20];
-	 op21 <= i_wb_rdt[21];
-	 op22 <= i_wb_rdt[22];
-	 op26 <= i_wb_rdt[26];
+         op20 <= i_wb_rdt[20];
+         op21 <= i_wb_rdt[21];
+         op22 <= i_wb_rdt[22];
+         op26 <= i_wb_rdt[26];
       end
    end
 

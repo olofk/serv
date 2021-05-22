@@ -9,6 +9,6 @@ module servant_gpio
    always @(posedge i_wb_clk) begin
       o_wb_rdt <= o_gpio;
       if (i_wb_cyc & i_wb_we)
-	o_gpio <= i_wb_dat;
+        o_gpio <= i_wb_dat;
    end
 endmodule

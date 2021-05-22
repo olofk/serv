@@ -7,45 +7,45 @@ module serv_rf_ram_if
     parameter l2w = $clog2(width))
   (
    //SERV side
-   input wire 				i_clk,
-   input wire 				i_rst,
-   input wire 				i_wreq,
-   input wire 				i_rreq,
-   output wire 				o_ready,
+   input wire                           i_clk,
+   input wire                           i_rst,
+   input wire                           i_wreq,
+   input wire                           i_rreq,
+   output wire                          o_ready,
    input wire [$clog2(32+csr_regs)-1:0] i_wreg0,
    input wire [$clog2(32+csr_regs)-1:0] i_wreg1,
-   input wire 				i_wen0,
-   input wire 				i_wen1,
-   input wire 				i_wdata0,
-   input wire 				i_wdata1,
+   input wire                           i_wen0,
+   input wire                           i_wen1,
+   input wire                           i_wdata0,
+   input wire                           i_wdata1,
    input wire [$clog2(32+csr_regs)-1:0] i_rreg0,
    input wire [$clog2(32+csr_regs)-1:0] i_rreg1,
-   output wire 				o_rdata0,
-   output wire 				o_rdata1,
+   output wire                          o_rdata0,
+   output wire                          o_rdata1,
    //RAM side
-   output wire [$clog2(depth)-1:0] 	o_waddr,
-   output wire [width-1:0] 		o_wdata,
-   output wire 				o_wen,
-   output wire [$clog2(depth)-1:0] 	o_raddr,
-   input wire [width-1:0] 		i_rdata);
+   output wire [$clog2(depth)-1:0]      o_waddr,
+   output wire [width-1:0]              o_wdata,
+   output wire                          o_wen,
+   output wire [$clog2(depth)-1:0]      o_raddr,
+   input wire [width-1:0]               i_rdata);
 
-   reg 				   rgnt;
+   reg                             rgnt;
    assign o_ready = rgnt | i_wreq;
-   reg [4:0] 	  rcnt;
+   reg [4:0]      rcnt;
 
    /*
     ********** Write side ***********
     */
 
-   wire [4:0] 	     wcnt;
+   wire [4:0]        wcnt;
 
    reg [width-2:0]   wdata0_r;
    reg [width-1:0]   wdata1_r;
 
-   reg 		     wen0_r;
-   reg 		     wen1_r;
-   wire 	     wtrig0;
-   wire 	     wtrig1;
+   reg               wen0_r;
+   reg               wen1_r;
+   wire              wtrig0;
+   wire              wtrig1;
 
    generate if (width == 2) begin
       assign wtrig0 = ~wcnt[0];
@@ -58,9 +58,9 @@ module serv_rf_ram_if
    end
    endgenerate
 
-   assign 	     o_wdata = wtrig1 ?
-			       wdata1_r :
-			       {i_wdata0, wdata0_r};
+   assign            o_wdata = wtrig1 ?
+                               wdata1_r :
+                               {i_wdata0, wdata0_r};
 
    wire [$clog2(32+csr_regs)-1:0] wreg  = wtrig1 ? i_wreg1 : i_wreg0;
    generate if (width == 32)
@@ -92,8 +92,8 @@ module serv_rf_ram_if
     */
 
 
-   wire 	  rtrig0;
-   reg 		  rtrig1;
+   wire           rtrig0;
+   reg            rtrig1;
 
    wire [$clog2(32+csr_regs)-1:0] rreg = rtrig0 ? i_rreg1 : i_rreg0;
    generate if (width == 32)
@@ -110,13 +110,13 @@ module serv_rf_ram_if
 
    assign rtrig0 = (rcnt[l2w-1:0] == 1);
 
-   reg 	      rreq_r;
+   reg        rreq_r;
 
    generate if (width>2)
      always @(posedge i_clk) begin
-	rdata1 <= {1'b0,rdata1[width-2:1]}; //Optimize?
-	if (rtrig1)
-	  rdata1[width-2:0] <= i_rdata[width-1:1];
+        rdata1 <= {1'b0,rdata1[width-2:1]}; //Optimize?
+        if (rtrig1)
+          rdata1[width-2:0] <= i_rdata[width-1:1];
      end
    else
      always @(posedge i_clk) if (rtrig1) rdata1 <= i_rdata[1];
@@ -126,22 +126,22 @@ module serv_rf_ram_if
       rtrig1 <= rtrig0;
       rcnt <= rcnt+5'd1;
       if (i_rreq)
-	 rcnt <= 5'd0;
+         rcnt <= 5'd0;
       if (i_wreq)
-	 rcnt <= 5'd2;
+         rcnt <= 5'd2;
 
       rreq_r <= i_rreq;
       rgnt <= rreq_r;
 
       rdata0 <= {1'b0,rdata0[width-1:1]};
       if (rtrig0)
-	rdata0 <= i_rdata;
+        rdata0 <= i_rdata;
 
       if (i_rst) begin
-	 if (reset_strategy != "NONE") begin
-	    rgnt <= 1'b0;
-	    rreq_r <= 1'b0;
-	 end
+         if (reset_strategy != "NONE") begin
+            rgnt <= 1'b0;
+            rreq_r <= 1'b0;
+         end
       end
    end
 

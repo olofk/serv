@@ -23,37 +23,37 @@ module serving_ram
     parameter depth = 256,
     parameter aw    = $clog2(depth),
     parameter memfile = "")
-   (input wire 		i_clk,
+   (input wire          i_clk,
     input wire [aw-1:0] i_waddr,
-    input wire [7:0] 	i_wdata,
-    input wire 		i_wen,
+    input wire [7:0]    i_wdata,
+    input wire          i_wen,
     input wire [aw-1:0] i_raddr,
-    output wire [7:0] 	o_rdata,
+    output wire [7:0]   o_rdata,
 
     input wire [aw-1:2] i_wb_adr,
-    input wire [31:0] 	i_wb_dat,
-    input wire [3:0] 	i_wb_sel,
-    input wire 		i_wb_we,
-    input wire 		i_wb_stb,
-    output wire [31:0] 	o_wb_rdt,
-    output reg 		o_wb_ack);
+    input wire [31:0]   i_wb_dat,
+    input wire [3:0]    i_wb_sel,
+    input wire          i_wb_we,
+    input wire          i_wb_stb,
+    output wire [31:0]  o_wb_rdt,
+    output reg          o_wb_ack);
 
-   reg [1:0] 		bsel;
+   reg [1:0]            bsel;
    reg [7:0] rdata;
 
-   wire 		wb_en = i_wb_stb & !i_wen & !o_wb_ack;
+   wire                 wb_en = i_wb_stb & !i_wen & !o_wb_ack;
 
-   wire 		wb_we = i_wb_we & i_wb_sel[bsel];
+   wire                 wb_we = i_wb_we & i_wb_sel[bsel];
 
-   wire  		we = wb_en ? wb_we : i_wen;
+   wire                 we = wb_en ? wb_we : i_wen;
 
-   reg [7:0] 		mem [0:depth-1] /* verilator public */;
+   reg [7:0]            mem [0:depth-1] /* verilator public */;
 
-   wire [aw-1:0] 	waddr = wb_en ? {i_wb_adr[aw-1:2],bsel} : i_waddr;
-   wire [7:0] 		wdata = wb_en ? i_wb_dat[bsel*8+:8]     : i_wdata;
-   wire [aw-1:0] 	raddr = wb_en ? {i_wb_adr[aw-1:2],bsel} : i_raddr;
+   wire [aw-1:0]        waddr = wb_en ? {i_wb_adr[aw-1:2],bsel} : i_waddr;
+   wire [7:0]           wdata = wb_en ? i_wb_dat[bsel*8+:8]     : i_wdata;
+   wire [aw-1:0]        raddr = wb_en ? {i_wb_adr[aw-1:2],bsel} : i_raddr;
 
-   reg [23:0] 		wb_rdt;
+   reg [23:0]           wb_rdt;
    assign o_wb_rdt = {rdata, wb_rdt};
 
    always @(posedge i_clk) begin
@@ -71,8 +71,8 @@ module serving_ram
 
    initial
      if(|memfile) begin
-	$display("Preloading %m from %s", memfile);
-	$readmemh(memfile, mem);
+        $display("Preloading %m from %s", memfile);
+        $readmemh(memfile, mem);
      end
 
    assign o_rdata = rdata;
