@@ -1,10 +1,10 @@
 `default_nettype none
 module servclone10
 (
- input wire 	   i_clk,
- input wire 	   i_rst,
- output wire 	   q,
- output wire 	   uart_txd);
+ input wire        i_clk,
+ input wire        i_rst,
+ output wire       q,
+ output wire       uart_txd);
 
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;

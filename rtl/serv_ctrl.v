@@ -4,34 +4,34 @@ module serv_ctrl
     parameter RESET_PC = 32'd0,
     parameter WITH_CSR = 1)
   (
-   input wire 	     clk,
-   input wire 	     i_rst,
+   input wire        clk,
+   input wire        i_rst,
    //State
-   input wire 	     i_pc_en,
-   input wire 	     i_cnt12to31,
-   input wire 	     i_cnt0,
-   input wire 	     i_cnt2,
+   input wire        i_pc_en,
+   input wire        i_cnt12to31,
+   input wire        i_cnt0,
+   input wire        i_cnt2,
    //Control
-   input wire 	     i_jump,
-   input wire 	     i_jal_or_jalr,
-   input wire 	     i_utype,
-   input wire 	     i_pc_rel,
-   input wire 	     i_trap,
+   input wire        i_jump,
+   input wire        i_jal_or_jalr,
+   input wire        i_utype,
+   input wire        i_pc_rel,
+   input wire        i_trap,
    //Data
-   input wire 	     i_imm,
-   input wire 	     i_buf,
-   input wire 	     i_csr_pc,
-   output wire 	     o_rd,
-   output wire 	     o_bad_pc,
+   input wire        i_imm,
+   input wire        i_buf,
+   input wire        i_csr_pc,
+   output wire       o_rd,
+   output wire       o_bad_pc,
    //External
    output reg [31:0] o_ibus_adr);
 
    wire       pc_plus_4;
    wire       pc_plus_4_cy;
-   reg 	      pc_plus_4_cy_r;
+   reg        pc_plus_4_cy_r;
    wire       pc_plus_offset;
    wire       pc_plus_offset_cy;
-   reg 	      pc_plus_offset_cy_r;
+   reg        pc_plus_offset_cy_r;
    wire       pc_plus_offset_aligned;
    wire       plus_4;
 
@@ -50,9 +50,9 @@ module serv_ctrl
 
    generate
       if (WITH_CSR)
-	assign new_pc = i_trap ? (i_csr_pc & !i_cnt0) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
+        assign new_pc = i_trap ? (i_csr_pc & !i_cnt0) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
       else
-	assign new_pc = i_jump ? pc_plus_offset_aligned : pc_plus_4;
+        assign new_pc = i_jump ? pc_plus_offset_aligned : pc_plus_4;
    endgenerate
    assign o_rd  = (i_utype & pc_plus_offset_aligned) | (pc_plus_4 & i_jal_or_jalr);
 
@@ -69,11 +69,11 @@ module serv_ctrl
       pc_plus_offset_cy_r <= i_pc_en & pc_plus_offset_cy;
 
       if (RESET_STRATEGY == "NONE") begin
-	 if (i_pc_en)
-	   o_ibus_adr <= {new_pc, o_ibus_adr[31:1]};
+         if (i_pc_en)
+           o_ibus_adr <= {new_pc, o_ibus_adr[31:1]};
       end else begin
-	 if (i_pc_en | i_rst)
-	   o_ibus_adr <= i_rst ? RESET_PC : {new_pc, o_ibus_adr[31:1]};
+         if (i_pc_en | i_rst)
+           o_ibus_adr <= i_rst ? RESET_PC : {new_pc, o_ibus_adr[31:1]};
       end
    end
 endmodule

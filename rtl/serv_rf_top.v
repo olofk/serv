@@ -12,18 +12,18 @@ module serv_rf_top
     parameter RESET_STRATEGY = "MINI",
     parameter WITH_CSR = 1,
     parameter RF_WIDTH = 2,
-	parameter RF_L2D   = $clog2((32+(WITH_CSR*4))*32/RF_WIDTH))
+        parameter RF_L2D   = $clog2((32+(WITH_CSR*4))*32/RF_WIDTH))
   (
-   input wire 	      clk,
-   input wire 	      i_rst,
-   input wire 	      i_timer_irq,
+   input wire         clk,
+   input wire         i_rst,
+   input wire         i_timer_irq,
 `ifdef RISCV_FORMAL
-   output wire 	      rvfi_valid,
+   output wire        rvfi_valid,
    output wire [63:0] rvfi_order,
    output wire [31:0] rvfi_insn,
-   output wire 	      rvfi_trap,
-   output wire 	      rvfi_halt,
-   output wire 	      rvfi_intr,
+   output wire        rvfi_trap,
+   output wire        rvfi_halt,
+   output wire        rvfi_intr,
    output wire [1:0]  rvfi_mode,
    output wire [1:0]  rvfi_ixl,
    output wire [4:0]  rvfi_rs1_addr,
@@ -41,36 +41,36 @@ module serv_rf_top
    output wire [31:0] rvfi_mem_wdata,
 `endif
    output wire [31:0] o_ibus_adr,
-   output wire 	      o_ibus_cyc,
+   output wire        o_ibus_cyc,
    input wire [31:0]  i_ibus_rdt,
-   input wire 	      i_ibus_ack,
+   input wire         i_ibus_ack,
    output wire [31:0] o_dbus_adr,
    output wire [31:0] o_dbus_dat,
    output wire [3:0]  o_dbus_sel,
-   output wire 	      o_dbus_we ,
-   output wire 	      o_dbus_cyc,
+   output wire        o_dbus_we ,
+   output wire        o_dbus_cyc,
    input wire [31:0]  i_dbus_rdt,
-   input wire 	      i_dbus_ack);
+   input wire         i_dbus_ack);
 
    localparam CSR_REGS = WITH_CSR*4;
 
-   wire 	      rf_wreq;
-   wire 	      rf_rreq;
+   wire               rf_wreq;
+   wire               rf_rreq;
    wire [4+WITH_CSR:0] wreg0;
    wire [4+WITH_CSR:0] wreg1;
-   wire 	      wen0;
-   wire 	      wen1;
-   wire 	      wdata0;
-   wire 	      wdata1;
+   wire               wen0;
+   wire               wen1;
+   wire               wdata0;
+   wire               wdata1;
    wire [4+WITH_CSR:0] rreg0;
    wire [4+WITH_CSR:0] rreg1;
-   wire 	      rf_ready;
-   wire 	      rdata0;
-   wire 	      rdata1;
+   wire               rf_ready;
+   wire               rdata0;
+   wire               rdata1;
 
    wire [RF_L2D-1:0]   waddr;
    wire [RF_WIDTH-1:0] wdata;
-   wire 	       wen;
+   wire                wen;
    wire [RF_L2D-1:0]   raddr;
    wire [RF_WIDTH-1:0] rdata;
 

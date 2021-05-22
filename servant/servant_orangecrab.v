@@ -79,7 +79,7 @@ module servant_orangecrab
    reg wb_rst;
    always @(posedge wb_clk)
        wb_rst <= ~pll_locked;
-   
+
    wire q;
    servant
      #(.memfile (memfile),

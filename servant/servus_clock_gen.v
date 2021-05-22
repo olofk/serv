@@ -6,7 +6,7 @@ module servus_clock_gen
 
    wire   clkfb;
    wire   locked;
-   reg 	  locked_r;
+   reg    locked_r;
 
    MMCME4_ADV
      #(.DIVCLK_DIVIDE    (5),

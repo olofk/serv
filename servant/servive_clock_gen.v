@@ -16,9 +16,9 @@ module servive_clock_gen
      else
        r <= 10'b1111111111;
 
-   wire [5:0] 	  clk;
+   wire [5:0]     clk;
 
-   assign 	  o_clk = clk[0];
+   assign         o_clk = clk[0];
 
    altpll
      #(.operation_mode         ("NORMAL"),

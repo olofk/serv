@@ -27,7 +27,7 @@ The FuseSoC standard library already contain a version of SERV, but if we want t
 
 `fusesoc library add serv https://github.com/olofk/serv`
 
-The SERV repo will now be available in $WORKSPACE/fusesoc_libraries/serv. To save some typing, we will refer to that directory as `$SERV`. 
+The SERV repo will now be available in $WORKSPACE/fusesoc_libraries/serv. To save some typing, we will refer to that directory as `$SERV`.
 
 We are now ready to do our first exercises with SERV
 
@@ -39,9 +39,9 @@ If everything worked, the output should look like
 
     INFO: Preparing ::serv:1.0.2
     INFO: Setting up project
-    
+
     INFO: Building simulation model
-    verilator -f serv_1.0.2.vc 
+    verilator -f serv_1.0.2.vc
     INFO: Running
 
 ## Running pre-built test software
@@ -152,7 +152,7 @@ FPGA Pin W18 (Pin 3 P8 connector)  is used for UART output with 57600 baud rate.
 
 ### SoCKit development kit
 
-FPGA Pin F14 (HSTC GPIO addon connector J2, pin 2) is used for UART output with 57600 baud rate. 
+FPGA Pin F14 (HSTC GPIO addon connector J2, pin 2) is used for UART output with 57600 baud rate.
 
     fusesoc run --target=sockit servant
 

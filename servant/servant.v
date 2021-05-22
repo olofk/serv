@@ -11,46 +11,46 @@ module servant
    parameter sim = 0;
    parameter with_csr = 1;
 
-   wire 	timer_irq;
+   wire         timer_irq;
 
-   wire [31:0] 	wb_ibus_adr;
-   wire 	wb_ibus_cyc;
-   wire [31:0] 	wb_ibus_rdt;
-   wire 	wb_ibus_ack;
+   wire [31:0]  wb_ibus_adr;
+   wire         wb_ibus_cyc;
+   wire [31:0]  wb_ibus_rdt;
+   wire         wb_ibus_ack;
 
-   wire [31:0] 	wb_dbus_adr;
-   wire [31:0] 	wb_dbus_dat;
-   wire [3:0] 	wb_dbus_sel;
-   wire 	wb_dbus_we;
-   wire 	wb_dbus_cyc;
-   wire [31:0] 	wb_dbus_rdt;
-   wire 	wb_dbus_ack;
+   wire [31:0]  wb_dbus_adr;
+   wire [31:0]  wb_dbus_dat;
+   wire [3:0]   wb_dbus_sel;
+   wire         wb_dbus_we;
+   wire         wb_dbus_cyc;
+   wire [31:0]  wb_dbus_rdt;
+   wire         wb_dbus_ack;
 
-   wire [31:0] 	wb_dmem_adr;
-   wire [31:0] 	wb_dmem_dat;
-   wire [3:0] 	wb_dmem_sel;
-   wire 	wb_dmem_we;
-   wire 	wb_dmem_cyc;
-   wire [31:0] 	wb_dmem_rdt;
-   wire 	wb_dmem_ack;
+   wire [31:0]  wb_dmem_adr;
+   wire [31:0]  wb_dmem_dat;
+   wire [3:0]   wb_dmem_sel;
+   wire         wb_dmem_we;
+   wire         wb_dmem_cyc;
+   wire [31:0]  wb_dmem_rdt;
+   wire         wb_dmem_ack;
 
-   wire [31:0] 	wb_mem_adr;
-   wire [31:0] 	wb_mem_dat;
-   wire [3:0] 	wb_mem_sel;
-   wire 	wb_mem_we;
-   wire 	wb_mem_cyc;
-   wire [31:0] 	wb_mem_rdt;
-   wire 	wb_mem_ack;
+   wire [31:0]  wb_mem_adr;
+   wire [31:0]  wb_mem_dat;
+   wire [3:0]   wb_mem_sel;
+   wire         wb_mem_we;
+   wire         wb_mem_cyc;
+   wire [31:0]  wb_mem_rdt;
+   wire         wb_mem_ack;
 
-   wire 	wb_gpio_dat;
-   wire 	wb_gpio_we;
-   wire 	wb_gpio_cyc;
-   wire 	wb_gpio_rdt;
+   wire         wb_gpio_dat;
+   wire         wb_gpio_we;
+   wire         wb_gpio_cyc;
+   wire         wb_gpio_rdt;
 
-   wire [31:0] 	wb_timer_dat;
-   wire 	wb_timer_we;
-   wire 	wb_timer_cyc;
-   wire [31:0] 	wb_timer_rdt;
+   wire [31:0]  wb_timer_dat;
+   wire         wb_timer_we;
+   wire         wb_timer_cyc;
+   wire [31:0]  wb_timer_rdt;
 
    servant_arbiter arbiter
      (.i_wb_cpu_dbus_adr (wb_dmem_adr),
@@ -121,20 +121,20 @@ module servant
 
    generate
       if (with_csr) begin
-	 servant_timer
-	   #(.RESET_STRATEGY (reset_strategy),
-	     .WIDTH (32))
-	 timer
-	   (.i_clk    (wb_clk),
-	    .i_rst    (wb_rst),
-	    .o_irq    (timer_irq),
-	    .i_wb_cyc (wb_timer_cyc),
-	    .i_wb_we  (wb_timer_we) ,
-	    .i_wb_dat (wb_timer_dat),
-	    .o_wb_dat (wb_timer_rdt));
+         servant_timer
+           #(.RESET_STRATEGY (reset_strategy),
+             .WIDTH (32))
+         timer
+           (.i_clk    (wb_clk),
+            .i_rst    (wb_rst),
+            .o_irq    (timer_irq),
+            .i_wb_cyc (wb_timer_cyc),
+            .i_wb_we  (wb_timer_we) ,
+            .i_wb_dat (wb_timer_dat),
+            .o_wb_dat (wb_timer_rdt));
       end else begin
-	 assign wb_timer_rdt = 32'd0;
-	 assign timer_irq = 1'b0;
+         assign wb_timer_rdt = 32'd0;
+         assign timer_irq = 1'b0;
       end
    endgenerate
 

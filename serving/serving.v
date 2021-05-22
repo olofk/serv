@@ -20,17 +20,17 @@
 `default_nettype none
 module serving
   (
-   input wire 	      i_clk,
-   input wire 	      i_rst,
-   input wire 	      i_timer_irq,
+   input wire         i_clk,
+   input wire         i_rst,
+   input wire         i_timer_irq,
 
    output wire [31:0] o_wb_adr,
    output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
-   output wire 	      o_wb_we ,
-   output wire 	      o_wb_stb,
+   output wire        o_wb_we ,
+   output wire        o_wb_stb,
    input wire [31:0]  i_wb_rdt,
-   input wire 	      i_wb_ack);
+   input wire         i_wb_ack);
 
    parameter memfile = "";
    parameter memsize = 8192;
@@ -42,38 +42,38 @@ module serving
 
    localparam aw = $clog2(memsize);
 
-   wire [31:0] 	wb_ibus_adr;
-   wire 	wb_ibus_stb;
-   wire [31:0] 	wb_ibus_rdt;
-   wire 	wb_ibus_ack;
+   wire [31:0]  wb_ibus_adr;
+   wire         wb_ibus_stb;
+   wire [31:0]  wb_ibus_rdt;
+   wire         wb_ibus_ack;
 
-   wire [31:0] 	wb_dbus_adr;
-   wire [31:0] 	wb_dbus_dat;
-   wire [3:0] 	wb_dbus_sel;
-   wire 	wb_dbus_we;
-   wire 	wb_dbus_stb;
-   wire [31:0] 	wb_dbus_rdt;
-   wire 	wb_dbus_ack;
+   wire [31:0]  wb_dbus_adr;
+   wire [31:0]  wb_dbus_dat;
+   wire [3:0]   wb_dbus_sel;
+   wire         wb_dbus_we;
+   wire         wb_dbus_stb;
+   wire [31:0]  wb_dbus_rdt;
+   wire         wb_dbus_ack;
 
-   wire [31:0] 	wb_dmem_adr;
-   wire [31:0] 	wb_dmem_dat;
-   wire [3:0] 	wb_dmem_sel;
-   wire 	wb_dmem_we;
-   wire 	wb_dmem_stb;
-   wire [31:0] 	wb_dmem_rdt;
-   wire 	wb_dmem_ack;
+   wire [31:0]  wb_dmem_adr;
+   wire [31:0]  wb_dmem_dat;
+   wire [3:0]   wb_dmem_sel;
+   wire         wb_dmem_we;
+   wire         wb_dmem_stb;
+   wire [31:0]  wb_dmem_rdt;
+   wire         wb_dmem_ack;
 
-   wire [31:0] 	wb_mem_adr;
-   wire [31:0] 	wb_mem_dat;
-   wire [3:0] 	wb_mem_sel;
-   wire 	wb_mem_we;
-   wire 	wb_mem_stb;
-   wire [31:0] 	wb_mem_rdt;
-   wire 	wb_mem_ack;
+   wire [31:0]  wb_mem_adr;
+   wire [31:0]  wb_mem_dat;
+   wire [3:0]   wb_mem_sel;
+   wire         wb_mem_we;
+   wire         wb_mem_stb;
+   wire [31:0]  wb_mem_rdt;
+   wire         wb_mem_ack;
 
    wire [6+WITH_CSR:0] waddr;
    wire [rf_width-1:0] wdata;
-   wire 	       wen;
+   wire                wen;
    wire [6+WITH_CSR:0] raddr;
    wire [rf_width-1:0] rdata;
 
@@ -152,19 +152,19 @@ module serving
 
    localparam RF_L2W = $clog2(rf_width);
 
-   wire 		   rf_wreq;
-   wire 		   rf_rreq;
+   wire                    rf_wreq;
+   wire                    rf_rreq;
    wire [$clog2(regs)-1:0] wreg0;
    wire [$clog2(regs)-1:0] wreg1;
-   wire 		   wen0;
-   wire 		   wen1;
-   wire 		   wdata0;
-   wire 		   wdata1;
+   wire                    wen0;
+   wire                    wen1;
+   wire                    wdata0;
+   wire                    wdata1;
    wire [$clog2(regs)-1:0] rreg0;
    wire [$clog2(regs)-1:0] rreg1;
-   wire 		   rf_ready;
-   wire 		   rdata0;
-   wire 		   rdata1;
+   wire                    rf_ready;
+   wire                    rdata0;
+   wire                    rdata1;
 
 
    serv_rf_ram_if

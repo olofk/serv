@@ -11,8 +11,8 @@ module servant_sim
    reg [1023:0] firmware_file;
    initial
      if ($value$plusargs("firmware=%s", firmware_file)) begin
-	$display("Loading RAM from %0s", firmware_file);
-	$readmemh(firmware_file, dut.ram.mem);
+        $display("Loading RAM from %0s", firmware_file);
+        $readmemh(firmware_file, dut.ram.mem);
      end
 
    servant

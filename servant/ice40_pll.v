@@ -16,25 +16,25 @@ module ice40_pll
 
    generate
       if (PLL == "ICE40_CORE") begin
-	 SB_PLL40_CORE
-	   #(`include "pll.vh")
-	 pll
-	   (
-	    .LOCK(locked),
-	    .RESETB(1'b1),
-	    .BYPASS(1'b0),
-	    .REFERENCECLK(i_clk),
-	    .PLLOUTCORE(o_clk));
+         SB_PLL40_CORE
+           #(`include "pll.vh")
+         pll
+           (
+            .LOCK(locked),
+            .RESETB(1'b1),
+            .BYPASS(1'b0),
+            .REFERENCECLK(i_clk),
+            .PLLOUTCORE(o_clk));
       end else if (PLL == "ICE40_PAD") begin
-	 SB_PLL40_PAD
-	   #(`include "pll.vh")
-	 pll
-	   (
-	    .LOCK(locked),
-	    .RESETB(1'b1),
-	    .BYPASS(1'b0),
-	    .PACKAGEPIN (i_clk),
-	    .PLLOUTCORE(o_clk));
+         SB_PLL40_PAD
+           #(`include "pll.vh")
+         pll
+           (
+            .LOCK(locked),
+            .RESETB(1'b1),
+            .BYPASS(1'b0),
+            .PACKAGEPIN (i_clk),
+            .PLLOUTCORE(o_clk));
       end
    endgenerate
 endmodule

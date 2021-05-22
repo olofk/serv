@@ -5,79 +5,79 @@ module serv_top
     parameter RESET_STRATEGY = "MINI",
     parameter RESET_PC = 32'd0)
    (
-   input wire 		      clk,
-   input wire 		      i_rst,
-   input wire 		      i_timer_irq,
+   input wire                 clk,
+   input wire                 i_rst,
+   input wire                 i_timer_irq,
 `ifdef RISCV_FORMAL
-   output reg 		      rvfi_valid = 1'b0,
-   output reg [63:0] 	      rvfi_order = 64'd0,
-   output reg [31:0] 	      rvfi_insn = 32'd0,
-   output reg 		      rvfi_trap = 1'b0,
-   output reg 		      rvfi_halt = 1'b0,
-   output reg 		      rvfi_intr = 1'b0,
-   output reg [1:0] 	      rvfi_mode = 2'b11,
-   output reg [1:0] 	      rvfi_ixl = 2'b01,
-   output reg [4:0] 	      rvfi_rs1_addr,
-   output reg [4:0] 	      rvfi_rs2_addr,
-   output reg [31:0] 	      rvfi_rs1_rdata,
-   output reg [31:0] 	      rvfi_rs2_rdata,
-   output reg [4:0] 	      rvfi_rd_addr,
-   output reg [31:0] 	      rvfi_rd_wdata,
-   output reg [31:0] 	      rvfi_pc_rdata,
-   output reg [31:0] 	      rvfi_pc_wdata,
-   output reg [31:0] 	      rvfi_mem_addr,
-   output reg [3:0] 	      rvfi_mem_rmask,
-   output reg [3:0] 	      rvfi_mem_wmask,
-   output reg [31:0] 	      rvfi_mem_rdata,
-   output reg [31:0] 	      rvfi_mem_wdata,
+   output reg                 rvfi_valid = 1'b0,
+   output reg [63:0]          rvfi_order = 64'd0,
+   output reg [31:0]          rvfi_insn = 32'd0,
+   output reg                 rvfi_trap = 1'b0,
+   output reg                 rvfi_halt = 1'b0,
+   output reg                 rvfi_intr = 1'b0,
+   output reg [1:0]           rvfi_mode = 2'b11,
+   output reg [1:0]           rvfi_ixl = 2'b01,
+   output reg [4:0]           rvfi_rs1_addr,
+   output reg [4:0]           rvfi_rs2_addr,
+   output reg [31:0]          rvfi_rs1_rdata,
+   output reg [31:0]          rvfi_rs2_rdata,
+   output reg [4:0]           rvfi_rd_addr,
+   output reg [31:0]          rvfi_rd_wdata,
+   output reg [31:0]          rvfi_pc_rdata,
+   output reg [31:0]          rvfi_pc_wdata,
+   output reg [31:0]          rvfi_mem_addr,
+   output reg [3:0]           rvfi_mem_rmask,
+   output reg [3:0]           rvfi_mem_wmask,
+   output reg [31:0]          rvfi_mem_rdata,
+   output reg [31:0]          rvfi_mem_wdata,
 `endif
    //RF Interface
-   output wire 		      o_rf_rreq,
-   output wire 		      o_rf_wreq,
-   input wire 		      i_rf_ready,
+   output wire                o_rf_rreq,
+   output wire                o_rf_wreq,
+   input wire                 i_rf_ready,
    output wire [4+WITH_CSR:0] o_wreg0,
    output wire [4+WITH_CSR:0] o_wreg1,
-   output wire 		      o_wen0,
-   output wire 		      o_wen1,
-   output wire 		      o_wdata0,
-   output wire 		      o_wdata1,
+   output wire                o_wen0,
+   output wire                o_wen1,
+   output wire                o_wdata0,
+   output wire                o_wdata1,
    output wire [4+WITH_CSR:0] o_rreg0,
    output wire [4+WITH_CSR:0] o_rreg1,
-   input wire 		      i_rdata0,
-   input wire 		      i_rdata1,
+   input wire                 i_rdata0,
+   input wire                 i_rdata1,
 
-   output wire [31:0] 	      o_ibus_adr,
-   output wire 		      o_ibus_cyc,
-   input wire [31:0] 	      i_ibus_rdt,
-   input wire 		      i_ibus_ack,
-   output wire [31:0] 	      o_dbus_adr,
-   output wire [31:0] 	      o_dbus_dat,
-   output wire [3:0] 	      o_dbus_sel,
-   output wire 		      o_dbus_we ,
-   output wire 		      o_dbus_cyc,
-   input wire [31:0] 	      i_dbus_rdt,
-   input wire 		      i_dbus_ack);
+   output wire [31:0]         o_ibus_adr,
+   output wire                o_ibus_cyc,
+   input wire [31:0]          i_ibus_rdt,
+   input wire                 i_ibus_ack,
+   output wire [31:0]         o_dbus_adr,
+   output wire [31:0]         o_dbus_dat,
+   output wire [3:0]          o_dbus_sel,
+   output wire                o_dbus_we ,
+   output wire                o_dbus_cyc,
+   input wire [31:0]          i_dbus_rdt,
+   input wire                 i_dbus_ack);
 
    wire [4:0]    rd_addr;
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
 
-   wire [3:0] 	 immdec_ctrl;
-   wire [3:0] 	immdec_en;
+   wire [3:0]    immdec_ctrl;
+   wire [3:0]   immdec_en;
 
    wire          sh_right;
-   wire 	 bne_or_bge;
-   wire 	 cond_branch;
-   wire 	 e_op;
-   wire 	 ebreak;
-   wire 	 branch_op;
+   wire          bne_or_bge;
+   wire          cond_branch;
+   wire          e_op;
+   wire          ebreak;
+   wire          branch_op;
    wire          mem_op;
-   wire 	 shift_op;
-   wire 	 slt_op;
-   wire 	 rd_op;
+   wire          shift_op;
+   wire          slt_op;
+   wire          rd_op;
 
-   wire 	 rd_alu_en;
-   wire 	 rd_csr_en;
+   wire          rd_alu_en;
+   wire          rd_csr_en;
    wire          ctrl_rd;
    wire          alu_rd;
    wire          mem_rd;
@@ -87,32 +87,32 @@ module serv_top
    wire          jump;
    wire          jal_or_jalr;
    wire          utype;
-   wire 	 mret;
+   wire          mret;
    wire          imm;
-   wire 	 trap;
-   wire 	 pc_rel;
+   wire          trap;
+   wire          pc_rel;
 
    wire          init;
    wire          cnt_en;
-   wire 	 cnt0to3;
-   wire 	 cnt12to31;
+   wire          cnt0to3;
+   wire          cnt12to31;
    wire          cnt0;
    wire          cnt1;
    wire          cnt2;
    wire          cnt3;
    wire          cnt7;
 
-   wire 	 cnt_done;
+   wire          cnt_done;
 
-   wire 	 bufreg_en;
+   wire          bufreg_en;
    wire          bufreg_sh_signed;
-   wire 	 bufreg_rs1_en;
-   wire 	 bufreg_imm_en;
-   wire 	 bufreg_clr_lsb;
-   wire 	 bufreg_q;
+   wire          bufreg_rs1_en;
+   wire          bufreg_imm_en;
+   wire          bufreg_clr_lsb;
+   wire          bufreg_q;
 
    wire          alu_sub;
-   wire [1:0] 	 alu_bool_op;
+   wire [1:0]    alu_bool_op;
    wire          alu_cmp_eq;
    wire          alu_cmp_sig;
    wire          alu_cmp;
@@ -127,32 +127,32 @@ module serv_top
    wire          mem_signed;
    wire          mem_word;
    wire          mem_half;
-   wire [1:0] 	 mem_bytecnt;
-   wire 	 mem_sh_done;
-   wire 	 mem_sh_done_r;
+   wire [1:0]    mem_bytecnt;
+   wire          mem_sh_done;
+   wire          mem_sh_done_r;
 
-   wire 	 mem_misalign;
+   wire          mem_misalign;
 
-   wire 	 bad_pc;
+   wire          bad_pc;
 
-   wire 	 csr_mstatus_en;
-   wire 	 csr_mie_en;
-   wire 	 csr_mcause_en;
-   wire [1:0]	 csr_source;
-   wire 	 csr_imm;
-   wire 	 csr_d_sel;
-   wire 	 csr_en;
-   wire [1:0] 	 csr_addr;
-   wire 	 csr_pc;
-   wire 	 csr_imm_en;
-   wire 	 csr_in;
-   wire 	 rf_csr_out;
+   wire          csr_mstatus_en;
+   wire          csr_mie_en;
+   wire          csr_mcause_en;
+   wire [1:0]    csr_source;
+   wire          csr_imm;
+   wire          csr_d_sel;
+   wire          csr_en;
+   wire [1:0]    csr_addr;
+   wire          csr_pc;
+   wire          csr_imm_en;
+   wire          csr_in;
+   wire          rf_csr_out;
 
-   wire 	 new_irq;
+   wire          new_irq;
 
    wire [1:0]   lsb;
 
-   wire 	op_b = op_b_source ? rs2 : imm;
+   wire         op_b = op_b_source ? rs2 : imm;
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
@@ -425,46 +425,46 @@ module serv_top
 
    generate
       if (WITH_CSR) begin
-	 serv_csr csr
-	   (
-	    .i_clk        (clk),
-	    //State
-	    .i_init       (init),
-	    .i_en         (cnt_en),
-	    .i_cnt0to3    (cnt0to3),
-	    .i_cnt3       (cnt3),
-	    .i_cnt7       (cnt7),
-	    .i_cnt_done   (cnt_done),
-	    .i_mem_op     (mem_op),
-	    .i_mtip       (i_timer_irq),
-	    .i_trap       (trap),
-	    .o_new_irq    (new_irq),
-	    //Control
-	    .i_e_op       (e_op),
-	    .i_ebreak     (ebreak),
-	    .i_mem_cmd    (o_dbus_we),
-	    .i_mstatus_en (csr_mstatus_en),
-	    .i_mie_en     (csr_mie_en    ),
-	    .i_mcause_en  (csr_mcause_en ),
-	    .i_csr_source (csr_source),
-	    .i_mret       (mret),
-	    .i_csr_d_sel  (csr_d_sel),
-	    //Data
-	    .i_rf_csr_out (rf_csr_out),
-	    .o_csr_in     (csr_in),
-	    .i_csr_imm    (csr_imm),
-	    .i_rs1        (rs1),
-	    .o_q          (csr_rd));
+         serv_csr csr
+           (
+            .i_clk        (clk),
+            //State
+            .i_init       (init),
+            .i_en         (cnt_en),
+            .i_cnt0to3    (cnt0to3),
+            .i_cnt3       (cnt3),
+            .i_cnt7       (cnt7),
+            .i_cnt_done   (cnt_done),
+            .i_mem_op     (mem_op),
+            .i_mtip       (i_timer_irq),
+            .i_trap       (trap),
+            .o_new_irq    (new_irq),
+            //Control
+            .i_e_op       (e_op),
+            .i_ebreak     (ebreak),
+            .i_mem_cmd    (o_dbus_we),
+            .i_mstatus_en (csr_mstatus_en),
+            .i_mie_en     (csr_mie_en    ),
+            .i_mcause_en  (csr_mcause_en ),
+            .i_csr_source (csr_source),
+            .i_mret       (mret),
+            .i_csr_d_sel  (csr_d_sel),
+            //Data
+            .i_rf_csr_out (rf_csr_out),
+            .o_csr_in     (csr_in),
+            .i_csr_imm    (csr_imm),
+            .i_rs1        (rs1),
+            .o_q          (csr_rd));
       end else begin
-	 assign csr_in = 1'b0;
-	 assign csr_rd = 1'b0;
-	 assign new_irq = 1'b0;
+         assign csr_in = 1'b0;
+         assign csr_rd = 1'b0;
+         assign new_irq = 1'b0;
       end
    endgenerate
 
 
 `ifdef RISCV_FORMAL
-   reg [31:0] 	 pc = RESET_PC;
+   reg [31:0]    pc = RESET_PC;
 
    wire rs_en = (branch_op|mem_op|shift_op|slt_op) ? init : ctrl_pc_en;
 
@@ -472,15 +472,15 @@ module serv_top
       rvfi_valid <= cnt_done & ctrl_pc_en & !i_rst;
       rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
       if (o_ibus_cyc & i_ibus_ack)
-	rvfi_insn <= i_ibus_rdt;
+        rvfi_insn <= i_ibus_rdt;
       if (o_wen0)
         rvfi_rd_wdata <= {o_wdata0,rvfi_rd_wdata[31:1]};
       if (cnt_done & ctrl_pc_en) begin
          rvfi_pc_rdata <= pc;
-	 if (!(rd_en & (|rd_addr))) begin
-	   rvfi_rd_addr <= 5'd0;
-	   rvfi_rd_wdata <= 32'd0;
-	 end
+         if (!(rd_en & (|rd_addr))) begin
+           rvfi_rd_addr <= 5'd0;
+           rvfi_rd_wdata <= 32'd0;
+         end
       end
       rvfi_trap <= trap;
       if (rvfi_valid) begin
@@ -493,9 +493,9 @@ module serv_top
       rvfi_mode <= 2'd3;
       rvfi_ixl = 2'd1;
       if (i_rf_ready) begin
-	 rvfi_rs1_addr <= rs1_addr;
+         rvfi_rs1_addr <= rs1_addr;
          rvfi_rs2_addr <= rs2_addr;
-	 rvfi_rd_addr  <= rd_addr;
+         rvfi_rd_addr  <= rd_addr;
       end
       if (rs_en) begin
          rvfi_rs1_rdata <= {rs1,rvfi_rs1_rdata[31:1]};
