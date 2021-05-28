@@ -223,7 +223,7 @@ module serv_decode #(
    wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
 
    generate
-      if (PRE_REGISTER) begin
+      if (PRE_REGISTER != 0) begin
 
          always @(posedge clk) begin
             if (i_wb_en) begin
