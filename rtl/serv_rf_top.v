@@ -3,6 +3,11 @@
 module serv_rf_top
   #(parameter RESET_PC = 32'd0,
 
+    /* Register signals before or after the decoder
+       0 : Register after the decoder. Faster but uses more resources
+       1 : (default) Register before the decoder. Slower but uses less resources
+     */
+    parameter PRE_REGISTER = 1,
     /* Amount of reset applied to design
        "NONE" : No reset at all. Relies on a POR to set correct initialization
                  values and that core isn't reset during runtime
@@ -113,6 +118,7 @@ module serv_rf_top
 
    serv_top
      #(.RESET_PC (RESET_PC),
+       .PRE_REGISTER (PRE_REGISTER),
        .RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR))
    cpu

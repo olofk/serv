@@ -25,6 +25,7 @@ targets:
   default:
     filesets : [core]
     parameters :
+      - "is_toplevel? (PRE_REGISTER)"
       - "is_toplevel? (RESET_STRATEGY)"
       - RISCV_FORMAL
       - SERV_CLEAR_RAM
@@ -42,6 +43,11 @@ targets:
     toplevel : serv_rf_top
 
 parameters:
+  PRE_REGISTER:
+    datatype    : int
+    description : Register signals before or after the decoder
+    paramtype   : vlogparam
+
   RESET_STRATEGY:
     datatype : str
     paramtype : vlogparam
