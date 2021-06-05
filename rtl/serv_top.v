@@ -2,6 +2,7 @@
 
 module serv_top
   #(parameter WITH_CSR = 1,
+    parameter PRE_REGISTER = 1,
     parameter RESET_STRATEGY = "MINI",
     parameter RESET_PC = 32'd0)
    (
@@ -204,7 +205,9 @@ module serv_top
       .i_rf_ready     (i_rf_ready),
       .o_rf_rd_en     (rd_en));
 
-   serv_decode decode
+   serv_decode
+     #(.PRE_REGISTER (PRE_REGISTER))
+   decode
      (
       .clk (clk),
       //Input

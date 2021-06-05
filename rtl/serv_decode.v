@@ -1,6 +1,6 @@
 `default_nettype none
 module serv_decode #(
-   parameter integer PRE_REGISTER = 1
+   parameter [0:0] PRE_REGISTER = 1
 )(
    input wire        clk,
    //Input
