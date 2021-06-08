@@ -144,6 +144,12 @@ FPGA Pin D11 (Connector JP1, pin 38) is used for UART output with 57600 baud rat
 
     fusesoc run --target=de0_nano servant
 
+### DE1 SoC revF
+
+FPGA PIN_AC18 (Connector GPIO0, pin 0) is used for UART output with 57600 baud rate. DE1 SoC revF needs an external 3.3V UART to connect to this pin. The UART pin has not been tested.
+
+    fusesoc run --target=de1_soc_revF servant
+
 ### DECA development kit
 
 FPGA Pin W18 (Pin 3 P8 connector)  is used for UART output with 57600 baud rate. Key 0 is reset and Led 0 q output.

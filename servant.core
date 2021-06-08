@@ -69,6 +69,13 @@ filesets:
       - servant/servive_clock_gen.v : {file_type : verilogSource}
       - servant/servive.v : {file_type : verilogSource}
 
+  de1_soc_revF:
+    files:
+      - data/de1_soc_revF.sdc : {file_type : SDC}
+      - data/de1_soc_revF.tcl : {file_type : tclSource}
+      - servant/servde1_soc_revF_clock_gen.v : {file_type : verilogSource}
+      - servant/servde1_soc_revF.v : {file_type : verilogSource}
+
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
   icesugar   : {files: [data/icesugar.pcf : {file_type : PCF}]}
@@ -180,6 +187,17 @@ targets:
         family : Cyclone IV E
         device : EP4CE22F17C6
     toplevel: servive
+
+  de1_soc_revF:
+    default_tool : quartus
+    filesets : [mem_files, soc, de1_soc_revF]
+    parameters : [memfile, memsize]
+    tools:
+      quartus:
+        family : Cyclone V
+        device : 5CSEMA5F31C6
+        board_device_index : 2
+    toplevel: servde1_soc_revF
 
   icebreaker:
     default_tool : icestorm
