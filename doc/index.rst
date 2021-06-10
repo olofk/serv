@@ -180,6 +180,8 @@ The life cycle of an instruction starts by the core issuing a request for a new 
 
 .. image:: life_cycle.png
 
+Fetch
+^^^^^
 The bus requests begin by SERV raising o_ibus_cyc until the memory responds with an i_ibus_ack and presents the instruction on i_ibus_rdt. Upon seeing the ack, SERV will lower cyc to indicate the end of the bus cycle.
 
 .. wavedrom::
@@ -202,6 +204,8 @@ The bus requests begin by SERV raising o_ibus_cyc until the memory responds with
           "a~>b","b~>c"]
         }
 
+Decode
+^^^^^^
 When the ack appears, two things happen in SERV. The relevant portions of the instruction such as opcode, funct3 and immediate value are saved in serv_decode and serv_immdec. The saved bits of the instruction is then decoded to create the internal control signals that corresponds to the current instruction. The decoded control signals remain static throughout the instruction life cycle.
 
 The other thing to happen is that a request to start accessing the register file is sent by strobing rf_rreq which prepares the register file for both read and write access.
@@ -240,10 +244,13 @@ The interface between the core and the register file is described in a protocol 
           "a~>b", "b~>c", "b~>d"]
         }
 
+Execute
+^^^^^^^
+
 After the instruction has been decoded and the register file prepared for reads (and possibly writes) the core knows whether it is a one-stage or two-stage instruction. These are handled differently and we will begin by looking at one-stage instructions. A stage in SERV is 32 consecutive cycles during which the core is active and processes inputs and creates results one bit at a time, starting with the LSB.
 
 One-stage instructions
-^^^^^^^^^^^^^^^^^^^^^^
+::::::::::::::::::::::
 
 Most operations are one-stage operations which finish in 32 cycles + fetch overhead. During a one-stage operation, the RF is read and written simultaneously as well as the PC which is increased by four to point to the next instruction. trap and init signals are low to distinguish from other stages.
 
@@ -259,6 +266,28 @@ Most operations are one-stage operations which finish in 32 cycles + fetch overh
           { name: "rs2"     , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
           { name: "imm"     , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
           { name: "rd"      , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
+          ],
+          edge : [
+          "a~>b", "b~>c", "b~>d"]
+        }
+
+Interrupts and ecall/ebreak
+:::::::::::::::::::::::::::
+
+External timer interrupts and ecall/ebreak are also one-stage operations with some notable differences. The new PC is fetched from the MTVEC CSR and instead of writing to rd, the MEPC and MTVAL CSR registers are written. All this is handled by serv_state raising the trap signal during the instruction's execution.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"     , wave: "0P..|..."},
+          { name: "cnt_en"  , wave: "01..|..0", node: "...."},
+          { name: "init"    , wave: "0...|...", node: "....", data: "r0"},
+          { name: "trap"    , wave: "1...|...", node: "....", data: "r1"},
+          { name: "pc_en"   , wave: "01..|..0"},
+          { name: "rs1"     , wave: "x...|...", node: "...", data: "0 1 ... 30 31"},
+          { name: "rs2"     , wave: "x...|...", node: "...", data: "0 1 ... 30 31"},
+          { name: "imm"     , wave: "x...|...", node: "...", data: "0 1 ... 30 31"},
+          { name: "rd"      , wave: "x...|...", node: "...", data: "0 1 ... 30 31"},
           ],
           edge : [
           "a~>b", "b~>c", "b~>d"]
