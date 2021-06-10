@@ -178,6 +178,10 @@ Instruction life cycle
 
 The life cycle of an instruction starts by the core issuing a request for a new instruction on the ibus and ends when the PC has been updated with the address of the next instruction. This section goes through what happens between those points for the various types of instructions. SERV distinguishes between two-stage and one-stage operations with the former category being all jump (branch), shift, slt and load/store instructions and the latter all other operations. In addition to this, exceptions are a special case. Only two-stage operations (jump, load/store) can cause an exception. Regardless of instruction type, they all start out the same way.
 
+.. image:: life_cycle.png
+
+The bus requests begin by SERV raising o_ibus_cyc until the memory responds with an i_ibus_ack and presents the instruction on i_ibus_rdt. Upon seeing the ack, SERV will lower cyc to indicate the end of the bus cycle.
+
 .. wavedrom::
 
         { signal: [
@@ -198,11 +202,9 @@ The life cycle of an instruction starts by the core issuing a request for a new 
           "a~>b","b~>c"]
         }
 
-The bus requests begin by SERV raising o_ibus_cyc until the memory responds with an i_ibus_ack and presents the instruction on i_ibus_rdt. Upon seeing the ack, SERV will ower cyc to indicate the end of the bus cycle.
-
 When the ack appears, two things happen in SERV. The relevant portions of the instruction such as opcode, funct3 and immediate value are saved in serv_decode and serv_immdec. The saved bits of the instruction is then decoded to create the internal control signals that corresponds to the current instruction.
 
-The other thing to happen is that request to start accessing the register file is sent by strobing rf_rreq which prepares the register file for both read and write access.
+The other thing to happen is that a request to start accessing the register file is sent by strobing rf_rreq which prepares the register file for both read and write access.
 
 .. wavedrom::
 
