@@ -292,3 +292,90 @@ External timer interrupts and ecall/ebreak are also one-stage operations with so
           edge : [
           "a~>b", "b~>c", "b~>d"]
         }
+
+Two-stage operations
+::::::::::::::::::::
+
+Some operations need to be executed in two stages. In the first stage the operands are read out from the immediate and the rs1/rs2 registers and potential results are written to PC and rd in the second stage. Various things happen between the stages depending on the type of operation. SERV has types of four two-stage operations; memory, shift, slt and branch operations. In all cases the first stage is distinguished by having the init signal raised and only performing reads from the RF.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"     , wave: "0P..|..."},
+          { name: "cnt_en"  , wave: "01..|..0", node: "...."},
+          { name: "init"    , wave: "1...|..0", node: "....", data: "r0"},
+          { name: "trap"    , wave: "0...|...", node: "....", data: "r1"},
+          { name: "pc_en"   , wave: "0...|..."},
+          { name: "rs1"     , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
+          { name: "rs2"     , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
+          { name: "imm"     , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
+          { name: "rd"      , wave: "x234|56x", node: "...", data: "0 1 ... 30 31"},
+          ],
+          edge : [
+          "a~>b", "b~>c", "b~>d"]
+        }
+
+
+memory
+++++++
+
+Loads and stores are memory operations. In the init stage, the data address to access is calculated, checked for alignment and stored in serv_bufreg. For stores, the data to write is also shifted into the data register in serv_mem_if.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"       , wave: "P..|..."},
+          { name: "trap"      , wave: "0..|...", node: "....", data: "r1"},
+          { name: "init"      , wave: "1.0|...", node: "....", data: "r0"},
+          { name: "cnt_en"    , wave: "1.0|.1.", node: ".....d"},
+          { name: "cnt_done"  , wave: "010|.1.", node: ".a...."},
+          { name: "o_dbus_cyc", wave: "0.1|.0.", node: "..b.", data: "0 1 ... 30 31"},
+          { name: "i_dbus_ack", wave: "0..|10.", node: "....c", data: "0 1 ... 30 31"},
+          { name: "o_dbus_adr", wave: "x.2|.x.", node: "...", data: "address"},
+          { name: "rs2"       , wave: "33x|...", node: ".e.", data: "d30 d31"},
+          { name: "o_dbus_dat", wave: "x.3|.x.", node: "..f", data: "data"},
+          { name: "o_dbus_sel", wave: "x.4|.x.", node: "...", data: ["write mask"]},
+          { name: "o_dbus_we" , wave: "1..|..."},
+          ],
+          edge : [
+          "a~>b", "b~>c", "c~>d", "e~>f"]
+        }
+
+If the address has correct alignment, the o_dbus_cyc signal is raised to signal an access on the data bus after the init stage has finished and waits for an incoming i_dbus_ack, and incoming data in case of loads. After an incoming ack, o_dbus_cyc is lowered and stage 2 begins. For stores, the only remaining work in stage 2 is to update the PC. For loads, the incoming data is shifted into rd.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"       , wave: "P..|..."},
+          { name: "trap"      , wave: "0..|...", node: "....", data: "r1"},
+          { name: "init"      , wave: "1.0|...", node: "....", data: "r0"},
+          { name: "cnt_en"    , wave: "1.0|.1.", node: ".....d"},
+          { name: "cnt_done"  , wave: "010|.1.", node: ".a...."},
+          { name: "o_dbus_cyc", wave: "0.1|.0.", node: "..b.", data: "0 1 ... 30 31"},
+          { name: "i_dbus_ack", wave: "0..|10.", node: "....c", data: "0 1 ... 30 31"},
+          { name: "o_dbus_adr", wave: "x.2|.x.", node: "...", data: "address"},
+          { name: "o_dbus_we" , wave: "0..|..."},
+          { name: "i_dbus_rdt", wave: "x..|3x.", node: "....e", data: "data"},
+          { name: "rd"        , wave: "x..|.33", node: ".....f", data: "d0 d1"},
+          ],
+          edge : [
+          "a~>b", "b~>c", "c~>d", "e~>f"]
+        }
+
+If the calculated address in the init stage was misaligned, SERV will raise a exception. Instead of performing an external bus access it will set mcause and raise the trap signal, which causes SERV to store the current PC to mepc, store misaligned address to mtval and set the new PC from mtvec which will enter the exception handler.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"       , wave: "P...."},
+          { name: "misalign"  , wave: "1....", node: "c..", data: ["write mask"]},
+          { name: "trap"      , wave: "0.1..", node: "..b.", data: "r1"},
+          { name: "init"      , wave: "1.0..", node: "....", data: "r0"},
+          { name: "cnt_en"    , wave: "1.01.", node: "...d"},
+          { name: "cnt_done"  , wave: "010..", node: ".a...."},
+          { name: "o_dbus_cyc", wave: "0....", node: "....", data: "0 1 ... 30 31"},
+          { name: "i_dbus_ack", wave: "0....", node: "....", data: "0 1 ... 30 31"},
+          ],
+          edge : [
+          "a~>b", "c~>b", "b~>d"]
+        }
