@@ -8,6 +8,10 @@ filesets:
     file_type : verilogSource
     depend : ["fusesoc:utils:generators"]
 
+  service_no_pll:
+    files: [servant/service_no_pll.v]
+    file_type : verilogSource
+
   mem_files:
     files:
       - sw/blinky.hex       : {copyto : blinky.hex}
@@ -80,7 +84,8 @@ filesets:
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
   icesugar   : {files: [data/icesugar.pcf : {file_type : PCF}]}
   alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
-  icestick : {files: [data/icestick.pcf  : {file_type : PCF}]}
+  icestick   : {files: [data/icestick.pcf  : {file_type : PCF}]}
+  go_board   : {files: [data/go_board.pcf  : {file_type : PCF}]}
 
   lx9_microboard:
     files:
@@ -388,6 +393,16 @@ targets:
     tools:
       icestorm:
         nextpnr_options : [--hx1k, --package, tq144, --freq, 32]
+        pnr: next
+    toplevel : service
+
+  go_board:
+    default_tool : icestorm
+    filesets : [mem_files, soc, service_no_pll, go_board]
+    parameters : [memfile=blinky.hex, memsize=7168]
+    tools:
+      icestorm:
+        nextpnr_options : [--hx1k, --package, vq100, --freq, 20]
         pnr: next
     toplevel : service
 
