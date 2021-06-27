@@ -1,0 +1,5 @@
+# 20 MHz clock input
+set_io i_clk 15
+
+# Onboard LED 1
+set_io q 56
