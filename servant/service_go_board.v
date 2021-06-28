@@ -4,7 +4,8 @@ module service_go_board
    output wire o_led1,
    output wire o_led2 = 1'b0,
    output wire o_led3 = 1'b0,
-   output wire o_led4 = 1'b0);
+   output wire o_led4 = 1'b0,
+   output wire o_uart_tx);
 
    parameter memfile = "blinky.hex";
    parameter memsize = 512;
@@ -19,12 +20,15 @@ module service_go_board
     end
    end
 
+   wire           q;
    servant
      #(.memfile (memfile),
        .memsize (memsize))
    servant
      (.wb_clk (i_clk),
       .wb_rst (rst_r),
-      .q      (o_led1));
+      .q      (q));
+    assign o_led1 = q;
+    assign o_uart_tx = q;
 
 endmodule
