@@ -1,12 +1,15 @@
 `default_nettype none
-module service
+module service_go_board
   (input wire  i_clk,
-   output wire q);
+   output wire o_led1,
+   output wire o_led2 = 1'b0,
+   output wire o_led3 = 1'b0,
+   output wire o_led4 = 1'b0);
 
-   parameter memfile = "zephyr_hello.hex";
-   parameter memsize = 7168;
+   parameter memfile = "blinky.hex";
+   parameter memsize = 512;
 
-   // Pull reset high for 64 clock cycles. Use the 7th bit as the reset signal.
+   // Assert reset for 64 clock cycles. Use the 7th bit as the reset signal.
    reg [6:0]      rst_count;
    wire           rst_r = !rst_count[6];
 
@@ -22,6 +25,6 @@ module service
    servant
      (.wb_clk (i_clk),
       .wb_rst (rst_r),
-      .q      (q));
+      .q      (o_led1));
 
 endmodule
