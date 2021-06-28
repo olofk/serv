@@ -6,3 +6,5 @@ set_io o_led1 56
 set_io o_led2 57
 set_io o_led3 59
 set_io o_led4 60
+
+set_io o_uart_tx 74
