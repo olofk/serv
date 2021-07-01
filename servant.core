@@ -327,6 +327,7 @@ targets:
     filesets : [soc, servant_tb]
     parameters :
       - RISCV_FORMAL
+      - MDU
       - SERV_CLEAR_RAM=true
       - firmware
       - memsize
@@ -359,6 +360,7 @@ targets:
     filesets : [soc, verilator_tb]
     parameters :
       - RISCV_FORMAL
+      - MDU
       - firmware
       - memsize
       - signature
@@ -398,6 +400,10 @@ parameters:
     paramtype : vlogparam
 
   RISCV_FORMAL:
+    datatype  : bool
+    paramtype : vlogdefine
+  
+  MDU:
     datatype  : bool
     paramtype : vlogdefine
 

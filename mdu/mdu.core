@@ -1,0 +1,33 @@
+CAPI=2:
+
+name : ::mdu:1.0.0
+
+filesets:
+  core:
+    files:
+      - rtl/mdu_top.v
+    file_type : verilogSource
+
+targets:
+  default:
+    filesets : [core]
+    parameters :
+      - "is_toplevel? (WIDTH)"
+    toplevel : ["is_toplevel? (mdu_top)"]
+
+  lint:
+    default_tool : verilator
+    filesets : [core]
+    tools:
+      verilator:
+        mode : lint-only
+        verilator_options:
+          - "-Wall"
+    toplevel : serv_rf_top
+
+parameters:
+  WIDTH:
+    datatype    : int
+    description : Set it to 1 for SERV or 32 for normal cores
+    paramtype   : vlogparam
+

@@ -46,7 +46,14 @@ module serv_top
    output wire [4+WITH_CSR:0] o_rreg1,
    input wire 		      i_rdata0,
    input wire 		      i_rdata1,
-
+`ifdef MDU
+   output reg         o_mdu_rs1,
+   output reg         o_mdu_rs2,
+   output reg  [ 2:0] o_mdu_op,
+   output reg         o_mdu_valid,
+   input  wire        i_mdu_ready,
+   input  wire        i_mdu_rd,
+`endif
    output wire [31:0] 	      o_ibus_adr,
    output wire 		      o_ibus_cyc,
    input wire [31:0] 	      i_ibus_rdt,
@@ -386,7 +393,9 @@ module serv_top
       .i_csr_rd    (csr_rd),
       .i_rd_csr_en (rd_csr_en),
       .i_mem_rd    (mem_rd),
-
+`ifdef MDU
+      .i_mdu_rd    (i_mdu_rd),
+`endif
       //RS1 read port
       .i_rs1_raddr (rs1_addr),
       .o_rs1       (rs1),
@@ -523,6 +532,24 @@ module serv_top
    /* verilator lint_on COMBDLY */
 
 
+`endif
+
+`ifdef MDU
+   wire [4:0] opcode = i_ibus_rdt[6:2];
+   always @(*) begin
+      if ((opcode == 5'b01100) & i_ibus_rdt[25]) begin
+         o_mdu_valid = 1'b1;
+      end else begin
+         o_mdu_valid = 1'b0;
+      end
+
+      o_mdu_op  = i_ibus_rdt[14:12];
+      
+      if (i_mdu_ready) begin
+         o_mdu_rs1 = rs1;
+         o_mdu_rs2 = rs2;
+      end
+   end
 `endif
 
 endmodule

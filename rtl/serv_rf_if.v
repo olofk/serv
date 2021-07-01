@@ -36,6 +36,9 @@ module serv_rf_if
    input wire 		      i_csr_rd,
    input wire 		      i_rd_csr_en,
    input wire 		      i_mem_rd,
+`ifdef MDU
+   input wire           i_mdu_rd,
+`endif
 
    //RS1 read port
    input wire [4:0] 	      i_rs1_raddr,
@@ -53,10 +56,17 @@ module serv_rf_if
 
    generate
    if (WITH_CSR) begin
+`ifdef MDU
+   wire 	     rd = (i_ctrl_rd ) |
+			  (i_alu_rd & i_rd_alu_en) |
+			  (i_csr_rd & i_rd_csr_en) |
+			  (i_mem_rd) | (i_mdu_rd);
+`else
    wire 	     rd = (i_ctrl_rd ) |
 			  (i_alu_rd & i_rd_alu_en) |
 			  (i_csr_rd & i_rd_csr_en) |
 			  (i_mem_rd);
+`endif
 
    wire 	     mtval = i_mem_op ? i_bufreg_q : i_bad_pc;
 
@@ -119,10 +129,15 @@ module serv_rf_if
    assign o_csr_pc = i_rdata1;
 
    end else begin
+`ifdef MDU
+      wire 	     rd = (i_ctrl_rd ) |
+			  (i_alu_rd & i_rd_alu_en) |
+			  (i_mem_rd) | (i_mdu_rd);
+`else
       wire 	     rd = (i_ctrl_rd ) |
 			  (i_alu_rd & i_rd_alu_en) |
 			  (i_mem_rd);
-
+`endif
       assign 	     o_wdata0 = rd;
       assign	     o_wdata1 = 1'b0;
 

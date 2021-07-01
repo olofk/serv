@@ -79,6 +79,15 @@ module serv_rf_top
    wire [RF_L2D-1:0]   raddr;
    wire [RF_WIDTH-1:0] rdata;
 
+`ifdef MDU
+   wire       mdu_rs1;
+   wire       mdu_rs2;
+   wire [2:0] mdu_op;
+   wire       mdu_valid;
+   wire       mdu_ready;
+   wire       mdu_rd;
+`endif
+
    serv_rf_ram_if
      #(.width    (RF_WIDTH),
        .reset_strategy (RESET_STRATEGY),
@@ -115,6 +124,18 @@ module serv_rf_top
       .i_wen   (wen),
       .i_raddr (raddr),
       .o_rdata (rdata));
+
+`ifdef MDU
+   mdu_top mdu_serv
+   (.i_clk(clk),
+    .i_rst(i_rst),
+    .i_mdu_rs1(mdu_rs1),
+    .i_mdu_rs2(mdu_rs2),
+    .i_mdu_op(mdu_op),
+    .i_mdu_valid(mdu_valid),
+    .o_mdu_ready(mdu_ready),
+    .o_mdu_rd(mdu_rd));
+`endif 
 
    serv_top
      #(.RESET_PC (RESET_PC),
@@ -167,7 +188,14 @@ module serv_rf_top
       .o_ibus_cyc   (o_ibus_cyc),
       .i_ibus_rdt   (i_ibus_rdt),
       .i_ibus_ack   (i_ibus_ack),
-
+`ifdef MDU
+      .o_mdu_rs1    (mdu_rs1),
+      .o_mdu_rs2    (mdu_rs2),
+      .o_mdu_op     (mdu_op),
+      .o_mdu_valid  (mdu_valid),
+      .i_mdu_ready  (mdu_ready),
+      .i_mdu_rd     (mdu_rd),
+`endif
       .o_dbus_adr   (o_dbus_adr),
       .o_dbus_dat   (o_dbus_dat),
       .o_dbus_sel   (o_dbus_sel),
