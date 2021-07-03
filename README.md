@@ -183,6 +183,13 @@ Pin 95 is used as the GPIO output which is connected to the board's green LED. D
     fusesoc run --target=icestick servant
     iceprog build/servant_1.0.2/icestick-icestorm/servant_1.0.2.bin
 
+### Nandland Go Board
+
+Pin 56 is used as the GPIO output which is connected to the board's LED1. Due to this board's limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.
+
+    fusesoc run --target=go_board servant
+    iceprog build/servant_1.0.2/go_board-icestorm/servant_1.0.2.bin
+
 ## Other targets
 
 The above targets are run on the servant SoC, but there are some targets defined for the CPU itself. Verilator can be run in lint mode to check for design problems by running
