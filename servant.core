@@ -39,7 +39,7 @@ filesets:
       - "!tool_quartus? (servant/servant_ram.v)"
       - servant/servant.v
     file_type : verilogSource
-    depend : [serv]
+    depend : {serv, mdu}
 
   cyc1000:
     files:
