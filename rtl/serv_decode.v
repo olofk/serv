@@ -63,8 +63,6 @@ module serv_decode #(
 
    reg       imm30;
 
-   wire [31:0] instr = {i_wb_rdt,2'b00};
-
    //opcode
    wire op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
 
