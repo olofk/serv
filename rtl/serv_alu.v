@@ -1,29 +1,29 @@
 `default_nettype none
 module serv_alu
   (
-   input wire 	    clk,
+   input wire       clk,
    //State
-   input wire 	    i_en,
-   input wire 	    i_cnt0,
-   output wire 	    o_cmp,
+   input wire       i_en,
+   input wire       i_cnt0,
+   output wire      o_cmp,
    //Control
-   input wire 	    i_sub,
+   input wire       i_sub,
    input wire [1:0] i_bool_op,
-   input wire 	    i_cmp_eq,
-   input wire 	    i_cmp_sig,
+   input wire       i_cmp_eq,
+   input wire       i_cmp_sig,
    input wire [2:0] i_rd_sel,
    //Data
-   input wire 	    i_rs1,
-   input wire 	    i_op_b,
-   input wire 	    i_buf,
-   output wire 	    o_rd);
+   input wire       i_rs1,
+   input wire       i_op_b,
+   input wire       i_buf,
+   output wire      o_rd);
 
    wire        result_add;
 
-   reg 	       cmp_r;
+   reg         cmp_r;
 
    wire        add_cy;
-   reg 	       add_cy_r;
+   reg         add_cy_r;
 
    //Sign-extended operands
    wire rs1_sx  = i_rs1 & i_cmp_sig;
@@ -62,7 +62,7 @@ module serv_alu
       add_cy_r <= i_en ? add_cy : i_sub;
 
       if (i_en)
-	cmp_r <= o_cmp;
+        cmp_r <= o_cmp;
    end
 
 endmodule

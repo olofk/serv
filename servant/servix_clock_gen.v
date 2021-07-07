@@ -8,7 +8,7 @@ module servix_clock_gen
 
    wire   clkfb;
    wire   locked;
-   reg 	  locked_r;
+   reg    locked_r;
 
    PLLE2_BASE
      #(.BANDWIDTH("OPTIMIZED"),

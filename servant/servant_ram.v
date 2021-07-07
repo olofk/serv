@@ -5,21 +5,21 @@ module servant_ram
     parameter aw    = $clog2(depth),
     parameter RESET_STRATEGY = "",
     parameter memfile = "")
-   (input wire 		i_wb_clk,
-    input wire 		i_wb_rst,
+   (input wire          i_wb_clk,
+    input wire          i_wb_rst,
     input wire [aw-1:2] i_wb_adr,
-    input wire [31:0] 	i_wb_dat,
-    input wire [3:0] 	i_wb_sel,
-    input wire 		i_wb_we,
-    input wire 		i_wb_cyc,
-    output reg [31:0] 	o_wb_rdt,
-    output reg 		o_wb_ack);
+    input wire [31:0]   i_wb_dat,
+    input wire [3:0]    i_wb_sel,
+    input wire          i_wb_we,
+    input wire          i_wb_cyc,
+    output reg [31:0]   o_wb_rdt,
+    output reg          o_wb_ack);
 
-   wire [3:0] 		we = {4{i_wb_we & i_wb_cyc}} & i_wb_sel;
+   wire [3:0]           we = {4{i_wb_we & i_wb_cyc}} & i_wb_sel;
 
-   reg [31:0] 		mem [0:depth/4-1] /* verilator public */;
+   reg [31:0]           mem [0:depth/4-1] /* verilator public */;
 
-   wire [aw-3:0] 	addr = i_wb_adr[aw-1:2];
+   wire [aw-3:0]        addr = i_wb_adr[aw-1:2];
 
    always @(posedge i_wb_clk)
      if (i_wb_rst & (RESET_STRATEGY != "NONE"))
@@ -38,9 +38,9 @@ module servant_ram
    initial
      if(|memfile) begin
 `ifndef ISE
-	$display("Preloading %m from %s", memfile);
+        $display("Preloading %m from %s", memfile);
 `endif
-	$readmemh(memfile, mem);
+        $readmemh(memfile, mem);
      end
 
 endmodule

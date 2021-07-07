@@ -11,7 +11,7 @@
 #ifndef DELAY
 #define DELAY 0x100000 /* Loop 100000 times before inverting the LED */
 #endif
-	
+
 	/*
 	a0 = GPIO Base address
 	t0 = Value

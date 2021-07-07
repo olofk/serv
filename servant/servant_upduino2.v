@@ -51,14 +51,14 @@ module servant_upduino2
       .RGB1(b),
       .RGB2(r));
 
-   reg 	     rst = 1'b1;
+   reg       rst = 1'b1;
 
 /*
    //Delayed reset
    reg [25:0] cnt;
    always @(posedge clk) begin
       if (!cnt[25])
-	cnt <= cnt + 1;
+        cnt <= cnt + 1;
       rst <= !cnt[25];
    end
  */

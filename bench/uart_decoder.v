@@ -11,7 +11,7 @@ module uart_decoder
       @(negedge rx);
       #(T/2) ch = 0;
       for (i=0;i<8;i=i+1)
-	#T ch[i] = rx;
+        #T ch[i] = rx;
       $write("%c",ch);
       $fflush;
    end

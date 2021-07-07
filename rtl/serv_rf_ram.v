@@ -4,16 +4,16 @@ module serv_rf_ram
     parameter depth=32*(32+csr_regs)/width)
    (input wire i_clk,
     input wire [$clog2(depth)-1:0] i_waddr,
-    input wire [width-1:0] 	   i_wdata,
-    input wire 			   i_wen,
+    input wire [width-1:0]         i_wdata,
+    input wire                     i_wen,
     input wire [$clog2(depth)-1:0] i_raddr,
-    output reg [width-1:0] 	   o_rdata);
-   
-   reg [width-1:0] 		   memory [0:depth-1];
+    output reg [width-1:0]         o_rdata);
+
+   reg [width-1:0]                 memory [0:depth-1];
 
    always @(posedge i_clk) begin
       if (i_wen)
-	memory[i_waddr] <= i_wdata;
+        memory[i_waddr] <= i_wdata;
       o_rdata <= memory[i_raddr];
    end
 

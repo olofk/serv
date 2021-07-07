@@ -1,4 +1,4 @@
-module pll(input clki, 
+module pll(input clki,
     output locked,
     output clko
 );
@@ -33,6 +33,6 @@ EHXPLLL #(
         .PLLWAKESYNC(1'b0),
         .ENCLKOP(1'b0),
         .LOCK(locked)
-	);
+        );
 assign clko = clkop;
 endmodule

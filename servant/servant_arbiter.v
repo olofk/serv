@@ -6,23 +6,23 @@ module servant_arbiter
    input wire [31:0]  i_wb_cpu_dbus_adr,
    input wire [31:0]  i_wb_cpu_dbus_dat,
    input wire [3:0]   i_wb_cpu_dbus_sel,
-   input wire 	      i_wb_cpu_dbus_we,
-   input wire 	      i_wb_cpu_dbus_cyc,
+   input wire         i_wb_cpu_dbus_we,
+   input wire         i_wb_cpu_dbus_cyc,
    output wire [31:0] o_wb_cpu_dbus_rdt,
-   output wire 	      o_wb_cpu_dbus_ack,
+   output wire        o_wb_cpu_dbus_ack,
 
    input wire [31:0]  i_wb_cpu_ibus_adr,
-   input wire 	      i_wb_cpu_ibus_cyc,
+   input wire         i_wb_cpu_ibus_cyc,
    output wire [31:0] o_wb_cpu_ibus_rdt,
-   output wire 	      o_wb_cpu_ibus_ack,
+   output wire        o_wb_cpu_ibus_ack,
 
    output wire [31:0] o_wb_cpu_adr,
    output wire [31:0] o_wb_cpu_dat,
    output wire [3:0]  o_wb_cpu_sel,
-   output wire 	      o_wb_cpu_we,
-   output wire 	      o_wb_cpu_cyc,
+   output wire        o_wb_cpu_we,
+   output wire        o_wb_cpu_cyc,
    input wire [31:0]  i_wb_cpu_rdt,
-   input wire 	      i_wb_cpu_ack);
+   input wire         i_wb_cpu_ack);
 
    assign o_wb_cpu_dbus_rdt = i_wb_cpu_rdt;
    assign o_wb_cpu_dbus_ack = i_wb_cpu_ack & !i_wb_cpu_ibus_cyc;

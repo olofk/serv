@@ -1,10 +1,10 @@
 `default_nettype none
 module servive
 (
- input wire 	   i_clk,
- input wire 	   i_rst_n,
- output wire 	   q,
- output wire 	   uart_txd);
+ input wire        i_clk,
+ input wire        i_rst_n,
+ output wire       q,
+ output wire       uart_txd);
 
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
