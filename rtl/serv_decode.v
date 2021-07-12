@@ -17,6 +17,8 @@ module serv_decode #(
    output reg       o_shift_op,
    output reg       o_slt_op,
    output reg       o_rd_op,
+   output reg       o_mdu_op,
+   output reg [2:0] o_mdu_opcode,
    //To bufreg
    output reg       o_bufreg_rs1_en,
    output reg       o_bufreg_imm_en,
@@ -61,7 +63,12 @@ module serv_decode #(
    reg        op22;
    reg        op26;
 
+   reg       imm25;
    reg       imm30;
+
+   //mdu
+   wire co_mdu_op = ((opcode == 5'b01100) & imm25);
+   wire [2:0]co_mdu_opcode = funct3;
 
    //opcode
    wire op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
@@ -190,7 +197,7 @@ module serv_decode #(
 
    wire co_mem_cmd  = opcode[3];
    wire co_mem_signed = ~funct3[2];
-   wire co_mem_word   = funct3[1];
+   wire co_mem_word   = co_mdu_op ? co_mdu_op :funct3[1];
    wire co_mem_half   = funct3[0];
 
    wire [1:0] co_alu_bool_op = funct3[1:0];
@@ -229,6 +236,7 @@ module serv_decode #(
             if (i_wb_en) begin
                funct3 <= i_wb_rdt[14:12];
                imm30  <= i_wb_rdt[30];
+               imm25  <= i_wb_rdt[25];
                opcode <= i_wb_rdt[6:2];
                op20   <= i_wb_rdt[20];
                op21   <= i_wb_rdt[21];
@@ -248,6 +256,8 @@ module serv_decode #(
             o_shift_op         = co_shift_op;
             o_slt_op           = co_slt_op;
             o_rd_op            = co_rd_op;
+            o_mdu_op           = co_mdu_op;
+            o_mdu_opcode       = co_mdu_opcode;
             o_bufreg_rs1_en    = co_bufreg_rs1_en;
             o_bufreg_imm_en    = co_bufreg_imm_en;
             o_bufreg_clr_lsb   = co_bufreg_clr_lsb;
@@ -285,6 +295,7 @@ module serv_decode #(
          always @(*) begin
             funct3  = i_wb_rdt[14:12];
             imm30   = i_wb_rdt[30];
+            imm25   = i_wb_rdt[25];
             opcode  = i_wb_rdt[6:2];
             op20    = i_wb_rdt[20];
             op21    = i_wb_rdt[21];
@@ -304,6 +315,8 @@ module serv_decode #(
                o_shift_op         <= co_shift_op;
                o_slt_op           <= co_slt_op;
                o_rd_op            <= co_rd_op;
+               o_mdu_op           <= co_mdu_op;
+               o_mdu_opcode       <= co_mdu_opcode;
                o_bufreg_rs1_en    <= co_bufreg_rs1_en;
                o_bufreg_imm_en    <= co_bufreg_imm_en;
                o_bufreg_clr_lsb   <= co_bufreg_clr_lsb;

@@ -80,12 +80,11 @@ module serv_rf_top
    wire [RF_WIDTH-1:0] rdata;
 
 `ifdef MDU
-   wire       mdu_rs1;
-   wire       mdu_rs2;
-   wire [2:0] mdu_op;
-   wire       mdu_valid;
-   wire       mdu_ready;
-   wire       mdu_rd;
+   wire [2:0]  mdu_op;
+   wire        mdu_valid;
+   wire        mdu_ready;
+   wire [31:0] mdu_rs1;
+   wire [31:0] mdu_rd;
 `endif
 
    serv_rf_ram_if
@@ -130,7 +129,7 @@ module serv_rf_top
    (.i_clk(clk),
     .i_rst(i_rst),
     .i_mdu_rs1(mdu_rs1),
-    .i_mdu_rs2(mdu_rs2),
+    .i_mdu_rs2(o_dbus_dat),
     .i_mdu_op(mdu_op),
     .i_mdu_valid(mdu_valid),
     .o_mdu_ready(mdu_ready),
@@ -189,20 +188,19 @@ module serv_rf_top
       .i_ibus_rdt   (i_ibus_rdt),
       .i_ibus_ack   (i_ibus_ack),
 `ifdef MDU
-      .o_mdu_rs1    (mdu_rs1),
-      .o_mdu_rs2    (mdu_rs2),
-      .o_mdu_op     (mdu_op),
+      .o_mdu_opcode (mdu_op),
       .o_mdu_valid  (mdu_valid),
       .i_mdu_ready  (mdu_ready),
-      .i_mdu_rd     (mdu_rd),
+      // .i_mdu_rd     (mdu_rd),
 `endif
       .o_dbus_adr   (o_dbus_adr),
       .o_dbus_dat   (o_dbus_dat),
       .o_dbus_sel   (o_dbus_sel),
       .o_dbus_we    (o_dbus_we),
       .o_dbus_cyc   (o_dbus_cyc),
-      .i_dbus_rdt   (i_dbus_rdt),
-      .i_dbus_ack   (i_dbus_ack));
+      .i_dbus_rdt   (mdu_ready ? mdu_rd:i_dbus_rdt),
+      .i_dbus_ack   (i_dbus_ack | mdu_ready),
+      .o_mdu_rs1    (mdu_rs1));
 
 endmodule
 `default_nettype wire

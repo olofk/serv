@@ -47,12 +47,9 @@ module serv_top
    input wire 		      i_rdata0,
    input wire 		      i_rdata1,
 `ifdef MDU
-   output reg         o_mdu_rs1,
-   output reg         o_mdu_rs2,
-   output reg  [ 2:0] o_mdu_op,
+   output reg  [ 2:0] o_mdu_opcode,
    output reg         o_mdu_valid,
    input  wire        i_mdu_ready,
-   input  wire        i_mdu_rd,
 `endif
    output wire [31:0] 	      o_ibus_adr,
    output wire 		      o_ibus_cyc,
@@ -64,7 +61,8 @@ module serv_top
    output wire 		      o_dbus_we ,
    output wire 		      o_dbus_cyc,
    input wire [31:0] 	      i_dbus_rdt,
-   input wire 		      i_dbus_ack);
+   input wire 		      i_dbus_ack,
+   output wire [31:0]   o_mdu_rs1);
 
    wire [4:0]    rd_addr;
    wire [4:0]    rs1_addr;
@@ -72,7 +70,7 @@ module serv_top
 
    wire [3:0] 	 immdec_ctrl;
    wire [3:0] 	immdec_en;
-
+   
    wire          sh_right;
    wire 	 bne_or_bge;
    wire 	 cond_branch;
@@ -83,6 +81,7 @@ module serv_top
    wire 	 shift_op;
    wire 	 slt_op;
    wire 	 rd_op;
+   wire   mdu_op;
 
    wire 	 rd_alu_en;
    wire 	 rd_csr_en;
@@ -201,6 +200,9 @@ module serv_top
       .i_slt_op       (slt_op),
       .i_e_op         (e_op),
       .i_rd_op        (rd_op),
+      .i_mdu_op       (mdu_op),
+      .o_mdu_valid    (o_mdu_valid),
+      .i_mdu_ready    (i_mdu_ready),
       //External
       .o_dbus_cyc     (o_dbus_cyc),
       .i_dbus_ack     (i_dbus_ack),
@@ -231,6 +233,9 @@ module serv_top
       .o_slt_op           (slt_op),
       .o_rd_op            (rd_op),
       .o_sh_right         (sh_right),
+      .o_mdu_op           (mdu_op),
+      .o_mdu_opcode       (o_mdu_opcode),
+      
       //To bufreg
       .o_bufreg_rs1_en    (bufreg_rs1_en),
       .o_bufreg_imm_en    (bufreg_imm_en),
@@ -296,6 +301,7 @@ module serv_top
       .i_cnt1   (cnt1),
       .i_en     (bufreg_en),
       .i_init   (init),
+      .i_mdu_en (mdu_op),
       .o_lsb    (lsb),
       //Control
       .i_sh_signed (bufreg_sh_signed),
@@ -307,7 +313,8 @@ module serv_top
       .i_imm    (imm),
       .o_q      (bufreg_q),
       //External
-      .o_dbus_adr (o_dbus_adr));
+      .o_dbus_adr (o_dbus_adr),
+      .o_mdu_rs1  (o_mdu_rs1));
 
    serv_ctrl
      #(.RESET_PC (RESET_PC),
@@ -393,9 +400,6 @@ module serv_top
       .i_csr_rd    (csr_rd),
       .i_rd_csr_en (rd_csr_en),
       .i_mem_rd    (mem_rd),
-`ifdef MDU
-      .i_mdu_rd    (i_mdu_rd),
-`endif
       //RS1 read port
       .i_rs1_raddr (rs1_addr),
       .o_rs1       (rs1),
@@ -532,24 +536,6 @@ module serv_top
    /* verilator lint_on COMBDLY */
 
 
-`endif
-
-`ifdef MDU
-   wire [4:0] opcode = i_ibus_rdt[6:2];
-   always @(*) begin
-      if ((opcode == 5'b01100) & i_ibus_rdt[25]) begin
-         o_mdu_valid = 1'b1;
-      end else begin
-         o_mdu_valid = 1'b0;
-      end
-
-      o_mdu_op  = i_ibus_rdt[14:12];
-      
-      if (i_mdu_ready) begin
-         o_mdu_rs1 = rs1;
-         o_mdu_rs2 = rs2;
-      end
-   end
 `endif
 
 endmodule

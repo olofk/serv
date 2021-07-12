@@ -22,6 +22,9 @@ module serv_state
    input wire 	     i_slt_op,
    input wire 	     i_e_op,
    input wire 	     i_rd_op,
+   input wire       i_mdu_op,
+   output wire         o_mdu_valid,
+   input wire          i_mdu_ready,
    output wire 	     o_init,
    output wire 	     o_cnt_en,
    output wire 	     o_cnt0,
@@ -75,7 +78,10 @@ module serv_state
    wire      take_branch = i_branch_op & (!i_cond_branch | (i_alu_cmp^i_bne_or_bge));
 
    //slt*, branch/jump, shift, load/store
-   wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
+   wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op | i_mdu_op;
+
+   //valid signal for mdu
+   assign o_mdu_valid = i_mdu_op & o_cnt_done;
 
    assign o_dbus_cyc = !o_cnt_en & init_done & i_mem_op & !i_mem_misalign;
 
@@ -87,7 +93,7 @@ module serv_state
    // and the first stage didn't cause a misalign exception
    assign o_rf_wreq = !misalign_trap_sync &
 		      ((i_shift_op & (i_sh_done | !i_sh_right) & !o_cnt_en & init_done) |
-		       (i_mem_op & i_dbus_ack) |
+		       (i_mem_op & i_dbus_ack) | i_mdu_ready |
 		       (stage_two_req & (i_slt_op | i_branch_op)));
 
    assign o_rf_rd_en = i_rd_op & !o_init;
