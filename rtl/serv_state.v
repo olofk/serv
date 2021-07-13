@@ -81,7 +81,7 @@ module serv_state
    wire two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op | i_mdu_op;
 
    //valid signal for mdu
-   assign o_mdu_valid = i_mdu_op & o_cnt_done;
+   assign o_mdu_valid = !o_cnt_en & init_done & i_mdu_op;
 
    assign o_dbus_cyc = !o_cnt_en & init_done & i_mem_op & !i_mem_misalign;
 
