@@ -425,6 +425,7 @@ module serv_top
       .o_sh_done   (mem_sh_done),
       .o_sh_done_r (mem_sh_done_r),
       //Control
+      .i_mdu_op   (mdu_op),
       .i_mem_op   (mem_op),
       .i_shift_op (shift_op),
       .i_signed   (mem_signed),

@@ -13,6 +13,7 @@ module serv_mem_if
    output wire 	      o_sh_done,
    output wire 	      o_sh_done_r,
    //Control
+   input wire         i_mdu_op,
    input wire 	      i_mem_op,
    input wire 	      i_shift_op,
    input wire 	      i_signed,
@@ -58,7 +59,9 @@ module serv_mem_if
 	(i_bytecnt == 2'b00) |
 	(i_half & !i_bytecnt[1]);
 
-   assign o_rd = i_mem_op & (dat_valid ? dat_cur : signbit & i_signed);
+   wire mem_rd = i_mem_op & (dat_valid ? dat_cur : signbit & i_signed);
+   wire mdu_rd = i_mdu_op & (dat_valid ? dat_cur : signbit & i_signed);
+   assign o_rd = mem_rd | mdu_rd;
 
    assign o_wb_sel[3] = (i_lsb == 2'b11) | i_word | (i_half & i_lsb[1]);
    assign o_wb_sel[2] = (i_lsb == 2'b10) | i_word;

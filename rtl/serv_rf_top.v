@@ -191,7 +191,6 @@ module serv_rf_top
       .o_mdu_opcode (mdu_op),
       .o_mdu_valid  (mdu_valid),
       .i_mdu_ready  (mdu_ready),
-      // .i_mdu_rd     (mdu_rd),
 `endif
       .o_dbus_adr   (o_dbus_adr),
       .o_dbus_dat   (o_dbus_dat),

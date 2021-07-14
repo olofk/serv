@@ -28,8 +28,8 @@ module mdu_top
   assign rdata_a = i_mdu_rs1;
   assign rdata_b = i_mdu_rs2;
 
-  always @(posedge i_clk) begin
-    en_q        <= i_mdu_valid;
+  always @(*) begin
+    en_q  = i_mdu_valid;
   end
 
   always @(posedge i_clk) begin
@@ -41,14 +41,15 @@ module mdu_top
       // en_q        = 1'b0;
     end else begin
       o_mdu_ready = 1'b0;
-      result_32   = 32'hffffffff;
+      done        = 1'b0;
+      result_32   = 32'b0;
       result_64   = {result_32,result_32};
       case (i_mdu_op)
         3'b000: begin
           if (en_q) begin // MUL
             result_64 = rdata_a * rdata_b;
             result_32 = result_64[31:0];
-            o_mdu_ready = en_q;
+            // o_mdu_ready = en_q;
             done = 1'b1;
           end
         end
@@ -56,7 +57,7 @@ module mdu_top
           if (en_q) begin
             result_64 = $signed(rdata_a) * $signed(rdata_b);
             result_32 = result_64[63:32];
-            o_mdu_ready = en_q;
+            // o_mdu_ready = en_q;
             done = 1'b1;
           end
         end
@@ -64,7 +65,7 @@ module mdu_top
           if (en_q) begin
             result_64 = $signed(rdata_a) * $unsigned(rdata_b);
             result_32 = result_64[63:32];
-            o_mdu_ready = en_q;
+            // o_mdu_ready = en_q;
             done = 1'b1;
           end
         end
@@ -72,7 +73,7 @@ module mdu_top
           if (en_q) begin
             result_64 = $unsigned(rdata_a) * $unsigned(rdata_b);
             result_32 = result_64[63:32];
-            o_mdu_ready = en_q;
+            // o_mdu_ready = en_q;
             done = 1'b1;
           end
         end
@@ -80,7 +81,7 @@ module mdu_top
           if (en_q) begin
             result_32 = $signed(rdata_a) / $signed(rdata_b);
             // result_32 = result_64[31:0];
-            o_mdu_ready = en_q;
+            // o_mdu_ready = en_q;
             done = 1'b1;
           end
         end
@@ -88,7 +89,7 @@ module mdu_top
           if (en_q) begin
             result_32 = $unsigned(rdata_a) * $unsigned(rdata_b);
             // result_32 = result_64[31:0];
-            o_mdu_ready = en_q;
+            // o_mdu_ready = en_q;
             done = 1'b1;
           end
         end
@@ -96,7 +97,7 @@ module mdu_top
           if (en_q) begin
             result_32 = $signed(rdata_a) % $signed(rdata_b);
             // result_32 = result_64[31:0];
-            o_mdu_ready = en_q;
+            // o_mdu_ready = en_q;
             done = 1'b1;
           end
         end
@@ -104,17 +105,21 @@ module mdu_top
           if (en_q) begin
             result_32 = $unsigned(rdata_a) % $unsigned(rdata_b);
             // result_32 = result_64[31:0];
-            o_mdu_ready = en_q;
+            // o_mdu_ready = en_q;
             done = 1'b1;
           end
         end
         default: begin
-          result_32 = 32'hffffffff;
+          result_32 = 32'b0;
           result_64 = {result_32,result_32};
-          o_mdu_ready = 1'b0;
+          // o_mdu_ready = 1'b0;
         end
       endcase
     end
+  end
+
+  always @(*) begin
+    o_mdu_ready = i_mdu_valid & done;
   end
 
   assign o_mdu_rd = result_32;
