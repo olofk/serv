@@ -5,7 +5,7 @@
  */
 
 /*
-  This is basically a 32-bit version of riscv_machine_timer.c fro Zephyr
+  This is basically a 32-bit version of riscv_machine_timer.c for Zephyr
 */
 #include <drivers/timer/system_timer.h>
 #include <sys_clock.h>
