@@ -227,7 +227,7 @@ module serv_decode #(
    //1 (OP_B_SOURCE_RS2) when BRANCH or OP
    wire co_op_b_source = opcode[3];
 
-   wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
+   wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
 
    generate
       if (PRE_REGISTER) begin
