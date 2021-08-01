@@ -120,8 +120,8 @@ module serv_decode #(
    // opcode & funct3
    //
 
-   wire co_shift_op = op_or_opimm & (funct3[1:0] == 2'b01);
-   wire co_slt_op   = op_or_opimm & (funct3[2:1] == 2'b01);
+   wire co_shift_op = op_or_opimm & (funct3[1:0] == 2'b01) & !co_mdu_op;
+   wire co_slt_op   = op_or_opimm & (funct3[2:1] == 2'b01) & !co_mdu_op;
 
    //Matches system ops except eceall/ebreak/mret
    wire csr_op = opcode[4] & opcode[2] & (|funct3);
