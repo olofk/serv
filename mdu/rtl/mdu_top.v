@@ -97,11 +97,11 @@ module mdu_top
     end else begin
       div_ready <= 1'b0; 
       if (divisor <= dividend) begin
-		  	dividend <= dividend - divisor;
-		  	quotient <= quotient | quotient_msk;
-		  end
+	      dividend <= dividend - divisor;
+	      quotient <= quotient | quotient_msk;
+      end
       divisor <= divisor >> 1;
-		  quotient_msk <= quotient_msk >> 1;
+      quotient_msk <= quotient_msk >> 1;
     end
   end
 
