@@ -43,11 +43,10 @@ If [Verilator](https://www.veripool.org/wiki/verilator) is installed, we can use
 
 If everything worked, the output should look like
 
-    INFO: Preparing ::serv:1.0.2
+    INFO: Preparing ::serv:1.1.0
     INFO: Setting up project
     
     INFO: Building simulation model
-    verilator -f serv_1.0.2.vc 
     INFO: Running
 
 ## Running pre-built test software
@@ -91,7 +90,7 @@ To run the RISC-V compliance tests, we need to supply the SERV-specific support 
 
 Run the compliance tests
 
-    cd riscv-compliance && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=rv32i RISCV_ISA=rv32i TARGET_SIM=$WORKSPACE/build/servant_1.0.2/verilator_tb-verilator/Vservant_sim
+    cd riscv-compliance && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=rv32i RISCV_ISA=rv32i TARGET_SIM=$WORKSPACE/build/servant_1.1.0/verilator_tb-verilator/Vservant_sim
 
 The above will run all tests in the rv32i test suite. Since SERV also implement the `rv32Zicsr` and `rv32Zifencei` extensions, these can also be tested by choosing any of them instead of rv32i as the `RISCV_ISA` variable.
 
@@ -137,7 +136,7 @@ serial console will show up.
 Pin D1 is used for UART output with 115200 baud rate.
 
     fusesoc run --target=orangecrab_r0.2 servant
-    dfu-util -d 1209:5af0 -D build/servant_1.0.2/orangecrab_r0.2-trellis/servant_1.0.2.bit
+    dfu-util -d 1209:5af0 -D build/servant_1.1.0/orangecrab_r0.2-trellis/servant_1.1.0.bit
 
 ### Arty A7 35T
 
@@ -189,14 +188,14 @@ Pin 61 is used for UART output with 115200 baud rate. This pin is connected to a
 Pin 95 is used as the GPIO output which is connected to the board's green LED. Due to this board's limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.
 
     fusesoc run --target=icestick servant
-    iceprog build/servant_1.0.2/icestick-icestorm/servant_1.0.2.bin
+    iceprog build/servant_1.1.0/icestick-icestorm/servant_1.1.0.bin
 
 ### Nandland Go Board
 
 Pin 56 is used as the GPIO output which is connected to the board's LED1. Due to this board's limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.
 
     fusesoc run --target=go_board servant
-    iceprog build/servant_1.0.2/go_board-icestorm/servant_1.0.2.bin
+    iceprog build/servant_1.1.0/go_board-icestorm/servant_1.1.0.bin
 
 ## Other targets
 
