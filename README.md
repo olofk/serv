@@ -6,9 +6,12 @@
 
 SERV is an award-winning bit-serial RISC-V core
 
-If you want to know more about SERV, what a bit-serial CPU is and what it's good for, I recommend starting out by watching the movies [introduction to SERV](https://diode.zone/videos/watch/0230a518-e207-4cf6-b5e2-69cc09411013) and the [presentation from the Zürich 2019 RISC-V workshop](https://www.youtube.com/watch?v=xjIxORBRaeQ)
+If you want to know more about SERV, what a bit-serial CPU is and what it's good for, I recommend starting out by watching the fantastic short SERV movies
+* [introduction to SERV](https://www.award-winning.me/serv-introduction/)
+* [SERV : RISC-V for a fistful of gates](https://www.award-winning.me/serv-for-a-fistful-of-gates/)
+* [Bit by bit - How to fit 8 RISC V cores in a $38 FPGA board (presentation from the Zürich 2019 RISC-V workshop)](https://www.youtube.com/watch?v=xjIxORBRaeQ)
 
-There's also an official [SERV user manual](https://serv.readthedocs.io/en/latest/#) with fancy block diagrams and an in-depth description of how some things work.
+There's also an official [SERV user manual](https://serv.readthedocs.io/en/latest/#) with fancy block diagrams, timing diagrams and an in-depth description of how some things work.
 
 ## Prerequisites
 
