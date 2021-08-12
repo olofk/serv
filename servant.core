@@ -76,6 +76,12 @@ filesets:
       - servant/servive_clock_gen.v : {file_type : verilogSource}
       - servant/servive.v : {file_type : verilogSource}
 
+  ebaz4205:
+    files:
+      - servant/servix_ebaz4205_clock_gen.v : {file_type : verilogSource}
+      - servant/servix_ebaz4205.v : {file_type : verilogSource}
+      - data/ebaz4205.xdc : {file_type : xdc}
+
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
   icesugar   : {files: [data/icesugar.pcf : {file_type : PCF}]}
@@ -182,7 +188,7 @@ targets:
         family : MAX 10
         device : 10M50DAF484C6GES
     toplevel: servive
-   
+
   de0_nano:
     default_tool : quartus
     filesets : [mem_files, soc, de0_nano]
@@ -295,6 +301,15 @@ targets:
     tools:
       vivado: {part : xc7a35ticsg324-1L}
     toplevel : servix
+
+  ebaz4205:
+    default_tool: vivado
+    description: EBAZ4205 'Development' Board
+    filesets : [mem_files, soc, ebaz4205]
+    parameters : [memfile, memsize, frequency=16]
+    tools:
+      vivado: {part : xc7z010clg400-1}
+    toplevel : servix_ebaz4205
 
   ac701:
     default_tool: vivado
