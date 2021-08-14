@@ -23,7 +23,7 @@ targets:
         mode : lint-only
         verilator_options:
           - "-Wall"
-    toplevel : serv_rf_top
+    toplevel : mdu_top
 
 parameters:
   WIDTH:

@@ -4,7 +4,8 @@ module serv_top
   #(parameter WITH_CSR = 1,
     parameter PRE_REGISTER = 1,
     parameter RESET_STRATEGY = "MINI",
-    parameter RESET_PC = 32'd0)
+    parameter RESET_PC = 32'd0,
+    parameter MDU = 1'b0)
    (
    input wire 		      clk,
    input wire 		      i_rst,
@@ -46,11 +47,11 @@ module serv_top
    output wire [4+WITH_CSR:0] o_rreg1,
    input wire 		      i_rdata0,
    input wire 		      i_rdata1,
-`ifdef MDU
+   // MDU
    output reg  [ 2:0] o_mdu_opcode,
    output reg         o_mdu_valid,
    input  wire        i_mdu_ready,
-`endif
+
    output wire [31:0] 	      o_ibus_adr,
    output wire 		      o_ibus_cyc,
    input wire [31:0] 	      i_ibus_rdt,
@@ -215,7 +216,8 @@ module serv_top
       .o_rf_rd_en     (rd_en));
 
    serv_decode
-     #(.PRE_REGISTER (PRE_REGISTER))
+     #(.PRE_REGISTER (PRE_REGISTER),
+       .MDU(MDU))
    decode
      (
       .clk (clk),
@@ -293,7 +295,9 @@ module serv_top
       .i_wb_en      (i_ibus_ack),
       .i_wb_rdt     (i_ibus_rdt[31:7]));
 
-   serv_bufreg bufreg
+   serv_bufreg 
+      #(.MDU(MDU))
+   bufreg
      (
       .i_clk    (clk),
       //State
@@ -411,7 +415,8 @@ module serv_top
       .o_csr       (rf_csr_out));
 
    serv_mem_if
-     #(.WITH_CSR (WITH_CSR))
+     #(.WITH_CSR (WITH_CSR),
+       .MDU(MDU))
    mem_if
      (
       .i_clk      (clk),
@@ -535,7 +540,6 @@ module serv_top
    always @(o_ibus_adr)
      rvfi_pc_wdata <= o_ibus_adr;
    /* verilator lint_on COMBDLY */
-
 
 `endif
 

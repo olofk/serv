@@ -10,6 +10,7 @@ module servant
    parameter reset_strategy = "MINI";
    parameter sim = 0;
    parameter with_csr = 1;
+   parameter MDU = 1;
 
    wire 	timer_irq;
 
@@ -51,6 +52,13 @@ module servant
    wire 	wb_timer_we;
    wire 	wb_timer_cyc;
    wire [31:0] 	wb_timer_rdt;
+
+   wire [31:0] mdu_rs1;
+   wire [31:0] mdu_rs2;
+   wire [ 2:0] mdu_op;
+   wire        mdu_valid;
+   wire [31:0] mdu_rd;
+   wire        mdu_ready;
 
    servant_arbiter arbiter
      (.i_wb_cpu_dbus_adr (wb_dmem_adr),
@@ -149,7 +157,8 @@ module servant
    serv_rf_top
      #(.RESET_PC (32'h0000_0000),
        .RESET_STRATEGY (reset_strategy),
-       .WITH_CSR (with_csr))
+       .WITH_CSR (with_csr),
+       .MDU(MDU))
    cpu
      (
       .clk      (wb_clk),
@@ -190,6 +199,32 @@ module servant
       .o_dbus_we    (wb_dbus_we),
       .o_dbus_cyc   (wb_dbus_cyc),
       .i_dbus_rdt   (wb_dbus_rdt),
-      .i_dbus_ack   (wb_dbus_ack));
+      .i_dbus_ack   (wb_dbus_ack),
+      
+      // MDU
+      .ext_mdu_rs1   (mdu_rs1),
+      .ext_mdu_rs2   (mdu_rs2),
+      .ext_mdu_op    (mdu_op),
+      .ext_mdu_valid (mdu_valid),
+      .ext_mdu_rd    (mdu_rd),
+      .ext_mdu_ready (mdu_ready));
+
+generate
+  if(MDU) begin
+     mdu_top mdu_serv
+     (
+      .i_clk(wb_clk),
+      .i_rst(wb_rst),
+      .i_mdu_rs1(mdu_rs1),
+      .i_mdu_rs2(mdu_rs2),
+      .i_mdu_op(mdu_op),
+      .i_mdu_valid(mdu_valid),
+      .o_mdu_ready(mdu_ready),
+      .o_mdu_rd(mdu_rd));
+  end else begin
+    assign mdu_ready = 1'b0;
+    assign mdu_rd = 32'b0;
+  end
+endgenerate
 
 endmodule

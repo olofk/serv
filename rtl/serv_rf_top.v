@@ -2,7 +2,11 @@
 
 module serv_rf_top
   #(parameter RESET_PC = 32'd0,
-
+    /* Multiplication and Division Unit
+       0 : Less hardware. Slow execution  of multipy/devide instructions
+       1 : Increase hardware. Fast execution of multipy/devide instructions
+    */
+    parameter MDU = 0,
     /* Register signals before or after the decoder
        0 : Register after the decoder. Faster but uses more resources
        1 : (default) Register before the decoder. Slower but uses less resources
@@ -55,8 +59,16 @@ module serv_rf_top
    output wire 	      o_dbus_we ,
    output wire 	      o_dbus_cyc,
    input wire [31:0]  i_dbus_rdt,
-   input wire 	      i_dbus_ack);
-
+   input wire 	      i_dbus_ack,
+   
+   // MDU
+   output wire [31:0] ext_mdu_rs1,
+   output wire [31:0] ext_mdu_rs2,
+   output wire [ 2:0] ext_mdu_op,
+   output wire        ext_mdu_valid,
+   input  wire [31:0] ext_mdu_rd,
+   input  wire        ext_mdu_ready);
+   
    localparam CSR_REGS = WITH_CSR*4;
 
    wire 	      rf_wreq;
@@ -79,13 +91,8 @@ module serv_rf_top
    wire [RF_L2D-1:0]   raddr;
    wire [RF_WIDTH-1:0] rdata;
 
-`ifdef MDU
-   wire [2:0]  mdu_op;
-   wire        mdu_valid;
-   wire        mdu_ready;
-   wire [31:0] mdu_rs1;
-   wire [31:0] mdu_rd;
-`endif
+   wire [31:0] dbus_rdt;
+   wire        dbus_ack;
 
    serv_rf_ram_if
      #(.width    (RF_WIDTH),
@@ -124,23 +131,12 @@ module serv_rf_top
       .i_raddr (raddr),
       .o_rdata (rdata));
 
-`ifdef MDU
-   mdu_top mdu_serv
-   (.i_clk(clk),
-    .i_rst(i_rst),
-    .i_mdu_rs1(mdu_rs1),
-    .i_mdu_rs2(o_dbus_dat),
-    .i_mdu_op(mdu_op),
-    .i_mdu_valid(mdu_valid),
-    .o_mdu_ready(mdu_ready),
-    .o_mdu_rd(mdu_rd));
-`endif 
-
    serv_top
      #(.RESET_PC (RESET_PC),
        .PRE_REGISTER (PRE_REGISTER),
        .RESET_STRATEGY (RESET_STRATEGY),
-       .WITH_CSR (WITH_CSR))
+       .WITH_CSR (WITH_CSR),
+       .MDU(MDU))
    cpu
      (
       .clk      (clk),
@@ -187,19 +183,31 @@ module serv_rf_top
       .o_ibus_cyc   (o_ibus_cyc),
       .i_ibus_rdt   (i_ibus_rdt),
       .i_ibus_ack   (i_ibus_ack),
-`ifdef MDU
-      .o_mdu_opcode (mdu_op),
-      .o_mdu_valid  (mdu_valid),
-      .i_mdu_ready  (mdu_ready),
-`endif
+      
+      // MDU
+      .o_mdu_opcode (ext_mdu_op),
+      .o_mdu_valid  (ext_mdu_valid),
+      .i_mdu_ready  (ext_mdu_ready),
+
       .o_dbus_adr   (o_dbus_adr),
       .o_dbus_dat   (o_dbus_dat),
       .o_dbus_sel   (o_dbus_sel),
       .o_dbus_we    (o_dbus_we),
       .o_dbus_cyc   (o_dbus_cyc),
-      .i_dbus_rdt   (mdu_ready ? mdu_rd:i_dbus_rdt),
-      .i_dbus_ack   (i_dbus_ack | mdu_ready),
-      .o_mdu_rs1    (mdu_rs1));
+      .i_dbus_rdt   (dbus_rdt),
+      .i_dbus_ack   (dbus_ack),
+      .o_mdu_rs1    (ext_mdu_rs1));
+
+generate
+  if (MDU) begin
+    assign dbus_rdt = ext_mdu_ready ? ext_mdu_rd:i_dbus_rdt;
+    assign dbus_ack = i_dbus_ack | ext_mdu_ready;
+  end else begin
+    assign dbus_rdt = 32'b0;  
+    assign dbus_ack =  1'b0;
+  end
+  assign ext_mdu_rs2 = o_dbus_dat;
+endgenerate
 
 endmodule
 `default_nettype wire

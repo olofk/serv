@@ -1,5 +1,6 @@
-module serv_bufreg
-  (
+module serv_bufreg #(
+      parameter MDU = 0
+)(
    input wire 	      i_clk,
    //State
    input wire 	      i_cnt0,
@@ -44,6 +45,10 @@ module serv_bufreg
    assign o_q = lsb[0] & i_en;
    assign o_dbus_adr = {data, 2'b00};
    assign o_mdu_rs1  = {o_dbus_adr[31:2],lsb};
-   assign o_lsb = i_mdu_en ? 2'b00 : lsb;
+
+   generate
+      if (MDU) assign o_lsb = i_mdu_en ? 2'b00 : lsb;
+      else     assign o_lsb = lsb;
+   endgenerate
 
 endmodule

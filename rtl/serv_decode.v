@@ -1,7 +1,8 @@
 `default_nettype none
-module serv_decode #(
-   parameter [0:0] PRE_REGISTER = 1
-)(
+module serv_decode 
+  #(parameter [0:0] PRE_REGISTER = 1,
+    parameter       MDU = 0)
+  (
    input wire        clk,
    //Input
    input wire [31:2] i_wb_rdt,
@@ -66,9 +67,30 @@ module serv_decode #(
    reg       imm25;
    reg       imm30;
 
-   //mdu
-   wire co_mdu_op = ((opcode == 5'b01100) & imm25);
-   wire [2:0]co_mdu_opcode = funct3;
+generate
+   wire co_mdu_op;
+   wire [2:0]co_mdu_opcode;
+   wire co_shift_op;
+   wire co_slt_op;
+   wire co_mem_word;
+   wire co_rd_alu_en;
+
+   if (MDU) begin
+      assign co_mdu_op     = ((opcode == 5'b01100) & imm25);
+      assign co_mdu_opcode = funct3;
+      assign co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01) & !co_mdu_op;
+      assign co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01) & !co_mdu_op;
+      assign co_mem_word   = co_mdu_op ? co_mdu_op :funct3[1];
+      assign co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
+   end else begin
+      assign co_mdu_op     = 1'b0;
+      assign co_mdu_opcode = 3'b0;
+      assign co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01);
+      assign co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01);
+      assign co_mem_word   = funct3[1];
+      assign co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
+   end 
+endgenerate
 
    //opcode
    wire op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
@@ -115,13 +137,6 @@ module serv_decode #(
 
    wire co_sh_right   = funct3[2];
    wire co_bne_or_bge = funct3[0];
-
-   //
-   // opcode & funct3
-   //
-
-   wire co_shift_op = op_or_opimm & (funct3[1:0] == 2'b01) & !co_mdu_op;
-   wire co_slt_op   = op_or_opimm & (funct3[2:1] == 2'b01) & !co_mdu_op;
 
    //Matches system ops except eceall/ebreak/mret
    wire csr_op = opcode[4] & opcode[2] & (|funct3);
@@ -197,7 +212,6 @@ module serv_decode #(
 
    wire co_mem_cmd  = opcode[3];
    wire co_mem_signed = ~funct3[2];
-   wire co_mem_word   = co_mdu_op ? co_mdu_op :funct3[1];
    wire co_mem_half   = funct3[0];
 
    wire [1:0] co_alu_bool_op = funct3[1:0];
@@ -226,8 +240,6 @@ module serv_decode #(
    //0 (OP_B_SOURCE_IMM) when OPIMM
    //1 (OP_B_SOURCE_RS2) when BRANCH or OP
    wire co_op_b_source = opcode[3];
-
-   wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
 
    generate
       if (PRE_REGISTER) begin

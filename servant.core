@@ -419,7 +419,7 @@ parameters:
   
   MDU:
     datatype  : bool
-    paramtype : vlogdefine
+    paramtype : vlogparam
 
   SERV_CLEAR_RAM:
     datatype  : bool

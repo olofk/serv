@@ -1,6 +1,7 @@
 `default_nettype none
 module serv_mem_if
-  #(parameter WITH_CSR = 1)
+  #(parameter WITH_CSR = 1,
+    parameter MDU = 0)
   (
    input wire 	      i_clk,
    //State
@@ -60,8 +61,16 @@ module serv_mem_if
 	(i_half & !i_bytecnt[1]);
 
    wire mem_rd = i_mem_op & (dat_valid ? dat_cur : signbit & i_signed);
-   wire mdu_rd = i_mdu_op & (dat_valid ? dat_cur : signbit & i_signed);
-   assign o_rd = mem_rd | mdu_rd;
+   
+   generate
+     if(MDU) begin
+       wire mdu_rd = i_mdu_op & (dat_valid ? dat_cur : signbit & i_signed);
+       assign o_rd = mem_rd | mdu_rd;
+     end else begin
+       wire mdu_rd = 1'b0;
+       assign o_rd = mem_rd;
+     end
+   endgenerate
 
    assign o_wb_sel[3] = (i_lsb == 2'b11) | i_word | (i_half & i_lsb[1]);
    assign o_wb_sel[2] = (i_lsb == 2'b10) | i_word;
