@@ -418,7 +418,8 @@ parameters:
     paramtype : vlogdefine
   
   MDU:
-    datatype  : bool
+    datatype  : int
+    description : Enables RISC-V standard M-extension
     paramtype : vlogparam
 
   SERV_CLEAR_RAM:
