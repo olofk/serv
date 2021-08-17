@@ -10,7 +10,6 @@ module servant
    parameter reset_strategy = "MINI";
    parameter sim = 0;
    parameter with_csr = 1;
-   parameter MDU = 1;
 
    wire 	timer_irq;
 
@@ -157,8 +156,10 @@ module servant
    serv_rf_top
      #(.RESET_PC (32'h0000_0000),
        .RESET_STRATEGY (reset_strategy),
-       .WITH_CSR (with_csr),
-       .MDU(MDU))
+  `ifdef MDU
+       .MDU(1),
+  `endif 
+       .WITH_CSR (with_csr))
    cpu
      (
       .clk      (wb_clk),
@@ -209,22 +210,20 @@ module servant
       .ext_mdu_rd    (mdu_rd),
       .ext_mdu_ready (mdu_ready));
 
-generate
-  if(MDU) begin
-     mdu_top mdu_serv
-     (
-      .i_clk(wb_clk),
-      .i_rst(wb_rst),
-      .i_mdu_rs1(mdu_rs1),
-      .i_mdu_rs2(mdu_rs2),
-      .i_mdu_op(mdu_op),
-      .i_mdu_valid(mdu_valid),
-      .o_mdu_ready(mdu_ready),
-      .o_mdu_rd(mdu_rd));
-  end else begin
+`ifdef MDU
+    mdu_top mdu_serv
+    (
+     .i_clk(wb_clk),
+     .i_rst(wb_rst),
+     .i_mdu_rs1(mdu_rs1),
+     .i_mdu_rs2(mdu_rs2),
+     .i_mdu_op(mdu_op),
+     .i_mdu_valid(mdu_valid),
+     .o_mdu_ready(mdu_ready),
+     .o_mdu_rd(mdu_rd));
+`else
     assign mdu_ready = 1'b0;
     assign mdu_rd = 32'b0;
-  end
-endgenerate
+`endif
 
 endmodule
