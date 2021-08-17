@@ -5,7 +5,7 @@ module serv_top
     parameter PRE_REGISTER = 1,
     parameter RESET_STRATEGY = "MINI",
     parameter RESET_PC = 32'd0,
-    parameter MDU = 1'b0)
+    parameter [0:0] MDU = 1'b0)
    (
    input wire 		      clk,
    input wire 		      i_rst,

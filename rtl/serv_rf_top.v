@@ -6,7 +6,7 @@ module serv_rf_top
        0 : Less hardware. Slow execution  of multipy/devide instructions
        1 : Increase hardware. Fast execution of multipy/devide instructions
     */
-    parameter MDU = 0,
+    parameter [0:0] MDU = 0,
     /* Register signals before or after the decoder
        0 : Register after the decoder. Faster but uses more resources
        1 : (default) Register before the decoder. Slower but uses less resources
@@ -203,8 +203,8 @@ generate
     assign dbus_rdt = ext_mdu_ready ? ext_mdu_rd:i_dbus_rdt;
     assign dbus_ack = i_dbus_ack | ext_mdu_ready;
   end else begin
-    assign dbus_rdt = 32'b0;  
-    assign dbus_ack =  1'b0;
+    assign dbus_rdt = i_dbus_rdt;  
+    assign dbus_ack = i_dbus_ack;
   end
   assign ext_mdu_rs2 = o_dbus_dat;
 endgenerate

@@ -1,5 +1,5 @@
 module serv_bufreg #(
-      parameter MDU = 0
+      parameter [0:0] MDU = 0
 )(
    input wire 	      i_clk,
    //State
