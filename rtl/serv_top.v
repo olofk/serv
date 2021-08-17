@@ -164,7 +164,8 @@ module serv_top
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
-       .WITH_CSR (WITH_CSR))
+       .WITH_CSR (WITH_CSR),
+       .MDU(MDU))
    state
      (
       .i_clk (clk),
