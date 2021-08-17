@@ -4,7 +4,7 @@ module servant_sim
    input wire  wb_rst,
    output wire q);
 
-   parameter memfile = "/home/merl-lab/practice/olofk/servent.mem";
+   parameter memfile = "";
    parameter memsize = 8192;
    parameter with_csr = 1;
 
