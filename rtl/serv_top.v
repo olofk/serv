@@ -48,8 +48,8 @@ module serv_top
    input wire 		      i_rdata0,
    input wire 		      i_rdata1,
    // MDU
-   output reg  [ 2:0] o_mdu_opcode,
-   output reg         o_mdu_valid,
+   output wire [ 2:0] o_mdu_opcode,
+   output wire        o_mdu_valid,
    input  wire        i_mdu_ready,
 
    output wire [31:0] 	      o_ibus_adr,
