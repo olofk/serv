@@ -91,9 +91,6 @@ module serv_rf_top
    wire [RF_L2D-1:0]   raddr;
    wire [RF_WIDTH-1:0] rdata;
 
-   wire [31:0] dbus_rdt;
-   wire        dbus_ack;
-
    serv_rf_ram_if
      #(.width    (RF_WIDTH),
        .reset_strategy (RESET_STRATEGY),
@@ -183,32 +180,23 @@ module serv_rf_top
       .o_ibus_cyc   (o_ibus_cyc),
       .i_ibus_rdt   (i_ibus_rdt),
       .i_ibus_ack   (i_ibus_ack),
-      
-      //Extension
-      .o_ext_funct3 (o_ext_funct3),
-      .i_ext_ready  (i_ext_ready),
-      //MDU
-      .o_mdu_valid  (o_mdu_valid),
 
       .o_dbus_adr   (o_dbus_adr),
       .o_dbus_dat   (o_dbus_dat),
       .o_dbus_sel   (o_dbus_sel),
       .o_dbus_we    (o_dbus_we),
       .o_dbus_cyc   (o_dbus_cyc),
-      .i_dbus_rdt   (dbus_rdt),
-      .i_dbus_ack   (dbus_ack),
-      .o_ext_rs1    (o_ext_rs1));
-
-generate
-  if (MDU) begin
-    assign dbus_rdt = i_ext_ready ? i_ext_rd:i_dbus_rdt;
-    assign dbus_ack = i_dbus_ack | i_ext_ready;
-  end else begin
-    assign dbus_rdt = i_dbus_rdt;  
-    assign dbus_ack = i_dbus_ack;
-  end
-  assign o_ext_rs2 = o_dbus_dat;
-endgenerate
+      .i_dbus_rdt   (i_dbus_rdt),
+      .i_dbus_ack   (i_dbus_ack),
+      
+      //Extension
+      .o_ext_funct3 (o_ext_funct3),
+      .i_ext_ready  (i_ext_ready),
+      .i_ext_rd     (i_ext_rd),
+      .o_ext_rs1    (o_ext_rs1),
+      .o_ext_rs2    (o_ext_rs2),
+      //MDU
+      .o_mdu_valid  (o_mdu_valid));
 
 endmodule
 `default_nettype wire

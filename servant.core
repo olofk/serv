@@ -347,7 +347,7 @@ targets:
     filesets : [soc, servant_tb]
     parameters :
       - RISCV_FORMAL
-      - MDU
+      - mdu? (MDU=1)
       - SERV_CLEAR_RAM=true
       - firmware
       - memsize

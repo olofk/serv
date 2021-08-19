@@ -60,9 +60,11 @@ module serv_top
    input wire [31:0] 	      i_dbus_rdt,
    input wire 		      i_dbus_ack,
    //Extension
-   output wire [31:0] o_ext_rs1,
    output wire [ 2:0] o_ext_funct3,
    input  wire        i_ext_ready,
+   input wire  [31:0] i_ext_rd,
+   output wire [31:0] o_ext_rs1,
+   output wire [31:0] o_ext_rs2,
    //MDU
    output wire        o_mdu_valid);
 
@@ -448,8 +450,8 @@ module serv_top
       //External interface
       .o_wb_dat   (o_dbus_dat),
       .o_wb_sel   (o_dbus_sel),
-      .i_wb_rdt   (i_dbus_rdt),
-      .i_wb_ack   (i_dbus_ack));
+      .i_wb_rdt   (dbus_rdt),
+      .i_wb_ack   (dbus_ack));
 
    generate
       if (WITH_CSR) begin
@@ -549,6 +551,19 @@ module serv_top
 
 
 `endif
+
+generate
+   wire [31:0] dbus_rdt;
+   wire        dbus_ack;
+  if (MDU) begin
+    assign dbus_rdt = i_ext_ready ? i_ext_rd:i_dbus_rdt;
+    assign dbus_ack = i_dbus_ack | i_ext_ready;
+  end else begin
+    assign dbus_rdt = i_dbus_rdt;  
+    assign dbus_ack = i_dbus_ack;
+  end
+  assign o_ext_rs2 = o_dbus_dat;
+endgenerate
 
 endmodule
 `default_nettype wire
