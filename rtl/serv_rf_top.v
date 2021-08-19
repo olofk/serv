@@ -184,11 +184,10 @@ module serv_rf_top
       .i_ibus_rdt   (i_ibus_rdt),
       .i_ibus_ack   (i_ibus_ack),
       
-      // Extension
+      //Extension
       .o_ext_funct3 (o_ext_funct3),
       .i_ext_ready  (i_ext_ready),
-
-      // MDU
+      //MDU
       .o_mdu_valid  (o_mdu_valid),
 
       .o_dbus_adr   (o_dbus_adr),
