@@ -47,10 +47,6 @@ module serv_top
    output wire [4+WITH_CSR:0] o_rreg1,
    input wire 		      i_rdata0,
    input wire 		      i_rdata1,
-   // MDU
-   output wire [ 2:0] o_mdu_opcode,
-   output wire        o_mdu_valid,
-   input  wire        i_mdu_ready,
 
    output wire [31:0] 	      o_ibus_adr,
    output wire 		      o_ibus_cyc,
@@ -63,7 +59,12 @@ module serv_top
    output wire 		      o_dbus_cyc,
    input wire [31:0] 	      i_dbus_rdt,
    input wire 		      i_dbus_ack,
-   output wire [31:0]   o_mdu_rs1);
+   //Extension
+   output wire [31:0] o_ext_rs1,
+   output wire [ 2:0] o_ext_funct3,
+   input  wire        i_ext_ready,
+   //MDU
+   output wire        o_mdu_valid);
 
    wire [4:0]    rd_addr;
    wire [4:0]    rs1_addr;
@@ -71,7 +72,7 @@ module serv_top
 
    wire [3:0] 	 immdec_ctrl;
    wire [3:0] 	immdec_en;
-   
+
    wire          sh_right;
    wire 	 bne_or_bge;
    wire 	 cond_branch;
@@ -202,9 +203,11 @@ module serv_top
       .i_slt_op       (slt_op),
       .i_e_op         (e_op),
       .i_rd_op        (rd_op),
+      //MDU
       .i_mdu_op       (mdu_op),
       .o_mdu_valid    (o_mdu_valid),
-      .i_mdu_ready    (i_mdu_ready),
+      //Extension
+      .i_mdu_ready    (i_ext_ready),
       //External
       .o_dbus_cyc     (o_dbus_cyc),
       .i_dbus_ack     (i_dbus_ack),
@@ -237,7 +240,8 @@ module serv_top
       .o_rd_op            (rd_op),
       .o_sh_right         (sh_right),
       .o_mdu_op           (mdu_op),
-      .o_mdu_opcode       (o_mdu_opcode),
+      //Extension
+      .o_ext_funct3       (o_ext_funct3),
       
       //To bufreg
       .o_bufreg_rs1_en    (bufreg_rs1_en),
@@ -306,7 +310,7 @@ module serv_top
       .i_cnt1   (cnt1),
       .i_en     (bufreg_en),
       .i_init   (init),
-      .i_mdu_en (mdu_op),
+      .i_mdu_op (mdu_op),
       .o_lsb    (lsb),
       //Control
       .i_sh_signed (bufreg_sh_signed),
@@ -319,7 +323,7 @@ module serv_top
       .o_q      (bufreg_q),
       //External
       .o_dbus_adr (o_dbus_adr),
-      .o_mdu_rs1  (o_mdu_rs1));
+      .o_ext_rs1  (o_ext_rs1));
 
    serv_ctrl
      #(.RESET_PC (RESET_PC),
@@ -405,6 +409,7 @@ module serv_top
       .i_csr_rd    (csr_rd),
       .i_rd_csr_en (rd_csr_en),
       .i_mem_rd    (mem_rd),
+
       //RS1 read port
       .i_rs1_raddr (rs1_addr),
       .o_rs1       (rs1),
@@ -541,6 +546,7 @@ module serv_top
    always @(o_ibus_adr)
      rvfi_pc_wdata <= o_ibus_adr;
    /* verilator lint_on COMBDLY */
+
 
 `endif
 

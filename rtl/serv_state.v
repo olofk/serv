@@ -23,9 +23,6 @@ module serv_state
    input wire 	     i_slt_op,
    input wire 	     i_e_op,
    input wire 	     i_rd_op,
-   input wire       i_mdu_op,
-   output wire         o_mdu_valid,
-   input wire          i_mdu_ready,
    output wire 	     o_init,
    output wire 	     o_cnt_en,
    output wire 	     o_cnt0,
@@ -45,7 +42,11 @@ module serv_state
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
    output reg 	     o_cnt_done,
-   output wire 	     o_bufreg_en);
+   output wire 	     o_bufreg_en,
+   //MDU
+   input wire        i_mdu_op,
+   output wire       o_mdu_valid,
+   input wire        i_mdu_ready);
 
    reg 	stage_two_req;
    reg 	init_done;

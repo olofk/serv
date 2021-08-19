@@ -14,12 +14,13 @@ module serv_mem_if
    output wire 	      o_sh_done,
    output wire 	      o_sh_done_r,
    //Control
-   input wire         i_mdu_op,
    input wire 	      i_mem_op,
    input wire 	      i_shift_op,
    input wire 	      i_signed,
    input wire 	      i_word,
    input wire 	      i_half,
+   //MDU
+   input wire         i_mdu_op,
    //Data
    input wire 	      i_op_b,
    output wire 	      o_rd,

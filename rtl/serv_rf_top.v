@@ -61,13 +61,14 @@ module serv_rf_top
    input wire [31:0]  i_dbus_rdt,
    input wire 	      i_dbus_ack,
    
+   // Extension
+   output wire [31:0] o_ext_rs1,
+   output wire [31:0] o_ext_rs2,
+   output wire [ 2:0] o_ext_funct3,
+   input  wire [31:0] i_ext_rd,
+   input  wire        i_ext_ready,
    // MDU
-   output wire [31:0] ext_mdu_rs1,
-   output wire [31:0] ext_mdu_rs2,
-   output wire [ 2:0] ext_mdu_op,
-   output wire        ext_mdu_valid,
-   input  wire [31:0] ext_mdu_rd,
-   input  wire        ext_mdu_ready);
+   output wire        o_mdu_valid);
    
    localparam CSR_REGS = WITH_CSR*4;
 
@@ -184,10 +185,12 @@ module serv_rf_top
       .i_ibus_rdt   (i_ibus_rdt),
       .i_ibus_ack   (i_ibus_ack),
       
+      // Extension
+      .o_ext_funct3 (o_ext_funct3),
+      .i_ext_ready  (i_ext_ready),
+
       // MDU
-      .o_mdu_opcode (ext_mdu_op),
-      .o_mdu_valid  (ext_mdu_valid),
-      .i_mdu_ready  (ext_mdu_ready),
+      .o_mdu_valid  (o_mdu_valid),
 
       .o_dbus_adr   (o_dbus_adr),
       .o_dbus_dat   (o_dbus_dat),
@@ -196,17 +199,17 @@ module serv_rf_top
       .o_dbus_cyc   (o_dbus_cyc),
       .i_dbus_rdt   (dbus_rdt),
       .i_dbus_ack   (dbus_ack),
-      .o_mdu_rs1    (ext_mdu_rs1));
+      .o_ext_rs1    (o_ext_rs1));
 
 generate
   if (MDU) begin
-    assign dbus_rdt = ext_mdu_ready ? ext_mdu_rd:i_dbus_rdt;
-    assign dbus_ack = i_dbus_ack | ext_mdu_ready;
+    assign dbus_rdt = i_ext_ready ? i_ext_rd:i_dbus_rdt;
+    assign dbus_ack = i_dbus_ack | i_ext_ready;
   end else begin
     assign dbus_rdt = i_dbus_rdt;  
     assign dbus_ack = i_dbus_ack;
   end
-  assign ext_mdu_rs2 = o_dbus_dat;
+  assign o_ext_rs2 = o_dbus_dat;
 endgenerate
 
 endmodule

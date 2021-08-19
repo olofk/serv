@@ -46,7 +46,7 @@ targets:
 parameters:
   MDU:
     datatype   : int
-    description: Enables RISC-V standard M-extension
+    description: Enables interface for RISC-V standard M-extension
     paramtype  : vlogparam
 
   PRE_REGISTER:

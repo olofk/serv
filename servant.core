@@ -39,7 +39,7 @@ filesets:
       - "!tool_quartus? (servant/servant_ram.v)"
       - servant/servant.v
     file_type : verilogSource
-    depend : {serv, mdu}
+    depend : [serv, "mdu? (mdu)"]
 
   cyc1000:
     files:
@@ -380,7 +380,7 @@ targets:
     filesets : [soc, verilator_tb]
     parameters :
       - RISCV_FORMAL
-      - MDU
+      - "mdu? (MDU=1)"
       - firmware
       - memsize
       - signature
@@ -433,7 +433,7 @@ parameters:
     paramtype : vlogdefine
   
   MDU:
-    datatype  : bool
+    datatype  : int
     description : Enables RISC-V standard M-extension
     paramtype : vlogdefine
 

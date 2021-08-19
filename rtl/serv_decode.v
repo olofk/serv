@@ -18,8 +18,10 @@ module serv_decode
    output reg       o_shift_op,
    output reg       o_slt_op,
    output reg       o_rd_op,
+   //MDU
    output reg       o_mdu_op,
-   output reg [2:0] o_mdu_opcode,
+   //Extension
+   output reg [2:0] o_ext_funct3,
    //To bufreg
    output reg       o_bufreg_rs1_en,
    output reg       o_bufreg_imm_en,
@@ -69,7 +71,7 @@ module serv_decode
 
 generate
    wire co_mdu_op;
-   wire [2:0]co_mdu_opcode;
+   wire [2:0]co_ext_funct3;
    wire co_shift_op;
    wire co_slt_op;
    wire co_mem_word;
@@ -77,19 +79,18 @@ generate
 
    if (MDU) begin
       assign co_mdu_op     = ((opcode == 5'b01100) & imm25);
-      assign co_mdu_opcode = funct3;
       assign co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01) & !co_mdu_op;
       assign co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01) & !co_mdu_op;
       assign co_mem_word   = co_mdu_op ? co_mdu_op :funct3[1];
       assign co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
    end else begin
       assign co_mdu_op     = 1'b0;
-      assign co_mdu_opcode = 3'b0;
       assign co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01);
       assign co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01);
       assign co_mem_word   = funct3[1];
       assign co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
-   end 
+   end
+   assign co_ext_funct3 = funct3;
 endgenerate
 
    //opcode
@@ -269,7 +270,7 @@ endgenerate
             o_slt_op           = co_slt_op;
             o_rd_op            = co_rd_op;
             o_mdu_op           = co_mdu_op;
-            o_mdu_opcode       = co_mdu_opcode;
+            o_ext_funct3       = co_ext_funct3;
             o_bufreg_rs1_en    = co_bufreg_rs1_en;
             o_bufreg_imm_en    = co_bufreg_imm_en;
             o_bufreg_clr_lsb   = co_bufreg_clr_lsb;
@@ -328,7 +329,7 @@ endgenerate
                o_slt_op           <= co_slt_op;
                o_rd_op            <= co_rd_op;
                o_mdu_op           <= co_mdu_op;
-               o_mdu_opcode       <= co_mdu_opcode;
+               o_ext_funct3       <= co_ext_funct3;
                o_bufreg_rs1_en    <= co_bufreg_rs1_en;
                o_bufreg_imm_en    <= co_bufreg_imm_en;
                o_bufreg_clr_lsb   <= co_bufreg_clr_lsb;

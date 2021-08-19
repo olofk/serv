@@ -7,7 +7,7 @@ module serv_bufreg #(
    input wire 	      i_cnt1,
    input wire 	      i_en,
    input wire 	      i_init,
-   input wire           i_mdu_en,
+   input wire           i_mdu_op,
    output wire [1:0]    o_lsb,
    //Control
    input wire 	      i_rs1_en,
@@ -20,7 +20,8 @@ module serv_bufreg #(
    output wire 	      o_q,
    //External
    output wire [31:0] o_dbus_adr,
-   output wire [31:0] o_mdu_rs1);
+   //Extension
+   output wire [31:0] o_ext_rs1);
 
    wire 	      c, q;
    reg 		      c_r;
@@ -44,10 +45,10 @@ module serv_bufreg #(
 
    assign o_q = lsb[0] & i_en;
    assign o_dbus_adr = {data, 2'b00};
-   assign o_mdu_rs1  = {o_dbus_adr[31:2],lsb};
+   assign o_ext_rs1  = {o_dbus_adr[31:2],lsb};
 
    generate
-      if (MDU) assign o_lsb = i_mdu_en ? 2'b00 : lsb;
+      if (MDU) assign o_lsb = i_mdu_op ? 2'b00 : lsb;
       else     assign o_lsb = lsb;
    endgenerate
 

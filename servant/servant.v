@@ -202,13 +202,14 @@ module servant
       .i_dbus_rdt   (wb_dbus_rdt),
       .i_dbus_ack   (wb_dbus_ack),
       
+      // Extension
+      .o_ext_rs1    (mdu_rs1),
+      .o_ext_rs2    (mdu_rs2),
+      .o_ext_funct3 (mdu_op),
+      .i_ext_rd     (mdu_rd),
+      .i_ext_ready  (mdu_ready),
       // MDU
-      .ext_mdu_rs1   (mdu_rs1),
-      .ext_mdu_rs2   (mdu_rs2),
-      .ext_mdu_op    (mdu_op),
-      .ext_mdu_valid (mdu_valid),
-      .ext_mdu_rd    (mdu_rd),
-      .ext_mdu_ready (mdu_ready));
+      .o_mdu_valid  (mdu_valid));
 
 `ifdef MDU
     mdu_top mdu_serv
