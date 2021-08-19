@@ -3,8 +3,7 @@
 module serv_rf_top
   #(parameter RESET_PC = 32'd0,
     /* Multiplication and Division Unit
-       0 : Less hardware. Slow execution  of multipy/devide instructions
-       1 : Increase hardware. Fast execution of multipy/devide instructions
+       This parameter enables the interface for connecting SERV and MDU
     */
     parameter [0:0] MDU = 0,
     /* Register signals before or after the decoder

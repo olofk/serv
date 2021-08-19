@@ -65,7 +65,7 @@ module serv_mem_if
    
    generate
      if(MDU) begin
-       wire mdu_rd = i_mdu_op & (dat_valid ? dat_cur : signbit & i_signed);
+       wire mdu_rd = i_mdu_op & dat_cur;
        assign o_rd = mem_rd | mdu_rd;
      end else begin
        wire mdu_rd = 1'b0;
