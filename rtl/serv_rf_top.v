@@ -2,7 +2,10 @@
 
 module serv_rf_top
   #(parameter RESET_PC = 32'd0,
-
+    /* Multiplication and Division Unit
+       This parameter enables the interface for connecting SERV and MDU
+    */
+    parameter [0:0] MDU = 0,
     /* Register signals before or after the decoder
        0 : Register after the decoder. Faster but uses more resources
        1 : (default) Register before the decoder. Slower but uses less resources
@@ -55,8 +58,17 @@ module serv_rf_top
    output wire 	      o_dbus_we ,
    output wire 	      o_dbus_cyc,
    input wire [31:0]  i_dbus_rdt,
-   input wire 	      i_dbus_ack);
-
+   input wire 	      i_dbus_ack,
+   
+   // Extension
+   output wire [31:0] o_ext_rs1,
+   output wire [31:0] o_ext_rs2,
+   output wire [ 2:0] o_ext_funct3,
+   input  wire [31:0] i_ext_rd,
+   input  wire        i_ext_ready,
+   // MDU
+   output wire        o_mdu_valid);
+   
    localparam CSR_REGS = WITH_CSR*4;
 
    wire 	      rf_wreq;
@@ -120,7 +132,8 @@ module serv_rf_top
      #(.RESET_PC (RESET_PC),
        .PRE_REGISTER (PRE_REGISTER),
        .RESET_STRATEGY (RESET_STRATEGY),
-       .WITH_CSR (WITH_CSR))
+       .WITH_CSR (WITH_CSR),
+       .MDU(MDU))
    cpu
      (
       .clk      (clk),
@@ -174,7 +187,16 @@ module serv_rf_top
       .o_dbus_we    (o_dbus_we),
       .o_dbus_cyc   (o_dbus_cyc),
       .i_dbus_rdt   (i_dbus_rdt),
-      .i_dbus_ack   (i_dbus_ack));
+      .i_dbus_ack   (i_dbus_ack),
+      
+      //Extension
+      .o_ext_funct3 (o_ext_funct3),
+      .i_ext_ready  (i_ext_ready),
+      .i_ext_rd     (i_ext_rd),
+      .o_ext_rs1    (o_ext_rs1),
+      .o_ext_rs2    (o_ext_rs2),
+      //MDU
+      .o_mdu_valid  (o_mdu_valid));
 
 endmodule
 `default_nettype wire

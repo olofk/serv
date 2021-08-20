@@ -39,7 +39,7 @@ filesets:
       - "!tool_quartus? (servant/servant_ram.v)"
       - servant/servant.v
     file_type : verilogSource
-    depend : [serv]
+    depend : [serv, "mdu? (mdu)"]
 
   cyc1000:
     files:
@@ -297,7 +297,7 @@ targets:
   arty_a7_35t:
     default_tool: vivado
     filesets : [mem_files, soc, arty_a7_35t]
-    parameters : [memfile, memsize, frequency=16]
+    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)"]
     tools:
       vivado: {part : xc7a35ticsg324-1L}
     toplevel : servix
@@ -347,6 +347,7 @@ targets:
     filesets : [soc, servant_tb]
     parameters :
       - RISCV_FORMAL
+      - "mdu? (MDU=1)"
       - SERV_CLEAR_RAM=true
       - firmware
       - memsize
@@ -379,6 +380,7 @@ targets:
     filesets : [soc, verilator_tb]
     parameters :
       - RISCV_FORMAL
+      - "mdu? (MDU=1)"
       - firmware
       - memsize
       - signature
@@ -428,6 +430,11 @@ parameters:
 
   RISCV_FORMAL:
     datatype  : bool
+    paramtype : vlogdefine
+  
+  MDU:
+    datatype  : int
+    description : Enables RISC-V standard M-extension
     paramtype : vlogdefine
 
   SERV_CLEAR_RAM:

@@ -4,7 +4,8 @@ module serv_top
   #(parameter WITH_CSR = 1,
     parameter PRE_REGISTER = 1,
     parameter RESET_STRATEGY = "MINI",
-    parameter RESET_PC = 32'd0)
+    parameter RESET_PC = 32'd0,
+    parameter [0:0] MDU = 1'b0)
    (
    input wire 		      clk,
    input wire 		      i_rst,
@@ -57,7 +58,15 @@ module serv_top
    output wire 		      o_dbus_we ,
    output wire 		      o_dbus_cyc,
    input wire [31:0] 	      i_dbus_rdt,
-   input wire 		      i_dbus_ack);
+   input wire 		      i_dbus_ack,
+   //Extension
+   output wire [ 2:0] o_ext_funct3,
+   input  wire        i_ext_ready,
+   input wire  [31:0] i_ext_rd,
+   output wire [31:0] o_ext_rs1,
+   output wire [31:0] o_ext_rs2,
+   //MDU
+   output wire        o_mdu_valid);
 
    wire [4:0]    rd_addr;
    wire [4:0]    rs1_addr;
@@ -76,6 +85,7 @@ module serv_top
    wire 	 shift_op;
    wire 	 slt_op;
    wire 	 rd_op;
+   wire   mdu_op;
 
    wire 	 rd_alu_en;
    wire 	 rd_csr_en;
@@ -157,7 +167,8 @@ module serv_top
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
-       .WITH_CSR (WITH_CSR))
+       .WITH_CSR (WITH_CSR),
+       .MDU(MDU))
    state
      (
       .i_clk (clk),
@@ -194,6 +205,11 @@ module serv_top
       .i_slt_op       (slt_op),
       .i_e_op         (e_op),
       .i_rd_op        (rd_op),
+      //MDU
+      .i_mdu_op       (mdu_op),
+      .o_mdu_valid    (o_mdu_valid),
+      //Extension
+      .i_mdu_ready    (i_ext_ready),
       //External
       .o_dbus_cyc     (o_dbus_cyc),
       .i_dbus_ack     (i_dbus_ack),
@@ -206,7 +222,8 @@ module serv_top
       .o_rf_rd_en     (rd_en));
 
    serv_decode
-     #(.PRE_REGISTER (PRE_REGISTER))
+     #(.PRE_REGISTER (PRE_REGISTER),
+       .MDU(MDU))
    decode
      (
       .clk (clk),
@@ -224,6 +241,10 @@ module serv_top
       .o_slt_op           (slt_op),
       .o_rd_op            (rd_op),
       .o_sh_right         (sh_right),
+      .o_mdu_op           (mdu_op),
+      //Extension
+      .o_ext_funct3       (o_ext_funct3),
+      
       //To bufreg
       .o_bufreg_rs1_en    (bufreg_rs1_en),
       .o_bufreg_imm_en    (bufreg_imm_en),
@@ -281,7 +302,9 @@ module serv_top
       .i_wb_en      (i_ibus_ack),
       .i_wb_rdt     (i_ibus_rdt[31:7]));
 
-   serv_bufreg bufreg
+   serv_bufreg 
+      #(.MDU(MDU))
+   bufreg
      (
       .i_clk    (clk),
       //State
@@ -289,6 +312,7 @@ module serv_top
       .i_cnt1   (cnt1),
       .i_en     (bufreg_en),
       .i_init   (init),
+      .i_mdu_op (mdu_op),
       .o_lsb    (lsb),
       //Control
       .i_sh_signed (bufreg_sh_signed),
@@ -300,7 +324,8 @@ module serv_top
       .i_imm    (imm),
       .o_q      (bufreg_q),
       //External
-      .o_dbus_adr (o_dbus_adr));
+      .o_dbus_adr (o_dbus_adr),
+      .o_ext_rs1  (o_ext_rs1));
 
    serv_ctrl
      #(.RESET_PC (RESET_PC),
@@ -398,7 +423,8 @@ module serv_top
       .o_csr       (rf_csr_out));
 
    serv_mem_if
-     #(.WITH_CSR (WITH_CSR))
+     #(.WITH_CSR (WITH_CSR),
+       .MDU(MDU))
    mem_if
      (
       .i_clk      (clk),
@@ -412,6 +438,7 @@ module serv_top
       .o_sh_done   (mem_sh_done),
       .o_sh_done_r (mem_sh_done_r),
       //Control
+      .i_mdu_op   (mdu_op),
       .i_mem_op   (mem_op),
       .i_shift_op (shift_op),
       .i_signed   (mem_signed),
@@ -423,8 +450,8 @@ module serv_top
       //External interface
       .o_wb_dat   (o_dbus_dat),
       .o_wb_sel   (o_dbus_sel),
-      .i_wb_rdt   (i_dbus_rdt),
-      .i_wb_ack   (i_dbus_ack));
+      .i_wb_rdt   (dbus_rdt),
+      .i_wb_ack   (dbus_ack));
 
    generate
       if (WITH_CSR) begin
@@ -524,6 +551,19 @@ module serv_top
 
 
 `endif
+
+generate
+   wire [31:0] dbus_rdt;
+   wire        dbus_ack;
+  if (MDU) begin
+    assign dbus_rdt = i_ext_ready ? i_ext_rd:i_dbus_rdt;
+    assign dbus_ack = i_dbus_ack | i_ext_ready;
+  end else begin
+    assign dbus_rdt = i_dbus_rdt;  
+    assign dbus_ack = i_dbus_ack;
+  end
+  assign o_ext_rs2 = o_dbus_dat;
+endgenerate
 
 endmodule
 `default_nettype wire

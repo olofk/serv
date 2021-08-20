@@ -52,6 +52,13 @@ module servant
    wire 	wb_timer_cyc;
    wire [31:0] 	wb_timer_rdt;
 
+   wire [31:0] mdu_rs1;
+   wire [31:0] mdu_rs2;
+   wire [ 2:0] mdu_op;
+   wire        mdu_valid;
+   wire [31:0] mdu_rd;
+   wire        mdu_ready;
+
    servant_arbiter arbiter
      (.i_wb_cpu_dbus_adr (wb_dmem_adr),
       .i_wb_cpu_dbus_dat (wb_dmem_dat),
@@ -149,6 +156,9 @@ module servant
    serv_rf_top
      #(.RESET_PC (32'h0000_0000),
        .RESET_STRATEGY (reset_strategy),
+  `ifdef MDU
+       .MDU(1),
+  `endif 
        .WITH_CSR (with_csr))
    cpu
      (
@@ -190,6 +200,31 @@ module servant
       .o_dbus_we    (wb_dbus_we),
       .o_dbus_cyc   (wb_dbus_cyc),
       .i_dbus_rdt   (wb_dbus_rdt),
-      .i_dbus_ack   (wb_dbus_ack));
+      .i_dbus_ack   (wb_dbus_ack),
+      
+      //Extension
+      .o_ext_rs1    (mdu_rs1),
+      .o_ext_rs2    (mdu_rs2),
+      .o_ext_funct3 (mdu_op),
+      .i_ext_rd     (mdu_rd),
+      .i_ext_ready  (mdu_ready),
+      //MDU
+      .o_mdu_valid  (mdu_valid));
+
+`ifdef MDU
+    mdu_top mdu_serv
+    (
+     .i_clk(wb_clk),
+     .i_rst(wb_rst),
+     .i_mdu_rs1(mdu_rs1),
+     .i_mdu_rs2(mdu_rs2),
+     .i_mdu_op(mdu_op),
+     .i_mdu_valid(mdu_valid),
+     .o_mdu_ready(mdu_ready),
+     .o_mdu_rd(mdu_rd));
+`else
+    assign mdu_ready = 1'b0;
+    assign mdu_rd = 32'b0;
+`endif
 
 endmodule
