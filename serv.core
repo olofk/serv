@@ -25,6 +25,7 @@ targets:
   default:
     filesets : [core]
     parameters :
+      - "is_toplevel? (MDU)"
       - "is_toplevel? (PRE_REGISTER)"
       - "is_toplevel? (RESET_STRATEGY)"
       - RISCV_FORMAL
@@ -43,6 +44,11 @@ targets:
     toplevel : serv_rf_top
 
 parameters:
+  MDU:
+    datatype   : int
+    description: Enables interface for RISC-V standard M-extension
+    paramtype  : vlogparam
+
   PRE_REGISTER:
     datatype    : int
     description : Register signals before or after the decoder

@@ -1,7 +1,8 @@
 `default_nettype none
-module serv_decode #(
-   parameter [0:0] PRE_REGISTER = 1
-)(
+module serv_decode 
+  #(parameter [0:0] PRE_REGISTER = 1,
+    parameter [0:0] MDU = 0)
+  (
    input wire        clk,
    //Input
    input wire [31:2] i_wb_rdt,
@@ -17,6 +18,10 @@ module serv_decode #(
    output reg       o_shift_op,
    output reg       o_slt_op,
    output reg       o_rd_op,
+   //MDU
+   output reg       o_mdu_op,
+   //Extension
+   output reg [2:0] o_ext_funct3,
    //To bufreg
    output reg       o_bufreg_rs1_en,
    output reg       o_bufreg_imm_en,
@@ -61,7 +66,32 @@ module serv_decode #(
    reg        op22;
    reg        op26;
 
+   reg       imm25;
    reg       imm30;
+
+generate
+   wire co_mdu_op;
+   wire [2:0]co_ext_funct3;
+   wire co_shift_op;
+   wire co_slt_op;
+   wire co_mem_word;
+   wire co_rd_alu_en;
+
+   if (MDU) begin
+      assign co_mdu_op     = ((opcode == 5'b01100) & imm25);
+      assign co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01) & !co_mdu_op;
+      assign co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01) & !co_mdu_op;
+      assign co_mem_word   = co_mdu_op ? co_mdu_op :funct3[1];
+      assign co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
+   end else begin
+      assign co_mdu_op     = 1'b0;
+      assign co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01);
+      assign co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01);
+      assign co_mem_word   = funct3[1];
+      assign co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
+   end
+   assign co_ext_funct3 = funct3;
+endgenerate
 
    //opcode
    wire op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
@@ -108,13 +138,6 @@ module serv_decode #(
 
    wire co_sh_right   = funct3[2];
    wire co_bne_or_bge = funct3[0];
-
-   //
-   // opcode & funct3
-   //
-
-   wire co_shift_op = op_or_opimm & (funct3[1:0] == 2'b01);
-   wire co_slt_op   = op_or_opimm & (funct3[2:1] == 2'b01);
 
    //Matches system ops except eceall/ebreak/mret
    wire csr_op = opcode[4] & opcode[2] & (|funct3);
@@ -190,7 +213,6 @@ module serv_decode #(
 
    wire co_mem_cmd  = opcode[3];
    wire co_mem_signed = ~funct3[2];
-   wire co_mem_word   = funct3[1];
    wire co_mem_half   = funct3[0];
 
    wire [1:0] co_alu_bool_op = funct3[1:0];
@@ -220,8 +242,6 @@ module serv_decode #(
    //1 (OP_B_SOURCE_RS2) when BRANCH or OP
    wire co_op_b_source = opcode[3];
 
-   wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
-
    generate
       if (PRE_REGISTER) begin
 
@@ -229,6 +249,7 @@ module serv_decode #(
             if (i_wb_en) begin
                funct3 <= i_wb_rdt[14:12];
                imm30  <= i_wb_rdt[30];
+               imm25  <= i_wb_rdt[25];
                opcode <= i_wb_rdt[6:2];
                op20   <= i_wb_rdt[20];
                op21   <= i_wb_rdt[21];
@@ -248,6 +269,8 @@ module serv_decode #(
             o_shift_op         = co_shift_op;
             o_slt_op           = co_slt_op;
             o_rd_op            = co_rd_op;
+            o_mdu_op           = co_mdu_op;
+            o_ext_funct3       = co_ext_funct3;
             o_bufreg_rs1_en    = co_bufreg_rs1_en;
             o_bufreg_imm_en    = co_bufreg_imm_en;
             o_bufreg_clr_lsb   = co_bufreg_clr_lsb;
@@ -285,6 +308,7 @@ module serv_decode #(
          always @(*) begin
             funct3  = i_wb_rdt[14:12];
             imm30   = i_wb_rdt[30];
+            imm25   = i_wb_rdt[25];
             opcode  = i_wb_rdt[6:2];
             op20    = i_wb_rdt[20];
             op21    = i_wb_rdt[21];
@@ -304,6 +328,8 @@ module serv_decode #(
                o_shift_op         <= co_shift_op;
                o_slt_op           <= co_slt_op;
                o_rd_op            <= co_rd_op;
+               o_mdu_op           <= co_mdu_op;
+               o_ext_funct3       <= co_ext_funct3;
                o_bufreg_rs1_en    <= co_bufreg_rs1_en;
                o_bufreg_imm_en    <= co_bufreg_imm_en;
                o_bufreg_clr_lsb   <= co_bufreg_clr_lsb;
