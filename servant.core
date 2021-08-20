@@ -297,7 +297,7 @@ targets:
   arty_a7_35t:
     default_tool: vivado
     filesets : [mem_files, soc, arty_a7_35t]
-    parameters : [memfile, memsize, frequency=16]
+    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)"]
     tools:
       vivado: {part : xc7a35ticsg324-1L}
     toplevel : servix
@@ -347,7 +347,7 @@ targets:
     filesets : [soc, servant_tb]
     parameters :
       - RISCV_FORMAL
-      - mdu? (MDU=1)
+      - "mdu? (MDU=1)"
       - SERV_CLEAR_RAM=true
       - firmware
       - memsize
