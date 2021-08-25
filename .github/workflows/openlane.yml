@@ -1,0 +1,14 @@
+name: build-openlane-sky130
+on: [push]
+jobs:
+  build-openlane:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout subservient
+        uses: actions/checkout@v2
+      - name: Build with Openlane
+        uses: librecores/ci-fusesoc-action@migrate-dockerized
+        with:
+          core: serv
+          target: sky130
+          tool: openlane
