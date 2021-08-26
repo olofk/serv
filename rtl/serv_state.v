@@ -186,6 +186,7 @@ endgenerate
 	    init_done <= 1'b0;
 	    o_ctrl_jump <= 1'b0;
 	    o_cnt_r <= 4'b0000;
+	    stage_two_req <= 1'b0;
 	 end
       end
    end
