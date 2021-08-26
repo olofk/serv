@@ -455,9 +455,12 @@ module serv_top
 
    generate
       if (WITH_CSR) begin
-	 serv_csr csr
+	 serv_csr
+	   #(.RESET_STRATEGY (RESET_STRATEGY))
+	 csr
 	   (
 	    .i_clk        (clk),
+	    .i_rst        (i_rst),
 	    //State
 	    .i_init       (init),
 	    .i_en         (cnt_en),

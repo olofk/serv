@@ -1,7 +1,9 @@
 `default_nettype none
 module serv_csr
+  #(parameter RESET_STRATEGY = "MINI")
   (
    input wire 	    i_clk,
+   input wire 	    i_rst,
    //State
    input wire 	    i_init,
    input wire 	    i_en,
@@ -76,7 +78,7 @@ module serv_csr
 	 timer_irq_r <= timer_irq;
 	 o_new_irq   <= timer_irq & !timer_irq_r;
       end
-	 
+
       if (i_mie_en & i_cnt7)
 	mie_mtie <= csr_in;
 
@@ -130,6 +132,10 @@ module serv_csr
       end
       if (i_mcause_en & i_cnt_done | i_trap)
 	mcause31 <= i_trap ? o_new_irq : csr_in;
+      if (i_rst)
+	if (RESET_STRATEGY != "NONE")
+	  o_new_irq <= 1'b0;
+
    end
 
 endmodule
