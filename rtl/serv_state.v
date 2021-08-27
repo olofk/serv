@@ -128,7 +128,7 @@ endgenerate
     shift : Shift in during phase 1. Continue shifting between phases (except
             for the first cycle after init). Shift out during phase 2
     */
-   assign o_bufreg_en = (o_cnt_en & (o_init | o_ctrl_trap | i_branch_op)) | (i_shift_op & !stage_two_req & (i_sh_right | i_sh_done_r));
+   assign o_bufreg_en = (o_cnt_en & (o_init | o_ctrl_trap | i_branch_op)) | (i_shift_op & !stage_two_req & (i_sh_right | i_sh_done_r) & init_done);
 
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
