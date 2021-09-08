@@ -225,6 +225,7 @@ targets:
 
   catzip:
     default_tool : icestorm
+    description : Catboard iCE40HX8K package CT256 FPGA board
     filesets : [mem_files, soc, service, catzip]
     generate: [catzip_pll]
     parameters : [memfile, memsize, PLL=ICE40_CORE]
