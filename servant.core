@@ -227,7 +227,7 @@ targets:
     default_tool : icestorm
     filesets : [mem_files, soc, service, catzip]
     generate: [catzip_pll]
-    parameters : [memfile, memsize, PLL=ICE40_PAD]
+    parameters : [memfile, memsize, PLL=ICE40_CORE]
     tools:
       icestorm:
         nextpnr_options: [--hx8k, --package, ct256 --freq, 40]
