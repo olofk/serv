@@ -121,6 +121,8 @@ module serv_top
    wire 	 bufreg_imm_en;
    wire 	 bufreg_clr_lsb;
    wire 	 bufreg_q;
+   wire [31:0] dbus_rdt;
+   wire        dbus_ack;
 
    wire          alu_sub;
    wire [1:0] 	 alu_bool_op;
@@ -553,8 +555,6 @@ module serv_top
 `endif
 
 generate
-   wire [31:0] dbus_rdt;
-   wire        dbus_ack;
   if (MDU) begin
     assign dbus_rdt = i_ext_ready ? i_ext_rd:i_dbus_rdt;
     assign dbus_ack = i_dbus_ack | i_ext_ready;

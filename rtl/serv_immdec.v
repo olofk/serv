@@ -28,7 +28,6 @@ module serv_immdec
    reg [4:0]  imm24_20;
    reg [4:0]  imm11_7;
 
-   assign o_imm = i_cnt_done ? signbit : i_ctrl[0] ? imm11_7[0] : imm24_20[0];
    assign o_csr_imm = imm19_12_20[4];
 
    generate
@@ -88,5 +87,7 @@ module serv_immdec
 	 end
       end
    endgenerate
+
+	 assign o_imm = i_cnt_done ? signbit : i_ctrl[0] ? imm11_7[0] : imm24_20[0];
 	 
 endmodule
