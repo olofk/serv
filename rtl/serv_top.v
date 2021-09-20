@@ -457,9 +457,12 @@ module serv_top
 
    generate
       if (WITH_CSR) begin
-	 serv_csr csr
+	 serv_csr
+	   #(.RESET_STRATEGY (RESET_STRATEGY))
+	 csr
 	   (
 	    .i_clk        (clk),
+	    .i_rst        (i_rst),
 	    //State
 	    .i_init       (init),
 	    .i_en         (cnt_en),
@@ -501,12 +504,18 @@ module serv_top
    wire rs_en = (branch_op|mem_op|shift_op|slt_op) ? init : ctrl_pc_en;
 
    always @(posedge clk) begin
+      /* End of instruction */
       rvfi_valid <= cnt_done & ctrl_pc_en & !i_rst;
       rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
+
+      /* Get instruction word when it's fetched from ibus */
       if (o_ibus_cyc & i_ibus_ack)
 	rvfi_insn <= i_ibus_rdt;
+
+      /* Store data written to rd */
       if (o_wen0)
         rvfi_rd_wdata <= {o_wdata0,rvfi_rd_wdata[31:1]};
+
       if (cnt_done & ctrl_pc_en) begin
          rvfi_pc_rdata <= pc;
 	 if (!(rd_en & (|rd_addr))) begin
@@ -520,18 +529,22 @@ module serv_top
          pc <= rvfi_pc_wdata;
       end
 
+      /* Not used */
       rvfi_halt <= 1'b0;
       rvfi_intr <= 1'b0;
       rvfi_mode <= 2'd3;
       rvfi_ixl = 2'd1;
+
+      /* RS1 not valid during J, U instructions (immdec_en[1]) */
+      /* RS2 not valid during I, J, U instructions (immdec_en[2]) */
       if (i_rf_ready) begin
-	 rvfi_rs1_addr <= rs1_addr;
-         rvfi_rs2_addr <= rs2_addr;
+	 rvfi_rs1_addr <= !immdec_en[1] ? rs1_addr : 5'd0;
+         rvfi_rs2_addr <= !immdec_en[2] /*rs2_valid*/ ? rs2_addr : 5'd0;
 	 rvfi_rd_addr  <= rd_addr;
       end
       if (rs_en) begin
-         rvfi_rs1_rdata <= {rs1,rvfi_rs1_rdata[31:1]};
-         rvfi_rs2_rdata <= {rs2,rvfi_rs2_rdata[31:1]};
+         rvfi_rs1_rdata <= {!immdec_en[1] & rs1,rvfi_rs1_rdata[31:1]};
+         rvfi_rs2_rdata <= {!immdec_en[2] & rs2,rvfi_rs2_rdata[31:1]};
       end
 
       if (i_dbus_ack) begin
