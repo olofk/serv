@@ -46,7 +46,7 @@ void uart_init(uart_context_t *context, uint32_t baud_rate) {
   context->state = 0;
 }
 
-void do_uart(uart_context_t *context, bool rx) {
+bool do_uart(uart_context_t *context, bool rx) {
   if (context->state == 0) {
     if (rx)
       context->state++;
@@ -74,10 +74,11 @@ void do_uart(uart_context_t *context, bool rx) {
   else {
     if (main_time > context->last_update) {
       context->last_update += context->baud_t;
-      putchar(context->ch);
       context->state=1;
+      return true;
     }
   }
+  return false;
 }
 
 int main(int argc, char **argv, char **env)
@@ -133,11 +134,12 @@ int main(int argc, char **argv, char **env)
 	  top->eval();
 	  if (dump)
 	    tfp->dump(main_time);
-	  if (baud_rate)
-	    do_uart(&uart_context, top->q);
-	  else
+	  if (baud_rate) {
+	    if (do_uart(&uart_context, top->q))
+	      putchar(uart_context.ch);
+	  } else {
 	    do_gpio(&gpio_context, top->q);
-
+	  }
 	  if (timeout && (main_time >= timeout)) {
 	    printf("Timeout: Exiting at time %lu\n", main_time);
 	    done = true;
