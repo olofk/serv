@@ -5,17 +5,31 @@ module serv_state
   (
    input wire 	     i_clk,
    input wire 	     i_rst,
+   //State
    input wire 	     i_new_irq,
-   input wire 	     i_dbus_ack,
-   output wire 	     o_ibus_cyc,
-   input wire 	     i_ibus_ack,
-   output wire 	     o_rf_rreq,
-   output wire 	     o_rf_wreq,
-   input wire 	     i_rf_ready,
-   output wire 	     o_rf_rd_en,
-   input wire 	     i_cond_branch,
-   input wire 	     i_bne_or_bge,
    input wire 	     i_alu_cmp,
+   output wire 	     o_init,
+   output wire 	     o_cnt_en,
+   output wire 	     o_cnt0to3,
+   output wire 	     o_cnt12to31,
+   output wire 	     o_cnt0,
+   output wire 	     o_cnt1,
+   output wire 	     o_cnt2,
+   output wire 	     o_cnt3,
+   output wire 	     o_cnt7,
+   output reg 	     o_cnt_done,
+   output wire 	     o_bufreg_en,
+   output wire 	     o_ctrl_pc_en,
+   output reg 	     o_ctrl_jump,
+   output wire 	     o_ctrl_trap,
+   input wire 	     i_ctrl_misalign,
+   input wire 	     i_sh_done,
+   input wire 	     i_sh_done_r,
+   output wire [1:0] o_mem_bytecnt,
+   input wire 	     i_mem_misalign,
+   //Control
+   input wire 	     i_bne_or_bge,
+   input wire 	     i_cond_branch,
    input wire 	     i_branch_op,
    input wire 	     i_mem_op,
    input wire 	     i_shift_op,
@@ -23,30 +37,21 @@ module serv_state
    input wire 	     i_slt_op,
    input wire 	     i_e_op,
    input wire 	     i_rd_op,
-   output wire 	     o_init,
-   output wire 	     o_cnt_en,
-   output wire 	     o_cnt0,
-   output wire 	     o_cnt0to3,
-   output wire 	     o_cnt12to31,
-   output wire 	     o_cnt1,
-   output wire 	     o_cnt2,
-   output wire 	     o_cnt3,
-   output wire 	     o_cnt7,
-   output wire 	     o_ctrl_pc_en,
-   output reg 	     o_ctrl_jump,
-   output wire 	     o_ctrl_trap,
-   input wire 	     i_ctrl_misalign,
-   input wire 	     i_sh_done,
-   input wire 	     i_sh_done_r,
-   output wire 	     o_dbus_cyc,
-   output wire [1:0] o_mem_bytecnt,
-   input wire 	     i_mem_misalign,
-   output reg 	     o_cnt_done,
-   output wire 	     o_bufreg_en,
    //MDU
-   input wire        i_mdu_op,
-   output wire       o_mdu_valid,
-   input wire        i_mdu_ready);
+   input wire 	     i_mdu_op,
+   output wire 	     o_mdu_valid,
+   //Extension
+   input wire 	     i_mdu_ready,
+   //External
+   output wire 	     o_dbus_cyc,
+   input wire 	     i_dbus_ack,
+   output wire 	     o_ibus_cyc,
+   input wire 	     i_ibus_ack,
+   //RF Interface
+   output wire 	     o_rf_rreq,
+   output wire 	     o_rf_wreq,
+   input wire 	     i_rf_ready,
+   output wire 	     o_rf_rd_en);
 
    reg 	stage_two_req;
    reg 	init_done;
@@ -97,7 +102,7 @@ generate
    end else begin
       //slt*, branch/jump, shift, load/store
       assign two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
-      
+
       //valid signal for mdu turned-off
       assign o_mdu_valid = 1'b0;
 
