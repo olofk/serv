@@ -1,5 +1,5 @@
 `default_nettype none
-module serv_decode 
+module serv_decode
   #(parameter [0:0] PRE_REGISTER = 1,
     parameter [0:0] MDU = 0)
   (
@@ -69,35 +69,16 @@ module serv_decode
    reg       imm25;
    reg       imm30;
 
-generate
-   wire co_mdu_op;
-   wire [2:0]co_ext_funct3;
-   wire co_shift_op;
-   wire co_slt_op;
-   wire co_mem_word;
-   wire co_rd_alu_en;
-
-   //opcode
    wire op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
+   wire co_mdu_op     = MDU & (opcode == 5'b01100) & imm25;
 
+   wire co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01) & !co_mdu_op;
+   wire co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01) & !co_mdu_op;
    wire co_mem_op   = !opcode[4] & !opcode[2] & !opcode[0];
    wire co_branch_op = opcode[4] & !opcode[2];
-
-   if (MDU) begin
-      assign co_mdu_op     = ((opcode == 5'b01100) & imm25);
-      assign co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01) & !co_mdu_op;
-      assign co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01) & !co_mdu_op;
-      assign co_mem_word   = co_mdu_op ? co_mdu_op :funct3[1];
-      assign co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
-   end else begin
-      assign co_mdu_op     = 1'b0;
-      assign co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01);
-      assign co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01);
-      assign co_mem_word   = funct3[1];
-      assign co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4];
-   end
-   assign co_ext_funct3 = funct3;
-endgenerate
+   wire co_mem_word   = co_mdu_op | funct3[1];
+   wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
+   wire [2:0] co_ext_funct3 = funct3;
 
    //jal,branch =     imm
    //jalr       = rs1+imm
