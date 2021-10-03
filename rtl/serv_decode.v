@@ -77,6 +77,12 @@ generate
    wire co_mem_word;
    wire co_rd_alu_en;
 
+   //opcode
+   wire op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
+
+   wire co_mem_op   = !opcode[4] & !opcode[2] & !opcode[0];
+   wire co_branch_op = opcode[4] & !opcode[2];
+
    if (MDU) begin
       assign co_mdu_op     = ((opcode == 5'b01100) & imm25);
       assign co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01) & !co_mdu_op;
@@ -92,12 +98,6 @@ generate
    end
    assign co_ext_funct3 = funct3;
 endgenerate
-
-   //opcode
-   wire op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
-
-   wire co_mem_op   = !opcode[4] & !opcode[2] & !opcode[0];
-   wire co_branch_op = opcode[4] & !opcode[2];
 
    //jal,branch =     imm
    //jalr       = rs1+imm
