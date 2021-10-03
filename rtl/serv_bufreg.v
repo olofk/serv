@@ -46,10 +46,6 @@ module serv_bufreg #(
    assign o_q = lsb[0] & i_en;
    assign o_dbus_adr = {data, 2'b00};
    assign o_ext_rs1  = {o_dbus_adr[31:2],lsb};
-
-   generate
-      if (MDU) assign o_lsb = i_mdu_op ? 2'b00 : lsb;
-      else     assign o_lsb = lsb;
-   endgenerate
+   assign o_lsb = (MDU & i_mdu_op) ? 2'b00 : lsb;
 
 endmodule

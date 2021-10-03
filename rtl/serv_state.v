@@ -85,34 +85,18 @@ module serv_state
    //been calculated.
    wire      take_branch = i_branch_op & (!i_cond_branch | (i_alu_cmp^i_bne_or_bge));
 
-generate
-   if (MDU) begin
-      //slt*, branch/jump, shift, load/store
-      assign two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op | i_mdu_op;
+   //slt*, branch/jump, shift, load/store, (optionally mdu ops)
+   assign two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op | (MDU & i_mdu_op);
 
-      //valid signal for mdu
-      assign o_mdu_valid = !o_cnt_en & init_done & i_mdu_op;
+   //valid signal for mdu
+   assign o_mdu_valid = MDU & !o_cnt_en & init_done & i_mdu_op;
 
-      //Prepare RF for writes when everything is ready to enter stage two
-      // and the first stage didn't cause a misalign exception
-      assign o_rf_wreq = !misalign_trap_sync &
+   //Prepare RF for writes when everything is ready to enter stage two
+   // and the first stage didn't cause a misalign exception
+   assign o_rf_wreq = !misalign_trap_sync &
 	   	      ((i_shift_op & (i_sh_done | !i_sh_right) & !o_cnt_en & init_done) |
-	   	       (i_mem_op & i_dbus_ack) | i_mdu_ready |
+	   	       (i_mem_op & i_dbus_ack) | (MDU & i_mdu_ready) |
 	   	       (stage_two_req & (i_slt_op | i_branch_op)));
-   end else begin
-      //slt*, branch/jump, shift, load/store
-      assign two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op;
-
-      //valid signal for mdu turned-off
-      assign o_mdu_valid = 1'b0;
-
-      //Prepare RF for writes when everything is ready to enter stage two
-      // and the first stage didn't cause a misalign exception
-      assign o_rf_wreq = !misalign_trap_sync &
-	   	      ((i_shift_op & (i_sh_done | !i_sh_right) & !o_cnt_en & init_done) |
-	   	       (i_mem_op & i_dbus_ack) | (stage_two_req & (i_slt_op | i_branch_op)));
-   end
-endgenerate
 
    assign o_dbus_cyc = !o_cnt_en & init_done & i_mem_op & !i_mem_misalign;
 
