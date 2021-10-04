@@ -61,17 +61,7 @@ module serv_mem_if
 	(i_bytecnt == 2'b00) |
 	(i_half & !i_bytecnt[1]);
 
-   wire mem_rd = i_mem_op & (dat_valid ? dat_cur : signbit & i_signed);
-   
-   generate
-     if(MDU) begin
-       wire mdu_rd = i_mdu_op & dat_cur;
-       assign o_rd = mem_rd | mdu_rd;
-     end else begin
-       wire mdu_rd = 1'b0;
-       assign o_rd = mem_rd;
-     end
-   endgenerate
+   assign o_rd = (i_mem_op | i_mdu_op) & ((dat_valid|i_mdu_op) ? dat_cur : signbit & i_signed);
 
    assign o_wb_sel[3] = (i_lsb == 2'b11) | i_word | (i_half & i_lsb[1]);
    assign o_wb_sel[2] = (i_lsb == 2'b10) | i_word;
