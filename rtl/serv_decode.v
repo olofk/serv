@@ -76,7 +76,7 @@ module serv_decode
    wire co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01) & !co_mdu_op;
    wire co_mem_op   = !opcode[4] & !opcode[2] & !opcode[0];
    wire co_branch_op = opcode[4] & !opcode[2];
-   wire co_mem_word   = co_mdu_op | funct3[1];
+   wire co_mem_word   = funct3[1];
    wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
    wire [2:0] co_ext_funct3 = funct3;
 
