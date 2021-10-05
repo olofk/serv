@@ -14,10 +14,11 @@ module serv_decode
    output reg       o_e_op,
    output reg       o_ebreak,
    output reg       o_branch_op,
-   output reg       o_mem_op,
    output reg       o_shift_op,
    output reg       o_slt_op,
    output reg       o_rd_op,
+   output reg       o_two_stage_op,
+   output reg       o_dbus_en,
    //MDU
    output reg       o_mdu_op,
    //Extension
@@ -52,10 +53,13 @@ module serv_decode
    output reg [1:0] o_csr_source,
    output reg       o_csr_d_sel,
    output reg       o_csr_imm_en,
+   output reg       o_mtval_pc,
    //To top
    output reg [3:0] o_immdec_ctrl,
    output reg [3:0] o_immdec_en,
    output reg       o_op_b_source,
+   //To RF IF
+   output reg       o_rd_mem_en,
    output reg       o_rd_csr_en,
    output reg       o_rd_alu_en);
 
@@ -72,12 +76,17 @@ module serv_decode
    wire op_or_opimm = (!opcode[4] & opcode[2] & !opcode[0]);
    wire co_mdu_op     = MDU & (opcode == 5'b01100) & imm25;
 
+   wire co_two_stage_op =
+	~opcode[2] | (funct3[0] & ~funct3[1] & ~opcode[0] & ~opcode[4]) |
+	(funct3[1] & ~funct3[2] & ~opcode[0] & ~opcode[4]) | co_mdu_op;
    wire co_shift_op   = op_or_opimm & (funct3[1:0] == 2'b01) & !co_mdu_op;
    wire co_slt_op     = op_or_opimm & (funct3[2:1] == 2'b01) & !co_mdu_op;
-   wire co_mem_op   = !opcode[4] & !opcode[2] & !opcode[0];
    wire co_branch_op = opcode[4] & !opcode[2];
+   wire co_dbus_en    = ~opcode[2] & ~opcode[4];
+   wire co_mtval_pc   = opcode[4];   
    wire co_mem_word   = funct3[1];
    wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
+   wire co_rd_mem_en  = (!opcode[2] & !opcode[0]) | co_mdu_op;
    wire [2:0] co_ext_funct3 = funct3;
 
    //jal,branch =     imm
@@ -243,10 +252,12 @@ module serv_decode
             o_sh_right         = co_sh_right;
             o_bne_or_bge       = co_bne_or_bge;
             o_cond_branch      = co_cond_branch;
+            o_dbus_en          = co_dbus_en;
+            o_mtval_pc         = co_mtval_pc;
+	    o_two_stage_op     = co_two_stage_op;
             o_e_op             = co_e_op;
             o_ebreak           = co_ebreak;
             o_branch_op        = co_branch_op;
-            o_mem_op           = co_mem_op;
             o_shift_op         = co_shift_op;
             o_slt_op           = co_slt_op;
             o_rd_op            = co_rd_op;
@@ -282,6 +293,7 @@ module serv_decode
             o_op_b_source      = co_op_b_source;
             o_rd_csr_en        = co_rd_csr_en;
             o_rd_alu_en        = co_rd_alu_en;
+            o_rd_mem_en        = co_rd_mem_en;
          end
 
       end else begin
@@ -304,8 +316,10 @@ module serv_decode
                o_cond_branch      <= co_cond_branch;
                o_e_op             <= co_e_op;
                o_ebreak           <= co_ebreak;
+               o_two_stage_op     <= co_two_stage_op;
+               o_dbus_en          <= co_dbus_en;
+               o_mtval_pc         <= co_mtval_pc;
                o_branch_op        <= co_branch_op;
-               o_mem_op           <= co_mem_op;
                o_shift_op         <= co_shift_op;
                o_slt_op           <= co_slt_op;
                o_rd_op            <= co_rd_op;
@@ -341,6 +355,7 @@ module serv_decode
                o_op_b_source      <= co_op_b_source;
                o_rd_csr_en        <= co_rd_csr_en;
                o_rd_alu_en        <= co_rd_alu_en;
+               o_rd_mem_en        <= co_rd_mem_en;
             end
          end
 

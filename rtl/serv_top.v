@@ -78,10 +78,10 @@ module serv_top
    wire          sh_right;
    wire 	 bne_or_bge;
    wire 	 cond_branch;
+   wire 	 two_stage_op;
    wire 	 e_op;
    wire 	 ebreak;
    wire 	 branch_op;
-   wire          mem_op;
    wire 	 shift_op;
    wire 	 slt_op;
    wire 	 rd_op;
@@ -89,10 +89,12 @@ module serv_top
 
    wire 	 rd_alu_en;
    wire 	 rd_csr_en;
+   wire 	 rd_mem_en;
    wire          ctrl_rd;
    wire          alu_rd;
    wire          mem_rd;
    wire          csr_rd;
+   wire 	 mtval_pc;
 
    wire          ctrl_pc_en;
    wire          jump;
@@ -160,6 +162,7 @@ module serv_top
    wire 	 csr_imm_en;
    wire 	 csr_in;
    wire 	 rf_csr_out;
+   wire 	 dbus_en;
 
    wire 	 new_irq;
 
@@ -200,8 +203,9 @@ module serv_top
       //Control
       .i_bne_or_bge   (bne_or_bge),
       .i_cond_branch  (cond_branch),
+      .i_dbus_en      (dbus_en),
+      .i_two_stage_op (two_stage_op),
       .i_branch_op    (branch_op),
-      .i_mem_op       (mem_op),
       .i_shift_op     (shift_op),
       .i_sh_right     (sh_right),
       .i_slt_op       (slt_op),
@@ -235,15 +239,16 @@ module serv_top
       //To state
       .o_bne_or_bge       (bne_or_bge),
       .o_cond_branch      (cond_branch),
+      .o_dbus_en          (dbus_en),
       .o_e_op             (e_op),
       .o_ebreak           (ebreak),
       .o_branch_op        (branch_op),
-      .o_mem_op           (mem_op),
       .o_shift_op         (shift_op),
       .o_slt_op           (slt_op),
       .o_rd_op            (rd_op),
       .o_sh_right         (sh_right),
       .o_mdu_op           (mdu_op),
+      .o_two_stage_op     (two_stage_op),
       //Extension
       .o_ext_funct3       (o_ext_funct3),
       
@@ -278,9 +283,12 @@ module serv_top
       .o_csr_source       (csr_source),
       .o_csr_d_sel        (csr_d_sel),
       .o_csr_imm_en       (csr_imm_en),
+      .o_mtval_pc         (mtval_pc      ),
       //To top
       .o_immdec_ctrl      (immdec_ctrl),
       .o_immdec_en        (immdec_en),
+      //To RF IF
+      .o_rd_mem_en        (rd_mem_en),
       .o_rd_csr_en        (rd_csr_en),
       .o_rd_alu_en        (rd_alu_en));
 
@@ -396,7 +404,7 @@ module serv_top
       .i_trap      (trap),
       .i_mret      (mret),
       .i_mepc      (o_ibus_adr[0]),
-      .i_mem_op    (mem_op),
+      .i_mtval_pc  (mtval_pc),
       .i_bufreg_q  (bufreg_q),
       .i_bad_pc    (bad_pc),
       .o_csr_pc    (csr_pc),
@@ -413,6 +421,7 @@ module serv_top
       .i_csr_rd    (csr_rd),
       .i_rd_csr_en (rd_csr_en),
       .i_mem_rd    (mem_rd),
+      .i_rd_mem_en (rd_mem_en),
 
       //RS1 read port
       .i_rs1_raddr (rs1_addr),
@@ -441,7 +450,6 @@ module serv_top
       .o_sh_done_r (mem_sh_done_r),
       //Control
       .i_mdu_op   (mdu_op),
-      .i_mem_op   (mem_op),
       .i_shift_op (shift_op),
       .i_signed   (mem_signed),
       .i_word     (mem_word),
@@ -470,7 +478,7 @@ module serv_top
 	    .i_cnt3       (cnt3),
 	    .i_cnt7       (cnt7),
 	    .i_cnt_done   (cnt_done),
-	    .i_mem_op     (mem_op),
+	    .i_mem_op     (!mtval_pc),
 	    .i_mtip       (i_timer_irq),
 	    .i_trap       (trap),
 	    .o_new_irq    (new_irq),
@@ -501,7 +509,7 @@ module serv_top
 `ifdef RISCV_FORMAL
    reg [31:0] 	 pc = RESET_PC;
 
-   wire rs_en = (branch_op|mem_op|shift_op|slt_op) ? init : ctrl_pc_en;
+   wire rs_en = two_stage_op ? init : ctrl_pc_en;
 
    always @(posedge clk) begin
       /* End of instruction */

@@ -30,8 +30,9 @@ module serv_state
    //Control
    input wire 	     i_bne_or_bge,
    input wire 	     i_cond_branch,
+   input wire 	     i_dbus_en,
+   input wire 	     i_two_stage_op,
    input wire 	     i_branch_op,
-   input wire 	     i_mem_op,
    input wire 	     i_shift_op,
    input wire 	     i_sh_right,
    input wire 	     i_slt_op,
@@ -56,7 +57,6 @@ module serv_state
    reg 	stage_two_req;
    reg 	init_done;
    wire misalign_trap_sync;
-   wire two_stage_op;
 
    reg [4:2] o_cnt;
    reg [3:0] o_cnt_r;
@@ -85,9 +85,6 @@ module serv_state
    //been calculated.
    wire      take_branch = i_branch_op & (!i_cond_branch | (i_alu_cmp^i_bne_or_bge));
 
-   //slt*, branch/jump, shift, load/store, (optionally mdu ops)
-   assign two_stage_op = i_slt_op | i_mem_op | i_branch_op | i_shift_op | (MDU & i_mdu_op);
-
    //valid signal for mdu
    assign o_mdu_valid = MDU & !o_cnt_en & init_done & i_mdu_op;
 
@@ -95,10 +92,10 @@ module serv_state
    // and the first stage didn't cause a misalign exception
    assign o_rf_wreq = !misalign_trap_sync &
 	   	      ((i_shift_op & (i_sh_done | !i_sh_right) & !o_cnt_en & init_done) |
-	   	       (i_mem_op & i_dbus_ack) | (MDU & i_mdu_ready) |
+	   	       i_dbus_ack | (MDU & i_mdu_ready) |
 	   	       (stage_two_req & (i_slt_op | i_branch_op)));
 
-   assign o_dbus_cyc = !o_cnt_en & init_done & i_mem_op & !i_mem_misalign;
+   assign o_dbus_cyc = !o_cnt_en & init_done & i_dbus_en & !i_mem_misalign;
 
    //Prepare RF for reads when a new instruction is fetched
    // or when stage one caused an exception (rreq implies a write request too)
@@ -121,7 +118,7 @@ module serv_state
 
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
-   assign o_init = two_stage_op & !i_new_irq & !init_done;
+   assign o_init = i_two_stage_op & !i_new_irq & !init_done;
 
    always @(posedge i_clk) begin
       //ibus_cyc changes on three conditions.
@@ -190,7 +187,7 @@ module serv_state
 	 //trap_pending is only guaranteed to have correct value during the
 	 // last cycle of the init stage
 	 wire trap_pending = WITH_CSR & ((take_branch & i_ctrl_misalign) |
-					 (i_mem_op    & i_mem_misalign));
+					 (i_dbus_en   & i_mem_misalign));
 
 	 always @(posedge i_clk) begin
 	    if (o_cnt_done)
