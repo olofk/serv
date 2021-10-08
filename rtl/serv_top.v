@@ -83,7 +83,7 @@ module serv_top
    wire 	 ebreak;
    wire 	 branch_op;
    wire 	 shift_op;
-   wire 	 slt_op;
+   wire 	 slt_or_branch;
    wire 	 rd_op;
    wire   mdu_op;
 
@@ -208,7 +208,7 @@ module serv_top
       .i_branch_op    (branch_op),
       .i_shift_op     (shift_op),
       .i_sh_right     (sh_right),
-      .i_slt_op       (slt_op),
+      .i_slt_or_branch (slt_or_branch),
       .i_e_op         (e_op),
       .i_rd_op        (rd_op),
       //MDU
@@ -244,7 +244,7 @@ module serv_top
       .o_ebreak           (ebreak),
       .o_branch_op        (branch_op),
       .o_shift_op         (shift_op),
-      .o_slt_op           (slt_op),
+      .o_slt_or_branch    (slt_or_branch),
       .o_rd_op            (rd_op),
       .o_sh_right         (sh_right),
       .o_mdu_op           (mdu_op),
