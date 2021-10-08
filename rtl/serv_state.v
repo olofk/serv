@@ -35,7 +35,7 @@ module serv_state
    input wire 	     i_branch_op,
    input wire 	     i_shift_op,
    input wire 	     i_sh_right,
-   input wire 	     i_slt_op,
+   input wire 	     i_slt_or_branch,
    input wire 	     i_e_op,
    input wire 	     i_rd_op,
    //MDU
@@ -90,10 +90,10 @@ module serv_state
 
    //Prepare RF for writes when everything is ready to enter stage two
    // and the first stage didn't cause a misalign exception
-   assign o_rf_wreq = !misalign_trap_sync &
-	   	      ((i_shift_op & (i_sh_done | !i_sh_right) & !o_cnt_en & init_done) |
+   assign o_rf_wreq = !misalign_trap_sync & !o_cnt_en & init_done &
+	   	      ((i_shift_op & (i_sh_done | !i_sh_right)) |
 	   	       i_dbus_ack | (MDU & i_mdu_ready) |
-	   	       (stage_two_req & (i_slt_op | i_branch_op)));
+	   	       i_slt_or_branch);
 
    assign o_dbus_cyc = !o_cnt_en & init_done & i_dbus_en & !i_mem_misalign;
 
