@@ -11,6 +11,7 @@ filesets:
       - rtl/serv_alu.v
       - rtl/serv_csr.v
       - rtl/serv_ctrl.v
+      - rtl/serv_mem_decode.v
       - rtl/serv_decode.v
       - rtl/serv_immdec.v
       - rtl/serv_mem_if.v

@@ -94,7 +94,6 @@ module serv_top
    wire          alu_rd;
    wire          mem_rd;
    wire          csr_rd;
-   wire 	 mtval_pc;
 
    wire          ctrl_pc_en;
    wire          jump;
@@ -229,71 +228,110 @@ module serv_top
       .i_rf_ready     (i_rf_ready),
       .o_rf_rd_en     (rd_en));
 
-   serv_decode
-     #(.PRE_REGISTER (PRE_REGISTER),
-       .MDU(MDU))
-   decode
+   wire 	pshift_op;
+   wire 	pslt_or_branch;
+   wire 	prd_op;
+   wire 	ptwo_stage_op;
+   wire 	pbufreg_rs1_en;
+   wire 	pbufreg_imm_en;
+   wire 	pdbus_en;
+   wire 	pimmdec_en1;
+   wire 	prd_alu_en;
+   wire 	pjal_or_jalr;
+   wire 	prd_mem_en;
+   wire 	timmdec_ctrl3;
+   
+   
+   assign shift_op = pshift_op & !mdu_op;
+   assign slt_or_branch = pslt_or_branch & !mdu_op;
+   assign rd_op = prd_op | rd_csr_en;
+   assign two_stage_op = ptwo_stage_op & !rd_csr_en | mdu_op;
+   assign bufreg_rs1_en = pbufreg_rs1_en | mdu_op;
+   assign bufreg_imm_en = pbufreg_imm_en & !mdu_op;
+   assign dbus_en = pdbus_en & !mdu_op;
+   assign immdec_en[1] = pimmdec_en1 | csr_imm_en;
+   assign rd_alu_en = prd_alu_en & !rd_csr_en & !mdu_op;
+   assign jal_or_jalr = pjal_or_jalr & !rd_csr_en;
+   assign rd_mem_en = prd_mem_en /*& !rd_csr_en*/ | mdu_op;
+   assign immdec_ctrl[3] = timmdec_ctrl3 | rd_csr_en;
+
+   serv_auto_decode #(.MDU (MDU)) autodec
      (
-      .clk (clk),
+      .i_clk (clk),
       //Input
-      .i_wb_rdt           (i_ibus_rdt[31:2]),
-      .i_wb_en            (i_ibus_ack),
-      //To state
-      .o_bne_or_bge       (bne_or_bge),
-      .o_cond_branch      (cond_branch),
-      .o_dbus_en          (dbus_en),
+      .i_imm30            (i_ibus_rdt[30]),
+      .i_funct3           (i_ibus_rdt[14:12]),
+      .i_opcode           (i_ibus_rdt[6:2]),
+      .i_en               (i_ibus_ack),
+      //CSR/MDU
+      .i_imm25            (i_ibus_rdt[25]),
+      .o_ext_funct3 (o_ext_funct3),
+      .o_mdu_op           (mdu_op),
+
+      .i_op20 (i_ibus_rdt[20]),
+      .i_op21 (i_ibus_rdt[21]),
+      .i_op22 (i_ibus_rdt[22]),
+      .i_op26 (i_ibus_rdt[26]),
       .o_e_op             (e_op),
       .o_ebreak           (ebreak),
-      .o_branch_op        (branch_op),
-      .o_shift_op         (shift_op),
-      .o_slt_or_branch    (slt_or_branch),
-      .o_rd_op            (rd_op),
-      .o_sh_right         (sh_right),
-      .o_mdu_op           (mdu_op),
-      .o_two_stage_op     (two_stage_op),
-      //Extension
-      .o_ext_funct3       (o_ext_funct3),
-
-      //To bufreg
-      .o_bufreg_rs1_en    (bufreg_rs1_en),
-      .o_bufreg_imm_en    (bufreg_imm_en),
-      .o_bufreg_clr_lsb   (bufreg_clr_lsb),
-      .o_bufreg_sh_signed (bufreg_sh_signed),
-      //To bufreg2
-      .o_op_b_source      (op_b_sel),
       //To ctrl
-      .o_ctrl_jal_or_jalr (jal_or_jalr),
-      .o_ctrl_utype       (utype),
-      .o_ctrl_pc_rel      (pc_rel),
       .o_ctrl_mret        (mret),
-      //To alu
-      .o_alu_sub          (alu_sub),
-      .o_alu_bool_op      (alu_bool_op),
-      .o_alu_cmp_eq       (alu_cmp_eq),
-      .o_alu_cmp_sig      (alu_cmp_sig),
-      .o_alu_rd_sel       (alu_rd_sel),
-      //To mem IF
-      .o_mem_cmd          (o_dbus_we),
-      .o_mem_signed       (mem_signed),
-      .o_mem_word         (mem_word),
-      .o_mem_half         (mem_half),
       //To CSR
-      .o_csr_en           (csr_en),
-      .o_csr_addr         (csr_addr),
+      .o_csr_en           (csr_en        ),
+      .o_csr_addr1        (csr_addr[1]      ),
+      .o_csr_addr0        (csr_addr[0]      ),
       .o_csr_mstatus_en   (csr_mstatus_en),
-      .o_csr_mie_en       (csr_mie_en),
-      .o_csr_mcause_en    (csr_mcause_en),
-      .o_csr_source       (csr_source),
-      .o_csr_d_sel        (csr_d_sel),
-      .o_csr_imm_en       (csr_imm_en),
-      .o_mtval_pc         (mtval_pc      ),
-      //To top
-      .o_immdec_ctrl      (immdec_ctrl),
-      .o_immdec_en        (immdec_en),
+      .o_csr_mie_en       (csr_mie_en    ),
+      .o_csr_mcause_en    (csr_mcause_en ),
+      .o_csr_source1       (csr_source[1]    ),
+      .o_csr_source0       (csr_source[0]    ),
+      .o_csr_d_sel        (csr_d_sel     ),
+      .o_csr_imm_en       (csr_imm_en    ),
       //To RF IF
-      .o_rd_mem_en        (rd_mem_en),
       .o_rd_csr_en        (rd_csr_en),
-      .o_rd_alu_en        (rd_alu_en));
+      
+//      .o_mtval_pc (),
+      //To alu
+      .o_op_b_source      (op_b_sel),
+      .o_sh_right         (sh_right      ),
+      .o_bne_or_bge       (bne_or_bge    ),
+      .o_cond_branch      (cond_branch   ),
+      .o_branch_op        (branch_op     ),
+      .o_shift_op         (pshift_op     ),
+      .o_slt_or_branch    (pslt_or_branch),
+      .o_rd_op            (prd_op         ),
+      .o_two_stage_op     (ptwo_stage_op  ),
+      .o_dbus_en          (pdbus_en         ),
+      .o_bufreg_rs1_en    (pbufreg_rs1_en   ),
+      .o_bufreg_imm_en    (pbufreg_imm_en   ),
+      .o_bufreg_clr_lsb   (bufreg_clr_lsb  ),
+      .o_bufreg_sh_signed (bufreg_sh_signed),
+      .o_ctrl_jal_or_jalr (pjal_or_jalr   ),
+      .o_ctrl_utype       (utype         ),
+      .o_ctrl_pc_rel      (pc_rel        ),
+      .o_alu_sub          (alu_sub       ),
+      .o_alu_bool_op1     (alu_bool_op[1]),
+      .o_alu_bool_op0     (alu_bool_op[0]),
+      .o_alu_cmp_eq       (alu_cmp_eq    ),
+      .o_alu_cmp_sig      (alu_cmp_sig   ),
+      .o_alu_rd_sel2      (alu_rd_sel[2] ),
+      .o_alu_rd_sel1      (alu_rd_sel[1] ),
+      .o_alu_rd_sel0      (alu_rd_sel[0] ),
+      .o_mem_signed       (mem_signed    ),
+      .o_mem_word         (mem_word      ),
+      .o_mem_half         (mem_half      ),
+      .o_mem_cmd          (o_dbus_we     ),
+      .o_immdec_ctrl0     (immdec_ctrl[0]),
+      .o_immdec_ctrl1     (immdec_ctrl[1]),
+      .o_immdec_ctrl2     (immdec_ctrl[2]),
+      .o_immdec_ctrl3     (timmdec_ctrl3),
+      .o_immdec_en0       (immdec_en[0]  ),
+      .o_immdec_en1       (pimmdec_en1  ),
+      .o_immdec_en2       (immdec_en[2]  ),
+      .o_immdec_en3       (immdec_en[3]  ),
+      .o_rd_mem_en        (prd_mem_en),
+      .o_rd_alu_en        (prd_alu_en     ));
+
 
    serv_immdec immdec
      (
@@ -431,12 +469,12 @@ module serv_top
       .i_trap      (trap),
       .i_mret      (mret),
       .i_mepc      (o_ibus_adr[0]),
-      .i_mtval_pc  (mtval_pc),
+      .i_mtval_pc  (branch_op),
       .i_bufreg_q  (bufreg_q),
       .i_bad_pc    (bad_pc),
       .o_csr_pc    (csr_pc),
       //CSR write port
-      .i_csr_en    (csr_en),
+      .i_csr_en    (csr_en & rd_csr_en),
       .i_csr_addr  (csr_addr),
       .i_csr       (csr_in),
       //RD write port
@@ -496,7 +534,7 @@ module serv_top
 	    .i_cnt3       (cnt3),
 	    .i_cnt7       (cnt7),
 	    .i_cnt_done   (cnt_done),
-	    .i_mem_op     (!mtval_pc),
+	    .i_mem_op     (dbus_en),
 	    .i_mtip       (i_timer_irq),
 	    .i_trap       (trap),
 	    .o_new_irq    (new_irq),
@@ -504,9 +542,9 @@ module serv_top
 	    .i_e_op       (e_op),
 	    .i_ebreak     (ebreak),
 	    .i_mem_cmd    (o_dbus_we),
-	    .i_mstatus_en (csr_mstatus_en),
-	    .i_mie_en     (csr_mie_en    ),
-	    .i_mcause_en  (csr_mcause_en ),
+	    .i_mstatus_en (rd_csr_en & csr_mstatus_en),
+	    .i_mie_en     (rd_csr_en & csr_mie_en    ),
+	    .i_mcause_en  (rd_csr_en & csr_mcause_en ),
 	    .i_csr_source (csr_source),
 	    .i_mret       (mret),
 	    .i_csr_d_sel  (csr_d_sel),
