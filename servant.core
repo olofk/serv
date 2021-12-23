@@ -65,7 +65,7 @@ filesets:
       - data/chameleon96/CV_96.v : {file_type : verilogSource}
       - servant/servive_clock_gen.v : {file_type : verilogSource}
       - servant/servive.v : {file_type : verilogSource}    
-      
+
   deca:
     files:
       - data/deca.sdc : {file_type : SDC}
@@ -95,6 +95,7 @@ filesets:
 
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
+  icev_wireless : {files: [data/icev_wireless.pcf  : {file_type : PCF}]}
   icesugar   : {files: [data/icesugar.pcf : {file_type : PCF}]}
   alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
   icestick   : {files: [data/icestick.pcf  : {file_type : PCF}]}
@@ -122,7 +123,7 @@ filesets:
       - servant/servax.v : {file_type : verilogSource}
       - data/nexys_2.tcl : {file_type : tclSource}
       - data/nexys_2.ucf : {file_type : UCF}
-  
+
   nexys_a7:
     files:
       - servant/servix_clock_gen.v : {file_type : verilogSource}
@@ -211,9 +212,9 @@ targets:
       quartus:
         family : Cyclone V
         device : 5CSEBA6U19I7
-        board_device_index : 2        
+        board_device_index : 2
     toplevel: CV_96
-    
+
   deca:
     default_tool : quartus
     description: DECA development kit by Arrow / Terasic
@@ -251,6 +252,17 @@ targets:
     default_tool : icestorm
     filesets : [mem_files, soc, service, icebreaker]
     generate: [icebreaker_pll]
+    parameters : [memfile, memsize, PLL=ICE40_PAD]
+    tools:
+      icestorm:
+        nextpnr_options: [--up5k, --freq, 16]
+        pnr: next
+    toplevel : service
+
+  icev_wireless:
+    default_tool : icestorm
+    filesets : [mem_files, soc, service, icev_wireless]
+    generate: [icev_wireless_pll]
     parameters : [memfile, memsize, PLL=ICE40_PAD]
     tools:
       icestorm:
@@ -507,7 +519,7 @@ parameters:
   RISCV_FORMAL:
     datatype  : bool
     paramtype : vlogdefine
-  
+
   MDU:
     datatype  : int
     description : Enables RISC-V standard M-extension
@@ -558,12 +570,12 @@ parameters:
     datatype    : int
     description : Delay start of VCD dumping until the specified time
     paramtype   : plusarg
-  
+
   compressed:
     datatype    : int
     description : Enable/Disable the Compressed extension
     paramtype   : vlogparam
-  
+
   align:
     datatype    : int
     description : Enable/Disable the Misaligned access of instruction
@@ -576,6 +588,11 @@ parameters:
 
 generate:
   icebreaker_pll:
+    generator: icepll
+    parameters:
+      freq_out : 16
+
+  icev_wireless_pll:
     generator: icepll
     parameters:
       freq_out : 16
