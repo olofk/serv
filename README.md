@@ -136,6 +136,14 @@ Pmod pin JA1 is conntected to UART tx with 57600 baud rate. A USB to TTL connect
 
     fusesoc run --target=nexys_2_500 servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello.hex
 
+### ICE-V Wireless
+
+Pin 9 is used for UART output with 57600 baud rate.
+
+    fusesoc run --target=icev_wireless servant
+
+    iceprog build/servant_1.2.0/icestick-icestorm/servant_1.2.0.bin
+
 
 ### iCESugar
 
