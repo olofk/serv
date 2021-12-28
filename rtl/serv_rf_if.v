@@ -122,7 +122,7 @@ module serv_rf_if
    end else begin
       wire 	     rd = (i_ctrl_rd ) |
 			  (i_alu_rd & i_rd_alu_en) |
-			  (i_mem_rd);
+			  (i_mem_rd & i_rd_mem_en);
 
       assign 	     o_wdata0 = rd;
       assign	     o_wdata1 = 1'b0;
