@@ -25,8 +25,10 @@ filesets:
   verilator_tb:
     files:
       - bench/servant_sim.v
-      - bench/servant_tb.cpp : {file_type : cppSource}
+      - "vidbo? (bench/servant_tb_vidbo.cpp)" : {file_type : cppSource}
+      - "!vidbo? (bench/servant_tb.cpp)" : {file_type : cppSource}
     file_type : verilogSource
+    depend : ["vidbo? (vidbo)"]
 
   soc:
     files:
