@@ -1,7 +1,6 @@
 `default_nettype none
 module serv_mem_if
-  #(parameter WITH_CSR = 1,
-    parameter [0:0] MDU = 0)
+  #(parameter [0:0] WITH_CSR = 1)
   (
    input wire 	      i_clk,
    //State

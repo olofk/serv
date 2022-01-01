@@ -434,8 +434,7 @@ module serv_top
       .o_csr       (rf_csr_out));
 
    serv_mem_if
-     #(.WITH_CSR (WITH_CSR),
-       .MDU(MDU))
+     #(.WITH_CSR (WITH_CSR))
    mem_if
      (
       .i_clk      (clk),
