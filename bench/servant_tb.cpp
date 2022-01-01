@@ -19,8 +19,8 @@ double sc_time_stamp () {       // Called by $time in Verilog
 
 void INThandler(int signal)
 {
-	printf("\nCaught ctrl-c\n");
-	done = true;
+  printf("\nCaught ctrl-c\n");
+  done = true;
 }
 
 typedef struct {
@@ -83,73 +83,70 @@ bool do_uart(uart_context_t *context, bool rx) {
 
 int main(int argc, char **argv, char **env)
 {
-  vluint64_t sample_time = 0;
-	uint32_t insn = 0;
-	uint32_t ex_pc = 0;
-	int baud_rate = 0;
+  int baud_rate = 0;
 
-	gpio_context_t gpio_context;
-	uart_context_t uart_context;
-	Verilated::commandArgs(argc, argv);
+  gpio_context_t gpio_context;
+  uart_context_t uart_context;
+  Verilated::commandArgs(argc, argv);
 
-	Vservant_sim* top = new Vservant_sim;
+  Vservant_sim* top = new Vservant_sim;
 
-	const char *arg = Verilated::commandArgsPlusMatch("uart_baudrate=");
-	if (arg[0]) {
-	  baud_rate = atoi(arg+15);
-	  if (baud_rate) {
-	    uart_init(&uart_context, baud_rate);
-	  }
-	}
+  const char *arg = Verilated::commandArgsPlusMatch("uart_baudrate=");
+  if (arg[0]) {
+    baud_rate = atoi(arg+15);
+    if (baud_rate) {
+      uart_init(&uart_context, baud_rate);
+    }
+  }
 
-	VerilatedVcdC * tfp = 0;
-	const char *vcd = Verilated::commandArgsPlusMatch("vcd=");
-	if (vcd[0]) {
-	  Verilated::traceEverOn(true);
-	  tfp = new VerilatedVcdC;
-	  top->trace (tfp, 99);
-	  tfp->open ("trace.vcd");
-	}
+  VerilatedVcdC * tfp = 0;
+  const char *vcd = Verilated::commandArgsPlusMatch("vcd=");
+  if (vcd[0]) {
+    Verilated::traceEverOn(true);
+    tfp = new VerilatedVcdC;
+    top->trace (tfp, 99);
+    tfp->open ("trace.vcd");
+  }
 
-	signal(SIGINT, INThandler);
+  signal(SIGINT, INThandler);
 
-	vluint64_t timeout = 0;
-	const char *arg_timeout = Verilated::commandArgsPlusMatch("timeout=");
-	if (arg_timeout[0])
-	  timeout = atoi(arg_timeout+9);
+  vluint64_t timeout = 0;
+  const char *arg_timeout = Verilated::commandArgsPlusMatch("timeout=");
+  if (arg_timeout[0])
+    timeout = atoi(arg_timeout+9);
 
-	vluint64_t vcd_start = 0;
-	const char *arg_vcd_start = Verilated::commandArgsPlusMatch("vcd_start=");
-	if (arg_vcd_start[0])
-	  vcd_start = atoi(arg_vcd_start+11);
+  vluint64_t vcd_start = 0;
+  const char *arg_vcd_start = Verilated::commandArgsPlusMatch("vcd_start=");
+  if (arg_vcd_start[0])
+    vcd_start = atoi(arg_vcd_start+11);
 
-	bool dump = false;
-	top->wb_clk = 1;
-	bool q = top->q;
-	while (!(done || Verilated::gotFinish())) {
-	  if (tfp && !dump && (main_time > vcd_start)) {
-	    dump = true;
-	  }
-	  top->wb_rst = main_time < 100;
-	  top->eval();
-	  if (dump)
-	    tfp->dump(main_time);
-	  if (baud_rate) {
-	    if (do_uart(&uart_context, top->q))
-	      putchar(uart_context.ch);
-	  } else {
-	    do_gpio(&gpio_context, top->q);
-	  }
-	  if (timeout && (main_time >= timeout)) {
-	    printf("Timeout: Exiting at time %lu\n", main_time);
-	    done = true;
-	  }
+  bool dump = false;
+  top->wb_clk = 1;
+  bool q = top->q;
+  while (!(done || Verilated::gotFinish())) {
+    if (tfp && !dump && (main_time > vcd_start)) {
+      dump = true;
+    }
+    top->wb_rst = main_time < 100;
+    top->eval();
+    if (dump)
+      tfp->dump(main_time);
+    if (baud_rate) {
+      if (do_uart(&uart_context, top->q))
+	putchar(uart_context.ch);
+    } else {
+      do_gpio(&gpio_context, top->q);
+    }
+    if (timeout && (main_time >= timeout)) {
+      printf("Timeout: Exiting at time %lu\n", main_time);
+      done = true;
+    }
 
-	  top->wb_clk = !top->wb_clk;
-	  main_time+=31.25;
+    top->wb_clk = !top->wb_clk;
+    main_time+=31.25;
 
-	}
-	if (tfp)
-	  tfp->close();
-	exit(0);
+  }
+  if (tfp)
+    tfp->close();
+  exit(0);
 }
