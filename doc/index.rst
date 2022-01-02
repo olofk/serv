@@ -170,16 +170,6 @@ serv_state keeps track of the state for the core and contains all dynamic contro
 
 New instructions are fetched by asserting o_ibus_cyc until there is a response on i_ibus_ack. Instruction fetches occur when the reset signal is deasserted, which is what gets SERV started, or when the PC has finished updating its value.
 
-shift_reg
-^^^^^^^^^
-
-shift_reg is a shift register implementation used in various places in SERV
-
-serv_shift
-^^^^^^^^^^
-
-serv_shift lives inside the ALU and contains the control logic for shift operations
-
 Instruction life cycle
 ----------------------
 
