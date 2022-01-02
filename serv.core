@@ -7,6 +7,7 @@ filesets:
     files:
       - "tool_verilator? (data/verilator_waiver.vlt)" : {file_type: vlt}
       - rtl/serv_bufreg.v
+      - rtl/serv_bufreg2.v
       - rtl/serv_alu.v
       - rtl/serv_csr.v
       - rtl/serv_ctrl.v
