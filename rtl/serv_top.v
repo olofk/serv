@@ -123,6 +123,7 @@ module serv_top
    wire 	 bufreg_imm_en;
    wire 	 bufreg_clr_lsb;
    wire 	 bufreg_q;
+   wire 	 bufreg2_q;
    wire [31:0] dbus_rdt;
    wire        dbus_ack;
 
@@ -137,14 +138,16 @@ module serv_top
    wire          rs2;
    wire          rd_en;
 
-   wire          op_b_source;
+   wire          op_b;
+   wire          op_b_sel;
 
    wire          mem_signed;
    wire          mem_word;
    wire          mem_half;
    wire [1:0] 	 mem_bytecnt;
-   wire 	 mem_sh_done;
-   wire 	 mem_sh_done_r;
+   wire 	 sh_done;
+   wire 	 sh_done_r;
+   wire 	 byte_valid;
 
    wire 	 mem_misalign;
 
@@ -168,7 +171,6 @@ module serv_top
 
    wire [1:0]   lsb;
 
-   wire 	op_b = op_b_source ? rs2 : imm;
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
@@ -196,8 +198,8 @@ module serv_top
       .o_ctrl_jump    (jump),
       .o_ctrl_trap    (trap),
       .i_ctrl_misalign(lsb[1]),
-      .i_sh_done      (mem_sh_done),
-      .i_sh_done_r    (mem_sh_done_r),
+      .i_sh_done      (sh_done),
+      .i_sh_done_r    (sh_done_r),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
       //Control
@@ -251,19 +253,20 @@ module serv_top
       .o_two_stage_op     (two_stage_op),
       //Extension
       .o_ext_funct3       (o_ext_funct3),
-      
+
       //To bufreg
       .o_bufreg_rs1_en    (bufreg_rs1_en),
       .o_bufreg_imm_en    (bufreg_imm_en),
       .o_bufreg_clr_lsb   (bufreg_clr_lsb),
       .o_bufreg_sh_signed (bufreg_sh_signed),
+      //To bufreg2
+      .o_op_b_source      (op_b_sel),
       //To ctrl
       .o_ctrl_jal_or_jalr (jal_or_jalr),
       .o_ctrl_utype       (utype),
       .o_ctrl_pc_rel      (pc_rel),
       .o_ctrl_mret        (mret),
       //To alu
-      .o_op_b_source      (op_b_source),
       .o_alu_sub          (alu_sub),
       .o_alu_bool_op      (alu_bool_op),
       .o_alu_cmp_eq       (alu_cmp_eq),
@@ -312,7 +315,7 @@ module serv_top
       .i_wb_en      (i_ibus_ack),
       .i_wb_rdt     (i_ibus_rdt[31:7]));
 
-   serv_bufreg 
+   serv_bufreg
       #(.MDU(MDU))
    bufreg
      (
@@ -336,6 +339,30 @@ module serv_top
       //External
       .o_dbus_adr (o_dbus_adr),
       .o_ext_rs1  (o_ext_rs1));
+
+   serv_bufreg2 bufreg2
+     (
+      .i_clk        (clk),
+      //State
+      .i_en         (cnt_en),
+      .i_init       (init),
+      .i_cnt_done   (cnt_done),
+      .i_lsb        (lsb),
+      .i_byte_valid (byte_valid),
+      .o_sh_done    (sh_done),
+      .o_sh_done_r  (sh_done_r),
+      //Control
+      .i_op_b_sel   (op_b_sel),
+      .i_shift_op   (shift_op),
+      //Data
+      .i_rs2        (rs2),
+      .i_imm        (imm),
+      .o_op_b       (op_b),
+      .o_q          (bufreg2_q),
+      //External
+      .o_dat        (o_dbus_dat),
+      .i_load       (dbus_ack),
+      .i_dat        (dbus_rdt));
 
    serv_ctrl
      #(.RESET_PC (RESET_PC),
@@ -437,30 +464,22 @@ module serv_top
      #(.WITH_CSR (WITH_CSR))
    mem_if
      (
-      .i_clk      (clk),
+      .i_clk        (clk),
       //State
-      .i_en       (cnt_en),
-      .i_init     (init),
-      .i_cnt_done (cnt_done),
-      .i_bytecnt  (mem_bytecnt),
-      .i_lsb      (lsb),
-      .o_misalign (mem_misalign),
-      .o_sh_done   (mem_sh_done),
-      .o_sh_done_r (mem_sh_done_r),
+      .i_bytecnt    (mem_bytecnt),
+      .i_lsb        (lsb),
+      .o_byte_valid (byte_valid),
+      .o_misalign   (mem_misalign),
       //Control
-      .i_mdu_op   (mdu_op),
-      .i_shift_op (shift_op),
-      .i_signed   (mem_signed),
-      .i_word     (mem_word),
-      .i_half     (mem_half),
+      .i_mdu_op     (mdu_op),
+      .i_signed     (mem_signed),
+      .i_word       (mem_word),
+      .i_half       (mem_half),
       //Data
-      .i_op_b     (op_b),
-      .o_rd       (mem_rd),
+      .i_bufreg2_q  (bufreg2_q),
+      .o_rd         (mem_rd),
       //External interface
-      .o_wb_dat   (o_dbus_dat),
-      .o_wb_sel   (o_dbus_sel),
-      .i_wb_rdt   (dbus_rdt),
-      .i_wb_ack   (dbus_ack));
+      .o_wb_sel     (o_dbus_sel));
 
    generate
       if (WITH_CSR) begin
@@ -579,7 +598,7 @@ generate
     assign dbus_rdt = i_ext_ready ? i_ext_rd:i_dbus_rdt;
     assign dbus_ack = i_dbus_ack | i_ext_ready;
   end else begin
-    assign dbus_rdt = i_dbus_rdt;  
+    assign dbus_rdt = i_dbus_rdt;
     assign dbus_ack = i_dbus_ack;
   end
   assign o_ext_rs2 = o_dbus_dat;

@@ -53,6 +53,15 @@ For two-stage operations, serv_bufreg holds data between stages. This data can b
 
 .. image:: serv_bufreg_int.png
 
+serv_bufreg2
+^^^^^^^^^^^^
+
+.. image:: serv_bufreg2.png
+
+serv_bugreg2 is a 32-bit buffer register with some special features. It is used for shift operations to store the shift amount. It's used in load and store operations to store the data to be written or be read from the data bus, and it holds rs2 for the SERV extension interface. For shift and store operations, the register is shifted in from MSB when dat_en is asserted, while for loads and uses of the extension interface, the whole data word is written to when the i_load signal is asserted. Once the data is in the buffer, it is used differently depending on the operation. For stores and the extension interface the whole buffer is directly connected to the data bus as a 32-bit register. For load operations, the data is fed out serially once it has been fetched from the data bus. To better support load operations of varying sizes the buffer contains logic for reading out data serially from any of the byte LSBs of the 32-bit word. Finally, in shift mode, the 6 LSB of the register is used as a downcounter that is initialized during the init stage and then counts the remaining number of steps to shift the data and signals using sh_done and sh_done_r when finished.
+
+.. image:: serv_bufreg2_int.png
+
 serv_csr
 ^^^^^^^^
 
@@ -101,15 +110,13 @@ serv_mem_if
 
 .. image:: serv_mem_if.png
 
-serv_mem_if prepares the data to be sent out on the dbus during store operations and serializes the incoming data during loads
+serv_mem_if contains the control logic for preparing the data to be sent out on the dbus during store operations and sign-extends the incoming data from bufreg2 during loads
 
-The memory interface is centered around four byte-wide shift registers connected in series. During store operations, the `dat_en` signal is asserted long enough to shift in the data from rs2 to the right place in the shift registers and the parallel output of the shift registers is then presented to the data bus as a 32-bit word together with a byte mask. The `Data bus byte mask`_ table summarizes the logic for when the individual byte select signals are asserted depending on the two LSB of the data address together with the size (byte, halfword, word) of the write operation.
+The memory interface is centered around four serially connected byte-wide shift registers located in serv_bufreg2. During store operations, the `o_byte_valid` signal is asserted long enough to shift in the data from rs2 to the right place in the shift registers. The `Data bus byte mask`_ table summarizes the logic for when the individual byte select signals are asserted depending on the two LSB of the data address together with the size (byte, halfword, word) of the write operation.
 
-During load operations, the data from the bus is latched into the shift registers. `dat_en` is again asserted to shift out data from the registers. `i_lsb` decides from which byte stage of the shift register to tap the data, depending on the alignment of the received data. The `dat_valid` signal makes sure to only present valid data to `o_rd` and otherwise fill in with zeros or sign extension.
+During load operations, the data from the bus is read from serv_bufreg2. `dat_en` is again asserted to shift out data from the registers. `i_lsb` decides from which byte stage of the shift register to tap the data, depending on the alignment of the received data. The `dat_valid` signal makes sure to only present valid data to `o_rd` and otherwise fill in with zeros or sign extension.
 
 When SERV is built with `WITH_CSR`, there is also logic to detect misaligned accesses which asserts the o_misalign flag to the core.
-
-The shift register used for stores and loads are also used to keep track of the number of steps to shift for left/right shift operations. In this mode, the six LSB of the register is loaded with the shift amount during the init stage and the used as a down counter which raises o_sh_done and o_sh_done_r when the number of shift steps have been completed.
 
 .. image:: serv_mem_if_int.png
 
