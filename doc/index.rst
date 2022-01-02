@@ -293,7 +293,7 @@ External timer interrupts and ecall/ebreak are also one-stage operations with so
 Two-stage operations
 ::::::::::::::::::::
 
-Some operations need to be executed in two stages. In the first stage the operands are read out from the immediate and the rs1/rs2 registers and potential results are written to PC and rd in the second stage. Various things happen between the stages depending on the type of operation. SERV has types of four two-stage operations; memory, shift, slt and branch operations. In all cases the first stage is distinguished by having the init signal raised and only performing reads from the RF.
+Some operations need to be executed in two stages. In the first stage the operands are read out from the instruction immediate fields and the rs1/rs2 registers. In the second stage rd and the PC are updated with the results from the operation. The operation-specific things happen between the aformentioned stages. SERV has four types of four two-stage operations; memory, shift, slt and branch operations. In all cases the first stage is distinguished by having the init signal raised and only performing reads from the RF.
 
 .. wavedrom::
 
@@ -313,10 +313,10 @@ Some operations need to be executed in two stages. In the first stage the operan
         }
 
 
-memory
-++++++
+memory operations
++++++++++++++++++
 
-Loads and stores are memory operations. In the init stage, the data address to access is calculated, checked for alignment and stored in serv_bufreg. For stores, the data to write is also shifted into the data register in serv_mem_if.
+Loads and stores are memory operations. In the init stage, the data address to access is calculated, checked for alignment and stored in serv_bufreg. For stores, the data to write is also shifted into the data register in serv_bufreg2.
 
 .. wavedrom::
 
@@ -375,4 +375,55 @@ If the calculated address in the init stage was misaligned, SERV will raise a ex
           ],
           edge : [
           "a~>b", "c~>b", "b~>d"]
+        }
+
+shift operations
+++++++++++++++++
+
+Left-shifts and right-shifts are handled somewhat differently in SERV. In both cases the data to be shifted (rs1) is stored in serv_bufreg and the shift amount (rs2 or imm) in serv_bufreg2 during the init stage, but after that the methods diverge.
+
+For left shifts stage two is started immediately during which rd is updated, but data is not shifted out from serv_bufreg2 until the number of cycles corresponding to the shift amount have passed. This effectively "delays" the data written from rs1 into rd, causing a left shift.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"         , wave: "P...|......."},
+          { name: "two_stage_op", wave: "1...|.......", node: "....", data: "r1"},
+          { name: "shift_op"    , wave: "1...|.......", node: "....", data: "r1"},
+          { name: "sh_right"    , wave: "0...|.......", node: "....", data: "r1"},
+          { name: "trap"        , wave: "0...|.......", node: "....", data: "r1"},
+          { name: "init"        , wave: "1.0.|.......", node: "....", data: "r0"},
+          { name: "cnt_en"      , wave: "1.01|.......", node: "...b."},
+          { name: "cnt_done"    , wave: "010.|.......", node: ".a....."},
+          { name: "shamt"       , wave: "x333|.333333", node: "......c.f", data: "N N-1 ... 0 31 30 29 28 27"},
+          { name: "sh_done_r"   , wave: "0...|...1...", node: "........d.", data: "0 1 ... 30 31"},
+          { name: "bufreg_en"   , wave: "1.0.|...1...", node: "........e", data: "0 1 ... 30 31"},
+          { name: "bufreg_q"    , wave: "x.3.|....456", node: "...", data: "d0 d1 d2 d3"},
+          { name: "rd"          , wave: "x..2|...3456", node: ".....f", data: "0 d0 d1 d2 d3"},
+          ],
+          edge : [
+          "a~>b", "c~>d", "c~>d", "d~>e"]
+        }
+
+For right shifts, the opposite happens. Data is immediately shifted out from serv_bufreg after stage one ends, but stage two (and writing to rd) doesn't start until shift amount cycles have passed. After all valid data has been written from serv_bufreg, the remaining cycles are zero-padded or sign-extended depending on logical or arithmetic shifts.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"         , wave: "P...|......|..|.."},
+          { name: "two_stage_op", wave: "1...|......|..|..", node: "....", data: "r1"},
+          { name: "shift_op"    , wave: "1...|......|..|..", node: "....", data: "r1"},
+          { name: "sh_right"    , wave: "1...|......|..|..", node: "....", data: "r1"},
+          { name: "trap"        , wave: "0...|......|..|..", node: "....", data: "r1"},
+          { name: "init"        , wave: "1.0.|......|..|..", node: "....", data: "r0"},
+          { name: "cnt_en"      , wave: "1.0.|...1..|..|.0", node: "........e"},
+          { name: "cnt_done"    , wave: "010.|......|..|10", node: ".a......."},
+          { name: "shamt"       , wave: "x333|.3x...|..|..", node: "......c.f", data: "N N-1 ... 0 31 30 29 ... 27"},
+          { name: "sh_done_r"   , wave: "0...|...1..|..|..", node: "........d.", data: "0 1 ... 30 31"},
+          { name: "bufreg_en"   , wave: "1.01|......|..|..", node: "...b.....", data: "0 1 ... 30 31"},
+          { name: "bufreg_q"    , wave: "x.34|567893|45|..", node: "...", data: "d0 ... dN-3 dN-2 dN-1 dN dN+1 ... d31 sign"},
+          { name: "rd"          , wave: "x...|...893|45|.x", node: ".....f", data: "dN dN+1 ... d31 sign"},
+          ],
+          edge : [
+          "a~>b", "c~>d", "c~>d", "d~>e"]
         }
