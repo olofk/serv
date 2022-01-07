@@ -45,7 +45,7 @@ If everything worked, the output should look like
 
     INFO: Preparing ::serv:1.1.0
     INFO: Setting up project
-
+    
     INFO: Building simulation model
     INFO: Running
 
@@ -145,6 +145,12 @@ blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
 
     fusesoc run --target=arty_a7_35t servant
 
+### Chameleon96 (Arrow 96 CV SoC Board)
+
+FPGA Pin W14 (1V8, pin 5 low speed connector) is used for UART Tx output with 115200 baud rate. No reset key. Yellow Wifi led is q output.
+
+    fusesoc run --target=chameleon96 servant
+
 ### DE0 Nano
 
 FPGA Pin D11 (Connector JP1, pin 38) is used for UART output with 57600 baud rate. DE0 Nano needs an external 3.3V UART to connect to this pin
@@ -169,7 +175,7 @@ Pin B20 is used for UART output with 57600 baud rate. To use `blinky.hex`
 change B20 to W14 (red led) in `data/ebaz4205.xdc` file).
 
     fusesoc run --target=ebaz4205 servant
-
+    
     fusesoc run --target=ebaz4205 servant --memfile=$SERV/sw/blinky.hex
 
 Reference: https://github.com/fusesoc/blinky#ebaz4205-development-board
