@@ -145,6 +145,12 @@ blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
 
     fusesoc run --target=arty_a7_35t servant
 
+### Chameleon96 (Arrow 96 CV SoC Board)
+
+FPGA Pin W14 (1V8, pin 5 low speed connector) is used for UART Tx output with 115200 baud rate. No reset key. Yellow Wifi led is q output.
+
+    fusesoc run --target=chameleon96 servant
+
 ### DE0 Nano
 
 FPGA Pin D11 (Connector JP1, pin 38) is used for UART output with 57600 baud rate. DE0 Nano needs an external 3.3V UART to connect to this pin

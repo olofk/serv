@@ -57,6 +57,15 @@ filesets:
       - servant/servive_clock_gen.v : {file_type : verilogSource}
       - servant/servive.v : {file_type : verilogSource}
 
+  chameleon96:
+    files:
+      - data/chameleon96/chameleon96.sdc : {file_type : SDC}
+      - data/chameleon96/pinmap.tcl   : {file_type: tclSource}
+      - data/chameleon96/HPS.sv : {file_type : systemVerilogSource}
+      - data/chameleon96/CV_96.v : {file_type : verilogSource}
+      - servant/servive_clock_gen.v : {file_type : verilogSource}
+      - servant/servive.v : {file_type : verilogSource}    
+      
   deca:
     files:
       - data/deca.sdc : {file_type : SDC}
@@ -180,6 +189,17 @@ targets:
         device : 5CSXFC6D6F31C6
     toplevel: servive
 
+  chameleon96:
+    default_tool : quartus
+    description : Chameleon96 (Arrow 96 CV SoC Board)
+    filesets : [mem_files, soc, chameleon96]
+    parameters : [memfile, memsize]
+    tools:
+      quartus:
+        family : Cyclone V
+        device : 5CSEBA6U19I7
+    toplevel: CV_96
+    
   deca:
     default_tool : quartus
     description: DECA development kit by Arrow / Terasic
