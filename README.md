@@ -45,7 +45,7 @@ If everything worked, the output should look like
 
     INFO: Preparing ::serv:1.1.0
     INFO: Setting up project
-    
+
     INFO: Building simulation model
     INFO: Running
 
@@ -175,7 +175,7 @@ Pin B20 is used for UART output with 57600 baud rate. To use `blinky.hex`
 change B20 to W14 (red led) in `data/ebaz4205.xdc` file).
 
     fusesoc run --target=ebaz4205 servant
-    
+
     fusesoc run --target=ebaz4205 servant --memfile=$SERV/sw/blinky.hex
 
 Reference: https://github.com/fusesoc/blinky#ebaz4205-development-board
