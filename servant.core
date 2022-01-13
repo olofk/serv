@@ -198,6 +198,7 @@ targets:
       quartus:
         family : Cyclone V
         device : 5CSEBA6U19I7
+        board_device_index : 2        
     toplevel: CV_96
     
   deca:
