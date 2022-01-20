@@ -12,3 +12,8 @@ jobs:
           core: serv
           target: sky130
           tool: openlane
+      - name: Store artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: serv.gds
+          path: /home/runner/work/serv/serv/build/serv_1.1.0/sky130-openlane/gds/serv_synth_wrapper.gds
