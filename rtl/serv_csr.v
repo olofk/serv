@@ -133,9 +133,10 @@ module serv_csr
       if (i_mcause_en & i_cnt_done | i_trap)
 	mcause31 <= i_trap ? o_new_irq : csr_in;
       if (i_rst)
-	if (RESET_STRATEGY != "NONE")
-	  o_new_irq <= 1'b0;
-
+	if (RESET_STRATEGY != "NONE") begin
+	   o_new_irq <= 1'b0;
+	   mie_mtie <= 1'b0;
+	end
    end
 
 endmodule
