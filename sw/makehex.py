@@ -7,21 +7,19 @@
 # binary, for any purpose, commercial or non-commercial, and by any
 # means.
 
-from sys import argv
+import sys
 
-binfile = argv[1]
-nwords = int(argv[2])
-
-with open(binfile, "rb") as f:
-    bindata = f.read()
-
-assert len(bindata) < 4*nwords
-assert len(bindata) % 4 == 0
-
-for i in range(nwords):
-    if i < len(bindata) // 4:
-        w = bindata[4*i : 4*i+4]
-        print("%02x%02x%02x%02x" % (w[3], w[2], w[1], w[0]))
-    else:
-        print("0")
-
+with open(sys.argv[1], "rb") as f:
+    cnt = 3
+    s = ["00"]*4
+    while True:
+        data = f.read(1)
+        if not data:
+            print(''.join(s))
+            exit(0)
+        s[cnt] = "{:02X}".format(data[0])
+        if cnt == 0:
+            print(''.join(s))
+            s = ["00"]*4
+            cnt = 4
+        cnt -= 1
