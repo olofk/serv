@@ -1,0 +1,9 @@
+CONFIG VCCAUX=3.3;
+
+NET i_clk     LOC = T8  | IOSTANDARD = LVCMOS33;
+NET i_rst     LOC = L3  | IOSTANDARD = LVCMOS33;
+NET q         LOC = P4  | IOSTANDARD = LVCMOS33;
+NET o_uart_tx LOC = D12 | IOSTANDARD = LVCMOS33;
+
+NET i_clk TNM_NET = sys_clk_pin;
+TIMESPEC TS_USER_CLOCK = PERIOD sys_clk_pin 50000 kHz;
