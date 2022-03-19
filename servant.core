@@ -104,6 +104,12 @@ filesets:
       - data/go_board.pcf : {file_type : PCF}
       - servant/service_go_board.v : {file_type : verilogSource}
 
+  ax309:
+    files:
+      - servant/servant_ax309_clock_gen.v : {file_type : verilogSource}
+      - servant/servant_ax309.v : {file_type : verilogSource}
+      - data/ax309.ucf : {file_type : UCF}
+
   lx9_microboard:
     files:
       - servant/servant_lx9_clock_gen.v : {file_type : verilogSource}
@@ -269,6 +275,19 @@ targets:
         package : csg324
         speed   : -2
     toplevel : servant_lx9
+
+  ax309:
+    default_tool : ise
+    description : XILINX Spartan-6 XC6SLX9 FPGA Development Board
+    filesets : [mem_files, soc, ax309]
+    parameters : [memfile, memsize]
+    tools:
+      ise:
+        family  : Spartan6
+        device  : xc6slx9
+        package : ftg256
+        speed   : -3
+    toplevel : servant_ax309
 
   tinyfpga_bx:
     default_tool : icestorm
