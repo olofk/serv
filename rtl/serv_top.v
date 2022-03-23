@@ -5,7 +5,9 @@ module serv_top
     parameter PRE_REGISTER = 1,
     parameter RESET_STRATEGY = "MINI",
     parameter RESET_PC = 32'd0,
-    parameter [0:0] MDU = 1'b0)
+    parameter [0:0] MDU = 1'b0,
+    parameter [0:0] COMPRESSED=0,
+    parameter [0:0] ALIGN = 0)
    (
    input wire 		      clk,
    input wire 		      i_rst,
@@ -104,6 +106,7 @@ module serv_top
    wire          imm;
    wire 	 trap;
    wire 	 pc_rel;
+   wire          iscomp;
 
    wire          init;
    wire          cnt_en;
@@ -171,11 +174,57 @@ module serv_top
 
    wire [1:0]   lsb;
 
+   wire [31:0] i_wb_rdt;
+
+   wire [31:0] wb_ibus_adr;
+   wire        wb_ibus_cyc;
+   wire [31:0] wb_ibus_rdt;
+   wire        wb_ibus_ack;
+
+   generate
+      if (ALIGN) begin
+         serv_aligner  align
+           (
+            .clk(clk),
+            .rst(i_rst),
+            // serv_rf_top
+            .i_ibus_adr(wb_ibus_adr),
+            .i_ibus_cyc(wb_ibus_cyc),
+            .o_ibus_rdt(wb_ibus_rdt),
+            .o_ibus_ack(wb_ibus_ack),
+            // servant_arbiter
+            .o_wb_ibus_adr(o_ibus_adr),
+            .o_wb_ibus_cyc(o_ibus_cyc),
+            .i_wb_ibus_rdt(i_ibus_rdt),
+            .i_wb_ibus_ack(i_ibus_ack));
+      end else begin
+         assign  o_ibus_adr  = wb_ibus_adr;
+         assign  o_ibus_cyc  = wb_ibus_cyc;
+         assign  wb_ibus_rdt = i_ibus_rdt;
+         assign  wb_ibus_ack = i_ibus_ack;
+        end
+   endgenerate
+
+   generate 
+      if (COMPRESSED) begin
+         serv_compdec compdec
+           (
+            .i_clk(clk),
+            .i_instr(wb_ibus_rdt),
+            .i_ack(wb_ibus_ack),
+            .o_instr(i_wb_rdt),
+            .o_iscomp(iscomp));
+      end else begin
+         assign i_wb_rdt =  wb_ibus_rdt;
+         assign iscomp   =  1'b0;
+      end
+   endgenerate
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR),
-       .MDU(MDU))
+       .MDU(MDU),
+       .COMPRESSED(COMPRESSED))
    state
      (
       .i_clk (clk),
@@ -221,8 +270,8 @@ module serv_top
       //External
       .o_dbus_cyc     (o_dbus_cyc),
       .i_dbus_ack     (i_dbus_ack),
-      .o_ibus_cyc     (o_ibus_cyc),
-      .i_ibus_ack     (i_ibus_ack),
+      .o_ibus_cyc     (wb_ibus_cyc),
+      .i_ibus_ack     (wb_ibus_ack),
       //RF Interface
       .o_rf_rreq      (o_rf_rreq),
       .o_rf_wreq      (o_rf_wreq),
@@ -236,8 +285,8 @@ module serv_top
      (
       .clk (clk),
       //Input
-      .i_wb_rdt           (i_ibus_rdt[31:2]),
-      .i_wb_en            (i_ibus_ack),
+      .i_wb_rdt           (i_wb_rdt[31:2]),
+      .i_wb_en            (wb_ibus_ack),
       //To state
       .o_bne_or_bge       (bne_or_bge),
       .o_cond_branch      (cond_branch),
@@ -312,8 +361,8 @@ module serv_top
       .o_csr_imm    (csr_imm),
       .o_imm        (imm),
       //External
-      .i_wb_en      (i_ibus_ack),
-      .i_wb_rdt     (i_ibus_rdt[31:7]));
+      .i_wb_en      (wb_ibus_ack),
+      .i_wb_rdt     (i_wb_rdt[31:7]));
 
    serv_bufreg
       #(.MDU(MDU))
@@ -376,6 +425,7 @@ module serv_top
       .i_pc_en    (ctrl_pc_en),
       .i_cnt12to31 (cnt12to31),
       .i_cnt0     (cnt0),
+      .i_cnt1     (cnt1),
       .i_cnt2     (cnt2),
       //Control
       .i_jump     (jump),
@@ -383,6 +433,7 @@ module serv_top
       .i_utype    (utype),
       .i_pc_rel   (pc_rel),
       .i_trap     (trap | mret),
+      .i_iscomp    (iscomp),
       //Data
       .i_imm      (imm),
       .i_buf      (bufreg_q),
@@ -390,7 +441,7 @@ module serv_top
       .o_rd       (ctrl_rd),
       .o_bad_pc   (bad_pc),
       //External
-      .o_ibus_adr (o_ibus_adr));
+      .o_ibus_adr (wb_ibus_adr));
 
    serv_alu alu
      (
@@ -430,7 +481,7 @@ module serv_top
       //Trap interface
       .i_trap      (trap),
       .i_mret      (mret),
-      .i_mepc      (o_ibus_adr[0]),
+      .i_mepc      (wb_ibus_adr[0]),
       .i_mtval_pc  (mtval_pc),
       .i_bufreg_q  (bufreg_q),
       .i_bad_pc    (bad_pc),
@@ -535,8 +586,8 @@ module serv_top
       rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
 
       /* Get instruction word when it's fetched from ibus */
-      if (o_ibus_cyc & i_ibus_ack)
-	rvfi_insn <= i_ibus_rdt;
+      if (wb_ibus_cyc & wb_ibus_ack)
+	rvfi_insn <= i_wb_rdt;
 
       /* Store data written to rd */
       if (o_wen0)
@@ -580,14 +631,14 @@ module serv_top
          rvfi_mem_rdata <= i_dbus_rdt;
          rvfi_mem_wdata <= o_dbus_dat;
       end
-      if (i_ibus_ack) begin
+      if (wb_ibus_ack) begin
          rvfi_mem_rmask <= 4'b0000;
          rvfi_mem_wmask <= 4'b0000;
       end
    end
    /* verilator lint_off COMBDLY */
-   always @(o_ibus_adr)
-     rvfi_pc_wdata <= o_ibus_adr;
+   always @(wb_ibus_adr)
+     rvfi_pc_wdata <= wb_ibus_adr;
    /* verilator lint_on COMBDLY */
 
 
