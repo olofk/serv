@@ -109,10 +109,11 @@ module serv_decode
    wire co_ctrl_jal_or_jalr = opcode[4] & opcode[0];
 
    //PC-relative operations
-   //True for jal, b* auipc
+   //True for jal, b* auipc, ebreak
    //False for jalr, lui
-   wire co_ctrl_pc_rel = (opcode[2:0] == 3'b000) |
-                          (opcode[1:0] == 2'b11) |
+   wire co_ctrl_pc_rel = (opcode[2:0] == 3'b000)  |
+                          (opcode[1:0] == 2'b11)  |
+                          (opcode[4] & opcode[2]) & op20|
                           (opcode[4:3] == 2'b00);
    //Write to RD
    //True for OP-IMM, AUIPC, OP, LUI, SYSTEM, JALR, JAL, LOAD

@@ -1,6 +1,7 @@
 module serv_state
   #(parameter RESET_STRATEGY = "MINI",
     parameter [0:0] WITH_CSR = 1,
+    parameter [0:0] COMPRESSED =0,
     parameter [0:0] MDU = 0)
   (
    input wire 	     i_clk,
@@ -114,7 +115,7 @@ module serv_state
     shift : Shift in during phase 1. Continue shifting between phases (except
             for the first cycle after init). Shift out during phase 2
     */
-   assign o_bufreg_en = (o_cnt_en & (o_init | o_ctrl_trap | i_branch_op)) | (i_shift_op & !stage_two_req & (i_sh_right | i_sh_done_r) & init_done);
+   assign o_bufreg_en = (o_cnt_en & (o_init | ((o_ctrl_trap | i_branch_op) & i_two_stage_op))) | (i_shift_op & !stage_two_req & (i_sh_right | i_sh_done_r) & init_done);
 
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
@@ -186,7 +187,7 @@ module serv_state
 
 	 //trap_pending is only guaranteed to have correct value during the
 	 // last cycle of the init stage
-	 wire trap_pending = WITH_CSR & ((take_branch & i_ctrl_misalign) |
+	 wire trap_pending = WITH_CSR & ((take_branch & i_ctrl_misalign & !COMPRESSED) |
 					 (i_dbus_en   & i_mem_misalign));
 
 	 always @(posedge i_clk) begin
