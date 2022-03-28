@@ -10,6 +10,7 @@ module serv_ctrl
    input wire 	     i_pc_en,
    input wire 	     i_cnt12to31,
    input wire 	     i_cnt0,
+   input wire        i_cnt1,
    input wire 	     i_cnt2,
    //Control
    input wire 	     i_jump,
@@ -17,6 +18,7 @@ module serv_ctrl
    input wire 	     i_utype,
    input wire 	     i_pc_rel,
    input wire 	     i_trap,
+   input wire        is_comp,
    //Data
    input wire 	     i_imm,
    input wire 	     i_buf,
@@ -42,7 +44,7 @@ module serv_ctrl
    wire       offset_a;
    wire       offset_b;
 
-   assign plus_4        = i_cnt2;
+   assign plus_4        = is_comp ? i_cnt1 : i_cnt2;
 
    assign o_bad_pc = pc_plus_offset_aligned;
 

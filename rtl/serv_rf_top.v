@@ -52,6 +52,7 @@ module serv_rf_top
    output wire 	      o_ibus_cyc,
    input wire [31:0]  i_ibus_rdt,
    input wire 	      i_ibus_ack,
+   input wire         is_comp,
    output wire [31:0] o_dbus_adr,
    output wire [31:0] o_dbus_dat,
    output wire [3:0]  o_dbus_sel,
@@ -180,6 +181,7 @@ module serv_rf_top
       .o_ibus_cyc   (o_ibus_cyc),
       .i_ibus_rdt   (i_ibus_rdt),
       .i_ibus_ack   (i_ibus_ack),
+      .is_comp      (is_comp),
 
       .o_dbus_adr   (o_dbus_adr),
       .o_dbus_dat   (o_dbus_dat),

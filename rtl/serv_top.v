@@ -52,6 +52,7 @@ module serv_top
    output wire 		      o_ibus_cyc,
    input wire [31:0] 	      i_ibus_rdt,
    input wire 		      i_ibus_ack,
+   input wire           is_comp,
    output wire [31:0] 	      o_dbus_adr,
    output wire [31:0] 	      o_dbus_dat,
    output wire [3:0] 	      o_dbus_sel,
@@ -376,6 +377,7 @@ module serv_top
       .i_pc_en    (ctrl_pc_en),
       .i_cnt12to31 (cnt12to31),
       .i_cnt0     (cnt0),
+      .i_cnt1     (cnt1),
       .i_cnt2     (cnt2),
       //Control
       .i_jump     (jump),
@@ -383,6 +385,7 @@ module serv_top
       .i_utype    (utype),
       .i_pc_rel   (pc_rel),
       .i_trap     (trap | mret),
+      .is_comp    (is_comp),
       //Data
       .i_imm      (imm),
       .i_buf      (bufreg_q),

@@ -20,6 +20,8 @@ filesets:
       - rtl/serv_state.v
       - rtl/serv_top.v
       - rtl/serv_rf_top.v
+      - rtl/serv_aligner.v
+      - rtl/serv_compdec.v
     file_type : verilogSource
 
   openlane:
