@@ -1,6 +1,7 @@
 module serv_state
   #(parameter RESET_STRATEGY = "MINI",
     parameter [0:0] WITH_CSR = 1,
+    parameter UNAL_ADR =0,
     parameter [0:0] MDU = 0)
   (
    input wire 	     i_clk,
@@ -186,7 +187,7 @@ module serv_state
 
 	 //trap_pending is only guaranteed to have correct value during the
 	 // last cycle of the init stage
-	 wire trap_pending = WITH_CSR & ((take_branch & i_ctrl_misalign) |
+	 wire trap_pending = WITH_CSR & ((take_branch & i_ctrl_misalign & UNAL_ADR) |
 					 (i_dbus_en   & i_mem_misalign));
 
 	 always @(posedge i_clk) begin
