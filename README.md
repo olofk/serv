@@ -76,11 +76,13 @@ Other applications can be tested by compiling and converting to bin and then hex
 
 ## Run RISC-V compliance tests
 
-**Note:** The following instructions are valid for version 1.0 of the RISC-V compliance tests. The target-specific support for SERV has not yet been ported to newer versions.
-
 Build the verilator model (if not already done)
 
     fusesoc run --target=verilator_tb --build servant --memsize=8388608
+
+To build the verilator model with MDU (for M extension compliance tests):
+
+    fusesoc run --target=verilator_tb --flag=mdu --build servant --memsize=8388608
 
 Download the tests repo
 
@@ -90,9 +92,9 @@ To run the RISC-V compliance tests, we need to supply the SERV-specific support 
 
 Run the compliance tests
 
-    cd riscv-arch-test && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv TARGET_SIM=$SERV/build/servant_1.1.0/verilator_tb-verilator/Vservant_sim
+    cd riscv-arch-test && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=I TARGET_SIM=$SERV/build/servant_1.1.0/verilator_tb-verilator/Vservant_sim
 
-The above will run all tests in the rv32i test suite. Since SERV also implement the `rv32im`, `rv32Zicsr` and `rv32Zifencei` extensions, these can also be tested by choosing any of them instead of rv32i as the `RISCV_ISA` variable.
+The above will run all tests in the rv32i test suite. Since SERV also implement the `M`, `privilege` and `Zifencei` extensions, these can also be tested by choosing any of them instead of `I` as the `RISCV_DEVICE` variable.
 
 ## Run on hardware
 
