@@ -1,4 +1,0 @@
-# exclude build files
-build/*
-fusesoc.conf
-fusesoc_libraries/*
