@@ -33,6 +33,7 @@ targets:
   default:
     filesets : [core]
     parameters :
+      - COMPRESSED
       - "is_toplevel? (MDU)"
       - "is_toplevel? (PRE_REGISTER)"
       - "is_toplevel? (RESET_STRATEGY)"
@@ -82,3 +83,8 @@ parameters:
   WITH_CSR:
     datatype  : int
     paramtype : vlogparam
+  
+  COMPRESSED:
+    datatype    : int
+    description : Enables the support for Compressed instructions
+    paramtype   : vlogparam

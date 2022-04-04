@@ -2,6 +2,10 @@
 
 module serv_rf_top
   #(parameter RESET_PC = 32'd0,
+    /*  COMPRESSED=1: Enable the compressed decoder and allowed misaligned jump of pc
+        COMPRESSED=0: Disable the compressed decoder and does not allow the misaligned jump of pc
+    */
+    parameter COMPRESSED = 0,
     /* Multiplication and Division Unit
        This parameter enables the interface for connecting SERV and MDU
     */
@@ -52,7 +56,6 @@ module serv_rf_top
    output wire 	      o_ibus_cyc,
    input wire [31:0]  i_ibus_rdt,
    input wire 	      i_ibus_ack,
-   input wire         is_comp,
    output wire [31:0] o_dbus_adr,
    output wire [31:0] o_dbus_dat,
    output wire [3:0]  o_dbus_sel,
@@ -91,6 +94,17 @@ module serv_rf_top
    wire 	       wen;
    wire [RF_L2D-1:0]   raddr;
    wire [RF_WIDTH-1:0] rdata;
+
+   wire [31:0] i_ibus_rdttop;
+   wire is_comp;
+
+    serv_compdec 
+    #(.COMPRESSED(COMPRESSED))
+    compdec
+    (.instr_i(i_ibus_rdt),
+    .ack(i_ibus_ack),
+    .instr_o(i_ibus_rdttop),
+    .is_comp(is_comp));
 
    serv_rf_ram_if
      #(.width    (RF_WIDTH),
@@ -134,7 +148,8 @@ module serv_rf_top
        .PRE_REGISTER (PRE_REGISTER),
        .RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR),
-       .MDU(MDU))
+       .MDU(MDU),
+       .COMPRESSED(COMPRESSED))
    cpu
      (
       .clk      (clk),
@@ -179,7 +194,7 @@ module serv_rf_top
 
       .o_ibus_adr   (o_ibus_adr),
       .o_ibus_cyc   (o_ibus_cyc),
-      .i_ibus_rdt   (i_ibus_rdt),
+      .i_ibus_rdt   (i_ibus_rdttop),
       .i_ibus_ack   (i_ibus_ack),
       .is_comp      (is_comp),
 

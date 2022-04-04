@@ -64,28 +64,21 @@ module servant
    wire [31:0] i_ibus_rdt;
    wire i_ibus_ack;
 
-   wire [31:0] i_ibus_dum;
-   wire is_comp;
 
-   serv_aligner align(
+   serv_aligner align
+   (
     .clk(wb_clk),
     .rst(wb_rst),
     // serv_rf_top
     .i_ibus_adr(o_ibus_adr),
     .i_ibus_cyc(o_ibus_cyc),
-    .o_ibus_rdt(i_ibus_dum),
+    .o_ibus_rdt(i_ibus_rdt),
     .o_ibus_ack(i_ibus_ack),
-    // servant_ram
+    // servant_arbiter
     .o_wb_ibus_adr(wb_ibus_adr),
     .o_wb_ibus_cyc(wb_ibus_cyc),
     .i_wb_ibus_rdt(wb_ibus_rdt),
     .i_wb_ibus_ack(wb_ibus_ack));
-  
-   serv_compdec compdec(
-    .instr_i(i_ibus_dum),
-    .ack(i_ibus_ack),
-    .instr_o(i_ibus_rdt),
-    .is_comp(is_comp));
 
    servant_arbiter arbiter
      (.i_wb_cpu_dbus_adr (wb_dmem_adr),
@@ -221,7 +214,6 @@ module servant
       .o_ibus_cyc   (o_ibus_cyc),
       .i_ibus_rdt   (i_ibus_rdt),
       .i_ibus_ack   (i_ibus_ack),
-      .is_comp      (is_comp),
 
       .o_dbus_adr   (wb_dbus_adr),
       .o_dbus_dat   (wb_dbus_dat),
