@@ -53,7 +53,6 @@ module serv_top
    output wire 		      o_ibus_cyc,
    input wire [31:0] 	      i_ibus_rdt,
    input wire 		      i_ibus_ack,
-   input wire           is_comp,
    output wire [31:0] 	      o_dbus_adr,
    output wire [31:0] 	      o_dbus_dat,
    output wire [3:0] 	      o_dbus_sel,
@@ -173,6 +172,16 @@ module serv_top
 
    wire [1:0]   lsb;
 
+  wire [31:0] i_wb_rdt;
+  wire iscomp;
+
+  serv_compdec 
+    #(.COMPRESSED(COMPRESSED))
+    compdec
+    (.i_instr(i_ibus_rdt),
+    .i_ack(i_ibus_ack),
+    .o_instr(i_wb_rdt),
+    .o_iscomp(iscomp));
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
@@ -239,7 +248,7 @@ module serv_top
      (
       .clk (clk),
       //Input
-      .i_wb_rdt           (i_ibus_rdt[31:2]),
+      .i_wb_rdt           (i_wb_rdt[31:2]),
       .i_wb_en            (i_ibus_ack),
       //To state
       .o_bne_or_bge       (bne_or_bge),
@@ -316,7 +325,7 @@ module serv_top
       .o_imm        (imm),
       //External
       .i_wb_en      (i_ibus_ack),
-      .i_wb_rdt     (i_ibus_rdt[31:7]));
+      .i_wb_rdt     (i_wb_rdt[31:7]));
 
    serv_bufreg
       #(.MDU(MDU))
@@ -387,7 +396,7 @@ module serv_top
       .i_utype    (utype),
       .i_pc_rel   (pc_rel),
       .i_trap     (trap | mret),
-      .is_comp    (is_comp),
+      .i_iscomp    (iscomp),
       //Data
       .i_imm      (imm),
       .i_buf      (bufreg_q),
@@ -541,7 +550,7 @@ module serv_top
 
       /* Get instruction word when it's fetched from ibus */
       if (o_ibus_cyc & i_ibus_ack)
-	rvfi_insn <= i_ibus_rdt;
+	rvfi_insn <= i_wb_rdt;
 
       /* Store data written to rd */
       if (o_wen0)

@@ -5,7 +5,7 @@ module serv_rf_top
     /*  COMPRESSED=1: Enable the compressed decoder and allowed misaligned jump of pc
         COMPRESSED=0: Disable the compressed decoder and does not allow the misaligned jump of pc
     */
-    parameter COMPRESSED = 0,
+    parameter COMPRESSED = 1,
     /* Multiplication and Division Unit
        This parameter enables the interface for connecting SERV and MDU
     */
@@ -95,16 +95,6 @@ module serv_rf_top
    wire [RF_L2D-1:0]   raddr;
    wire [RF_WIDTH-1:0] rdata;
 
-   wire [31:0] i_ibus_rdttop;
-   wire is_comp;
-
-    serv_compdec 
-    #(.COMPRESSED(COMPRESSED))
-    compdec
-    (.instr_i(i_ibus_rdt),
-    .ack(i_ibus_ack),
-    .instr_o(i_ibus_rdttop),
-    .is_comp(is_comp));
 
    serv_rf_ram_if
      #(.width    (RF_WIDTH),
@@ -194,9 +184,8 @@ module serv_rf_top
 
       .o_ibus_adr   (o_ibus_adr),
       .o_ibus_cyc   (o_ibus_cyc),
-      .i_ibus_rdt   (i_ibus_rdttop),
+      .i_ibus_rdt   (i_ibus_rdt),
       .i_ibus_ack   (i_ibus_ack),
-      .is_comp      (is_comp),
 
       .o_dbus_adr   (o_dbus_adr),
       .o_dbus_dat   (o_dbus_dat),
