@@ -12,12 +12,12 @@ module serv_top
    input wire 		      i_rst,
    input wire 		      i_timer_irq,
 `ifdef RISCV_FORMAL
-   output reg 		      rvfi_valid = 1'b0,
+   output reg 		          rvfi_valid = 1'b0,
    output reg [63:0] 	      rvfi_order = 64'd0,
    output reg [31:0] 	      rvfi_insn = 32'd0,
-   output reg 		      rvfi_trap = 1'b0,
-   output reg 		      rvfi_halt = 1'b0,
-   output reg 		      rvfi_intr = 1'b0,
+   output reg 		          rvfi_trap = 1'b0,
+   output reg 		          rvfi_halt = 1'b0,
+   output reg 		          rvfi_intr = 1'b0,
    output reg [1:0] 	      rvfi_mode = 2'b11,
    output reg [1:0] 	      rvfi_ixl = 2'b01,
    output reg [4:0] 	      rvfi_rs1_addr,
@@ -35,31 +35,31 @@ module serv_top
    output reg [31:0] 	      rvfi_mem_wdata,
 `endif
    //RF Interface
-   output wire 		      o_rf_rreq,
-   output wire 		      o_rf_wreq,
-   input wire 		      i_rf_ready,
+   output wire 		            o_rf_rreq,
+   output wire 		            o_rf_wreq,
+   input wire 		            i_rf_ready,
    output wire [4+WITH_CSR:0] o_wreg0,
    output wire [4+WITH_CSR:0] o_wreg1,
-   output wire 		      o_wen0,
-   output wire 		      o_wen1,
-   output wire 		      o_wdata0,
-   output wire 		      o_wdata1,
+   output wire 		            o_wen0,
+   output wire 		            o_wen1,
+   output wire 		            o_wdata0,
+   output wire 		            o_wdata1,
    output wire [4+WITH_CSR:0] o_rreg0,
    output wire [4+WITH_CSR:0] o_rreg1,
-   input wire 		      i_rdata0,
-   input wire 		      i_rdata1,
+   input wire 		            i_rdata0,
+   input wire 		            i_rdata1,
 
    output wire [31:0] 	      o_ibus_adr,
-   output wire 		      o_ibus_cyc,
-   input wire [31:0] 	      i_ibus_rdt,
-   input wire 		      i_ibus_ack,
+   output wire 		            o_ibus_cyc,
+   input wire [31:0] 	        i_ibus_rdt,
+   input wire 		            i_ibus_ack,
    output wire [31:0] 	      o_dbus_adr,
    output wire [31:0] 	      o_dbus_dat,
-   output wire [3:0] 	      o_dbus_sel,
-   output wire 		      o_dbus_we ,
-   output wire 		      o_dbus_cyc,
-   input wire [31:0] 	      i_dbus_rdt,
-   input wire 		      i_dbus_ack,
+   output wire [3:0] 	        o_dbus_sel,
+   output wire 		            o_dbus_we ,
+   output wire 		            o_dbus_cyc,
+   input wire [31:0] 	        i_dbus_rdt,
+   input wire 		            i_dbus_ack,
    //Extension
    output wire [ 2:0] o_ext_funct3,
    input  wire        i_ext_ready,
@@ -73,10 +73,10 @@ module serv_top
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
 
-   wire [3:0] 	 immdec_ctrl;
+   wire [3:0] 	immdec_ctrl;
    wire [3:0] 	immdec_en;
 
-   wire          sh_right;
+   wire    sh_right;
    wire 	 bne_or_bge;
    wire 	 cond_branch;
    wire 	 two_stage_op;
@@ -86,30 +86,31 @@ module serv_top
    wire 	 shift_op;
    wire 	 slt_or_branch;
    wire 	 rd_op;
-   wire   mdu_op;
+   wire    mdu_op;
 
    wire 	 rd_alu_en;
    wire 	 rd_csr_en;
    wire 	 rd_mem_en;
-   wire          ctrl_rd;
-   wire          alu_rd;
-   wire          mem_rd;
-   wire          csr_rd;
+   wire    ctrl_rd;
+   wire    alu_rd;
+   wire    mem_rd;
+   wire    csr_rd;
    wire 	 mtval_pc;
 
    wire          ctrl_pc_en;
    wire          jump;
    wire          jal_or_jalr;
    wire          utype;
-   wire 	 mret;
+   wire 	       mret;
    wire          imm;
-   wire 	 trap;
-   wire 	 pc_rel;
+   wire 	       trap;
+   wire 	       pc_rel;
+   wire          iscomp;
 
    wire          init;
    wire          cnt_en;
-   wire 	 cnt0to3;
-   wire 	 cnt12to31;
+   wire 	       cnt0to3;
+   wire 	       cnt12to31;
    wire          cnt0;
    wire          cnt1;
    wire          cnt2;
@@ -119,7 +120,7 @@ module serv_top
    wire 	 cnt_done;
 
    wire 	 bufreg_en;
-   wire          bufreg_sh_signed;
+   wire    bufreg_sh_signed;
    wire 	 bufreg_rs1_en;
    wire 	 bufreg_imm_en;
    wire 	 bufreg_clr_lsb;
@@ -172,14 +173,36 @@ module serv_top
 
    wire [1:0]   lsb;
 
-  wire [31:0] i_wb_rdt;
-  wire iscomp;
+   wire [31:0] i_wb_rdt;
+  
+
+
+   wire [31:0] wb_ibus_adr;
+   wire        wb_ibus_cyc;
+   wire [31:0] wb_ibus_rdt;
+   wire        wb_ibus_ack;
+
+
+   serv_aligner align
+   (
+    .clk(clk),
+    .rst(i_rst),
+    // serv_rf_top
+    .i_ibus_adr(wb_ibus_adr),
+    .i_ibus_cyc(wb_ibus_cyc),
+    .o_ibus_rdt(wb_ibus_rdt),
+    .o_ibus_ack(wb_ibus_ack),
+    // servant_arbiter
+    .o_wb_ibus_adr(o_ibus_adr),
+    .o_wb_ibus_cyc(o_ibus_cyc),
+    .i_wb_ibus_rdt(i_ibus_rdt),
+    .i_wb_ibus_ack(i_ibus_ack));
 
   serv_compdec 
     #(.COMPRESSED(COMPRESSED))
-    compdec
-    (.i_instr(i_ibus_rdt),
-    .i_ack(i_ibus_ack),
+  compdec
+    (.i_instr(wb_ibus_rdt),
+    .i_ack(wb_ibus_ack),
     .o_instr(i_wb_rdt),
     .o_iscomp(iscomp));
 
@@ -233,8 +256,8 @@ module serv_top
       //External
       .o_dbus_cyc     (o_dbus_cyc),
       .i_dbus_ack     (i_dbus_ack),
-      .o_ibus_cyc     (o_ibus_cyc),
-      .i_ibus_ack     (i_ibus_ack),
+      .o_ibus_cyc     (wb_ibus_cyc),
+      .i_ibus_ack     (wb_ibus_ack),
       //RF Interface
       .o_rf_rreq      (o_rf_rreq),
       .o_rf_wreq      (o_rf_wreq),
@@ -249,7 +272,7 @@ module serv_top
       .clk (clk),
       //Input
       .i_wb_rdt           (i_wb_rdt[31:2]),
-      .i_wb_en            (i_ibus_ack),
+      .i_wb_en            (wb_ibus_ack),
       //To state
       .o_bne_or_bge       (bne_or_bge),
       .o_cond_branch      (cond_branch),
@@ -324,7 +347,7 @@ module serv_top
       .o_csr_imm    (csr_imm),
       .o_imm        (imm),
       //External
-      .i_wb_en      (i_ibus_ack),
+      .i_wb_en      (wb_ibus_ack),
       .i_wb_rdt     (i_wb_rdt[31:7]));
 
    serv_bufreg
@@ -404,7 +427,7 @@ module serv_top
       .o_rd       (ctrl_rd),
       .o_bad_pc   (bad_pc),
       //External
-      .o_ibus_adr (o_ibus_adr));
+      .o_ibus_adr (wb_ibus_adr));
 
    serv_alu alu
      (
@@ -444,7 +467,7 @@ module serv_top
       //Trap interface
       .i_trap      (trap),
       .i_mret      (mret),
-      .i_mepc      (o_ibus_adr[0]),
+      .i_mepc      (wb_ibus_adr[0]),
       .i_mtval_pc  (mtval_pc),
       .i_bufreg_q  (bufreg_q),
       .i_bad_pc    (bad_pc),
@@ -549,7 +572,7 @@ module serv_top
       rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
 
       /* Get instruction word when it's fetched from ibus */
-      if (o_ibus_cyc & i_ibus_ack)
+      if (wb_ibus_cyc & wb_ibus_ack)
 	rvfi_insn <= i_wb_rdt;
 
       /* Store data written to rd */
@@ -594,14 +617,14 @@ module serv_top
          rvfi_mem_rdata <= i_dbus_rdt;
          rvfi_mem_wdata <= o_dbus_dat;
       end
-      if (i_ibus_ack) begin
+      if (wb_ibus_ack) begin
          rvfi_mem_rmask <= 4'b0000;
          rvfi_mem_wmask <= 4'b0000;
       end
    end
    /* verilator lint_off COMBDLY */
-   always @(o_ibus_adr)
-     rvfi_pc_wdata <= o_ibus_adr;
+   always @(wb_ibus_adr)
+     rvfi_pc_wdata <= wb_ibus_adr;
    /* verilator lint_on COMBDLY */
 
 

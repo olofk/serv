@@ -5,7 +5,7 @@ module serv_aligner (
     input wire i_ibus_cyc,
     output wire [31:0] o_ibus_rdt,
     output wire o_ibus_ack,
-    // servant_ram
+    // servant_arbiter
     output wire [31:0] o_wb_ibus_adr,
     output wire o_wb_ibus_cyc,
     input wire [31:0] i_wb_ibus_rdt,
