@@ -5,7 +5,12 @@ module serv_rf_top
     /*  COMPRESSED=1: Enable the compressed decoder and allowed misaligned jump of pc
         COMPRESSED=0: Disable the compressed decoder and does not allow the misaligned jump of pc
     */
-    parameter COMPRESSED = 1,
+    parameter COMPRESSED = 0,
+    /*  
+      ALIGN = 1: Fetch the aligned instruction by making two bus transactions if the misaligned address 
+      is given to the instruction bus.  
+    */
+    parameter ALIGN = 0,
     /* Multiplication and Division Unit
        This parameter enables the interface for connecting SERV and MDU
     */
@@ -139,7 +144,8 @@ module serv_rf_top
        .RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR),
        .MDU(MDU),
-       .COMPRESSED(COMPRESSED))
+       .COMPRESSED(COMPRESSED),
+       .ALIGN(ALIGN))
    cpu
      (
       .clk      (clk),

@@ -33,6 +33,7 @@ targets:
   default:
     filesets : [core]
     parameters :
+      - "is_toplevel? (ALIGN)"
       - "is_toplevel? (COMPRESSED)"
       - "is_toplevel? (MDU)"
       - "is_toplevel? (PRE_REGISTER)"
@@ -86,5 +87,11 @@ parameters:
   
   COMPRESSED:
     datatype    : int
-    description : Enables the support for Compressed instructions
+    description : Enable/Disable the support for Compressed instructions
     paramtype   : vlogparam
+  
+  ALIGN:
+    datatype    : int
+    paramtype   : vlogparam
+    description : Enable/Disable the support of misaligned instructions
+
