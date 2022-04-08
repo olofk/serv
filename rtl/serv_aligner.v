@@ -2,21 +2,20 @@ module serv_aligner
 #(parameter ALIGN = 0)
 (
     input clk,rst,
-    // serv_rf_top
+    // serv_top
     input wire [31:0] i_ibus_adr,
     input wire i_ibus_cyc,
     output wire [31:0] o_ibus_rdt,
     output wire o_ibus_ack,
-    // servant_arbiter
+    // serv_rf_top
     output wire [31:0] o_wb_ibus_adr,
     output wire o_wb_ibus_cyc,
     input wire [31:0] i_wb_ibus_rdt,
     input wire i_wb_ibus_ack
 );
-    parameter idle = 2'b00;
-    parameter fetch_al = 2'b01;
-    parameter fetch_misal1 = 2'b10;
-    parameter fetch_misal_ack = 2'b11;
+    parameter fetch_align = 2'b00;
+    parameter fetch_misal = 2'b01;
+    parameter fetch_ack   = 2'b10;
     generate
         if(ALIGN)begin
             
@@ -41,53 +40,47 @@ module serv_aligner
 
 
             // Controller --> Moore State Machine
-            // State parameters
-
             // State register
             reg [1:0] cs,ns;
             always @(posedge clk ) begin
                 if(rst)
-                    cs <= idle;
+                    cs <= fetch_align;
                 else    
                     cs <= ns;
             end
             //Output logic
             always @(*) begin
                 case (cs)
-                    idle:  begin
+                    fetch_align:  begin
                             rdt_sel = 1'b0;
                             en_ack = 1'b1;
                             addr_sel = 1'b0;
                             en_reg = 1'b0;
                         end
-                    fetch_al: begin
-                            rdt_sel = 1'b0;
-                            en_ack = 1'b1;
-                            addr_sel = 1'b0;
-                            en_reg = 1'b0;
-                        end
-                    fetch_misal1: begin
+                    fetch_misal: begin
                             rdt_sel = 1'b1;
                             en_ack = 1'b0;
                             addr_sel = 1'b1;
                             en_reg = 1'b1;
                         end
-                    fetch_misal_ack: begin
+                    fetch_ack: begin
                             rdt_sel = 1'b1;
                             en_ack = 1'b1;
                             addr_sel = 1'b1;
                             en_reg = 1'b0;
                         end
+                
+                    default:;
                 endcase
             end
 
             // Next state Logic
             always @(* ) begin
                 case (cs)
-                    idle:            ns = i_ibus_adr[1]&i_ibus_cyc ? fetch_misal1 : fetch_al;
-                    fetch_al:        ns = i_ibus_adr[1]&i_ibus_cyc ? fetch_misal1 : idle;
-                    fetch_misal1:    ns = fetch_misal_ack;
-                    fetch_misal_ack:    ns = i_wb_ibus_ack ? idle : fetch_misal_ack;
+                    fetch_align     :    ns = i_ibus_adr[1]&i_ibus_cyc ? fetch_misal : fetch_align;
+                    fetch_misal     :    ns = fetch_ack;
+                    fetch_ack       :    ns = i_wb_ibus_ack ? fetch_align : fetch_ack;
+                    default         :    ;
                 endcase
             end
         end
