@@ -38,7 +38,6 @@ module serv_aligner
 
             assign concat_ibus_rdt = {i_wb_ibus_rdt[15:0],lower_hw};
 
-
             // Controller --> Moore State Machine
             // State register
             reg [1:0] cs,ns;

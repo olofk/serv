@@ -59,27 +59,6 @@ module servant
    wire [31:0] mdu_rd;
    wire        mdu_ready;
 
-  //  wire [31:0] o_ibus_adr;
-  //  wire o_ibus_cyc;
-  //  wire [31:0] i_ibus_rdt;
-  //  wire i_ibus_ack;
-
-
-  //  serv_aligner align
-  //  (
-  //   .clk(wb_clk),
-  //   .rst(wb_rst),
-  //   // serv_rf_top
-  //   .i_ibus_adr(o_ibus_adr),
-  //   .i_ibus_cyc(o_ibus_cyc),
-  //   .o_ibus_rdt(i_ibus_rdt),
-  //   .o_ibus_ack(i_ibus_ack),
-  //   // servant_arbiter
-  //   .o_wb_ibus_adr(wb_ibus_adr),
-  //   .o_wb_ibus_cyc(wb_ibus_cyc),
-  //   .i_wb_ibus_rdt(wb_ibus_rdt),
-  //   .i_wb_ibus_ack(wb_ibus_ack));
-
    servant_arbiter arbiter
      (.i_wb_cpu_dbus_adr (wb_dmem_adr),
       .i_wb_cpu_dbus_dat (wb_dmem_dat),
