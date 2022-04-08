@@ -37,45 +37,37 @@ module serv_compdec
 
       always @ (*) begin
         // By default, forward incoming instruction, mark it as legal.
-        comp_instr         = i_instr;
+        comp_instr    = i_instr;
         illegal_instr = 1'b0;
 
         // Check if incoming instruction is compressed.
         case (i_instr[1:0])
           // C0
           2'b00: begin
-            case (i_instr[15:13])
-              3'b000: begin
+            case (i_instr[15:14])
+              2'b00: begin
                 // c.addi4spn -> addi rd', x2, imm
                 comp_instr = {2'b0, i_instr[10:7], i_instr[12:11], i_instr[5],
                           i_instr[6], 2'b00, 5'h02, 3'b000, 2'b01, i_instr[4:2], {OPCODE_OP_IMM}};
-                if (i_instr[12:5] == 8'b0)  illegal_instr = 1'b1;
               end
 
-              3'b010: begin
+              2'b01: begin
                 // c.lw -> lw rd', imm(rs1')
                 comp_instr = {5'b0, i_instr[5], i_instr[12:10], i_instr[6],
                           2'b00, 2'b01, i_instr[9:7], 3'b010, 2'b01, i_instr[4:2], {OPCODE_LOAD}};
               end
 
-              3'b110: begin
+              2'b11: begin
                 // c.sw -> sw rs2', imm(rs1')
                 comp_instr = {5'b0, i_instr[5], i_instr[12], 2'b01, i_instr[4:2],
                           2'b01, i_instr[9:7], 3'b010, i_instr[11:10], i_instr[6],
                           2'b00, {OPCODE_STORE}};
               end
 
-              3'b001,
-              3'b011,
-              3'b100,
-              3'b101,
-              3'b111: begin
+              2'b10: begin
                 illegal_instr = 1'b1;
               end
 
-              default: begin
-                illegal_instr = 1'b1;
-              end
             endcase
           end
 
@@ -119,7 +111,6 @@ module serv_compdec
                             i_instr[6], 4'b0, 5'h02, 3'b000, 5'h02, {OPCODE_OP_IMM}};
                 end
 
-                if ({i_instr[12], i_instr[6:2]} == 6'b0) illegal_instr = 1'b1;
               end
 
               3'b100: begin
@@ -131,7 +122,6 @@ module serv_compdec
                     // (c.srli/c.srai hints are translated into a srli/srai hint)
                     comp_instr = {1'b0, i_instr[10], 5'b0, i_instr[6:2], 2'b01, i_instr[9:7],
                               3'b101, 2'b01, i_instr[9:7], {OPCODE_OP_IMM}};
-                    if (i_instr[12] == 1'b1)  illegal_instr = 1'b1;
                   end
 
                   2'b10: begin
@@ -141,48 +131,31 @@ module serv_compdec
                   end
 
                   2'b11: begin
-                    case ({i_instr[12], i_instr[6:5]})
-                      3'b000: begin
+                    case (i_instr[6:5])
+                      2'b00: begin
                         // c.sub -> sub rd', rd', rs2'
                         comp_instr = {2'b01, 5'b0, 2'b01, i_instr[4:2], 2'b01, i_instr[9:7],
                                   3'b000, 2'b01, i_instr[9:7], {OPCODE_OP}};
                       end
 
-                      3'b001: begin
+                      2'b01: begin
                         // c.xor -> xor rd', rd', rs2'
                         comp_instr = {7'b0, 2'b01, i_instr[4:2], 2'b01, i_instr[9:7], 3'b100,
                                   2'b01, i_instr[9:7], {OPCODE_OP}};
                       end
 
-                      3'b010: begin
+                      2'b10: begin
                         // c.or  -> or  rd', rd', rs2'
                         comp_instr = {7'b0, 2'b01, i_instr[4:2], 2'b01, i_instr[9:7], 3'b110,
                                   2'b01, i_instr[9:7], {OPCODE_OP}};
                       end
 
-                      3'b011: begin
+                      2'b11: begin
                         // c.and -> and rd', rd', rs2'
                         comp_instr = {7'b0, 2'b01, i_instr[4:2], 2'b01, i_instr[9:7], 3'b111,
                                   2'b01, i_instr[9:7], {OPCODE_OP}};
                       end
-
-                      3'b100,
-                      3'b101,
-                      3'b110,
-                      3'b111: begin
-                        // 100: c.subw
-                        // 101: c.addw
-                        illegal_instr = 1'b1;
-                      end
-
-                      default: begin
-                        illegal_instr = 1'b1;
-                      end
                     endcase
-                  end
-
-                  default: begin
-                    illegal_instr = 1'b1;
                   end
                 endcase
               end
@@ -194,10 +167,6 @@ module serv_compdec
                           i_instr[9:7], 2'b00, i_instr[13], i_instr[11:10], i_instr[4:3],
                           i_instr[12], {OPCODE_BRANCH}};
               end
-
-              default: begin
-                illegal_instr = 1'b1;
-              end
             endcase
           end
 
@@ -207,22 +176,20 @@ module serv_compdec
           // If this check fails, an illegal instruction exception is triggered and the controller
           // writes the actual faulting instruction to mtval.
           2'b10: begin
-            case (i_instr[15:13])
-              3'b000: begin
+            case (i_instr[15:14])
+              2'b00: begin
                 // c.slli -> slli rd, rd, shamt
                 // (c.ssli hints are translated into a slli hint)
                 comp_instr = {7'b0, i_instr[6:2], i_instr[11:7], 3'b001, i_instr[11:7], {OPCODE_OP_IMM}};
-                if (i_instr[12] == 1'b1)  illegal_instr = 1'b1; // reserved for custom extensions
               end
 
-              3'b010: begin
+              2'b01: begin
                 // c.lwsp -> lw rd, imm(x2)
                 comp_instr = {4'b0, i_instr[3:2], i_instr[12], i_instr[6:4], 2'b00, 5'h02,
                           3'b010, i_instr[11:7], OPCODE_LOAD};
-                if (i_instr[11:7] == 5'b0)  illegal_instr = 1'b1;
               end
 
-              3'b100: begin
+              2'b10: begin
                 if (i_instr[12] == 1'b0) begin
                   if (i_instr[6:2] != 5'b0) begin
                     // c.mv -> add rd/rs1, x0, rs2
@@ -231,7 +198,6 @@ module serv_compdec
                   end else begin
                     // c.jr -> jalr x0, rd/rs1, 0
                     comp_instr = {12'b0, i_instr[11:7], 3'b0, 5'b0, {OPCODE_JALR}};
-                    if (i_instr[11:7] == 5'b0)  illegal_instr = 1'b1;
                   end
                 end else begin
                   if (i_instr[6:2] != 5'b0) begin
@@ -250,36 +216,22 @@ module serv_compdec
                 end
               end
 
-              3'b110: begin
+              2'b11: begin
                 // c.swsp -> sw rs2, imm(x2)
                 comp_instr = {4'b0, i_instr[8:7], i_instr[12], i_instr[6:2], 5'h02, 3'b010,
                           i_instr[11:9], 2'b00, {OPCODE_STORE}};
-              end
-
-              3'b001,
-              3'b011,
-              3'b101,
-              3'b111: begin
-                illegal_instr = 1'b1;
-              end
-
-              default: begin
-                illegal_instr = 1'b1;
               end
             endcase
           end
 
           // Incoming instruction is not compressed.
-          2'b11:;
+          2'b11: illegal_instr = 1'b1;
 
-          default: begin
-            illegal_instr = 1'b1;
-          end
         endcase
       end
       reg comp1; 
       always @(negedge i_ack) begin
-        if(i_instr[1:0]==2'b11)
+        if(illegal_instr)
           comp1 = 0;
         else
           comp1 = 1;    
@@ -293,7 +245,5 @@ module serv_compdec
       assign o_iscomp = 1'b0;
     end
   endgenerate
-
-
 
 endmodule
