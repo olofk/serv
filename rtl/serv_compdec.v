@@ -1,5 +1,12 @@
+// Copyright lowRISC contributors.
+// Copyright 2018 ETH Zurich and University of Bologna, see also CREDITS.md.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+/* Decodes RISC-V compressed instructions into their RV32 equivalent. */
+
 module serv_compdec 
-#(parameter COMPRESSED=0)
+#(parameter [0:0] COMPRESSED=0)
 (
   input  wire [31:0] i_instr,
   input wire i_ack,

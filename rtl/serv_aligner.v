@@ -1,7 +1,8 @@
 module serv_aligner 
-#(parameter ALIGN = 0)
+#(parameter [0:0] ALIGN = 0)
 (
-    input clk,rst,
+    input wire clk,
+    input wire rst,
     // serv_top
     input wire [31:0] i_ibus_adr,
     input wire i_ibus_cyc,
@@ -13,9 +14,9 @@ module serv_aligner
     input wire [31:0] i_wb_ibus_rdt,
     input wire i_wb_ibus_ack
 );
-    parameter fetch_align = 2'b00;
-    parameter fetch_misal = 2'b01;
-    parameter fetch_ack   = 2'b10;
+    localparam fetch_align = 2'b00;
+    localparam fetch_misal = 2'b01;
+    localparam fetch_ack   = 2'b10;
     generate
         if(ALIGN)begin
             

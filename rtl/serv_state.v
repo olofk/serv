@@ -1,7 +1,7 @@
 module serv_state
   #(parameter RESET_STRATEGY = "MINI",
     parameter [0:0] WITH_CSR = 1,
-    parameter COMPRESSED =0,
+    parameter [0:0] COMPRESSED =0,
     parameter [0:0] MDU = 0)
   (
    input wire 	     i_clk,

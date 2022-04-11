@@ -6,19 +6,19 @@ module serv_top
     parameter RESET_STRATEGY = "MINI",
     parameter RESET_PC = 32'd0,
     parameter [0:0] MDU = 1'b0,
-    parameter COMPRESSED=0,
-    parameter ALIGN = 0)
+    parameter [0:0] COMPRESSED=0,
+    parameter [0:0] ALIGN = 0)
    (
    input wire 		      clk,
    input wire 		      i_rst,
    input wire 		      i_timer_irq,
 `ifdef RISCV_FORMAL
-   output reg 		          rvfi_valid = 1'b0,
+   output reg 		      rvfi_valid = 1'b0,
    output reg [63:0] 	      rvfi_order = 64'd0,
    output reg [31:0] 	      rvfi_insn = 32'd0,
-   output reg 		          rvfi_trap = 1'b0,
-   output reg 		          rvfi_halt = 1'b0,
-   output reg 		          rvfi_intr = 1'b0,
+   output reg 		      rvfi_trap = 1'b0,
+   output reg 		      rvfi_halt = 1'b0,
+   output reg 		      rvfi_intr = 1'b0,
    output reg [1:0] 	      rvfi_mode = 2'b11,
    output reg [1:0] 	      rvfi_ixl = 2'b01,
    output reg [4:0] 	      rvfi_rs1_addr,
