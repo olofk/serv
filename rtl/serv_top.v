@@ -106,7 +106,7 @@ module serv_top
    wire          imm;
    wire 	 trap;
    wire 	 pc_rel;
-   wire    iscomp;
+   wire          iscomp;
 
    wire          init;
    wire          cnt_en;
@@ -178,9 +178,9 @@ module serv_top
    wire [31:0] i_wb_rdt;
 
    wire [31:0] wb_ibus_adr;
-   wire    wb_ibus_cyc;
+   wire        wb_ibus_cyc;
    wire [31:0] wb_ibus_rdt;
-   wire    wb_ibus_ack;
+   wire        wb_ibus_ack;
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
