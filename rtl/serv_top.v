@@ -536,7 +536,7 @@ module serv_top
       end
    endgenerate
 
-  generate 
+   generate 
       if (COMPRESSED) begin
         serv_compdec compdec
           (
@@ -549,9 +549,9 @@ module serv_top
         assign i_wb_rdt =  wb_ibus_rdt;
         assign iscomp   =  1'b0;
       end
-  endgenerate
+   endgenerate
 
-  generate
+   generate
       if (ALIGN) begin
         serv_aligner  align
           (
@@ -573,7 +573,7 @@ module serv_top
           assign  wb_ibus_rdt = i_ibus_rdt;
           assign  wb_ibus_ack = i_ibus_ack;
         end
-  endgenerate
+   endgenerate
 
 `ifdef RISCV_FORMAL
    reg [31:0] 	 pc = RESET_PC;
