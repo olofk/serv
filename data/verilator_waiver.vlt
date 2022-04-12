@@ -1,5 +1,5 @@
 `verilator_config
-// Bits [1:0] in i_ibus_rdt are not used at all
+// Bits [1:0] in i_wb_rdt are not used at all
 lint_off -rule UNUSED -file "*/serv_top.v" -lines 178
 
 //Some bits in the instruction word are not used in serv_decode but it's easier
