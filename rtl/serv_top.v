@@ -537,42 +537,43 @@ module serv_top
    endgenerate
 
   generate 
-      if(COMPRESSED) begin
+      if (COMPRESSED) begin
         serv_compdec compdec
-          (.i_clk(clk),
-          .i_instr(wb_ibus_rdt),
-          .i_ack(wb_ibus_ack),
-          .o_instr(i_wb_rdt),
-          .o_iscomp(iscomp));
+          (
+           .i_clk(clk),
+           .i_instr(wb_ibus_rdt),
+           .i_ack(wb_ibus_ack),
+           .o_instr(i_wb_rdt),
+           .o_iscomp(iscomp));
       end else begin
         assign i_wb_rdt =  wb_ibus_rdt;
         assign iscomp   =  1'b0;
       end
   endgenerate
 
-   generate
-     if(ALIGN) begin
-   serv_aligner  align
-     (
-      .clk(clk),
-      .rst(i_rst),
-      // serv_rf_top
-      .i_ibus_adr(wb_ibus_adr),
-      .i_ibus_cyc(wb_ibus_cyc),
-      .o_ibus_rdt(wb_ibus_rdt),
-      .o_ibus_ack(wb_ibus_ack),
-      // servant_arbiter
-      .o_wb_ibus_adr(o_ibus_adr),
-      .o_wb_ibus_cyc(o_ibus_cyc),
-      .i_wb_ibus_rdt(i_ibus_rdt),
-      .i_wb_ibus_ack(i_ibus_ack));
-     end else begin
-   assign  o_ibus_adr  = wb_ibus_adr;
-   assign  o_ibus_cyc  = wb_ibus_cyc;
-   assign  wb_ibus_rdt = i_ibus_rdt;
-   assign  wb_ibus_ack = i_ibus_ack;
-     end
-   endgenerate
+  generate
+      if (ALIGN) begin
+        serv_aligner  align
+          (
+           .clk(clk),
+           .rst(i_rst),
+           // serv_rf_top
+           .i_ibus_adr(wb_ibus_adr),
+           .i_ibus_cyc(wb_ibus_cyc),
+           .o_ibus_rdt(wb_ibus_rdt),
+           .o_ibus_ack(wb_ibus_ack),
+           // servant_arbiter
+           .o_wb_ibus_adr(o_ibus_adr),
+           .o_wb_ibus_cyc(o_ibus_cyc),
+           .i_wb_ibus_rdt(i_ibus_rdt),
+           .i_wb_ibus_ack(i_ibus_ack));
+      end else begin
+          assign  o_ibus_adr  = wb_ibus_adr;
+          assign  o_ibus_cyc  = wb_ibus_cyc;
+          assign  wb_ibus_rdt = i_ibus_rdt;
+          assign  wb_ibus_ack = i_ibus_ack;
+        end
+  endgenerate
 
 `ifdef RISCV_FORMAL
    reg [31:0] 	 pc = RESET_PC;
