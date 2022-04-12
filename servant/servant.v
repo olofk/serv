@@ -14,33 +14,33 @@ module servant
    wire 	timer_irq;
 
    wire [31:0] 	wb_ibus_adr;
-   wire 	      wb_ibus_cyc;
+   wire 	wb_ibus_cyc;
    wire [31:0] 	wb_ibus_rdt;
-   wire 	      wb_ibus_ack;
+   wire 	wb_ibus_ack;
 
    wire [31:0] 	wb_dbus_adr;
    wire [31:0] 	wb_dbus_dat;
    wire [3:0] 	wb_dbus_sel;
-   wire 	      wb_dbus_we;
-   wire 	      wb_dbus_cyc;
+   wire 	wb_dbus_we;
+   wire 	wb_dbus_cyc;
    wire [31:0] 	wb_dbus_rdt;
-   wire 	      wb_dbus_ack;
+   wire 	wb_dbus_ack;
 
    wire [31:0] 	wb_dmem_adr;
    wire [31:0] 	wb_dmem_dat;
    wire [3:0] 	wb_dmem_sel;
-   wire 	      wb_dmem_we;
-   wire 	      wb_dmem_cyc;
+   wire 	wb_dmem_we;
+   wire 	wb_dmem_cyc;
    wire [31:0] 	wb_dmem_rdt;
-   wire 	      wb_dmem_ack;
+   wire 	wb_dmem_ack;
 
    wire [31:0] 	wb_mem_adr;
    wire [31:0] 	wb_mem_dat;
    wire [3:0] 	wb_mem_sel;
-   wire 	      wb_mem_we;
-   wire 	      wb_mem_cyc;
+   wire 	wb_mem_we;
+   wire 	wb_mem_cyc;
    wire [31:0] 	wb_mem_rdt;
-   wire 	      wb_mem_ack;
+   wire 	wb_mem_ack;
 
    wire 	wb_gpio_dat;
    wire 	wb_gpio_we;
@@ -48,8 +48,8 @@ module servant
    wire 	wb_gpio_rdt;
 
    wire [31:0] 	wb_timer_dat;
-   wire 	      wb_timer_we;
-   wire 	      wb_timer_cyc;
+   wire 	wb_timer_we;
+   wire 	wb_timer_cyc;
    wire [31:0] 	wb_timer_rdt;
 
    wire [31:0] mdu_rs1;
