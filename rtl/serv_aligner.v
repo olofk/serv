@@ -1,5 +1,6 @@
 module serv_aligner 
-   (input wire clk,
+   (
+    input wire clk,
     input wire rst,
     // serv_top
     input  wire [31:0]  i_ibus_adr,
@@ -52,22 +53,22 @@ module serv_aligner
     always @(*) begin
         case (fsm_cs)
             fetch_align:  begin
-                rdt_sel = 1'b0;
-                en_ack = 1'b1;
+                rdt_sel  = 1'b0;
+                en_ack   = 1'b1;
                 addr_sel = 1'b0;
-                en_reg = 1'b0;
+                en_reg   = 1'b0;
                 end
             fetch_misal: begin
-                rdt_sel = 1'b1;
-                en_ack = 1'b0;
+                rdt_sel  = 1'b1;
+                en_ack   = 1'b0;
                 addr_sel = 1'b1;
-                en_reg = 1'b1;
+                en_reg   = 1'b1;
                 end
             fetch_ack: begin
-                rdt_sel = 1'b1;
-                en_ack = 1'b1;
+                rdt_sel  = 1'b1;
+                en_ack   = 1'b1;
                 addr_sel = 1'b1;
-                en_reg = 1'b0;
+                en_reg   = 1'b0;
                 end    
             default:;
         endcase

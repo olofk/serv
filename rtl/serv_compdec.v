@@ -6,14 +6,12 @@
 /* Decodes RISC-V compressed instructions into their RV32 equivalent. */
 
 module serv_compdec 
-#(parameter [0:0] COMPRESSED=0)
-(
-  input  wire i_clk,
-  input  wire [31:0] i_instr,
-  input  wire i_ack,
-  output wire [31:0] o_instr,
-  output reg o_iscomp
-);
+  (
+   input wire i_clk,
+   input  wire [31:0] i_instr,
+   input  wire i_ack,
+   output wire [31:0] o_instr,
+   output reg o_iscomp);
 
   localparam OPCODE_LOAD     = 7'h03;
   localparam OPCODE_OP_IMM   = 7'h13;
