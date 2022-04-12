@@ -87,7 +87,7 @@ module serv_top
    wire 	 shift_op;
    wire 	 slt_or_branch;
    wire 	 rd_op;
-   wire   mdu_op;
+   wire          mdu_op;
 
    wire 	 rd_alu_en;
    wire 	 rd_csr_en;
