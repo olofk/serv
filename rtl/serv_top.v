@@ -537,18 +537,18 @@ module serv_top
    endgenerate
 
   generate 
-    if(COMPRESSED) begin
-      serv_compdec compdec
-        (.i_clk(clk),
-        .i_instr(wb_ibus_rdt),
-        .i_ack(wb_ibus_ack),
-        .o_instr(i_wb_rdt),
-        .o_iscomp(iscomp));
-    end else begin
-      assign i_wb_rdt =  wb_ibus_rdt;
-      assign iscomp   =  1'b0;
+      if(COMPRESSED) begin
+        serv_compdec compdec
+          (.i_clk(clk),
+          .i_instr(wb_ibus_rdt),
+          .i_ack(wb_ibus_ack),
+          .o_instr(i_wb_rdt),
+          .o_iscomp(iscomp));
+      end else begin
+        assign i_wb_rdt =  wb_ibus_rdt;
+        assign iscomp   =  1'b0;
       end
-   endgenerate
+  endgenerate
 
    generate
      if(ALIGN) begin
