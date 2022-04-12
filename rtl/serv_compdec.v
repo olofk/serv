@@ -30,7 +30,7 @@ module serv_compdec
 
   assign o_instr = illegal_instr ? i_instr : comp_instr;
 
-  always @(negedge i_clk) begin
+  always @(posedge i_clk) begin
     if(i_ack)
       o_iscomp <= !illegal_instr; 
   end
