@@ -5,7 +5,7 @@ TOOLCHAIN_PREFIX=riscv64-unknown-elf-
 %.bin: %.elf
 	$(TOOLCHAIN_PREFIX)objcopy -O binary $< $@
 %.hex: %.bin
-	python3 makehex.py $< 2048 > $@
+	python3 makehex.py $< > $@
 
 clean:
 	rm -f *.elf *.bin *.hex
