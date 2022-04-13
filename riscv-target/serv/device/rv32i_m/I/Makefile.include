@@ -5,7 +5,7 @@ endif
 
 RUN_TARGET=\
     $(TARGET_SIM) \
-        +timeout=100000000 \
+        +timeout=100000000000 \
         +signature=$(*).signature.output \
         +firmware=$(<).hex 2> $@
 
@@ -23,4 +23,4 @@ COMPILE_TARGET=\
 		-o $$@; \
 	$$(RISCV_OBJCOPY) -O binary $$@  $$@.bin; \
 	$$(RISCV_OBJDUMP) -D $$@ > $$@.objdump; \
-	python3 $(TARGETDIR)/$(RISCV_TARGET)/makehex.py $$@.bin 2048 > $$@.hex;
+	python3 $(TARGETDIR)/$(RISCV_TARGET)/makehex.py $$@.bin 524288 > $$@.hex;
