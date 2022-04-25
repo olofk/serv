@@ -411,6 +411,8 @@ targets:
       - uart_baudrate
       - vcd
       - vcd_start
+      - compressed
+      - align
     tools:
       verilator:
         verilator_options : [--trace]
@@ -505,6 +507,17 @@ parameters:
     datatype    : int
     description : Delay start of VCD dumping until the specified time
     paramtype   : plusarg
+  
+  compressed:
+    datatype    : int
+    description : Enable/Disable the Compressed extension
+    paramtype   : vlogparam
+  
+  align:
+    datatype    : int
+    description : Enable/Disable the Misaligned access of instruction
+    paramtype   : vlogparam
+  
 
 generate:
   icebreaker_pll:

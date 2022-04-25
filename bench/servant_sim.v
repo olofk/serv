@@ -7,6 +7,8 @@ module servant_sim
    parameter memfile = "";
    parameter memsize = 8192;
    parameter with_csr = 1;
+   parameter compressed = 0;
+   parameter align = compressed;
 
    reg [1023:0] firmware_file;
    initial
@@ -19,7 +21,9 @@ module servant_sim
      #(.memfile  (memfile),
        .memsize  (memsize),
        .sim      (1),
-       .with_csr (with_csr))
+       .with_csr (with_csr),
+       .compress (compressed[0:0]),
+       .align    (align[0:0]))
    dut(wb_clk, wb_rst, q);
 
 endmodule
