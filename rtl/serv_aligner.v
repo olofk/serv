@@ -13,78 +13,55 @@ module serv_aligner
     input  wire [31:0]  i_wb_ibus_rdt,
     input  wire         i_wb_ibus_ack);
 
-    localparam fetch_align = 2'b00;
-    localparam fetch_misal = 2'b01;
-    localparam fetch_ack   = 2'b10;
-
     wire [31:0] concat_ibus_rdt;
 
-    reg         addr_sel;
-    reg         en_ack;
-    reg         rdt_sel;
-    reg         en_reg;
-    reg [15:0]  lower_hw;      
+    wire        misal_sel;
+    wire        en_ack;
+    reg [15:0]  lower_hw;    
+    reg         misal_ack ; 
 
     // Datapath
-    assign o_wb_ibus_adr = addr_sel ? (i_ibus_adr+32'd4) : i_ibus_adr;
+    assign o_wb_ibus_adr = misal_sel ? (i_ibus_adr+32'd4) : i_ibus_adr;
     assign o_wb_ibus_cyc = i_ibus_cyc;
 
     assign o_ibus_ack = i_wb_ibus_ack & en_ack;
-    assign o_ibus_rdt = rdt_sel ? concat_ibus_rdt : i_wb_ibus_rdt;
+    assign o_ibus_rdt = misal_sel ? concat_ibus_rdt : i_wb_ibus_rdt;
             
     always @(posedge clk) begin
-        if(en_reg)begin
+        if(i_wb_ibus_ack)begin
             lower_hw <= i_wb_ibus_rdt[31:16];
         end
     end
 
     assign concat_ibus_rdt = {i_wb_ibus_rdt[15:0],lower_hw};
+    
+    assign en_ack   = !(i_ibus_adr[1] & !misal_ack);
+    assign misal_sel  = misal_ack; 
 
-    // Controller --> Moore State Machine
-    // State register
-    reg [1:0] fsm_cs,fsm_ns;
+    // state machine for misal_ack a.k.a final
+    localparam S0 = 1'b0;
+    localparam S1 = 1'b1;
+    
+    reg cs, ns;
     always @(posedge clk ) begin
         if(rst)
-            fsm_cs <= fetch_align;
-        else    
-            fsm_cs <= fsm_ns;
+            cs <= S0;
+        else 
+            cs <= ns;
     end
-    //Output logic
-    always @(*) begin
-        case (fsm_cs)
-            fetch_align:  begin
-                rdt_sel  = 1'b0;
-                en_ack   = 1'b1;
-                addr_sel = 1'b0;
-                en_reg   = 1'b0;
-                end
-            fetch_misal: begin
-                rdt_sel  = 1'b1;
-                en_ack   = 1'b0;
-                addr_sel = 1'b1;
-                en_reg   = 1'b1;
-                end
-            fetch_ack: begin
-                rdt_sel  = 1'b1;
-                en_ack   = 1'b1;
-                addr_sel = 1'b1;
-                en_reg   = 1'b0;
-                end    
-            default:;
+    //output logic
+    always @(*) begin    
+        case (cs)
+            S0  :   ns = (i_wb_ibus_ack & i_ibus_adr[1]) ? S1 : S0;
+            S1  :   ns = i_wb_ibus_ack                   ? S0 : S1;
         endcase
     end
-
-    // Next state Logic
-    always @(* ) begin
-        case (fsm_cs)
-            fetch_align     :    fsm_ns = i_ibus_adr[1]&i_ibus_cyc ? fetch_misal : fetch_align;
-            fetch_misal     :    fsm_ns = fetch_ack;
-            fetch_ack       :    fsm_ns = i_wb_ibus_ack ? fetch_align : fetch_ack;
-            default         :    ;
+    // Next state logic
+    always @(*) begin    
+        case (cs)
+            S0 : misal_ack =0;
+            S1 : misal_ack =1;
         endcase
-    end 
+    end
     
 endmodule
-
-
-        
