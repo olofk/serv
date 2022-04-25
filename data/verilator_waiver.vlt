@@ -9,3 +9,5 @@ lint_off -rule UNUSED -file "*/serv_decode.v" -lines 8
 //Some variables are only used when we connect an Extension with serv_decode
 lint_off -rule UNUSED -file "*/serv_top.v" -lines 67
 
+lint_off -rule UNUSED -file "*/serv_top.v" -lines 177
+
