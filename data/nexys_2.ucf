@@ -2,7 +2,7 @@ NET "i_clk" LOC = "B8" | IOSTANDARD = LVCMOS33 ;
 NET "i_clk" CLOCK_DEDICATED_ROUTE = FALSE;
 
 # Pin assignment for Uart tx
-# NET "q" LOC = "L15"  | IOSTANDARD = LVTTL | SLEW = FAST | DRIVE = 8 ; 
+NET "q" LOC = "L15"  | IOSTANDARD = LVTTL | SLEW = FAST | DRIVE = 8 ; 
 
 # Pin assignment for LED
-NET "q" LOC = "J14"  | IOSTANDARD = LVTTL | SLEW = FAST | DRIVE = 8 ; 
+# NET "q" LOC = "J14"  | IOSTANDARD = LVTTL | SLEW = FAST | DRIVE = 8 ; 
