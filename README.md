@@ -94,7 +94,7 @@ Run the compliance tests
 
     cd riscv-arch-test && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=I TARGET_SIM=$WORKSPACE/build/servant_1.1.0/verilator_tb-verilator/Vservant_sim
 
-The above will run all tests in the rv32i test suite. Since SERV also implement the `M`, `privilege` and `Zifencei` extensions, these can also be tested by choosing any of them instead of `I` as the `RISCV_DEVICE` variable.
+The above will run all tests in the rv32i test suite. Since SERV also implement the `M`, `C`, `privilege` and `Zifencei` extensions, these can also be tested by choosing any of them instead of `I` as the `RISCV_DEVICE` variable.
 
 ## Run on hardware
 
