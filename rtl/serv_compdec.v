@@ -3,8 +3,7 @@ Copyright 2018 ETH Zurich and University of Bologna, see also CREDITS.md.
 Licensed under the Apache License, Version 2.0, see LICENSE for details.
 SPDX-License-Identifier: Apache-2.0 
 
-* Adapted to SERV by @Abdulwadoodd as part of the project under spring '22 LFX Mentorship program *
-*/
+* Adapted to SERV by @Abdulwadoodd as part of the project under spring '22 LFX Mentorship program */
 
 /* Decodes RISC-V compressed instructions into their RV32i equivalent. */
 

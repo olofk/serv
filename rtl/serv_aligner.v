@@ -38,30 +38,11 @@ module serv_aligner
     assign en_ack   = !(i_ibus_adr[1] & !misal_ack);
     assign misal_sel  = misal_ack; 
 
-    // state machine for misal_ack a.k.a final
-    localparam S0 = 1'b0;
-    localparam S1 = 1'b1;
-    
-    reg cs, ns;
     always @(posedge clk ) begin
         if(rst)
-            cs <= S0;
-        else 
-            cs <= ns;
+            misal_ack = 0;
+        else if(i_wb_ibus_ack & i_ibus_adr[1])
+            misal_ack = ~misal_ack;
     end
-    //output logic
-    always @(*) begin    
-        case (cs)
-            S0  :   ns = (i_wb_ibus_ack & i_ibus_adr[1]) ? S1 : S0;
-            S1  :   ns = i_wb_ibus_ack                   ? S0 : S1;
-        endcase
-    end
-    // Next state logic
-    always @(*) begin    
-        case (cs)
-            S0 : misal_ack =0;
-            S1 : misal_ack =1;
-        endcase
-    end
-    
+
 endmodule
