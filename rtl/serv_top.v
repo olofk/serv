@@ -436,7 +436,7 @@ module serv_top
       .i_iscomp    (iscomp),
       //Data
       .i_imm      (imm),
-      .i_buf      (bufreg_q & !(trap & ebreak)),
+      .i_buf      (bufreg_q),
       .i_csr_pc   (csr_pc),
       .o_rd       (ctrl_rd),
       .o_bad_pc   (bad_pc),
