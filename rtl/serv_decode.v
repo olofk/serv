@@ -113,7 +113,7 @@ module serv_decode
    //False for jalr, lui
    wire co_ctrl_pc_rel = (opcode[2:0] == 3'b000)  |
                           (opcode[1:0] == 2'b11)  |
-                          (opcode[4] & opcode[2]) |
+                          (opcode[4] & opcode[2]) & op20|
                           (opcode[4:3] == 2'b00);
    //Write to RD
    //True for OP-IMM, AUIPC, OP, LUI, SYSTEM, JALR, JAL, LOAD
