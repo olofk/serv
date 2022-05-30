@@ -10,7 +10,7 @@ module serv_rf_top
       ALIGN = 1: Fetch the aligned instruction by making two bus transactions if the misaligned address 
       is given to the instruction bus.  
     */
-    parameter [0:0] ALIGN = 0,
+    parameter [0:0] ALIGN = COMPRESSED,
     /* Multiplication and Division Unit
        This parameter enables the interface for connecting SERV and MDU
     */

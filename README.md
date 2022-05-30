@@ -84,6 +84,10 @@ To build the verilator model with MDU (for M extension compliance tests):
 
     fusesoc run --target=verilator_tb --flag=mdu --build servant --memsize=8388608
 
+To build the verilator model with C extension (for Compressed extension compliance tests):
+
+    fusesoc run --target=verilator_tb --build servant --memsize=8388608 --compressed=1
+
 Download the tests repo
 
     git clone https://github.com/riscv-non-isa/riscv-arch-test.git

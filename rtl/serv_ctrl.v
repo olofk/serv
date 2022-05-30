@@ -44,6 +44,8 @@ module serv_ctrl
    wire       offset_a;
    wire       offset_b;
 
+  /*  If i_iscomp=1: increment pc by 2 else increment pc by 4  */
+
    assign plus_4        = i_iscomp ? i_cnt1 : i_cnt2;
 
    assign o_bad_pc = pc_plus_offset_aligned;
