@@ -110,6 +110,13 @@ filesets:
       - servant/servant_lx9.v : {file_type : verilogSource}
       - data/lx9_microboard.ucf : {file_type : UCF}
 
+  nexys_2:
+    files:
+      - servant/servax_clock_gen.v : {file_type : verilogSource}
+      - servant/servax.v : {file_type : verilogSource}
+      - data/nexys_2.tcl : {file_type : tclSource}
+      - data/nexys_2.ucf : {file_type : UCF}
+  
   nexys_a7:
     files:
       - servant/servix_clock_gen.v : {file_type : verilogSource}
@@ -308,6 +315,30 @@ targets:
     tools:
       vivado: {part : xc7a100tcsg324-1}
     toplevel : servix
+
+  nexys_2_500:
+    default_tool: ise
+    filesets : [mem_files, soc, nexys_2]
+    parameters : [memfile, memsize]
+    tools:
+      ise:
+        family  : Spartan3E
+        device  : xc3s500e
+        package : fg320
+        speed   : -4
+    toplevel : servax
+
+  nexys_2_1200:
+    default_tool: ise
+    filesets : [mem_files, soc, nexys_2]
+    parameters : [memfile, memsize]
+    tools:
+      ise:
+        family  : Spartan3E
+        device  : xc3s1600e
+        package : fg320
+        speed   : -4
+    toplevel : servax
 
   cmod_a7_35t:
     default_tool: vivado
