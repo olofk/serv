@@ -319,7 +319,7 @@ targets:
   nexys_2_500:
     default_tool: ise
     filesets : [mem_files, soc, nexys_2]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, compressed]
     tools:
       ise:
         family  : Spartan3E
@@ -331,7 +331,7 @@ targets:
   nexys_2_1200:
     default_tool: ise
     filesets : [mem_files, soc, nexys_2]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, compressed]
     tools:
       ise:
         family  : Spartan3E
