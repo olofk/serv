@@ -224,7 +224,7 @@ module serv_top
      #(.RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR),
        .MDU(MDU),
-       .COMPRESSED(COMPRESSED))
+       .ALIGN(ALIGN))
    state
      (
       .i_clk (clk),
