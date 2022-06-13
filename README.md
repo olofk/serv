@@ -90,7 +90,7 @@ To build the verilator model with C extension (for Compressed extension complian
 
 Download the tests repo
 
-    git clone https://github.com/riscv-non-isa/riscv-arch-test.git
+    git clone --branch 2.7.4 https://github.com/riscv-non-isa/riscv-arch-test.git
 
 To run the RISC-V compliance tests, we need to supply the SERV-specific support files and point the test suite to where it can find a target to run (i.e. the previously built Verilator model)
 
