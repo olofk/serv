@@ -129,6 +129,14 @@ Pin 9 is used for UART output with 57600 baud rate.
 
     fusesoc run --target=icebreaker servant
 
+### Nexys 2
+
+Pmod pin JA1 is conntected to UART tx with 57600 baud rate. A USB to TTL connector is used to display to hello world message on the serial monitor. 
+(To use blinky.hex change L15 to J14 (led[0]) in data/nexys_2.ucf).
+
+    fusesoc run --target=nexys_2_500 servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello.hex
+
+
 ### iCESugar
 
 Pin 6 is used for UART output with 115200 baud rate. Thanks to the onboard
