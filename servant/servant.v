@@ -11,7 +11,7 @@ module servant
    parameter sim = 0;
    parameter with_csr = 1;
    parameter [0:0] compress = 0;
-   parameter [0:0] align = 0;
+   parameter [0:0] align = 1;
 
    wire 	timer_irq;
 

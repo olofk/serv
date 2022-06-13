@@ -80,7 +80,11 @@ Build the verilator model (if not already done)
 
     fusesoc run --target=verilator_tb --build servant --memsize=8388608
 
-To build the verilator model with MDU (for M extension compliance tests):
+Build the verilator model with Compressed Instructions support (for C extension compliance tests)
+
+    fusesoc run --target=verilator_tb --build servant --compressed=1 --memsize=8388608    
+
+To build the verilator model with MDU (for M extension compliance tests)
 
     fusesoc run --target=verilator_tb --flag=mdu --build servant --memsize=8388608
 
@@ -124,6 +128,14 @@ Pin A6 is used for UART output with 115200 baud rate.
 Pin 9 is used for UART output with 57600 baud rate.
 
     fusesoc run --target=icebreaker servant
+
+### Nexys 2
+
+Pmod pin JA1 is conntected to UART tx with 57600 baud rate. A USB to TTL connector is used to display to hello world message on the serial monitor. 
+(To use blinky.hex change L15 to J14 (led[0]) in data/nexys_2.ucf).
+
+    fusesoc run --target=nexys_2_500 servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello.hex
+
 
 ### iCESugar
 

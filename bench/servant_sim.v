@@ -8,7 +8,7 @@ module servant_sim
    parameter memsize = 8192;
    parameter with_csr = 1;
    parameter compressed = 0;
-   parameter align = compressed;
+   parameter align = 1;
 
    reg [1023:0] firmware_file;
    initial
