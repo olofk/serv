@@ -88,6 +88,10 @@ To build the verilator model with MDU (for M extension compliance tests)
 
     fusesoc run --target=verilator_tb --flag=mdu --build servant --memsize=8388608
 
+To build the verilator model with C extension (for Compressed extension compliance tests):
+
+    fusesoc run --target=verilator_tb --build servant --memsize=8388608 --compressed=1
+
 Download the tests repo
 
     git clone https://github.com/riscv-non-isa/riscv-arch-test.git
@@ -227,6 +231,12 @@ Pin 56 is used as the GPIO output which is connected to the board's LED1. Due to
 
     fusesoc run --target=go_board servant
     iceprog build/servant_1.1.0/go_board-icestorm/servant_1.1.0.bin
+
+### Alinx ax309 (Spartan6 LX9)
+
+Pin D12 (the on-board RS232 TX pin) is used for UART output with 115200 baud rate and wired to Pin P4 (LED0).
+
+    fusesoc run --target=ax309 servant
 
 ## Other targets
 
