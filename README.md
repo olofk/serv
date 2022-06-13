@@ -79,10 +79,7 @@ Other applications can be tested by compiling and converting to bin and then hex
 Build the verilator model (if not already done)
 
     fusesoc run --target=verilator_tb --build servant --memsize=8388608
-
-Build the verilator model with Compressed Instructions support (for C extension compliance tests)
-
-    fusesoc run --target=verilator_tb --build servant --compressed=1 --memsize=8388608    
+  
 
 To build the verilator model with MDU (for M extension compliance tests)
 
