@@ -52,6 +52,11 @@ jobs:
         cd $GITHUB_WORKSPACE/riscv-arch-test
         make RISCV_PREFIX=riscv64-unknown-elf- TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=Zifencei TARGET_SIM=$GITHUB_WORKSPACE/servant_x/verilator_tb-verilator/Vservant_sim
 
+    - name: run RV32 privilege compliance tests
+      run: |
+        cd $GITHUB_WORKSPACE/riscv-arch-test
+        make RISCV_PREFIX=riscv64-unknown-elf- TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=privilege TARGET_SIM=$GITHUB_WORKSPACE/servant_x/verilator_tb-verilator/Vservant_sim
+
 #    - name: run RV32 privilege compliance tests
 #      run: |
 #        cd $GITHUB_WORKSPACE/riscv-arch-test
