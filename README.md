@@ -136,6 +136,14 @@ Pin 9 is used for UART output with 57600 baud rate.
 
     fusesoc run --target=icebreaker servant
 
+## ICE-V Wireless
+
+Pin 9 is used for UART output with 57600 baud rate.
+
+    fusesoc run --target=icev_wireless servant
+
+    iceprog build/servant_1.1.0/icestick-icestorm/servant_1.1.0.bin
+
 ### iCESugar
 
 Pin 6 is used for UART output with 115200 baud rate. Thanks to the onboard
