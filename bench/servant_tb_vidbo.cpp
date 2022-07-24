@@ -4,6 +4,8 @@
 #include "verilated_vcd_c.h"
 #include "Vservant_sim.h"
 
+#include "vidbo.h"
+
 using namespace std;
 
 static bool done;
@@ -87,6 +89,11 @@ int main(int argc, char **argv, char **env)
 
   gpio_context_t gpio_context;
   uart_context_t uart_context;
+
+  vidbo_context_t vidbo_context;
+  vidbo_init(&vidbo_context, 8081);
+  int poll_vidbo = 0;
+
   Verilated::commandArgs(argc, argv);
 
   Vservant_sim* top = new Vservant_sim;
@@ -133,14 +140,18 @@ int main(int argc, char **argv, char **env)
       tfp->dump(main_time);
     if (baud_rate) {
       if (do_uart(&uart_context, top->q))
-	putchar(uart_context.ch);
-    } else {
-      do_gpio(&gpio_context, top->q);
+	vidbo_send(&vidbo_context, main_time, "serial", "uart", uart_context.ch);
     }
+      if (top->q != gpio_context.last_value) {
+	vidbo_send(&vidbo_context, main_time, "gpio", "LD0", (top->q) & 0x1);
+	gpio_context.last_value = top->q;
+      }
     if (timeout && (main_time >= timeout)) {
       printf("Timeout: Exiting at time %lu\n", main_time);
       done = true;
     }
+
+    if (!(poll_vidbo++ % 100000)) vidbo_recv(&vidbo_context, 0);
 
     top->wb_clk = !top->wb_clk;
     main_time+=31.25;

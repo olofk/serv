@@ -7,6 +7,7 @@ filesets:
     files:
       - "tool_verilator? (data/verilator_waiver.vlt)" : {file_type: vlt}
       - rtl/serv_bufreg.v
+      - rtl/serv_bufreg2.v
       - rtl/serv_alu.v
       - rtl/serv_csr.v
       - rtl/serv_ctrl.v
@@ -19,6 +20,8 @@ filesets:
       - rtl/serv_state.v
       - rtl/serv_top.v
       - rtl/serv_rf_top.v
+      - rtl/serv_aligner.v
+      - rtl/serv_compdec.v
     file_type : verilogSource
 
   openlane:
@@ -30,6 +33,8 @@ targets:
   default:
     filesets : [core]
     parameters :
+      - "is_toplevel? (ALIGN)"
+      - "is_toplevel? (COMPRESSED)"
       - "is_toplevel? (MDU)"
       - "is_toplevel? (PRE_REGISTER)"
       - "is_toplevel? (RESET_STRATEGY)"
@@ -79,3 +84,14 @@ parameters:
   WITH_CSR:
     datatype  : int
     paramtype : vlogparam
+  
+  COMPRESSED:
+    datatype    : int
+    description : Enable/Disable the support for Compressed instructions
+    paramtype   : vlogparam
+  
+  ALIGN:
+    datatype    : int
+    paramtype   : vlogparam
+    description : Enable/Disable the support of misaligned instructions
+

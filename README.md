@@ -83,23 +83,29 @@ Other applications can be tested by compiling and converting to bin and then hex
 
 ## Run RISC-V compliance tests
 
-**Note:** The following instructions are valid for version 1.0 of the RISC-V compliance tests. The target-specific support for SERV has not yet been ported to newer versions.
-
 Build the verilator model (if not already done)
 
-    fusesoc run --target=verilator_tb --build servant
+    fusesoc run --target=verilator_tb --build servant --memsize=8388608
+
+To build the verilator model with MDU (for M extension compliance tests):
+
+    fusesoc run --target=verilator_tb --flag=mdu --build servant --memsize=8388608
+
+To build the verilator model with C extension (for Compressed extension compliance tests):
+
+    fusesoc run --target=verilator_tb --build servant --memsize=8388608 --compressed=1
 
 Download the tests repo
 
-    git clone https://github.com/riscv/riscv-compliance --branch 1.0
+    git clone https://github.com/riscv-non-isa/riscv-arch-test.git
 
 To run the RISC-V compliance tests, we need to supply the SERV-specific support files and point the test suite to where it can find a target to run (i.e. the previously built Verilator model)
 
 Run the compliance tests
 
-    cd riscv-compliance && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=rv32i RISCV_ISA=rv32i TARGET_SIM=$WORKSPACE/build/servant_1.1.0/verilator_tb-verilator/Vservant_sim
+    cd riscv-arch-test && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=I TARGET_SIM=$WORKSPACE/build/servant_1.1.0/verilator_tb-verilator/Vservant_sim
 
-The above will run all tests in the rv32i test suite. Since SERV also implement the `rv32im`, `rv32Zicsr` and `rv32Zifencei` extensions, these can also be tested by choosing any of them instead of rv32i as the `RISCV_ISA` variable.
+The above will run all tests in the rv32i test suite. Since SERV also implement the `M`, `C`, `privilege` and `Zifencei` extensions, these can also be tested by choosing any of them instead of `I` as the `RISCV_DEVICE` variable.
 
 ## Run on hardware
 
@@ -151,6 +157,12 @@ Pin D10 (uart_rxd_out) is used for UART output with 57600 baud rate (to use
 blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
 
     fusesoc run --target=arty_a7_35t servant
+
+### Chameleon96 (Arrow 96 CV SoC Board)
+
+FPGA Pin W14 (1V8, pin 5 low speed connector) is used for UART Tx output with 115200 baud rate. No reset key. Yellow Wifi led is q output.
+
+    fusesoc run --target=chameleon96 servant
 
 ### DE0 Nano
 
@@ -214,6 +226,12 @@ Pin 56 is used as the GPIO output which is connected to the board's LED1. Due to
 
     fusesoc run --target=go_board servant
     iceprog build/servant_1.1.0/go_board-icestorm/servant_1.1.0.bin
+
+### Alinx ax309 (Spartan6 LX9)
+
+Pin D12 (the on-board RS232 TX pin) is used for UART output with 115200 baud rate and wired to Pin P4 (LED0).
+
+    fusesoc run --target=ax309 servant
 
 ## Other targets
 
