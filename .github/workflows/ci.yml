@@ -7,6 +7,19 @@ jobs:
     name: RISC-V Compliance Test
     runs-on: ubuntu-20.04
 
+    strategy:
+      fail-fast: false
+      matrix:
+        compressed: [0, 1]
+        csr: [0, 1]
+        mdu: [0, 1]
+        exclude:
+          # compressed requires csr for the cebreak test
+          - compressed: 1
+            csr : 0
+        include:
+          - mdu: 1
+            mduflag: "--flag=mdu"
     steps:
     - uses: actions/checkout@v2
       with:
@@ -27,7 +40,7 @@ jobs:
       run: fusesoc library add mdu https://github.com/zeeshanrafique23/mdu
 
     - name: build servant
-      run: fusesoc run --target=verilator_tb --flag=mdu --build --build-root=servant_x servant --memsize=8388608 --compressed=1
+      run: fusesoc run --target=verilator_tb ${{ matrix.mduflag }} --build --build-root=servant_x servant --memsize=8388608 --align=1 --compressed=${{ matrix.compressed }} --with_csr=${{ matrix.csr }}
 
     - name: download riscv-arch-test version 2.7.4
       run: git clone https://github.com/riscv-non-isa/riscv-arch-test.git --branch 2.7.4
@@ -37,12 +50,14 @@ jobs:
         cd $GITHUB_WORKSPACE/riscv-arch-test
         make RISCV_PREFIX=riscv64-unknown-elf- TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=I TARGET_SIM=$GITHUB_WORKSPACE/servant_x/verilator_tb-verilator/Vservant_sim
 
-    - name: run RV32 C compliance tests
+    - if: ${{ matrix.compressed }}
+      name: run RV32 C compliance tests
       run: |
         cd $GITHUB_WORKSPACE/riscv-arch-test
         make RISCV_PREFIX=riscv64-unknown-elf- TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=C TARGET_SIM=$GITHUB_WORKSPACE/servant_x/verilator_tb-verilator/Vservant_sim
 
-    - name: run RV32 M compliance tests
+    - if: ${{ matrix.mdu }}
+      name: run RV32 M compliance tests
       run: |
         cd $GITHUB_WORKSPACE/riscv-arch-test
         make RISCV_PREFIX=riscv64-unknown-elf- TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=M TARGET_SIM=$GITHUB_WORKSPACE/servant_x/verilator_tb-verilator/Vservant_sim
@@ -52,7 +67,8 @@ jobs:
         cd $GITHUB_WORKSPACE/riscv-arch-test
         make RISCV_PREFIX=riscv64-unknown-elf- TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=Zifencei TARGET_SIM=$GITHUB_WORKSPACE/servant_x/verilator_tb-verilator/Vservant_sim
 
-#    - name: run RV32 privilege compliance tests
-#      run: |
-#        cd $GITHUB_WORKSPACE/riscv-arch-test
-#        make RISCV_PREFIX=riscv64-unknown-elf- TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=privilege TARGET_SIM=$GITHUB_WORKSPACE/servant_x/verilator_tb-verilator/Vservant_sim
+    - if: ${{ matrix.csr }}
+      name: run RV32 privilege compliance tests
+      run: |
+        cd $GITHUB_WORKSPACE/riscv-arch-test
+        make RISCV_PREFIX=riscv64-unknown-elf- TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=privilege TARGET_SIM=$GITHUB_WORKSPACE/servant_x/verilator_tb-verilator/Vservant_sim
