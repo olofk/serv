@@ -53,7 +53,7 @@ module serv_rf_if
    wire 	     rd_wen = i_rd_wen & (|i_rd_waddr);
 
    generate
-   if (WITH_CSR) begin
+   if (|WITH_CSR) begin
    wire 	     rd = (i_ctrl_rd ) |
 			  (i_alu_rd & i_rd_alu_en) |
 			  (i_csr_rd & i_rd_csr_en) |
