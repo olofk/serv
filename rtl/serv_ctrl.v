@@ -53,7 +53,7 @@ module serv_ctrl
    assign {pc_plus_4_cy,pc_plus_4} = pc+plus_4+pc_plus_4_cy_r;
 
    generate
-      if (WITH_CSR)
+      if (|WITH_CSR)
 	assign new_pc = i_trap ? (i_csr_pc & !i_cnt0) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
       else
 	assign new_pc = i_jump ? pc_plus_offset_aligned : pc_plus_4;

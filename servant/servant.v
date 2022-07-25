@@ -129,7 +129,7 @@ module servant
       .o_wb_ack (wb_mem_ack));
 
    generate
-      if (with_csr) begin
+      if (|with_csr) begin
 	 servant_timer
 	   #(.RESET_STRATEGY (reset_strategy),
 	     .WIDTH (32))
