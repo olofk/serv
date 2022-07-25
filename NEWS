@@ -1,0 +1,13 @@
+1.2.0 2022-07-25 Olof Kindgren
+======================================================
+
+* New Servant ports: EBAZ4205, Chameleion96, Nexys2, Alinx AX309
+* Support for M ISA extension
+* Support for C ISA extension
+* Fix occasionally wrong sign on immediates
+* Support for producing GDS with OpenLANE
+* Fix Model/QuestaSim compatibility
+* Add ViDBo support
+* Improved documentation
+* Less resource usage
+* Updated RISC-V Compliance support from 1.0 to 2.7.4
