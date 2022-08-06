@@ -25,14 +25,7 @@ Install FuseSoC
 
 `pip install fusesoc`
 
-Create a workspace project directory to hold your `fusesoc.conf` and other project files as descibed in the [fusesoc  Getting Started](https://github.com/olofk/fusesoc#getting-started):
-
-```
-mkdir myproject
-cd myproject
-```
-
-Add the FuseSoC standard library:
+Add the FuseSoC standard library
 
 `fusesoc library add fusesoc_cores https://github.com/fusesoc/fusesoc-cores`
 

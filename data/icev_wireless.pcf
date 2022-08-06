@@ -3,3 +3,5 @@ set_io i_clk        35
 
 # RS232
 set_io q 9
+
+# use q 39 for red, q 40 for green, q 41 for blue LED
