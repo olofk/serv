@@ -1,6 +1,6 @@
 CAPI=2:
 
-name : ::servant:1.1.0
+name : ::servant:1.2.0
 
 filesets:
   service:
@@ -463,6 +463,7 @@ targets:
       - vcd_start
       - compressed
       - align
+      - with_csr=1
     tools:
       verilator:
         verilator_options : [--trace]
@@ -568,6 +569,10 @@ parameters:
     description : Enable/Disable the Misaligned access of instruction
     paramtype   : vlogparam
   
+  with_csr:
+    datatype    : int
+    description : Enable/Disable CSR support
+    paramtype   : vlogparam
 
 generate:
   icebreaker_pll:

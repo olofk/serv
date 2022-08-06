@@ -222,9 +222,9 @@ module serv_top
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
-       .WITH_CSR (WITH_CSR),
+       .WITH_CSR (WITH_CSR[0:0]),
        .MDU(MDU),
-       .COMPRESSED(COMPRESSED))
+       .ALIGN(ALIGN))
    state
      (
       .i_clk (clk),
@@ -512,7 +512,7 @@ module serv_top
       .o_csr       (rf_csr_out));
 
    serv_mem_if
-     #(.WITH_CSR (WITH_CSR))
+     #(.WITH_CSR (WITH_CSR[0:0]))
    mem_if
      (
       .i_clk        (clk),
@@ -533,7 +533,7 @@ module serv_top
       .o_wb_sel     (o_dbus_sel));
 
    generate
-      if (WITH_CSR) begin
+      if (|WITH_CSR) begin
 	 serv_csr
 	   #(.RESET_STRATEGY (RESET_STRATEGY))
 	 csr
