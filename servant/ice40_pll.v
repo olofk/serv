@@ -11,8 +11,8 @@ module ice40_pll
 
    reg [1:0] rst_reg;
    always @(posedge o_clk)
-     rst_reg <= {!locked, rst_reg[1]};
-   assign o_rst = rst_reg[0];
+     rst_reg <= {rst_reg[0],locked};
+   assign o_rst = ~rst_reg[1];
 
    generate
       if (PLL == "ICE40_CORE") begin
