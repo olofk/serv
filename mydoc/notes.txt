@@ -1,0 +1,18 @@
+~/testbuilds/catzip/rtl/uart
+
+When catboard is programmed with helloworld.bin
+sudo config_cat helloworld.bin
+Writes 
+Hello, World! 
+Hello, World! 
+Hello, World! 
+Hello, World! 
+Hello, World! 
+Hello, World! 
+Hello, World! 
+
+When catboard is programmed with servant_1.1.0.bin
+sudo config_cat ~/servant_1.1.0.bin
+
+ÔÔÔÔÔÐà÷÷úÕöóÐìóøÔýøÐçéÐüóøôýø×úÙÖÙÚÖÙ×Ú×óñÛñØòÚØÛÙÙòÓÐÔÔÔÔÔÇÄäóöö÷Ðë÷øöòÑÐùóøúÄ
+

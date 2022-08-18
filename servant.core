@@ -95,6 +95,7 @@ filesets:
 
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
+  catzip : {files: [data/catzip.pcf  : {file_type : PCF}]}  
   icesugar   : {files: [data/icesugar.pcf : {file_type : PCF}]}
   alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
   icestick   : {files: [data/icestick.pcf  : {file_type : PCF}]}
@@ -255,6 +256,18 @@ targets:
     tools:
       icestorm:
         nextpnr_options: [--up5k, --freq, 16]
+        pnr: next
+    toplevel : service
+
+  catzip:
+    default_tool : icestorm
+    description : Catboard iCE40HX8K package CT256 FPGA board
+    filesets : [mem_files, soc, service, catzip]
+    generate: [catzip_pll]
+    parameters : [memfile, memsize, PLL=ICE40_CORE]
+    tools:
+      icestorm:
+        nextpnr_options: [--hx8k, --package, ct256 --freq, 40]
         pnr: next
     toplevel : service
 
@@ -579,6 +592,12 @@ generate:
     generator: icepll
     parameters:
       freq_out : 16
+
+  catzip_pll:
+    generator: icepll
+    parameters:
+      freq_in  : 100
+      freq_out : 40
 
   icesugar_pll:
     generator: icepll

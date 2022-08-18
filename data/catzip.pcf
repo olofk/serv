@@ -1,0 +1,5 @@
+set_io q B3
+set_io i_clk C8
+set_io g A9
+set_io b B8
+set_io r B7
