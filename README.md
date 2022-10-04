@@ -16,30 +16,34 @@ If you want to know more about SERV, what a bit-serial CPU is and what it's good
 
 There's also an official [SERV user manual](https://serv.readthedocs.io/en/latest/#) with fancy block diagrams, timing diagrams and an in-depth description of how some things work.
 
-## Prerequisites
+## Getting started
 
-Create a directory to keep all the different parts of the project together. We
-will refer to this directory as `$WORKSPACE` from now on. All commands will be run from this directory unless otherwise stated.
+:o: Create a root directory to keep all the different parts of the project together. We
+will refer to this directory as `$WORKSPACE` from now on.
 
-Install FuseSoC
+    $ export WORKSPACE=$(pwd)
 
-`pip install fusesoc`
+All the following commands will be run from this directory unless otherwise stated.
+- Install FuseSoC
 
-Add the FuseSoC standard library
+        $ pip install fusesoc
+- Add the FuseSoC standard library 
 
-`fusesoc library add fusesoc_cores https://github.com/fusesoc/fusesoc-cores`
+        $ fusesoc library add fusesoc_cores https://github.com/fusesoc/fusesoc-cores
+- The FuseSoC standard library already contain a version of SERV, but if we want to make changes to SERV, run the bundled example or use the Zephyr support, it is better to add SERV as a separate library into the workspace
 
-The FuseSoC standard library already contain a version of SERV, but if we want to make changes to SERV, run the bundled example or use the Zephyr support, it is better to add SERV as a separate library into the workspace
 
-`fusesoc library add serv https://github.com/olofk/serv`
+        $ fusesoc library add serv https://github.com/olofk/serv
+    >:warning: The SERV repo will now be available in `$WORKSPACE/fusesoc_libraries/serv`. We will refer to that directory as `$SERV`.
+- Install latest version of [Verilator](https://www.veripool.org/wiki/verilator)
+- (Optional) To support RISC-V M-extension extension, Multiplication and Division unit (MDU) can be added included into the SERV as a seprate library.
 
-The SERV repo will now be available in $WORKSPACE/fusesoc_libraries/serv. To save some typing, we will refer to that directory as `$SERV`.
+        $ fusesoc library add mdu https://github.com/zeeshanrafique23/mdu
+    MDU will be available in `$WORKSPACE/fusesoc_libraries/mdu`
 
-We are now ready to do our first exercises with SERV
+We are now ready to do our first exercises with SERV. If everything above is done correctly,we can use Verilator as a linter to check the SERV source code.
 
-If [Verilator](https://www.veripool.org/wiki/verilator) is installed, we can use that as a linter to check the SERV source code
-
-`fusesoc run --target=lint serv`
+    $ fusesoc run --target=lint serv
 
 If everything worked, the output should look like
 
@@ -48,6 +52,23 @@ If everything worked, the output should look like
 
     INFO: Building simulation model
     INFO: Running
+
+After performing all the steps that are mentioned above, the directory structure from the `$WORKSPACE` should look like this:
+
+    .
+    $WORKSPACE
+    |
+    ├── build
+    │   └── ...
+    ├── fusesoc.conf
+    └── fusesoc_libraries
+        ├── fusesoc_cores
+        │   └── ...
+        ├── mdu
+        │   └── ...
+        └── serv
+            └── ...
+
 
 ## Running pre-built test software
 
@@ -72,33 +93,13 @@ For a more advanced example, we can also run the Dining philosophers demo
 
     fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_sync.hex --memsize=16384
 
-Other applications can be tested by compiling and converting to bin and then hex e.g. with makehex.py found in `$SERV/sw`
+If the [toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) is installed, other applications can be tested by compiling the assembly prgram and converting to bin and then hex with makehex.py found in [`$SERV/sw`](/sw/). 
 
-## Run RISC-V compliance tests
+:bulb:RISC-V Compressed Extension can be enabled by passing `--compressed=1` parameter. 
 
-Build the verilator model (if not already done)
+## Verification
+SERV is verified using RISC-V compliance tests for the base ISA (RV32I) and the implemented extensions (M, C, Zicsr). The instructions on running Compliance tests using RISCOF framework are given in [verif](/verif/) directory.
 
-    fusesoc run --target=verilator_tb --build servant --memsize=8388608
-
-To build the verilator model with MDU (for M extension compliance tests):
-
-    fusesoc run --target=verilator_tb --flag=mdu --build servant --memsize=8388608
-
-To build the verilator model with C extension (for Compressed extension compliance tests):
-
-    fusesoc run --target=verilator_tb --build servant --memsize=8388608 --compressed=1
-
-Download the tests repo
-
-    git clone --branch 2.7.4 https://github.com/riscv-non-isa/riscv-arch-test.git
-
-To run the RISC-V compliance tests, we need to supply the SERV-specific support files and point the test suite to where it can find a target to run (i.e. the previously built Verilator model)
-
-Run the compliance tests
-
-    cd riscv-arch-test && make TARGETDIR=$SERV/riscv-target RISCV_TARGET=serv RISCV_DEVICE=I TARGET_SIM=$WORKSPACE/build/servant_1.2.0/verilator_tb-verilator/Vservant_sim
-
-The above will run all tests in the rv32i test suite. Since SERV also implement the `M`, `C`, `privilege` and `Zifencei` extensions, these can also be tested by choosing any of them instead of `I` as the `RISCV_DEVICE` variable.
 
 ## Run on hardware
 
