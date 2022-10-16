@@ -1,6 +1,7 @@
 `default_nettype none
 module servix_clock_gen
   (input wire  i_clk,
+   input wire  i_rst,
    output wire o_clk,
    output reg  o_rst);
 
@@ -28,7 +29,7 @@ module servix_clock_gen
       .LOCKED(locked),
       .CLKIN1(i_clk),
       .PWRDWN(1'b0),
-      .RST(1'b0),
+      .RST(i_rst),
       .CLKFBIN(clkfb));
 
    always @(posedge o_clk) begin

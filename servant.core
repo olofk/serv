@@ -382,7 +382,7 @@ targets:
   arty_a7_35t:
     default_tool: vivado
     filesets : [mem_files, soc, arty_a7_35t]
-    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)"]
+    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET]
     tools:
       vivado: {part : xc7a35ticsg324-1L}
     toplevel : servix
@@ -586,6 +586,11 @@ parameters:
     description : Enable/Disable CSR support
     paramtype   : vlogparam
 
+  WITH_RESET:
+    datatype    : bool
+    default     : true
+    description : Enable reset input (for supported targets)
+    paramtype   : vlogdefine
 generate:
   icebreaker_pll:
     generator: icepll

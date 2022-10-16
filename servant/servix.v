@@ -2,6 +2,9 @@
 module servix
 (
  input wire  i_clk,
+`ifdef WITH_RESET
+ input wire  i_rst_n,
+`endif
  output wire q);
 
    parameter frequency = 32;
@@ -16,6 +19,11 @@ module servix
      #(.frequency (frequency))
    clock_gen
      (.i_clk (i_clk),
+`ifdef WITH_RESET
+      .i_rst (!i_rst_n),
+`else
+      .i_rst (1'b0),
+`endif
       .o_clk (wb_clk),
       .o_rst (wb_rst));
 
