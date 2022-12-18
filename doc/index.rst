@@ -9,3 +9,4 @@ Welcome to the user manual of the award-winning SERV, the world's smallest RISC-
 
    interface.rst
    modules.rst
+   servant.rst
