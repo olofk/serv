@@ -1,6 +1,6 @@
 `default_nettype none
 
-module serv_synth_wrapper  
+module serv_synth_wrapper
   #(
     /* Register signals before or after the decoder
      0 : Register after the decoder. Faster but uses more resources
@@ -21,29 +21,6 @@ module serv_synth_wrapper
    input wire 		      clk,
    input wire 		      i_rst,
    input wire 		      i_timer_irq,
-`ifdef RISCV_FORMAL
-   output wire 		      rvfi_valid,
-   output wire [63:0] 	      rvfi_order,
-   output wire [31:0] 	      rvfi_insn,
-   output wire 		      rvfi_trap,
-   output wire 		      rvfi_halt,
-   output wire 		      rvfi_intr,
-   output wire [1:0] 	      rvfi_mode,
-   output wire [1:0] 	      rvfi_ixl,
-   output wire [4:0] 	      rvfi_rs1_addr,
-   output wire [4:0] 	      rvfi_rs2_addr,
-   output wire [31:0] 	      rvfi_rs1_rdata,
-   output wire [31:0] 	      rvfi_rs2_rdata,
-   output wire [4:0] 	      rvfi_rd_addr,
-   output wire [31:0] 	      rvfi_rd_wdata,
-   output wire [31:0] 	      rvfi_pc_rdata,
-   output wire [31:0] 	      rvfi_pc_wdata,
-   output wire [31:0] 	      rvfi_mem_addr,
-   output wire [3:0] 	      rvfi_mem_rmask,
-   output wire [3:0] 	      rvfi_mem_wmask,
-   output wire [31:0] 	      rvfi_mem_rdata,
-   output wire [31:0] 	      rvfi_mem_wdata,
-`endif
    output wire [31:0] 	      o_ibus_adr,
    output wire 		      o_ibus_cyc,
    input wire [31:0] 	      i_ibus_rdt,
@@ -55,13 +32,13 @@ module serv_synth_wrapper
    output wire 		      o_dbus_cyc,
    input wire [31:0] 	      i_dbus_rdt,
    input wire 		      i_dbus_ack,
-   
+
    output wire [RF_L2D-1:0]   o_waddr,
    output wire [RF_WIDTH-1:0] o_wdata,
    output wire 		      o_wen,
    output wire [RF_L2D-1:0]   o_raddr,
    input wire [RF_WIDTH-1:0]  i_rdata);
-   
+
    localparam CSR_REGS = WITH_CSR*4;
 
    wire 	      rf_wreq;
@@ -141,7 +118,7 @@ module serv_synth_wrapper
       .o_dbus_cyc   (o_dbus_cyc),
       .i_dbus_rdt   (i_dbus_rdt),
       .i_dbus_ack   (i_dbus_ack),
-      
+
       //Extension
       .o_ext_funct3 (),
       .i_ext_ready  (1'b0),
