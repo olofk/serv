@@ -3,11 +3,7 @@ CAPI=2:
 name : ::servant:1.2.0
 
 filesets:
-  service:
-    files: [servant/ice40_pll.v, servant/service.v]
-    file_type : verilogSource
-    depend : ["fusesoc:utils:generators"]
-
+  # Common filesets
   mem_files:
     files:
       - sw/blinky.hex       : {copyto : blinky.hex}
@@ -22,13 +18,10 @@ filesets:
     file_type : verilogSource
     depend : [vlog_tb_utils]
 
-  verilator_tb:
-    files:
-      - bench/servant_sim.v
-      - "vidbo? (bench/servant_tb_vidbo.cpp)" : {file_type : cppSource}
-      - "!vidbo? (bench/servant_tb.cpp)" : {file_type : cppSource}
+  service:
+    files: [servant/ice40_pll.v, servant/service.v]
     file_type : verilogSource
-    depend : ["vidbo? (vidbo)"]
+    depend : ["fusesoc:utils:generators"]
 
   soc:
     files:
@@ -43,19 +36,35 @@ filesets:
     file_type : verilogSource
     depend : [serv, "mdu? (mdu)"]
 
-  cyc1000:
+  verilator_tb:
     files:
-      - data/cyc1000.sdc : {file_type : SDC}
-      - data/cyc1000.tcl : {file_type : tclSource}
-      - servant/servclone10_clock_gen.v : {file_type : verilogSource}
-      - servant/servclone10.v : {file_type : verilogSource}
+      - bench/servant_sim.v
+      - "vidbo? (bench/servant_tb_vidbo.cpp)" : {file_type : cppSource}
+      - "!vidbo? (bench/servant_tb.cpp)" : {file_type : cppSource}
+    file_type : verilogSource
+    depend : ["vidbo? (vidbo)"]
 
-  sockit:
+  # Target-specific filesets. Alphabetically sorted
+
+  ac701:
     files:
-      - data/sockit.sdc : {file_type : SDC}
-      - data/sockit.tcl : {file_type : tclSource}
-      - servant/servive_clock_gen.v : {file_type : verilogSource}
-      - servant/servive.v : {file_type : verilogSource}
+      - servant/servix.v : {file_type : verilogSource}
+      - servant/servant_ac701.v : {file_type : verilogSource}
+      - data/ac701.xdc : {file_type : xdc}
+
+  alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
+
+  arty_a7_35t:
+    files:
+      - servant/servix_clock_gen.v : {file_type : verilogSource}
+      - servant/servix.v : {file_type : verilogSource}
+      - data/arty_a7_35t.xdc : {file_type : xdc}
+
+  ax309:
+    files:
+      - servant/servant_ax309_clock_gen.v : {file_type : verilogSource}
+      - servant/servant_ax309.v : {file_type : verilogSource}
+      - data/ax309.ucf : {file_type : UCF}
 
   chameleon96:
     files:
@@ -64,7 +73,20 @@ filesets:
       - data/chameleon96/HPS.sv : {file_type : systemVerilogSource}
       - data/chameleon96/CV_96.v : {file_type : verilogSource}
       - servant/servive_clock_gen.v : {file_type : verilogSource}
-      - servant/servive.v : {file_type : verilogSource}    
+      - servant/servive.v : {file_type : verilogSource}
+
+  cmod_a7_35t:
+    files:
+      - servant/servix_clock_gen.v : {file_type : verilogSource}
+      - servant/servix.v : {file_type : verilogSource}
+      - data/cmod_a7_35t.xdc : {file_type : xdc}
+
+  cyc1000:
+    files:
+      - data/cyc1000.sdc : {file_type : SDC}
+      - data/cyc1000.tcl : {file_type : tclSource}
+      - servant/servclone10_clock_gen.v : {file_type : verilogSource}
+      - servant/servclone10.v : {file_type : verilogSource}
 
   deca:
     files:
@@ -93,23 +115,18 @@ filesets:
       - servant/servix_ebaz4205.v : {file_type : verilogSource}
       - data/ebaz4205.xdc : {file_type : xdc}
 
-  tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
-  icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
-  icev_wireless : {files: [data/icev_wireless.pcf  : {file_type : PCF}]}
-  icesugar   : {files: [data/icesugar.pcf : {file_type : PCF}]}
-  alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
-  icestick   : {files: [data/icestick.pcf  : {file_type : PCF}]}
-
   go_board:
     files:
       - data/go_board.pcf : {file_type : PCF}
       - servant/service_go_board.v : {file_type : verilogSource}
 
-  ax309:
-    files:
-      - servant/servant_ax309_clock_gen.v : {file_type : verilogSource}
-      - servant/servant_ax309.v : {file_type : verilogSource}
-      - data/ax309.ucf : {file_type : UCF}
+  icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
+
+  icestick   : {files: [data/icestick.pcf  : {file_type : PCF}]}
+
+  icesugar   : {files: [data/icesugar.pcf : {file_type : PCF}]}
+
+  icev_wireless : {files: [data/icev_wireless.pcf  : {file_type : PCF}]}
 
   lx9_microboard:
     files:
@@ -130,24 +147,6 @@ filesets:
       - servant/servix.v : {file_type : verilogSource}
       - data/nexys_a7.xdc : {file_type : xdc}
 
-  cmod_a7_35t:
-    files:
-      - servant/servix_clock_gen.v : {file_type : verilogSource}
-      - servant/servix.v : {file_type : verilogSource}
-      - data/cmod_a7_35t.xdc : {file_type : xdc}
-
-  arty_a7_35t:
-    files:
-      - servant/servix_clock_gen.v : {file_type : verilogSource}
-      - servant/servix.v : {file_type : verilogSource}
-      - data/arty_a7_35t.xdc : {file_type : xdc}
-
-  ac701:
-    files:
-      - servant/servix.v : {file_type : verilogSource}
-      - servant/servant_ac701.v : {file_type : verilogSource}
-      - data/ac701.xdc : {file_type : xdc}
-
   orangecrab:
     files:
       - data/orangecrab_r02.lpf : {file_type : LPF}
@@ -158,6 +157,15 @@ filesets:
       - servant/servis_clock_gen.v : {file_type : verilogSource}
       - servant/servis.v : {file_type : verilogSource}
       - data/pipistrello.ucf : {file_type : UCF}
+
+  sockit:
+    files:
+      - data/sockit.sdc : {file_type : SDC}
+      - data/sockit.tcl : {file_type : tclSource}
+      - servant/servive_clock_gen.v : {file_type : verilogSource}
+      - servant/servive.v : {file_type : verilogSource}
+
+  tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
 
   ulx3s:
     files:
@@ -181,27 +189,46 @@ targets:
   default:
     filesets : [soc]
 
-  cyc1000:
-    default_tool: quartus
-    description: cyc1000 FPGA board
-    filesets : [mem_files, soc, cyc1000]
-    parameters : [memfile, memsize=32768]
+  ac701:
+    default_tool: vivado
+    filesets : [mem_files, soc, ac701]
+    parameters : [memfile, memsize, frequency=32]
     tools:
-      quartus:
-        family : Cyclone 10 LP
-        device : 10CL025YU256C8G
-    toplevel : servclone10
+      vivado: {part : xc7a200t-fbg676-2}
+    toplevel : servant_ac701
 
-  sockit:
-    default_tool : quartus
-    description: SoCKit development kit by Arrow / Terasic
-    filesets : [mem_files, soc, sockit]
+  alhambra:
+    default_tool : icestorm
+    description: Open-hardware iCE40HX4K FPGA board
+    filesets : [mem_files, soc, service, alhambra]
+    generate: [alhambra_pll]
+    parameters : [memfile, memsize, PLL=ICE40_CORE]
+    tools:
+      icestorm:
+        nextpnr_options : [--hx8k, --package, "tq144:4k", --freq, 32]
+        pnr: next
+    toplevel : service
+
+  arty_a7_35t:
+    default_tool: vivado
+    filesets : [mem_files, soc, arty_a7_35t]
+    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET]
+    tools:
+      vivado: {part : xc7a35ticsg324-1L}
+    toplevel : servix
+
+  ax309:
+    default_tool : ise
+    description : XILINX Spartan-6 XC6SLX9 FPGA Development Board
+    filesets : [mem_files, soc, ax309]
     parameters : [memfile, memsize]
     tools:
-      quartus:
-        family : CycloneV
-        device : 5CSXFC6D6F31C6
-    toplevel: servive
+      ise:
+        family  : Spartan6
+        device  : xc6slx9
+        package : ftg256
+        speed   : -3
+    toplevel : servant_ax309
 
   chameleon96:
     default_tool : quartus
@@ -215,16 +242,24 @@ targets:
         board_device_index : 2
     toplevel: CV_96
 
-  deca:
-    default_tool : quartus
-    description: DECA development kit by Arrow / Terasic
-    filesets : [mem_files, soc, deca]
-    parameters : [memfile, memsize]
+  cmod_a7_35t:
+    default_tool: vivado
+    filesets : [mem_files, soc, cmod_a7_35t]
+    parameters : [memfile=blinky.hex, memsize, frequency=12]
+    tools:
+      vivado: {part : xc7a35tcpg236-1}
+    toplevel : servix
+
+  cyc1000:
+    default_tool: quartus
+    description: cyc1000 FPGA board
+    filesets : [mem_files, soc, cyc1000]
+    parameters : [memfile, memsize=32768]
     tools:
       quartus:
-        family : MAX 10
-        device : 10M50DAF484C6GES
-    toplevel: servive
+        family : Cyclone 10 LP
+        device : 10CL025YU256C8G
+    toplevel : servclone10
 
   de0_nano:
     default_tool : quartus
@@ -248,6 +283,35 @@ targets:
         board_device_index : 2
     toplevel : servive
 
+  deca:
+    default_tool : quartus
+    description: DECA development kit by Arrow / Terasic
+    filesets : [mem_files, soc, deca]
+    parameters : [memfile, memsize]
+    tools:
+      quartus:
+        family : MAX 10
+        device : 10M50DAF484C6GES
+    toplevel: servive
+
+  ebaz4205:
+    default_tool: vivado
+    description: EBAZ4205 'Development' Board
+    filesets : [mem_files, soc, ebaz4205]
+    parameters : [memfile, memsize, frequency=16]
+    tools:
+      vivado: {part : xc7z010clg400-1}
+    toplevel : servix_ebaz4205
+
+  go_board:
+    default_tool : icestorm
+    filesets : [mem_files, soc, go_board]
+    tools:
+      icestorm:
+        nextpnr_options : [--hx1k, --package, vq100, --freq, 20]
+        pnr: next
+    toplevel : service_go_board
+
   icebreaker:
     default_tool : icestorm
     filesets : [mem_files, soc, service, icebreaker]
@@ -259,14 +323,14 @@ targets:
         pnr: next
     toplevel : service
 
-  icev_wireless:
+  icestick:
     default_tool : icestorm
-    filesets : [mem_files, soc, service, icev_wireless]
-    generate: [icev_wireless_pll]
-    parameters : [memfile, memsize, PLL=ICE40_PAD]
+    filesets : [mem_files, soc, service, icestick]
+    generate: [icestick_pll]
+    parameters : [memfile=blinky.hex, memsize=7168, PLL=ICE40_CORE]
     tools:
       icestorm:
-        nextpnr_options: [--up5k, --freq, 16]
+        nextpnr_options : [--hx1k, --package, tq144, --freq, 32]
         pnr: next
     toplevel : service
 
@@ -282,6 +346,25 @@ targets:
         pnr: next
     toplevel : service
 
+  icev_wireless:
+    default_tool : icestorm
+    filesets : [mem_files, soc, service, icev_wireless]
+    generate: [icev_wireless_pll]
+    parameters : [memfile, memsize, PLL=ICE40_PAD]
+    tools:
+      icestorm:
+        nextpnr_options: [--up5k, --freq, 16]
+        pnr: next
+    toplevel : service
+
+  lint:
+    default_tool : verilator
+    filesets : [soc]
+    tools:
+      verilator:
+        mode : lint-only
+    toplevel : servant
+
   lx9_microboard:
     default_tool: ise
     description : LX9 Microboard
@@ -294,58 +377,6 @@ targets:
         package : csg324
         speed   : -2
     toplevel : servant_lx9
-
-  ax309:
-    default_tool : ise
-    description : XILINX Spartan-6 XC6SLX9 FPGA Development Board
-    filesets : [mem_files, soc, ax309]
-    parameters : [memfile, memsize]
-    tools:
-      ise:
-        family  : Spartan6
-        device  : xc6slx9
-        package : ftg256
-        speed   : -3
-    toplevel : servant_ax309
-
-  tinyfpga_bx:
-    default_tool : icestorm
-    filesets : [mem_files, soc, service, tinyfpga_bx]
-    generate: [tinyfpga_bx_pll]
-    parameters : [memfile, memsize, PLL=ICE40_CORE]
-    tools:
-      icestorm:
-        nextpnr_options : [--lp8k, --package, cm81, --freq, 32]
-        pnr: next
-    toplevel : service
-
-  alhambra:
-    default_tool : icestorm
-    description: Open-hardware iCE40HX4K FPGA board
-    filesets : [mem_files, soc, service, alhambra]
-    generate: [alhambra_pll]
-    parameters : [memfile, memsize, PLL=ICE40_CORE]
-    tools:
-      icestorm:
-        nextpnr_options : [--hx8k, --package, "tq144:4k", --freq, 32]
-        pnr: next
-    toplevel : service
-
-  lint:
-    default_tool : verilator
-    filesets : [soc]
-    tools:
-      verilator:
-        mode : lint-only
-    toplevel : servant
-
-  nexys_a7:
-    default_tool: vivado
-    filesets : [mem_files, soc, nexys_a7]
-    parameters : [memfile, memsize, frequency=32]
-    tools:
-      vivado: {part : xc7a100tcsg324-1}
-    toplevel : servix
 
   nexys_2_500:
     default_tool: ise
@@ -371,38 +402,13 @@ targets:
         speed   : -4
     toplevel : servax
 
-  cmod_a7_35t:
+  nexys_a7:
     default_tool: vivado
-    filesets : [mem_files, soc, cmod_a7_35t]
-    parameters : [memfile=blinky.hex, memsize, frequency=12]
-    tools:
-      vivado: {part : xc7a35tcpg236-1}
-    toplevel : servix
-
-  arty_a7_35t:
-    default_tool: vivado
-    filesets : [mem_files, soc, arty_a7_35t]
-    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET]
-    tools:
-      vivado: {part : xc7a35ticsg324-1L}
-    toplevel : servix
-
-  ebaz4205:
-    default_tool: vivado
-    description: EBAZ4205 'Development' Board
-    filesets : [mem_files, soc, ebaz4205]
-    parameters : [memfile, memsize, frequency=16]
-    tools:
-      vivado: {part : xc7z010clg400-1}
-    toplevel : servix_ebaz4205
-
-  ac701:
-    default_tool: vivado
-    filesets : [mem_files, soc, ac701]
+    filesets : [mem_files, soc, nexys_a7]
     parameters : [memfile, memsize, frequency=32]
     tools:
-      vivado: {part : xc7a200t-fbg676-2}
-    toplevel : servant_ac701
+      vivado: {part : xc7a100tcsg324-1}
+    toplevel : servix
 
   orangecrab_r0.2:
     default_tool: trellis
@@ -437,6 +443,28 @@ targets:
       - firmware
       - memsize
     toplevel : servant_tb
+
+  sockit:
+    default_tool : quartus
+    description: SoCKit development kit by Arrow / Terasic
+    filesets : [mem_files, soc, sockit]
+    parameters : [memfile, memsize]
+    tools:
+      quartus:
+        family : CycloneV
+        device : 5CSXFC6D6F31C6
+    toplevel: servive
+
+  tinyfpga_bx:
+    default_tool : icestorm
+    filesets : [mem_files, soc, service, tinyfpga_bx]
+    generate: [tinyfpga_bx_pll]
+    parameters : [memfile, memsize, PLL=ICE40_CORE]
+    tools:
+      icestorm:
+        nextpnr_options : [--lp8k, --package, cm81, --freq, 32]
+        pnr: next
+    toplevel : service
 
   ulx3s_85:
     default_tool: diamond
@@ -490,44 +518,16 @@ targets:
       vivado: {part : xczu7ev-ffvc1156-2-e}
     toplevel : servus
 
-  icestick:
-    default_tool : icestorm
-    filesets : [mem_files, soc, service, icestick]
-    generate: [icestick_pll]
-    parameters : [memfile=blinky.hex, memsize=7168, PLL=ICE40_CORE]
-    tools:
-      icestorm:
-        nextpnr_options : [--hx1k, --package, tq144, --freq, 32]
-        pnr: next
-    toplevel : service
-
-  go_board:
-    default_tool : icestorm
-    filesets : [mem_files, soc, go_board]
-    tools:
-      icestorm:
-        nextpnr_options : [--hx1k, --package, vq100, --freq, 20]
-        pnr: next
-    toplevel : service_go_board
-
 parameters:
-  PLL:
-    datatype : str
-    description : PLL type to use for main clock generation
-    paramtype : vlogparam
+  align:
+    datatype    : int
+    description : Enable/Disable the Misaligned access of instruction
+    paramtype   : vlogparam
 
-  RISCV_FORMAL:
-    datatype  : bool
-    paramtype : vlogdefine
-
-  MDU:
-    datatype  : int
-    description : Enables RISC-V standard M-extension
-    paramtype : vlogdefine
-
-  SERV_CLEAR_RAM:
-    datatype  : bool
-    paramtype : vlogdefine
+  compressed:
+    datatype    : int
+    description : Enable/Disable the Compressed extension
+    paramtype   : vlogparam
 
   firmware:
     datatype : file
@@ -538,6 +538,11 @@ parameters:
     datatype    : int
     description : PLL output frequency
     paramtype   : vlogparam
+
+  MDU:
+    datatype  : int
+    description : Enables RISC-V standard M-extension
+    paramtype : vlogdefine
 
   memfile:
     datatype    : file
@@ -550,16 +555,30 @@ parameters:
     description : Memory size in bytes for RAM (default 8kiB)
     paramtype   : vlogparam
 
+  PLL:
+    datatype : str
+    description : PLL type to use for main clock generation
+    paramtype : vlogparam
+
+  RISCV_FORMAL:
+    datatype  : bool
+    paramtype : vlogdefine
+
+  SERV_CLEAR_RAM:
+    datatype  : bool
+    paramtype : vlogdefine
+
   signature:
     datatype : file
-    paramtype : plusarg
-  uart_baudrate:
-    datatype : int
-    description : Treat q output as an UART with the specified baudrate (0 or omitted parameter disables UART decoding)
     paramtype : plusarg
 
   timeout:
     datatype : int
+    paramtype : plusarg
+
+  uart_baudrate:
+    datatype : int
+    description : Treat q output as an UART with the specified baudrate (0 or omitted parameter disables UART decoding)
     paramtype : plusarg
 
   vcd:
@@ -571,16 +590,6 @@ parameters:
     description : Delay start of VCD dumping until the specified time
     paramtype   : plusarg
 
-  compressed:
-    datatype    : int
-    description : Enable/Disable the Compressed extension
-    paramtype   : vlogparam
-
-  align:
-    datatype    : int
-    description : Enable/Disable the Misaligned access of instruction
-    paramtype   : vlogparam
-  
   with_csr:
     datatype    : int
     description : Enable/Disable CSR support
@@ -591,16 +600,24 @@ parameters:
     default     : true
     description : Enable reset input (for supported targets)
     paramtype   : vlogdefine
+
 generate:
+  alhambra_pll:
+    generator: icepll
+    parameters:
+      freq_in  : 12
+      freq_out : 32
+
   icebreaker_pll:
     generator: icepll
     parameters:
       freq_out : 16
 
-  icev_wireless_pll:
+  icestick_pll:
     generator: icepll
     parameters:
-      freq_out : 16
+      freq_in  : 12
+      freq_out : 32
 
   icesugar_pll:
     generator: icepll
@@ -608,20 +625,13 @@ generate:
       freq_in  : 12
       freq_out : 32
 
+  icev_wireless_pll:
+    generator: icepll
+    parameters:
+      freq_out : 16
+
   tinyfpga_bx_pll:
     generator: icepll
     parameters:
       freq_in  : 16
-      freq_out : 32
-
-  alhambra_pll:
-    generator: icepll
-    parameters:
-      freq_in  : 12
-      freq_out : 32
-
-  icestick_pll:
-    generator: icepll
-    parameters:
-      freq_in  : 12
       freq_out : 32
