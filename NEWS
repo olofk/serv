@@ -1,3 +1,12 @@
+1.2.1 2022-12-25 Olof Kindgren
+======================================================
+
+* Guarantee at least 2 cycles of o_rst after ice40 PLL is locked
+* New Servant ports: ICE-V Wireless
+* Add reset input for Arty A7
+* Add Servant documentation
+* Updated RISC-V Compliance support from 2.7.4 to 3.x
+
 1.2.0 2022-07-25 Olof Kindgren
 ======================================================
 
