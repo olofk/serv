@@ -7,7 +7,7 @@ module serv_top
     parameter RESET_PC = 32'd0,
     parameter [0:0] MDU = 1'b0,
     parameter [0:0] COMPRESSED=0,
-    parameter [0:0] ALIGN = 0)
+    parameter [0:0] ALIGN = COMPRESSED)
    (
    input wire 		      clk,
    input wire 		      i_rst,
