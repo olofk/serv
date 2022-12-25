@@ -8,7 +8,7 @@ logger = logging.getLogger()
 
 class serv(pluginTemplate):
     __model__ = "serv"
-    __version__ = "1.2.0"
+    __version__ = "1.2.1"
 
     def __init__(self, *args, **kwargs):
         sclass = super().__init__(*args, **kwargs)

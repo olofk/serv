@@ -47,7 +47,7 @@ We are now ready to do our first exercises with SERV. If everything above is don
 
 If everything worked, the output should look like
 
-    INFO: Preparing ::serv:1.2.0
+    INFO: Preparing ::serv:1.2.1
     INFO: Setting up project
 
     INFO: Building simulation model
