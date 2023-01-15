@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <stdint.h>
 #include <signal.h>
 
@@ -110,6 +111,11 @@ int main(int argc, char **argv, char **env)
 
   signal(SIGINT, INThandler);
 
+  int tf = 0;
+  const char *arg_trace_pc = Verilated::commandArgsPlusMatch("trace_pc=");
+  if (arg_trace_pc[0])
+    tf = open("trace.bin", O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+
   vluint64_t timeout = 0;
   const char *arg_timeout = Verilated::commandArgsPlusMatch("timeout=");
   if (arg_timeout[0])
@@ -137,6 +143,8 @@ int main(int argc, char **argv, char **env)
     } else {
       do_gpio(&gpio_context, top->q);
     }
+    if (tf && top->wb_clk && top->pc_vld)
+      write(tf, (void *)&top->pc_adr, 4);
     if (timeout && (main_time >= timeout)) {
       printf("Timeout: Exiting at time %lu\n", main_time);
       done = true;
@@ -146,6 +154,7 @@ int main(int argc, char **argv, char **env)
     main_time+=31.25;
 
   }
+  close(tf);
   if (tfp)
     tfp->close();
   exit(0);

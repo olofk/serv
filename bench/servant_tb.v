@@ -21,6 +21,11 @@ module servant_tb;
      #(.memfile  (memfile),
        .memsize  (memsize),
        .with_csr (with_csr))
-   dut(wb_clk, wb_rst, q);
+   dut
+     (.wb_clk (wb_clk),
+      .wb_rst (wb_rst),
+      .pc_adr (),
+      .pc_vld (),
+      .q      (q));
 
 endmodule
