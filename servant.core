@@ -512,6 +512,7 @@ targets:
       - memsize
       - signature
       - timeout
+      - trace_pc
       - uart_baudrate
       - vcd
       - vcd_start
@@ -585,6 +586,10 @@ parameters:
 
   timeout:
     datatype : int
+    paramtype : plusarg
+
+  trace_pc:
+    datatype : bool
     paramtype : plusarg
 
   uart_baudrate:

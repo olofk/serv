@@ -1,8 +1,10 @@
 `default_nettype none
 module servant_sim
-  (input wire  wb_clk,
-   input wire  wb_rst,
-   output wire q);
+  (input wire	      wb_clk,
+   input wire	      wb_rst,
+   output wire [31:0] pc_adr,
+   output wire	      pc_vld,
+   output wire	      q);
 
    parameter memfile = "";
    parameter memsize = 8192;
@@ -25,5 +27,8 @@ module servant_sim
        .compress (compressed[0:0]),
        .align    (align[0:0]))
    dut(wb_clk, wb_rst, q);
+
+   assign pc_adr = dut.wb_ibus_adr;
+   assign pc_vld = dut.wb_ibus_ack;
 
 endmodule
