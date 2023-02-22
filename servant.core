@@ -10,11 +10,16 @@ filesets:
       - sw/zephyr_hello.hex : {copyto : zephyr_hello.hex}
     file_type : user
 
+  ice40_cells:
+    files:
+      - cells_sim.v : {file_type : verilogSource, tags : [simulation]}
+
   servant_tb:
     files:
       - bench/servant_sim.v
       - bench/uart_decoder.v
       - bench/servant_tb.v
+    tags : [simulation]
     file_type : verilogSource
     depend : [vlog_tb_utils]
 
@@ -184,6 +189,12 @@ filesets:
       - servant/servus_clock_gen.v : {file_type : verilogSource}
       - servant/servus.v : {file_type : verilogSource}
       - data/zcu106.xdc : {file_type : xdc}
+
+  vivado_cells:
+    files:
+      - /opt/Xilinx/Vivado/2019.1/data/verilog/src/glbl.v
+    tags : [simulation]
+    file_type : verilogSource
 
 targets:
   default:
@@ -432,6 +443,32 @@ targets:
         package : csg324
         speed   : -3
     toplevel : servis
+
+  gatesim:
+    filesets : [mem_files, soc, servant_tb, ice40_cells]
+    flow: gls
+    flow_options:
+      arch : ice40
+      synth: yosys
+      synth_top : servant
+      sim: icarus
+      iverilog_options : [-g2012]
+    parameters :
+      - memfile
+    toplevel : [servant_tb]
+
+  vivadogls:
+    filesets : [mem_files, soc, servant_tb, vivado_cells]
+    flow: gls
+    flow_options:
+      synth: vivado
+      synth_top : servant
+      sim: icarus
+      iverilog_options : [-g2012, -y/opt/Xilinx/Vivado/2019.1/data/verilog/src/unisims]
+    parameters :
+      - memfile
+    toplevel : [servant_tb, glbl]
+
 
   sim:
     default_tool: icarus

@@ -1,0 +1,50 @@
+CAPI=2:
+
+name : ::vlog_tb_utils:1.1-r2
+description : Verilog test bench utilities
+
+filesets:
+  tb_files:
+    files:
+      - vlog_functions.v
+      - vlog_tap_generator.v
+      - vlog_tb_utils.v
+    file_type : verilogSource
+    tags : [simulation]
+
+targets:
+  default:
+    filesets : [tb_files]
+    parameters : [heartbeat, tapfile, testcase, timeout, vcd]
+
+parameters:
+  heartbeat:
+    datatype    : int
+    description : Display a heartbeat message every n*heartbeat time unit
+    paramtype   : plusarg
+
+  tapfile:
+    datatype    : str
+    description : Name of TAP file
+    paramtype   : plusarg
+
+  testcase:
+    datatype    : str
+    description : Name of testcase (Used for VCD filename)
+    paramtype   : plusarg
+
+  timeout:
+    datatype    : int
+    description : Abort test case after n cycles
+    paramtype   : plusarg
+
+  vcd:
+    datatype    : bool
+    description : Enable VCD logging
+    paramtype   : plusarg
+
+provider:
+  name : github
+  user : fusesoc
+  repo : vlog_tb_utils
+  version : v1.1
