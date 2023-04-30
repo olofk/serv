@@ -7,6 +7,7 @@ module serv_rf_ram
     input wire [width-1:0] 	   i_wdata,
     input wire 			   i_wen,
     input wire [$clog2(depth)-1:0] i_raddr,
+    input wire			   i_ren,
     output wire [width-1:0] 	   o_rdata);
 
    reg [width-1:0] 		   memory [0:depth-1];
@@ -15,7 +16,7 @@ module serv_rf_ram
    always @(posedge i_clk) begin
       if (i_wen)
 	memory[i_waddr] <= i_wdata;
-      rdata <= memory[i_raddr];
+      rdata <= i_ren ? memory[i_raddr] : {width{1'bx}};
    end
 
    /* Reads from reg x0 needs to return 0

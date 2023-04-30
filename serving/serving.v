@@ -191,6 +191,7 @@ module serving
       .o_wdata  (wdata),
       .o_wen    (wen),
       .o_raddr  (raddr),
+      .o_ren    (),
       .i_rdata  (rdata));
 
    serv_top
