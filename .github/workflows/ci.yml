@@ -1,11 +1,11 @@
-name: CI
+name: Run compliance test suite
 
 on: [push, pull_request]
 
 jobs:
   compliance:
     name: RISC-V Compliance Test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v2
@@ -14,51 +14,39 @@ jobs:
 
     - name: install fusesoc, verilator, gcc and riscof
       run: |
-        sudo apt-get install -y python3-setuptools verilator gcc-riscv64-unknown-elf
+        sudo apt-get install -y python3-setuptools verilator
         pip3 install fusesoc
-        pip3 install git+https://github.com/riscv/riscof.git
-    
+        pip3 install riscof
+        wget -qO- https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2023.07.05/riscv64-elf-ubuntu-22.04-gcc-nightly-2023.07.05-nightly.tar.gz | tar xz
+        echo $GITHUB_WORKSPACE/riscv/bin >> $GITHUB_PATH
+        
+
     - name: set root and SERV directory
       run: |
         echo "SERV=$GITHUB_WORKSPACE/serv" >> $GITHUB_ENV
-        echo "WORKSPACE=$GITHUB_WORKSPACE/" >> $GITHUB_ENV
 
     - name: setup workspace
       run: fusesoc library add serv $SERV
-    
-    - name: Update submodule to add arch-tests
-      run: |
-        cd $SERV
-        git submodule init
-        git submodule update
 
     - name: Setup SAIL-RISCV Model
       run: |
         tar -xzf $SERV/verif/bin/sail-riscv.tar.gz
         echo $GITHUB_WORKSPACE/sail-riscv >> $GITHUB_PATH
-    
+
+    - name: Init arch tests
+      run: riscof arch-test --clone
+
     - name: Run RV32I compliance tests
-      run: |
-        cd $SERV/verif
-        riscof run --config=config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/I --env=riscv-arch-test/riscv-test-suite/env --no-browser
-    
+      run: riscof run --config=$SERV/verif/config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/I --env=riscv-arch-test/riscv-test-suite/env --no-browser
+
     - name: Run RV32IM compliance tests
-      run: |
-        cd $SERV/verif
-        riscof run --config=config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/M --env=riscv-arch-test/riscv-test-suite/env --no-browser
-    
+      run: riscof run --config=$SERV/verif/config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/M --env=riscv-arch-test/riscv-test-suite/env --no-browser
+
     - name: Run RV32IC compliance tests
-      run: |
-        cd $SERV/verif
-        riscof run --config=config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/C --env=riscv-arch-test/riscv-test-suite/env --no-browser
-    
+      run: riscof run --config=$SERV/verif/config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/C --env=riscv-arch-test/riscv-test-suite/env --no-browser
+
     - name: Run RV32I Zifencei compliance tests
-      run: |
-        cd $SERV/verif
-        riscof run --config=config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/Zifencei --env=riscv-arch-test/riscv-test-suite/env --no-browser
-    
+      run: riscof run --config=$SERV/verif/config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/Zifencei --env=riscv-arch-test/riscv-test-suite/env --no-browser
+
     - name: Run RV32I Privilege compliance tests
-      run: |
-        cd $SERV/verif
-        riscof run --config=config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/privilege --env=riscv-arch-test/riscv-test-suite/env --no-browser
-    
+      run: riscof run --config=$SERV/verif/config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/privilege --env=riscv-arch-test/riscv-test-suite/env --no-browser

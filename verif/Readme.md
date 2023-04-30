@@ -9,59 +9,57 @@ In our case, DUT is SERV core and reference is the [sail-riscv](https://github.c
 
 - [RISC-V GCC Toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) - Install toolchain by running following command.
 
-
         sudo apt-get install -y gcc-riscv64-unknown-elf
 > :bulb: By default, RISCOF plugins uses [RV32](https://github.com/riscv-collab/riscv-gnu-toolchain#:~:text=To%20build%20the%2032%2Dbit%20RV32GC%20toolchain%2C%20use%3A) toolchain for compiling native `rv32` code. For SERV, this dependency has been removed from the plugin as RV64 is sufficient for 32-bit systems as well.
     
-- [SAIL-RISCV](https://github.com/riscv/sail-riscv) - The reference model can be build by following [these](https://riscof.readthedocs.io/en/stable/installation.html#install-plugin-models) instructions. The pre-built binaries of sail-riscv is available in [`bin`](/verif/bin/) directory. 
+- [SAIL-RISCV](https://github.com/riscv/sail-riscv) - The reference model can be build by following [these](https://riscof.readthedocs.io/en/stable/installation.html#install-plugin-models) instructions. The pre-built binaries of sail-riscv is available in [`bin`](/verif/bin/) directory. Extract the tarball somewhere and add the directory containing `riscv_sim_RV32` to your PATH
 
-- [riscv-arch-tests](https://github.com/riscv-non-isa/riscv-arch-test) - Compliance tests are added as a submodule in `$SERV/verif`. Run the following commands from the `$SERV`.
-        
-        $ git submodule init
-        $ git submodule update
-    This will clone the arch-tests repository into the `$SERV/verif/riscv-arch-tests`.
 - [RISCOF](https://riscof.readthedocs.io/en/stable/installation.html#install-python) - If you have installed [Python](https://riscof.readthedocs.io/en/stable/installation.html#install-python), run the folllowing command to [install RISCOF](https://riscof.readthedocs.io/en/stable/installation.html#).
 
-        pip3 install git+https://github.com/riscv/riscof.git
+        pip3 install riscof
 
-> :warning: Make sure to export the root directory as `$WORKSPACE` and also make sure to have the directory structure that looks like this.
+- [riscv-arch-tests](https://github.com/riscv-non-isa/riscv-arch-test) - Compliance tests are installed into the workspace by running:
+        
+        $ riscof arch-test --clone
+
+or alternatively
+
+	$ riscof arch-test --update
+
+if the tests are already installed and just needs to be updated.
+
+> Make sure to have the directory structure that looks like this.
 
 
 
     .
-    $WORKSPACE
     |
-    ├── build
-    │   └── ...
     ├── fusesoc.conf
-    └── fusesoc_libraries
-        ├── fusesoc_cores
-        │   └── ...
-        ├── mdu
-        │   └── ...
-        └── serv
-            ├── ...
-            ├── verif
-            |   ├── bin
-            |   |   └── ...
-            |   ├── config.ini
-            |   ├── plugin-sail_cSim
-            |   |   └── ...
-            |   ├── plugin-serv
-            |   |   └── ...
-            |   ├── Readme.md
-            |   ├── riscv-arch-test
-            |   |   └── ...
-            |   └── sim
-            |       └── ...
-            └── ...
+    ├── fusesoc_libraries
+    |   ├── fusesoc_cores
+    |   │   └── ...
+    |   ├── mdu
+    |   │   └── ...
+    |   └── serv
+    |       ├── ...
+    |       ├── verif
+    |       |   ├── bin
+    |       |   |   └── ...
+    |       |   ├── config.ini
+    |       |   ├── plugin-sail_cSim
+    |       |   |   └── ...
+    |       |   ├── plugin-serv
+    |       |   |   └── ...
+    |       └── ...
+    ├── riscv-arch-test
+    └── ...
 
 ## Running Compliance tests
 After completing all the steps in [Getting started](/README.md) followed by the [Prerequisites](##Prerequisites), we are all set to run the complaince tests.
 
-:o: All the RISCOF commands will be run from `$SERV/verif`
+:o: All the RISCOF commands will be run from the workspace
 
-    riscof run --config=config.ini \
+    riscof run --config=$SERV/verif/config.ini \
     --suite=riscv-arch-test/riscv-test-suite/rv32i_m/I \
     --env=riscv-arch-test/riscv-test-suite/env
 
@@ -71,4 +69,4 @@ After completing all the steps in [Getting started](/README.md) followed by the 
 
 > :bulb: Other optional arguments of RISCOF command can be found [here](https://riscof.readthedocs.io/en/stable/commands.html#run)
 
-When RISCOF run command successfully executed: an `html` report is generated which depicts the results of the tests. And a directory named `riscof_work` is created inside `$SERV/verif/` which contains all the log files, signatures, executeables for Reference model and/or DUT.
+When RISCOF run command successfully executed: an `html` report is generated which depicts the results of the tests. And a directory named `riscof_work` is created in the workspace which contains all the log files, signatures, executeables for Reference model and/or DUT.
