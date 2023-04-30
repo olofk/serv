@@ -98,6 +98,7 @@ module serv_rf_top
    wire [RF_WIDTH-1:0] wdata;
    wire 	       wen;
    wire [RF_L2D-1:0]   raddr;
+   wire 	       ren;
    wire [RF_WIDTH-1:0] rdata;
 
    serv_rf_ram_if
@@ -124,6 +125,7 @@ module serv_rf_top
       .o_wdata  (wdata),
       .o_wen    (wen),
       .o_raddr  (raddr),
+      .o_ren    (ren),
       .i_rdata  (rdata));
 
    serv_rf_ram
@@ -135,6 +137,7 @@ module serv_rf_top
       .i_wdata (wdata),
       .i_wen   (wen),
       .i_raddr (raddr),
+      .i_ren    (ren),
       .o_rdata (rdata));
 
    serv_top
