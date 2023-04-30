@@ -358,11 +358,10 @@ targets:
     toplevel : service
 
   lint:
-    default_tool : verilator
     filesets : [soc]
-    tools:
-      verilator:
-        mode : lint-only
+    flow: lint
+    flow_options:
+      tool : verilator
     toplevel : servant
 
   lx9_microboard:
@@ -403,8 +402,10 @@ targets:
     toplevel : servax
 
   nexys_a7:
-    default_tool: vivado
     filesets : [mem_files, soc, nexys_a7]
+    flow: vivado
+    flow_options:
+      part : xc7a100tcsg324-1
     parameters : [memfile, memsize, frequency=32]
     tools:
       vivado: {part : xc7a100tcsg324-1}
@@ -458,6 +459,9 @@ targets:
   tinyfpga_bx:
     default_tool : icestorm
     filesets : [mem_files, soc, service, tinyfpga_bx]
+    flow: icestorm
+    flow_options:
+      nextpnr_options : [--lp8k, --package, cm81, --freq, '32']
     generate: [tinyfpga_bx_pll]
     parameters : [memfile, memsize, PLL=ICE40_CORE]
     tools:
@@ -489,8 +493,11 @@ targets:
     toplevel : servant_upduino2
 
   verilator_tb:
-    default_tool: verilator
     filesets : [soc, verilator_tb]
+    flow: sim
+    flow_options:
+      tool: verilator
+      verilator_options : [--trace]
     parameters :
       - RISCV_FORMAL
       - "mdu? (MDU=1)"
@@ -504,9 +511,6 @@ targets:
       - compressed
       - align
       - with_csr=1
-    tools:
-      verilator:
-        verilator_options : [--trace]
     toplevel : servant_sim
 
   zcu106:
