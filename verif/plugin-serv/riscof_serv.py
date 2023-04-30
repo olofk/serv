@@ -13,14 +13,13 @@ class serv(pluginTemplate):
     def __init__(self, *args, **kwargs):
         sclass = super().__init__(*args, **kwargs)
         config = kwargs.get('config')
+        config_dir = kwargs.get('config_dir')
         if config is None:
             print("Please enter input file paths in configuration.")
             raise SystemExit(1)
-        self.dut_exe = os.path.join(config['PATH'] if 'PATH' in config else "","serv")
-        self.num_jobs = str(config['jobs'] if 'jobs' in config else 1)
-        self.pluginpath=os.path.abspath(config['pluginpath'])
-        self.isa_spec = os.path.abspath(config['ispec'])
-        self.platform_spec = os.path.abspath(config['pspec'])
+        self.pluginpath=os.path.join(config_dir, config['pluginpath'])
+        self.isa_spec = os.path.join(config_dir, config['ispec'])
+        self.platform_spec = os.path.join(config_dir, config['pspec'])
         if 'target_run' in config and config['target_run']=='0':
             self.target_run = False
         else:
@@ -35,21 +34,14 @@ class serv(pluginTemplate):
          -T '+self.pluginpath+'/env/link.ld\
          -I '+self.pluginpath+'/env/\
          -I ' + archtest_env + ' {1} -o {2} {3}'
-       self.objcopy_cmd = 'riscv64-unknown-elf-objcopy -O binary {0} {1}.bin'
-       self.objdump_cmd = 'riscv64-unknown-elf-objdump -D {0} > {1}.disass'
-       self.hexgen_cmd = 'python3 makehex.py {0}/{1}.bin > {0}/{1}.hex'
 
-       build_serv = 'cd $WORKSPACE \n   \
-        fusesoc library add mdu https://github.com/zeeshanrafique23/mdu\n'
-       build_serv = build_serv + 'fusesoc run --target=verilator_tb --flag=mdu\
+       add_mdu = 'fusesoc library add mdu https://github.com/zeeshanrafique23/mdu'
+       utils.shellCommand(add_mdu).run()
+
+       build_serv = 'fusesoc run --target=verilator_tb --flag=mdu\
          --build --build-root=servant_test servant\
          --memsize=8388608 --compressed=1'
        utils.shellCommand(build_serv).run()
-       self.sigdump_cmd = 'cd $WORKSPACE/servant_test/verilator_tb \n\
-         ./Vservant_sim\
-          +timeout=100000000000\
-          +signature={0}/DUT-serv.signature\
-          +firmware={0}/{1}.hex'
 
     def build(self, isa_yaml, platform_yaml):
       ispec = utils.load_yaml(isa_yaml)['hart0']
@@ -64,29 +56,54 @@ class serv(pluginTemplate):
       self.compile_cmd = self.compile_cmd+' -mabi='+('lp64 ' if 64 in ispec['supported_xlen'] else 'ilp32 ')
 
     def runTests(self, testList):
-      for testname in testList:
-          testentry = testList[testname]
+      for testentry in testList.values():
           test = testentry['test_path']
           test_dir = testentry['work_dir']
-          file_name = 'serv-{0}'.format(test.rsplit('/',1)[1][:-2])
+          file_name = os.path.basename(test)[:-2]
 
-          elf = '{0}.elf'.format(file_name)
+          elf = file_name+'.elf'
           compile_macros= ' -D' + " -D".join(testentry['macros'])
           marchstr = testentry['isa'].lower()
 
           compile_run = self.compile_cmd.format(marchstr, test, elf, compile_macros)
           utils.shellCommand(compile_run).run(cwd=test_dir)
-          
-          objcopy_run = self.objcopy_cmd.format(elf,file_name)
+
+          objcopy_run = f'riscv64-unknown-elf-objcopy -O binary {elf} {file_name}.bin'
           utils.shellCommand(objcopy_run).run(cwd=test_dir)
-          
-          objdump_run = self.objdump_cmd.format(elf,file_name)
+
+          objdump_run = f'riscv64-unknown-elf-objdump -D {elf} > {file_name}.disass'
           utils.shellCommand(objdump_run).run(cwd=test_dir)
 
-          hexgen_run = self.hexgen_cmd.format(test_dir,file_name)
-          utils.shellCommand(hexgen_run).run()
+          self.makehex(f"{test_dir}/{file_name}.bin", f"{test_dir}/{file_name}.hex")
 
-          sigdump_run = self.sigdump_cmd.format(test_dir,file_name)
-          utils.shellCommand(sigdump_run).run()
+          #The behavior of --build-root in FuseSoC has changed since version 2.2.1
+          #Check first for executable model in the new location and else fall back
+          #to the old one
+          exe = 'servant_test/verilator_tb/Vservant_sim'
+          if not os.path.exists(exe):
+              exe = 'servant_test/servant_1.2.1/verilator_tb/Vservant_sim'
+          
+          sigdump_run = [exe,
+                         "+timeout=1000000000",
+                         f"+signature={test_dir}/DUT-serv.signature",
+                         f"+firmware={test_dir}/{file_name}.hex"]
+
+          utils.shellCommand(' '.join(sigdump_run)).run()
       if not self.target_run:
           raise SystemExit
+
+    def makehex(self, binfile, hexfile):
+        with open(binfile, "rb") as f, open(hexfile, "w") as fout:
+            cnt = 3
+            s = ["00"]*4
+            while True:
+                data = f.read(1)
+                if not data:
+                    fout.write(''.join(s)+'\n')
+                    return
+                s[cnt] = "{:02X}".format(data[0])
+                if cnt == 0:
+                    fout.write(''.join(s)+'\n')
+                    s = ["00"]*4
+                    cnt = 4
+                cnt -= 1
