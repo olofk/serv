@@ -45,7 +45,7 @@ class serv(pluginTemplate):
          --build --build-root=servant_test servant\
          --memsize=8388608 --compressed=1'
        utils.shellCommand(build_serv).run()
-       self.sigdump_cmd = 'cd $WORKSPACE/servant_test/verilator_tb-verilator \n\
+       self.sigdump_cmd = 'cd $WORKSPACE/servant_test/verilator_tb \n\
          ./Vservant_sim\
           +timeout=100000000000\
           +signature={0}/DUT-serv.signature\

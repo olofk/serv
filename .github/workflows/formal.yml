@@ -1,0 +1,66 @@
+name: run-formal
+on: [push]
+jobs:
+  formal:
+    name: Run RISCV-formal verification suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout riscv-formal
+        uses: actions/checkout@v3
+        with:
+          repository: YosysHQ/riscv-formal
+      - name: Checkout SERV
+        uses: actions/checkout@v3
+        with:
+          path: cores/serv/serv-src
+      - uses: YosysHQ/setup-oss-cad-suite@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare formal tests
+        run: |
+          cd cores/serv
+          python3 ../../checks/genchecks.py
+# Skip non-instruction tests for now
+#      - run: make -C cores/serv/checks causal_ch0
+#      - run: make -C cores/serv/checks liveness_ch0
+#      - run: make -C cores/serv/checks pc_bwd_ch0
+#      - run: make -C cores/serv/checks pc_fwd_ch0
+#      - run: make -C cores/serv/checks reg_ch0
+#      - run: make -C cores/serv/checks unique_ch0
+      - run: make -C cores/serv/checks insn_add_ch0
+      - run: make -C cores/serv/checks insn_addi_ch0
+      - run: make -C cores/serv/checks insn_and_ch0
+      - run: make -C cores/serv/checks insn_andi_ch0
+      - run: make -C cores/serv/checks insn_auipc_ch0
+      - run: make -C cores/serv/checks insn_beq_ch0
+      - run: make -C cores/serv/checks insn_bge_ch0
+      - run: make -C cores/serv/checks insn_bgeu_ch0
+      - run: make -C cores/serv/checks insn_blt_ch0
+      - run: make -C cores/serv/checks insn_bltu_ch0
+      - run: make -C cores/serv/checks insn_bne_ch0
+      - run: make -C cores/serv/checks insn_jal_ch0
+      - run: make -C cores/serv/checks insn_jalr_ch0
+      - run: make -C cores/serv/checks insn_lb_ch0
+      - run: make -C cores/serv/checks insn_lbu_ch0
+      - run: make -C cores/serv/checks insn_lh_ch0
+      - run: make -C cores/serv/checks insn_lhu_ch0
+      - run: make -C cores/serv/checks insn_lui_ch0
+      - run: make -C cores/serv/checks insn_lw_ch0
+      - run: make -C cores/serv/checks insn_or_ch0
+      - run: make -C cores/serv/checks insn_ori_ch0
+      - run: make -C cores/serv/checks insn_sb_ch0
+      - run: make -C cores/serv/checks insn_sh_ch0
+      - run: make -C cores/serv/checks insn_sll_ch0
+      - run: make -C cores/serv/checks insn_slli_ch0
+      - run: make -C cores/serv/checks insn_slt_ch0
+      - run: make -C cores/serv/checks insn_slti_ch0
+      - run: make -C cores/serv/checks insn_sltiu_ch0
+      - run: make -C cores/serv/checks insn_sltu_ch0
+      - run: make -C cores/serv/checks insn_sra_ch0
+      - run: make -C cores/serv/checks insn_srai_ch0
+      - run: make -C cores/serv/checks insn_srl_ch0
+      - run: make -C cores/serv/checks insn_srli_ch0
+      - run: make -C cores/serv/checks insn_sub_ch0
+      - run: make -C cores/serv/checks insn_sw_ch0
+      - run: make -C cores/serv/checks insn_xor_ch0
+      - run: make -C cores/serv/checks insn_xori_ch0
