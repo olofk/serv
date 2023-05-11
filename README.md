@@ -9,10 +9,15 @@
 
 SERV is an award-winning bit-serial RISC-V core
 
+In fact, the award-winning SERV is the world's smallest RISC-V CPU. It's the perfect companion whenever you need a bit of computation and silicon real estate is at a premium.
+
 If you want to know more about SERV, what a bit-serial CPU is and what it's good for, I recommend starting out by watching the fantastic short SERV movies
 * [introduction to SERV](https://www.award-winning.me/serv-introduction/)
 * [SERV : RISC-V for a fistful of gates](https://www.award-winning.me/serv-for-a-fistful-of-gates/)
+* [SERV: 32-bit is the New 8-bit](https://www.award-winning.me/serv-32-bit-is-the-new-8-bit/)
 * [Bit by bit - How to fit 8 RISC V cores in a $38 FPGA board (presentation from the Zürich 2019 RISC-V workshop)](https://www.youtube.com/watch?v=xjIxORBRaeQ)
+
+All SERV videos and more can also be found [here](https://www.award-winning.me/videos/).
 
 There's also an official [SERV user manual](https://serv.readthedocs.io/en/latest/#) with fancy block diagrams, timing diagrams and an in-depth description of how some things work.
 
@@ -155,6 +160,18 @@ To convert the newly built hello world example into a Verilog hex file, run
 Or to create an FPGA image with the application preloaded to on-chip RAM, e.g. for a Nexys A7 board, run
 
     fusesoc run --target=nexys_a7 servant --memfile=/path/to/hello.hex
+
+## Systems using SERV
+
+[Servant](https://serv.readthedocs.io/en/latest/servant.html) is the reference platform for SERV. It is a very basic SoC that contains just enough runs Zephyr RTOS. Servant is intended for FPGAs and has been ported to around 20 different FPGA boards. It is also used to run the RISC-V regression test suite.
+
+[CoreScore](https://corescore.store/) is an award-giving benchmark for FPGAs and their synthesis/P&R tools. It tests how many SERV cores that can be put into a particular FPGA.
+
+[Observer](https://github.com/olofk/observer) is a configurable and software-programmable sensor aggregation platform for heterogenous sensors.
+
+[Subservient](https://github.com/olofk/subservient/) is a small technology-independent SERV-based SoC intended for ASIC implementations together with a single-port SRAM.
+
+[Litex](https://github.com/enjoy-digital/litex) is a Python-based framework for creating FPGA SoCs. SERV is one of the 30+ supported cores. A Litex-generated SoC has been used to run DooM on SERV.
 
 ## Good to know
 
