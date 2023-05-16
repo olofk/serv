@@ -201,7 +201,7 @@ targets:
     default_tool : icestorm
     description: Open-hardware iCE40HX4K FPGA board
     filesets : [mem_files, soc, service, alhambra]
-    generate: [alhambra_pll]
+    generate: [ice40pll: {freq_in : 12, freq_out : 32}]
     parameters : [memfile, memsize, PLL=ICE40_CORE]
     tools:
       icestorm:
@@ -315,7 +315,7 @@ targets:
   icebreaker:
     default_tool : icestorm
     filesets : [mem_files, soc, service, icebreaker]
-    generate: [icebreaker_pll]
+    generate: [ice40pll : {freq_out : 16}]
     parameters : [memfile, memsize, PLL=ICE40_PAD]
     tools:
       icestorm:
@@ -326,7 +326,7 @@ targets:
   icestick:
     default_tool : icestorm
     filesets : [mem_files, soc, service, icestick]
-    generate: [icestick_pll]
+    generate: [ice40pll: {freq_in : 12, freq_out : 32}]
     parameters : [memfile=blinky.hex, memsize=7168, PLL=ICE40_CORE]
     tools:
       icestorm:
@@ -338,7 +338,7 @@ targets:
     default_tool : icestorm
     description : iCE40UP5K Development Board by MuseLab
     filesets : [mem_files, soc, service, icesugar]
-    generate: [icesugar_pll]
+    generate: [ice40pll : {freq_in : 12, freq_out : 32}]
     parameters : [memfile, memsize, PLL=ICE40_PAD]
     tools:
       icestorm:
@@ -349,7 +349,7 @@ targets:
   icev_wireless:
     default_tool : icestorm
     filesets : [mem_files, soc, service, icev_wireless]
-    generate: [icev_wireless_pll]
+    generate: [ice40pll : {freq_out : 16}]
     parameters : [memfile, memsize, PLL=ICE40_PAD]
     tools:
       icestorm:
@@ -407,8 +407,6 @@ targets:
     flow_options:
       part : xc7a100tcsg324-1
     parameters : [memfile, memsize, frequency=32]
-    tools:
-      vivado: {part : xc7a100tcsg324-1}
     toplevel : servix
 
   orangecrab_r0.2:
@@ -457,17 +455,12 @@ targets:
     toplevel: servive
 
   tinyfpga_bx:
-    default_tool : icestorm
     filesets : [mem_files, soc, service, tinyfpga_bx]
     flow: icestorm
     flow_options:
       nextpnr_options : [--lp8k, --package, cm81, --freq, '32']
-    generate: [tinyfpga_bx_pll]
+    generate: [ice40pll: {freq_in : 16, freq_out : 32}]
     parameters : [memfile, memsize, PLL=ICE40_CORE]
-    tools:
-      icestorm:
-        nextpnr_options : [--lp8k, --package, cm81, --freq, 32]
-        pnr: next
     toplevel : service
 
   ulx3s_85:
@@ -606,36 +599,5 @@ parameters:
     paramtype   : vlogdefine
 
 generate:
-  alhambra_pll:
+  ice40pll:
     generator: icepll
-    parameters:
-      freq_in  : 12
-      freq_out : 32
-
-  icebreaker_pll:
-    generator: icepll
-    parameters:
-      freq_out : 16
-
-  icestick_pll:
-    generator: icepll
-    parameters:
-      freq_in  : 12
-      freq_out : 32
-
-  icesugar_pll:
-    generator: icepll
-    parameters:
-      freq_in  : 12
-      freq_out : 32
-
-  icev_wireless_pll:
-    generator: icepll
-    parameters:
-      freq_out : 16
-
-  tinyfpga_bx_pll:
-    generator: icepll
-    parameters:
-      freq_in  : 16
-      freq_out : 32
