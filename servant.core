@@ -77,8 +77,8 @@ filesets:
 
   cmod_a7_35t:
     files:
-      - servant/servix_clock_gen.v : {file_type : verilogSource}
-      - servant/servix.v : {file_type : verilogSource}
+      - servant/servant_cmod_a7_clock_gen.v : {file_type : verilogSource}
+      - servant/servant_cmod_a7.v : {file_type : verilogSource}
       - data/cmod_a7_35t.xdc : {file_type : xdc}
 
   cyc1000:
@@ -243,12 +243,12 @@ targets:
     toplevel: CV_96
 
   cmod_a7_35t:
-    default_tool: vivado
     filesets : [mem_files, soc, cmod_a7_35t]
-    parameters : [memfile=blinky.hex, memsize, frequency=12]
-    tools:
-      vivado: {part : xc7a35tcpg236-1}
-    toplevel : servix
+    flow: vivado
+    flow_options:
+      part : xc7a35tcpg236-1
+    parameters : [memfile, memsize]
+    toplevel : servant_cmod_a7
 
   cyc1000:
     default_tool: quartus

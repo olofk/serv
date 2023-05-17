@@ -52,6 +52,13 @@ FPGA Pin W14 (1V8, pin 5 low speed connector) is used for UART Tx output with 11
 
     fusesoc run --target=chameleon96 servant
 
+CMOD A7 35t
+^^^^^^^^^^^
+
+FPGA Pin J18 is used for UART output with 57600 baud rate. btn0 is used for reset.
+
+    fusesoc run --target=cmod_a7_35t servant
+
 DE0 Nano
 ^^^^^^^^
 
