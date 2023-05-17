@@ -7,8 +7,10 @@ set_property -dict { PACKAGE_PIN A17   IOSTANDARD LVCMOS33 } [get_ports { q }]; 
 #set_property -dict { PACKAGE_PIN C16   IOSTANDARD LVCMOS33 } [get_ports { q }]; #IO_L13P_T2_MRCC_16 Sch=led[2]
 
 ## UART
-#set_property -dict { PACKAGE_PIN J18   IOSTANDARD LVCMOS33 } [get_ports { q }]; #IO_L7N_T1_D10_14 Sch=uart_rxd_out
+set_property -dict { PACKAGE_PIN J18   IOSTANDARD LVCMOS33 } [get_ports { o_uart_tx }]; #IO_L7N_T1_D10_14 Sch=uart_rxd_out
 #set_property -dict { PACKAGE_PIN J17   IOSTANDARD LVCMOS33 } [get_ports { q  }]; #IO_L7P_T1_D09_14 Sch=uart_txd_in
+
+set_property -dict { PACKAGE_PIN A18   IOSTANDARD LVCMOS33 } [get_ports { i_rst }]; #IO_L19N_T3_VREF_16 Sch=btn[0]
 
 set_property CFGBVS VCCO [current_design]
 set_property CONFIG_VOLTAGE 3.3 [current_design]
