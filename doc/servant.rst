@@ -172,3 +172,17 @@ Pin A6 is used for UART output with 115200 baud rate.
 
     fusesoc run --target=tinyfpga_bx servant
     tinyprog --program build/servant_1.0.1/tinyfpga_bx-icestorm/servant_1.0.1.bin
+
+Porting Servant to a new target
+-------------------------------
+
+Mostly any FPGA board can be used to run the Servant SoC. In its simplest form it just needs and FPGA with a clock input and an output that can be used to connect an UART or a LED.
+
+The porting process consists of FIXME steps.
+We will use `<name>` as a placeholder for the name of the FPGA board.
+1. Locate the pins used for clock input and for the outputs. Outputs should preferably be both a LED and an UART, but either works if not both are available. Optionally, locate an input pin connected to the reset as well. This is not required, but can be handy.
+2. Write a pin constraints file with your located pins in the format of the FPGA toolchain you intend to use. For Vivado this would be an .xdc file. For Quartus a .tcl file, for nextpnr a .pcf file and so on. Save this as `data/<name>.{pcf,ucf,xdc...}` in the SERV repo.
+3. Create a clock generation file
+4. Create a top-level
+5. Create a fileset
+6. Create a target
