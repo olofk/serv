@@ -45,6 +45,14 @@ blinky.hex change D10 to H5 (led[4]) in data/arty_a7_35t.xdc).
 
     fusesoc run --target=arty_a7_35t servant
 
+Arty S7 50T
+^^^^^^^^^^^
+
+Pin R12 (uart_rxd_out) is used for UART output with 57600 baud rate (to use
+blinky.hex change R12 to E18 (led[4]) in data/arty_s7_50t.xdc).
+
+    fusesoc run --target=arty_s7_50t servant
+
 Chameleon96 (Arrow 96 CV SoC Board)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
