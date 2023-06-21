@@ -3,7 +3,7 @@
 
 config SERV_TIMER
 	bool "SERV Timer"
-#	select TICKLESS_CAPABLE
+	select TICKLESS_CAPABLE
 	help
 	  This module implements a kernel device driver for the SERV
 	  timer driver. It provides the standard "system clock driver" interfaces.
