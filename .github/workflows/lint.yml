@@ -16,3 +16,5 @@ jobs:
       - run: pip3 install fusesoc
       - run: fusesoc library add $REPO $GITHUB_WORKSPACE/$REPO
       - run: fusesoc run --target=lint $VLNV
+      - run: fusesoc run --target=lint servant
+      - run: fusesoc run --target=lint serving
