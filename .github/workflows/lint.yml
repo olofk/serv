@@ -1,3 +1,5 @@
+name: Run linter
+
 on: [push, pull_request]
 
 jobs:
