@@ -1,4 +1,5 @@
-name: build-openlane-sky130
+name: Build GDS using OpenLANE and sky130 PDK
+
 on: [push]
 jobs:
   build-openlane:

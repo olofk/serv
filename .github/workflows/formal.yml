@@ -1,4 +1,5 @@
-name: run-formal
+name: Formal verification
+
 on: [push]
 jobs:
   formal:

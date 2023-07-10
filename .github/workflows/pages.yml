@@ -1,3 +1,5 @@
+name: Build documentation
+
 on:
   push:
     branches:
