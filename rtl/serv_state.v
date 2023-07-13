@@ -10,7 +10,7 @@ module serv_state
    input wire 	     i_new_irq,
    input wire 	     i_alu_cmp,
    output wire 	     o_init,
-   output wire 	     o_cnt_en,
+   output reg 	     o_cnt_en,
    output wire 	     o_cnt0to3,
    output wire 	     o_cnt12to31,
    output wire 	     o_cnt0,
@@ -18,7 +18,7 @@ module serv_state
    output wire 	     o_cnt2,
    output wire 	     o_cnt3,
    output wire 	     o_cnt7,
-   output reg 	     o_cnt_done,
+   output wire 	     o_cnt_done,
    output wire 	     o_bufreg_en,
    output wire 	     o_ctrl_pc_en,
    output reg 	     o_ctrl_jump,
@@ -60,23 +60,21 @@ module serv_state
    wire misalign_trap_sync;
 
    reg [4:2] o_cnt;
-   reg [3:0] o_cnt_r;
+   reg [3:0] cnt_r;
 
    reg 	     ibus_cyc;
    //Update PC in RUN or TRAP states
    assign o_ctrl_pc_en  = o_cnt_en & !o_init;
 
-   assign o_cnt_en = |o_cnt_r;
-
    assign o_mem_bytecnt = o_cnt[4:3];
 
    assign o_cnt0to3   = (o_cnt[4:2] == 3'd0);
    assign o_cnt12to31 = (o_cnt[4] | (o_cnt[3:2] == 2'b11));
-   assign o_cnt0 = (o_cnt[4:2] == 3'd0) & o_cnt_r[0];
-   assign o_cnt1 = (o_cnt[4:2] == 3'd0) & o_cnt_r[1];
-   assign o_cnt2 = (o_cnt[4:2] == 3'd0) & o_cnt_r[2];
-   assign o_cnt3 = (o_cnt[4:2] == 3'd0) & o_cnt_r[3];
-   assign o_cnt7 = (o_cnt[4:2] == 3'd1) & o_cnt_r[3];
+   assign o_cnt0 = (o_cnt[4:2] == 3'd0) & cnt_r[0];
+   assign o_cnt1 = (o_cnt[4:2] == 3'd0) & cnt_r[1];
+   assign o_cnt2 = (o_cnt[4:2] == 3'd0) & cnt_r[2];
+   assign o_cnt3 = (o_cnt[4:2] == 3'd0) & cnt_r[3];
+   assign o_cnt7 = (o_cnt[4:2] == 3'd1) & cnt_r[3];
 
    //Take branch for jump or branch instructions (opcode == 1x0xx) if
    //a) It's an unconditional branch (opcode[0] == 1)
@@ -121,6 +119,8 @@ module serv_state
 
    assign o_init = i_two_stage_op & !i_new_irq & !init_done;
 
+   assign o_cnt_done = (o_cnt[4:2] == 3'b111) & cnt_r[3];
+
    always @(posedge i_clk) begin
       //ibus_cyc changes on three conditions.
       //1. i_rst is asserted. Together with the async gating above, o_ibus_cyc
@@ -138,23 +138,32 @@ module serv_state
 	 init_done <= o_init & !init_done;
 	 o_ctrl_jump <= o_init & take_branch;
       end
-      o_cnt_done <= (o_cnt[4:2] == 3'b111) & o_cnt_r[2];
 
       //Need a strobe for the first cycle in the IDLE state after INIT
       stage_two_req <= o_cnt_done & o_init;
 
+      if (i_rst) begin
+	 if (RESET_STRATEGY != "NONE") begin
+	    init_done <= 1'b0;
+	    o_ctrl_jump <= 1'b0;
+	    stage_two_req <= 1'b0;
+	 end
+      end
+   end
+
+   always @(posedge i_clk) begin
       /*
        Because SERV is 32-bit bit-serial we need a counter than can count 0-31
-       to keep track of which bit we are currently processing. o_cnt and o_cnt_r
+       to keep track of which bit we are currently processing. o_cnt and cnt_r
        are used together to create such a counter.
        The top three bits (o_cnt) are implemented as a normal counter, but
-       instead of the two LSB, o_cnt_r is a 4-bit shift register which loops 0-3
-       When o_cnt_r[3] is 1, o_cnt will be increased.
+       instead of the two LSB, cnt_r is a 4-bit shift register which loops 0-3
+       When cnt_r[3] is 1, o_cnt will be increased.
 
        The counting starts when the core is idle and the i_rf_ready signal
        comes in from the RF module by shifting in the i_rf_ready bit as LSB of
        the shift register. Counting is stopped by using o_cnt_done to block the
-       bit that was supposed to be shifted into bit 0 of o_cnt_r.
+       bit that was supposed to be shifted into bit 0 of cnt_r.
 
        There are two benefit of doing the counter this way
        1. We only need to check four bits instead of five when we want to check
@@ -162,22 +171,21 @@ module serv_state
        we only need one LUT instead of two for each comparison.
        2. We don't need a separate enable signal to turn on and off the counter
        between stages, which saves an extra FF and a unique control signal. We
-       just need to check if o_cnt_r is not zero to see if the counter is
+       just need to check if cnt_r is not zero to see if the counter is
        currently running
        */
-      o_cnt <= o_cnt + {2'd0,o_cnt_r[3]};
-      o_cnt_r <= {o_cnt_r[2:0],(o_cnt_r[3] & !o_cnt_done) | (i_rf_ready & !o_cnt_en)};
+      o_cnt <= o_cnt + {2'd0,cnt_r[3]};
+      cnt_r <= {cnt_r[2:0],(cnt_r[3] & !o_cnt_done) | (i_rf_ready & !o_cnt_en)};
       if (i_rst) begin
 	 if (RESET_STRATEGY != "NONE") begin
 	    o_cnt   <= 3'd0;
-	    init_done <= 1'b0;
-	    o_ctrl_jump <= 1'b0;
-	    o_cnt_done <= 1'b0;
-	    o_cnt_r <= 4'b0000;
-	    stage_two_req <= 1'b0;
+	    cnt_r <= 4'b0000;
 	 end
       end
    end
+
+   always @(*)
+     o_cnt_en = |cnt_r;
 
    assign o_ctrl_trap = WITH_CSR & (i_e_op | i_new_irq | misalign_trap_sync);
 
