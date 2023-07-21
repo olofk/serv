@@ -71,9 +71,6 @@ class serv(pluginTemplate):
           objcopy_run = f'riscv64-unknown-elf-objcopy -O binary {elf} {file_name}.bin'
           utils.shellCommand(objcopy_run).run(cwd=test_dir)
 
-          objdump_run = f'riscv64-unknown-elf-objdump -D {elf} > {file_name}.disass'
-          utils.shellCommand(objdump_run).run(cwd=test_dir)
-
           self.makehex(f"{test_dir}/{file_name}.bin", f"{test_dir}/{file_name}.hex")
 
           #The behavior of --build-root in FuseSoC has changed since version 2.2.1
