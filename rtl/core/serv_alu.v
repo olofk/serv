@@ -1,7 +1,7 @@
-`default_nettype none
 module serv_alu
   (
    input wire 	    clk,
+   input wire       i_rst,
    //State
    input wire 	    i_en,
    input wire 	    i_cnt0,
@@ -51,18 +51,22 @@ module serv_alu
     i_bool_op will be 01 during shift operations, so by outputting zero under
     this condition we can safely or result_bool with i_buf
     */
-   wire result_bool = ((i_rs1 ^ i_op_b) & ~ i_bool_op[0]) | (i_bool_op[1] & i_op_b & i_rs1);
+   wire result_bool = ((i_rs1 ^ i_op_b) & ~ i_bool_op[0]) || 
+                      (i_bool_op[1] & i_op_b & i_rs1);
 
    assign o_rd = i_buf |
                  (i_rd_sel[0] & result_add) |
                  (i_rd_sel[1] & cmp_r & i_cnt0) |
                  (i_rd_sel[2] & result_bool);
 
-   always @(posedge clk) begin
-      add_cy_r <= i_en ? add_cy : i_sub;
-
-      if (i_en)
-	cmp_r <= o_cmp;
-   end
+   always @(posedge clk)
+    if (i_rst) begin
+        add_cy_r <= 1'b0;
+        cmp_r    <= 1'b0;
+    end
+    else begin
+        add_cy_r <= i_en ? add_cy : i_sub;
+        if (i_en) cmp_r <= o_cmp;
+	end
 
 endmodule
