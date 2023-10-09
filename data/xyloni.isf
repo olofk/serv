@@ -1,0 +1,54 @@
+# Efinity Interface Configuration
+# Version: 2023.1.150
+# Date: 2023-10-06 23:12
+#
+# Copyright (C) 2017 - 2023 Efinix Inc. All rights reserved.
+#
+# Device: T8F81
+# Package: 81-ball FBGA (final)
+# Project: xyloni
+# Configuration mode: active (x1)
+# Timing Model: C2 (final)
+
+
+# Device setting
+design.set_device_property("1A","VOLTAGE","3.3","IOBANK")
+design.set_device_property("1B","VOLTAGE","3.3","IOBANK")
+design.set_device_property("1C","VOLTAGE","1.1","IOBANK")
+design.set_device_property("2A","VOLTAGE","3.3","IOBANK")
+design.set_device_property("2B","VOLTAGE","3.3","IOBANK")
+
+# Create instance
+design.create_pll_input_clock_gpio("PLL_IN")
+design.create_input_gpio("i_rst")
+design.create_output_gpio("l2")
+design.create_output_gpio("l3")
+design.create_output_gpio("l4")
+design.create_output_gpio("o_uart_tx")
+design.create_output_gpio("q")
+design.create_block("pll_inst1","PLL")
+
+# Set property, non-defaults
+design.set_property("o_uart_tx","OUT_REG","REG")
+design.set_property("o_uart_tx","OUT_CLK_PIN","i_clk")
+design.set_property("pll_inst1","CLKOUT0_EN","1","PLL")
+design.set_property("pll_inst1","CLKOUT1_EN","0","PLL")
+design.set_property("pll_inst1","CLKOUT2_EN","0","PLL")
+design.set_property("pll_inst1","CLKOUT0_DIV","8","PLL")
+design.set_property("pll_inst1","CLKOUT0_PIN","i_clk","PLL")
+design.set_property("pll_inst1","LOCKED_PIN","i_pll_locked","PLL")
+design.set_property("pll_inst1","M","16","PLL")
+design.set_property("pll_inst1","N","1","PLL")
+design.set_property("pll_inst1","O","4","PLL")
+design.set_property("pll_inst1","REFCLK_FREQ","33.33","PLL")
+design.set_property("pll_inst1","RSTN_PIN","","PLL")
+
+# Set resource assignment
+design.assign_pkg_pin("PLL_IN","C3")
+design.assign_pkg_pin("i_rst","C5")
+design.assign_pkg_pin("l2","J6")
+design.assign_pkg_pin("l3","D7")
+design.assign_pkg_pin("l4","D8")
+design.assign_pkg_pin("o_uart_tx","F3")
+design.assign_pkg_pin("q","B3")
+design.assign_resource("pll_inst1","PLL_0","PLL")

@@ -197,6 +197,11 @@ filesets:
       - servant/servant_upduino2.v : {file_type : verilogSource}
       - data/upduino2.pcf : {file_type : PCF}
 
+  xyloni:
+    files:
+      - data/xyloni.isf: {file_type : ISF}
+      - servant/servant_xyloni.v : {file_type: verilogSource}
+
   zcu106:
     files:
       - servant/servus_clock_gen.v : {file_type : verilogSource}
@@ -557,6 +562,17 @@ targets:
       - align
       - with_csr=1
     toplevel : servant_sim
+
+  xyloni:
+    filesets: [mem_files, soc, xyloni]
+    flow: generic
+    flow_options:
+      tool: efinity
+      family: Trion
+      part: T8F81
+      timing: C2
+    parameters : [memfile, memsize]
+    toplevel : servant_xyloni
 
   zcu106:
     default_tool: vivado
