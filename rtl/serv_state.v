@@ -213,11 +213,8 @@ module serv_state
 					 (i_dbus_en   & i_mem_misalign));
 
 	 always @(posedge i_clk) begin
-	    if (o_cnt_done)
-	      misalign_trap_sync_r <= trap_pending & o_init;
-	    if (i_rst)
-	      if (RESET_STRATEGY != "NONE")
-		misalign_trap_sync_r <= 1'b0;
+	    if (i_ibus_ack | o_cnt_done | i_rst)
+	      misalign_trap_sync_r <= !(i_ibus_ack | i_rst) & ((trap_pending & o_init) | misalign_trap_sync_r);
 	 end
 	 assign misalign_trap_sync = misalign_trap_sync_r;
       end else

@@ -5,7 +5,7 @@ module serv_csr
    input wire 	    i_clk,
    input wire 	    i_rst,
    //State
-   input wire 	    i_init,
+   input wire 	    i_trig_irq,
    input wire 	    i_en,
    input wire 	    i_cnt0to3,
    input wire 	    i_cnt3,
@@ -74,7 +74,7 @@ module serv_csr
    assign o_csr_in = csr_in;
 
    always @(posedge i_clk) begin
-      if (!i_init & i_cnt_done) begin
+      if (i_trig_irq) begin
 	 timer_irq_r <= timer_irq;
 	 o_new_irq   <= timer_irq & !timer_irq_r;
       end
