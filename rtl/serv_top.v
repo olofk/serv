@@ -541,7 +541,7 @@ module serv_top
 	    .i_clk        (clk),
 	    .i_rst        (i_rst),
 	    //State
-	    .i_init       (init),
+	    .i_trig_irq   (wb_ibus_ack),
 	    .i_en         (cnt_en),
 	    .i_cnt0to3    (cnt0to3),
 	    .i_cnt3       (cnt3),
