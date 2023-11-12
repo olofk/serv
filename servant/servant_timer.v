@@ -14,9 +14,9 @@ module servant_timer
    localparam HIGH = WIDTH-1-DIVIDER;
 
    reg [WIDTH-1:0]   mtime;
-   reg [HIGH:0]      mtimecmp;
+   reg signed [HIGH:0]      mtimecmp;
 
-   wire [HIGH:0]     mtimeslice = mtime[WIDTH-1:DIVIDER];
+   wire signed [HIGH:0]     mtimeslice = mtime[WIDTH-1:DIVIDER];
 
    always @(mtimeslice) begin
       o_wb_dat = 32'd0;
@@ -27,7 +27,7 @@ module servant_timer
       if (i_wb_cyc & i_wb_we)
 	mtimecmp <= i_wb_dat[HIGH:0];
       mtime <= mtime + 'd1;
-      o_irq <= (mtimeslice >= mtimecmp);
+      o_irq <= (mtimeslice - mtimecmp >= 0);
       if (RESET_STRATEGY != "NONE")
 	if (i_rst) begin
 	   mtime <= 0;
