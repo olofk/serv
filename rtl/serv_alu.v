@@ -60,7 +60,9 @@ module serv_alu
 
    assign result_slt[0] = cmp_r & i_cnt0;
    generate
-      if (W>1) assign result_slt[B:1] = {B{1'b0}};
+      if (W>1) begin : gen_w_gt_1
+	 assign result_slt[B:1] = {B{1'b0}};
+      end
    endgenerate
 
    assign o_rd = i_buf |
