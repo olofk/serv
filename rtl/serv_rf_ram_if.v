@@ -62,9 +62,9 @@ module serv_rf_ram_if
 
    assign wtrig0 = rtrig1;
 
-   generate if (width == 2) begin
+   generate if (width == 2) begin : gen_w_eq_2
       assign wtrig1 =  wcnt[0];
-   end else begin
+   end else begin : gen_w_neq_2
       reg wtrig0_r;
       always @(posedge i_clk) wtrig0_r <= wtrig0;
       assign wtrig1 = wtrig0_r;
@@ -76,10 +76,11 @@ module serv_rf_ram_if
 			       wdata0_r;
 
    wire [raw-1:0] wreg  = wtrig1 ? i_wreg1 : i_wreg0;
-   generate if (width == 32)
-     assign o_waddr = wreg;
-   else
-     assign o_waddr = {wreg, wcnt[4:l2w]};
+   generate if (width == 32) begin : gen_w_eq_32
+      assign o_waddr = wreg;
+   end else begin : gen_w_neq_32
+      assign o_waddr = {wreg, wcnt[4:l2w]};
+   end
    endgenerate
 
    assign o_wen = (wtrig0 & wen0_r) | (wtrig1 & wen1_r);
@@ -105,10 +106,11 @@ module serv_rf_ram_if
    wire 	  rtrig0;
 
    wire [raw-1:0] rreg = rtrig0 ? i_rreg1 : i_rreg0;
-   generate if (width == 32)
-     assign o_raddr = rreg;
-   else
-     assign o_raddr = {rreg, rcnt[4:l2w]};
+   generate if (width == 32) begin : gen_rreg_eq_32
+      assign o_raddr = rreg;
+   end else begin : gen_rreg_neq_32
+      assign o_raddr = {rreg, rcnt[4:l2w]};
+   end
    endgenerate
 
    reg [width-1:0]  rdata0;
@@ -121,22 +123,24 @@ module serv_rf_ram_if
 
    assign rtrig0 = (rcnt[l2w-1:0] == 1);
 
-   generate if (width == 2)
-     assign o_ren = rgate;
-   else
-     assign o_ren = rgate & (rcnt[l2w-1:1] == 0);
+   generate if (width == 2) begin : gen_ren_w_eq_2
+      assign o_ren = rgate;
+   end else begin : gen_ren_w_neq_2
+      assign o_ren = rgate & (rcnt[l2w-1:1] == 0);
+   end
    endgenerate
 
    reg 	      rreq_r;
 
-   generate if (width>2)
-     always @(posedge i_clk) begin
-	rdata1 <= {1'b0,rdata1[width-2:1]}; //Optimize?
-	if (rtrig1)
-	  rdata1[width-2:0] <= i_rdata[width-1:1];
-     end
-   else
-     always @(posedge i_clk) if (rtrig1) rdata1 <= i_rdata[1];
+   generate if (width>2) begin : gen_rdata1_w_neq_2
+      always @(posedge i_clk) begin
+	 rdata1 <= {1'b0,rdata1[width-2:1]}; //Optimize?
+	 if (rtrig1)
+	   rdata1[width-2:0] <= i_rdata[width-1:1];
+      end
+   end else begin : gen_rdata1_w_eq_2
+      always @(posedge i_clk) if (rtrig1) rdata1 <= i_rdata[1];
+   end
    endgenerate
 
    always @(posedge i_clk) begin

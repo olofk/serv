@@ -33,7 +33,7 @@ module serv_immdec
    wire       signbit = imm31 & !i_csr_imm_en;
 
    generate
-      if (SHARED_RFADDR_IMM_REGS) begin
+      if (SHARED_RFADDR_IMM_REGS) begin : gen_shared_imm_regs
 	 assign o_rs1_addr = imm19_12_20[8:4];
 	 assign o_rs2_addr = imm24_20;
 	 assign o_rd_addr  = imm11_7;
@@ -57,7 +57,7 @@ module serv_immdec
 	    if (i_wb_en | (i_cnt_en & i_immdec_en[0]))
 	      imm11_7     <= i_wb_en ? i_wb_rdt[11:7] : {imm30_25[0], imm11_7[4:1]};
 	 end
-      end else begin
+      end else begin : gen_separate_imm_regs
 	 reg [4:0]  rd_addr;
 	 reg [4:0]  rs1_addr;
 	 reg [4:0]  rs2_addr;
@@ -91,5 +91,5 @@ module serv_immdec
    endgenerate
 
 	 assign o_imm = i_cnt_done ? signbit : i_ctrl[0] ? imm11_7[0] : imm24_20[0];
-	 
+
 endmodule

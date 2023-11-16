@@ -82,7 +82,7 @@ module serv_decode
    wire co_slt_or_branch = (opcode[4] | (funct3[1] & opcode[2]) | (imm30 & opcode[2] & opcode[3] & ~funct3[2])) & !co_mdu_op;
    wire co_branch_op = opcode[4];
    wire co_dbus_en    = ~opcode[2] & ~opcode[4];
-   wire co_mtval_pc   = opcode[4];   
+   wire co_mtval_pc   = opcode[4];
    wire co_mem_word   = funct3[1];
    wire co_rd_alu_en  = !opcode[0] & opcode[2] & !opcode[4] & !co_mdu_op;
    wire co_rd_mem_en  = (!opcode[2] & !opcode[0]) | co_mdu_op;
@@ -233,7 +233,7 @@ module serv_decode
    wire co_op_b_source = opcode[3];
 
    generate
-      if (PRE_REGISTER) begin
+      if (PRE_REGISTER) begin : gen_pre_register
 
          always @(posedge clk) begin
             if (i_wb_en) begin
@@ -296,7 +296,7 @@ module serv_decode
             o_rd_mem_en        = co_rd_mem_en;
          end
 
-      end else begin
+      end else begin : gen_post_register
 
          always @(*) begin
             funct3  = i_wb_rdt[14:12];

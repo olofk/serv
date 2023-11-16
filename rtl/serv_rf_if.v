@@ -53,7 +53,7 @@ module serv_rf_if
    wire 	     rd_wen = i_rd_wen & (|i_rd_waddr);
 
    generate
-   if (|WITH_CSR) begin
+   if (|WITH_CSR) begin : gen_csr
    wire 	     rd = (i_ctrl_rd ) |
 			  (i_alu_rd & i_rd_alu_en) |
 			  (i_csr_rd & i_rd_csr_en) |
@@ -119,7 +119,7 @@ module serv_rf_if
    assign o_csr = i_rdata1 & i_csr_en;
    assign o_csr_pc = i_rdata1;
 
-   end else begin
+   end else begin : gen_no_csr
       wire 	     rd = (i_ctrl_rd ) |
 			  (i_alu_rd & i_rd_alu_en) |
 			  (i_mem_rd & i_rd_mem_en);

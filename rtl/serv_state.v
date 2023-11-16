@@ -204,7 +204,7 @@ module serv_state
    assign o_ctrl_trap = WITH_CSR & (i_e_op | i_new_irq | misalign_trap_sync);
 
    generate
-      if (WITH_CSR) begin
+      if (WITH_CSR) begin : gen_csr
 	 reg 	misalign_trap_sync_r;
 
 	 //trap_pending is only guaranteed to have correct value during the
@@ -217,7 +217,8 @@ module serv_state
 	      misalign_trap_sync_r <= !(i_ibus_ack | i_rst) & ((trap_pending & o_init) | misalign_trap_sync_r);
 	 end
 	 assign misalign_trap_sync = misalign_trap_sync_r;
-      end else
-	assign misalign_trap_sync = 1'b0;
+      end else begin : gen_no_csr
+	 assign misalign_trap_sync = 1'b0;
+      end
    endgenerate
 endmodule

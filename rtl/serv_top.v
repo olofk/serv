@@ -182,7 +182,7 @@ module serv_top
    wire        wb_ibus_ack;
 
    generate
-      if (ALIGN) begin
+      if (ALIGN) begin : gen_align
          serv_aligner  align
            (
             .clk(clk),
@@ -197,7 +197,7 @@ module serv_top
             .o_wb_ibus_cyc(o_ibus_cyc),
             .i_wb_ibus_rdt(i_ibus_rdt),
             .i_wb_ibus_ack(i_ibus_ack));
-      end else begin
+      end else begin : gen_no_align
          assign  o_ibus_adr  = wb_ibus_adr;
          assign  o_ibus_cyc  = wb_ibus_cyc;
          assign  wb_ibus_rdt = i_ibus_rdt;
@@ -205,8 +205,8 @@ module serv_top
         end
    endgenerate
 
-   generate 
-      if (COMPRESSED) begin
+   generate
+      if (COMPRESSED) begin : gen_compressed
          serv_compdec compdec
            (
             .i_clk(clk),
@@ -214,7 +214,7 @@ module serv_top
             .i_ack(wb_ibus_ack),
             .o_instr(i_wb_rdt),
             .o_iscomp(iscomp));
-      end else begin
+      end else begin : gen_no_compressed
          assign i_wb_rdt =  wb_ibus_rdt;
          assign iscomp   =  1'b0;
       end
@@ -533,7 +533,7 @@ module serv_top
       .o_wb_sel     (o_dbus_sel));
 
    generate
-      if (|WITH_CSR) begin
+      if (|WITH_CSR) begin : gen_csr
 	 serv_csr
 	   #(.RESET_STRATEGY (RESET_STRATEGY))
 	 csr
@@ -567,7 +567,7 @@ module serv_top
 	    .i_csr_imm    (csr_imm),
 	    .i_rs1        (rs1),
 	    .o_q          (csr_rd));
-      end else begin
+      end else begin : gen_no_csr
 	 assign csr_in = 1'b0;
 	 assign csr_rd = 1'b0;
 	 assign new_irq = 1'b0;
@@ -645,10 +645,10 @@ module serv_top
 `endif
 
 generate
-  if (MDU) begin
+  if (MDU) begin: gen_mdu
     assign dbus_rdt = i_ext_ready ? i_ext_rd:i_dbus_rdt;
     assign dbus_ack = i_dbus_ack | i_ext_ready;
-  end else begin
+  end else begin : gen_no_mdu
     assign dbus_rdt = i_dbus_rdt;
     assign dbus_ack = i_dbus_ack;
   end
