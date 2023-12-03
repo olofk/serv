@@ -13,7 +13,7 @@ module serv_bufreg #(
    input wire 	      i_rs1_en,
    input wire 	      i_imm_en,
    input wire 	      i_clr_lsb,
-   input wire 	      i_sh_signed, 
+   input wire 	      i_sh_signed,
    //Data
    input wire 	      i_rs1,
    input wire 	      i_imm,

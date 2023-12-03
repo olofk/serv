@@ -1,13 +1,13 @@
 /* Copyright lowRISC contributors.
 Copyright 2018 ETH Zurich and University of Bologna, see also CREDITS.md.
 Licensed under the Apache License, Version 2.0, see LICENSE for details.
-SPDX-License-Identifier: Apache-2.0 
+SPDX-License-Identifier: Apache-2.0
 
 * Adapted to SERV by @Abdulwadoodd as part of the project under spring '22 LFX Mentorship program */
 
 /* Decodes RISC-V compressed instructions into their RV32i equivalent. */
 
-module serv_compdec 
+module serv_compdec
   (
    input wire i_clk,
    input  wire [31:0] i_instr,
@@ -31,7 +31,7 @@ module serv_compdec
 
   always @(posedge i_clk) begin
     if(i_ack)
-      o_iscomp <= !illegal_instr; 
+      o_iscomp <= !illegal_instr;
   end
 
   always @ (*) begin
@@ -71,7 +71,7 @@ module serv_compdec
       end
 
       // C1
- 
+
       // Register address checks for RV32E are performed in the regular instruction decoder.
       // If this check fails, an illegal instruction exception is triggered and the controller
       // writes the actual faulting instruction to mtval.
@@ -228,7 +228,5 @@ module serv_compdec
 
     endcase
   end
-  
+
   endmodule
-
-
