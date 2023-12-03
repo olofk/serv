@@ -122,3 +122,6 @@ uint32_t sys_timer_cycle_get_32(void)
 {
 	return mtime();
 }
+
+SYS_INIT(sys_clock_driver_init, PRE_KERNEL_2,
+	 CONFIG_SYSTEM_CLOCK_INIT_PRIORITY);
