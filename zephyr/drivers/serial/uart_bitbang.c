@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <kernel.h>
-#include <arch/cpu.h>
-#include <drivers/uart.h>
+#include <zephyr/kernel.h>
+#include <zephyr/arch/cpu.h>
+#include <zephyr/device.h>
+#include <zephyr/drivers/uart.h>
+
+#define DT_DRV_COMPAT olofk_serial
 
 #define reg_uart_data (*(volatile uint32_t*)UART_BITBANG_BASE)
 
@@ -50,8 +53,25 @@ static const struct uart_driver_api uart_bitbang_driver_api = {
 	.err_check        = NULL,
 };
 
+struct my_dev_data {
 
-DEVICE_AND_API_INIT(uart_bitbang, "uart0", &uart_bitbang_init,
-		    NULL, NULL,
-		    PRE_KERNEL_1, CONFIG_KERNEL_INIT_PRIORITY_DEVICE,
-		    &uart_bitbang_driver_api);
+};
+
+struct my_dev_cfg {
+
+};
+
+#define CREATE_MY_DEVICE(inst)                                       \
+     static struct my_dev_data my_data_##inst = {                    \
+     };                                                              \
+     static const struct my_dev_cfg my_cfg_##inst = {                \
+     };                                                              \
+     DEVICE_DT_INST_DEFINE(inst,                                     \
+                           uart_bitbang_init,                        \
+                           NULL,                                     \
+                           &my_data_##inst,                          \
+                           &my_cfg_##inst,                           \
+                           PRE_KERNEL_1, CONFIG_SERIAL_INIT_PRIORITY,  \
+                           &uart_bitbang_driver_api);
+
+DT_INST_FOREACH_STATUS_OKAY(CREATE_MY_DEVICE)
