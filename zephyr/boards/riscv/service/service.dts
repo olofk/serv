@@ -11,11 +11,23 @@
 / {
 	chosen {
 		zephyr,sram = &ram;
+		zephyr,console = &uart0;
 	};
 
 	ram: memory@0 {
 		compatible = "mmio-sram";
 		reg = <0x0 0x8000>;
+	};
+
+	soc {
+		compatible = "olofk,serv";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		uart0: serial@0 {
+			reg = <0x0 0x1>;
+			compatible = "olofk,serial";
+		};
 	};
 };
 

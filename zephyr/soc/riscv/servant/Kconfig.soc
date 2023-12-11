@@ -5,3 +5,4 @@ config SOC_RISCV32_SERVANT
 	bool "servant SoC"
 	select RISCV
 	select ATOMIC_OPERATIONS_C
+	select RISCV_ISA_EXT_ZICSR

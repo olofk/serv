@@ -8,10 +8,8 @@
  * common interrupt management code for riscv SOCs supporting the riscv
  * privileged architecture specification
  */
-#include <kernel_structs.h>
 #include <offsets.h>
-#include <toolchain.h>
-#include <linker/sections.h>
+#include <zephyr/linker/sections.h>
 #include <soc.h>
 
 /* exports */

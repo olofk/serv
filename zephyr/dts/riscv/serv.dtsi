@@ -8,4 +8,16 @@
 	#address-cells = <1>;
 	#size-cells = <1>;
 	compatible = "olofk,servant";
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu0: cpu@0 {
+			compatible = "olofk,serv";
+			riscv,isa = "rv32i_zicsr";
+			reg = <0>;
+			device_type = "cpu";
+		};
+	};
 };

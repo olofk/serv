@@ -9,6 +9,7 @@ arch: riscv32
 toolchain:
   - zephyr
 ram: 32
+vendor: olofk
 testing:
   ignore_tags:
     - net
