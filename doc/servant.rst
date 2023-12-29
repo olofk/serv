@@ -158,6 +158,19 @@ Pin D1 is used for UART output with 115200 baud rate.
     fusesoc run --target=orangecrab_r0.2 servant
     dfu-util -d 1209:5af0 -D build/servant_1.2.1/orangecrab_r0.2-trellis/servant_1.2.1.bit
 
+PolarFire Splash Kit
+^^^^^^^^^^^^^^^^^^^^
+
+Pin R5 is used for UART output with a 115200 baud rate, this is routed through
+the onboard FTDI transceiver. LED1 (Pin P7) serves as the generic GPIO.
+
+Pin P8 is used as the GPIO heartbeat with a 1Hz frequency and is connected to
+the board's LED2.
+
+Pin N4 (user reset) is used for the reset
+
+    fusesoc run --target=polarfire_splashkit servant --memfile=$SERV/sw/zephyr_hello.hex
+
 Saanlima Pipistrello (Spartan6 LX45)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
