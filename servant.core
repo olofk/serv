@@ -550,7 +550,7 @@ parameters:
 
   frequency:
     datatype    : int
-    description : PLL output frequency
+    description : PLL output frequency in MHz
     paramtype   : vlogparam
 
   MDU:
