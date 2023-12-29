@@ -1,0 +1,11 @@
+set_io -port_name {i_clk}	-DIRECTION INPUT	-pin_name H7 -io_std LVCMOS18 -fixed true
+set_io -port_name {resetb}	-DIRECTION INPUT	-pin_name N4 -io_std LVCMOS18 -fixed true
+set_io -port_name {o_led1}	-DIRECTION OUTPUT	-pin_name P7 -io_std LVCMOS18 -fixed true
+set_io -port_name {o_led2}	-DIRECTION OUTPUT	-pin_name P8 -io_std LVCMOS18 -fixed true
+set_io -port_name {o_led3}	-DIRECTION OUTPUT	-pin_name N7 -io_std LVCMOS18 -fixed true
+set_io -port_name {o_led4}	-DIRECTION OUTPUT	-pin_name N8 -io_std LVCMOS18 -fixed true
+set_io -port_name {o_led5}	-DIRECTION OUTPUT	-pin_name N6 -io_std LVCMOS18 -fixed true
+set_io -port_name {o_led6}	-DIRECTION OUTPUT	-pin_name N5 -io_std LVCMOS18 -fixed true
+set_io -port_name {o_led7}	-DIRECTION OUTPUT	-pin_name M8 -io_std LVCMOS18 -fixed true
+set_io -port_name {o_led8}	-DIRECTION OUTPUT	-pin_name M9 -io_std LVCMOS18 -fixed true
+set_io -port_name {o_uart_tx}	-DIRECTION OUTPUT	-pin_name R4 -io_std LVCMOS18 -fixed true

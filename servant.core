@@ -166,6 +166,12 @@ filesets:
       - servant/servis.v : {file_type : verilogSource}
       - data/pipistrello.ucf : {file_type : UCF}
 
+  polarfire_splashkit:
+    files:
+      - servant/servant_pf.v : {file_type : verilogSource}
+      - servant/servant_pf_clock_gen.v : {file_type : verilogSource}
+      - data/polarfire_splashkit.pdc : {file_type : PDC}
+
   sockit:
     files:
       - data/sockit.sdc : {file_type : SDC}
@@ -447,6 +453,18 @@ targets:
         package : csg324
         speed   : -3
     toplevel : servis
+
+  polarfire_splashkit:
+    default_tool: libero
+    description : Microsemi Polarfire Splash Kit
+    filesets : [mem_files, soc, polarfire_splashkit]
+    parameters : [memfile, memsize]
+    tools:
+      libero:
+        family : PolarFire
+        die : MPF300TS
+        package : FCG484
+    toplevel : servant_pf
 
   sim:
     default_tool: icarus
