@@ -1,5 +1,5 @@
 `default_nettype none
-module servant_clock_gen
+module service_clock_gen
   (
    input wire  i_clk,
    output wire o_clk,

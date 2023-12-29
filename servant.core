@@ -19,13 +19,15 @@ filesets:
     depend : [vlog_tb_utils]
 
   service:
-    files: [servant/ice40_pll.v, servant/service.v]
+    files:
+      - servant/ice40_pll.v
+      - servant/service_clock_gen.v
+      - servant/service.v
     file_type : verilogSource
     depend : ["fusesoc:utils:generators"]
 
   soc:
     files:
-      - servant/servant_clock_gen.v
       - servant/servant_timer.v
       - servant/servant_gpio.v
       - servant/servant_arbiter.v

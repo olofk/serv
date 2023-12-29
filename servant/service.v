@@ -11,7 +11,7 @@ module service
    wire      wb_clk;
    wire      wb_rst;
 
-   servant_clock_gen #(.PLL (PLL))
+   service_clock_gen #(.PLL (PLL))
    clock_gen
      (.i_clk (i_clk),
       .o_clk (wb_clk),
