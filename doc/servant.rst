@@ -133,6 +133,15 @@ Pin 9 is used for UART output with 57600 baud rate.
 
     iceprog build/servant_1.2.1/icestick-icestorm/servant_1.2.1.bin
 
+Machdyne Kolibri
+^^^^^^^^^^^^^^^^
+
+Pin B1 is used for UART output with 115200 baud rate. The serial port on Kolibri is accessible as a USB-CDC device.
+
+    fusesoc run --target=machdyne_kolibri servant
+
+    ldprog -Ks build/servant_1.2.1/machdyne_kolibri-icestorm/servant_1.2.1.bin
+
 Nandland Go Board
 ^^^^^^^^^^^^^^^^^
 
