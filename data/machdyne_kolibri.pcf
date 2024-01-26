@@ -1,0 +1,4 @@
+set_io clk48	G1
+set_io led		B11
+set_io tx		B1
+set_io rx		B2
