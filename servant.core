@@ -142,6 +142,11 @@ filesets:
       - servant/servant_lx9.v : {file_type : verilogSource}
       - data/lx9_microboard.ucf : {file_type : UCF}
 
+  machdyne_kolibri:
+    files:
+      - servant/servant_md_kolibri.v : {file_type : verilogSource}
+      - data/machdyne_kolibri.pcf : {file_type : PCF}
+
   nexys_2:
     files:
       - servant/servax_clock_gen.v : {file_type : verilogSource}
@@ -398,6 +403,18 @@ targets:
         package : csg324
         speed   : -2
     toplevel : servant_lx9
+
+  machdyne_kolibri:
+    default_tool: icestorm
+    description : Machdyne Kolibri FPGA Dongle
+    filesets : [mem_files, soc, machdyne_kolibri]
+    parameters : [memfile, memsize]
+    tools:
+    tools:
+      icestorm:
+        nextpnr_options : [--hx4k, --package, bg121, --freq, 48]
+        pnr: next
+    toplevel : servant_md_kolibri
 
   nexys_2_500:
     default_tool: ise
