@@ -30,13 +30,12 @@ filesets:
     files:
       - servant/servant_timer.v
       - servant/servant_gpio.v
-      - servant/servant_arbiter.v
       - servant/servant_mux.v
       -  "tool_quartus? (servant/servant_ram_quartus.sv)" : {file_type : systemVerilogSource}
       - "!tool_quartus? (servant/servant_ram.v)"
       - servant/servant.v
     file_type : verilogSource
-    depend : [serv, "mdu? (mdu)"]
+    depend : [servile, "mdu? (mdu)"]
 
   verilator_tb:
     files:
