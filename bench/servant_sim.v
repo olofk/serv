@@ -28,7 +28,7 @@ module servant_sim
        .align    (align[0:0]))
    dut(wb_clk, wb_rst, q);
 
-   assign pc_adr = dut.wb_ibus_adr;
-   assign pc_vld = dut.wb_ibus_ack;
+   assign pc_adr = dut.wb_mem_adr;
+   assign pc_vld = dut.wb_mem_ack;
 
 endmodule
