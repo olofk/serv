@@ -6,4 +6,5 @@ A CPU is only as good as its eosystem. In order to make use of SERV, it needs to
 
 Welcome to the reservoir, a pool of ready-made designs and subsystems for different purpsoses that you can use to quickly get started with SERV or integrate it into larger designs.
 
+.. include::   servile.rst
 .. include::   servant.rst
