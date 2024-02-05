@@ -122,6 +122,12 @@ For a more advanced example, we can also run the Dining philosophers demo
 
     fusesoc run --target=verilator_tb servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_sync.hex --memsize=16384
 
+...or... the blinky example (note that the ```uart_baudrate``` should not be defined for the blinky test)
+
+    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/blinky.hex --memsize=16384
+
+
+
 If the [toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) is installed, other applications can be tested by compiling the assembly prgram and converting to bin and then hex with makehex.py found in [`$SERV/sw`](/sw/). 
 
 :bulb:RISC-V Compressed Extension can be enabled by passing `--compressed=1` parameter. 
