@@ -5,12 +5,10 @@ name : ::serving:1.2.1
 filesets:
   rtl:
     files:
-      - serving/serving_arbiter.v
-      - serving/serving_mux.v
       - serving/serving_ram.v
       - serving/serving.v
     file_type : verilogSource
-    depend : [serv]
+    depend : [servile]
 
 targets:
   default:
