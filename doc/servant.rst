@@ -1,9 +1,11 @@
-Reference platform
-==================
+Servant : FPGA Reference platform
+=================================
+
+.. figure:: servant.png
+
+   Servant FPGA Reference platform
 
 SERV comes with a small FPGA-focused reference platform called Servant, which is capable of running Zephyr RTOS, the regression test suite and other software. The platform consists of SERV, a timer, memory and a 1-bit GPIO output pin.
-
-.. image:: servant.png
 
 Available targets
 -----------------
