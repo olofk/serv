@@ -61,7 +61,7 @@ module servile_mux
    generate
       if (sim) begin
 
-	 assign sig_en  = i_wb_cpu_we & (i_wb_cpu_adr == sim_sig_adr);
+	 assign sig_en  = |f & i_wb_cpu_we & (i_wb_cpu_adr == sim_sig_adr);
 	 assign halt_en = i_wb_cpu_we & (i_wb_cpu_adr == sim_halt_adr);
 
 	 reg [1023:0] signature_file;
