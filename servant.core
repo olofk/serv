@@ -544,6 +544,7 @@ targets:
     parameters :
       - RISCV_FORMAL
       - "mdu? (MDU=1)"
+      - cps
       - firmware
       - memsize
       - signature
@@ -576,6 +577,11 @@ parameters:
     datatype    : int
     description : Enable/Disable the Compressed extension
     paramtype   : vlogparam
+
+  cps:
+    datatype : bool
+    description: Write simulated cycles per second to a text file named cps
+    paramtype : plusarg
 
   firmware:
     datatype : file

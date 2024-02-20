@@ -5,6 +5,8 @@
 #include "verilated_vcd_c.h"
 #include "Vservant_sim.h"
 
+#include <ctime>
+
 using namespace std;
 
 static bool done;
@@ -126,6 +128,14 @@ int main(int argc, char **argv, char **env)
   if (arg_vcd_start[0])
     vcd_start = atoi(arg_vcd_start+11);
 
+  int cur_cycle = 0;
+  int last_cycle = 0;
+  std::time_t last_time = std::time(nullptr);
+  int cps_file = 0;
+  const char *arg_cps = Verilated::commandArgsPlusMatch("cps=");
+  if (arg_cps[0])
+    cps_file = open("cps", O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+
   bool dump = false;
   top->wb_clk = 1;
   bool q = top->q;
@@ -153,7 +163,16 @@ int main(int argc, char **argv, char **env)
     top->wb_clk = !top->wb_clk;
     main_time+=31.25;
 
+    if (cps_file) {
+      cur_cycle++;
+      if (std::time(nullptr) > last_time) {
+	dprintf(cps_file,"%d\n", (cur_cycle-last_cycle)/2);
+	last_cycle = cur_cycle;
+	last_time++;
+      }
+    }
   }
+  close(cps_file);
   close(tf);
   if (tfp)
     tfp->close();
