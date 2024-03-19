@@ -12,7 +12,7 @@ module serv_state
    input wire 	     i_new_irq,
    input wire 	     i_alu_cmp,
    output wire 	     o_init,
-   output reg 	     o_cnt_en,
+   output wire	     o_cnt_en,
    output wire 	     o_cnt0to3,
    output wire 	     o_cnt12to31,
    output wire 	     o_cnt0,
@@ -62,7 +62,7 @@ module serv_state
    wire misalign_trap_sync;
 
    reg [4:2] o_cnt;
-   reg [3:0] cnt_r;
+   wire [3:0] cnt_r;
 
    reg 	     ibus_cyc;
    //Update PC in RUN or TRAP states
@@ -153,7 +153,7 @@ module serv_state
       end
    end
 
-   always @(posedge i_clk) begin
+   generate
       /*
        Because SERV is 32-bit bit-serial we need a counter than can count 0-31
        to keep track of which bit we are currently processing. o_cnt and cnt_r
@@ -176,30 +176,33 @@ module serv_state
        just need to check if cnt_r is not zero to see if the counter is
        currently running
        */
-      if (W == 4) begin
-          if (i_rf_ready) o_cnt_en <= 1; else
-          if (o_cnt_done) o_cnt_en <= 0;
-          o_cnt <= o_cnt + { 2'b0, o_cnt_en };
-      end else if (W == 1) begin
-          o_cnt <= o_cnt + {2'd0,cnt_r[3]};
-          cnt_r <= {cnt_r[2:0],(cnt_r[3] & !o_cnt_done) | (i_rf_ready & !o_cnt_en)};
+      if (W == 1) begin : gen_cnt_w_eq_1
+	 reg [3:0] cnt_lsb;
+	 always @(posedge i_clk) begin
+            o_cnt <= o_cnt + {2'd0,cnt_r[3]};
+            cnt_lsb <= {cnt_lsb[2:0],(cnt_lsb[3] & !o_cnt_done) | (i_rf_ready & !o_cnt_en)};
+	    if (i_rst & (RESET_STRATEGY != "NONE")) begin
+	       o_cnt   <= 3'd0;
+	       cnt_lsb <= 4'b0000;
+	    end
+	 end
+	 assign cnt_r = cnt_lsb;
+	 assign o_cnt_en = |cnt_lsb;
+      end else if (W == 4) begin : gen_cnt_w_eq_4
+	 reg cnt_en;
+	 always @(posedge i_clk) begin
+            if (i_rf_ready) cnt_en <= 1; else
+            if (o_cnt_done) cnt_en <= 0;
+            o_cnt <= o_cnt + { 2'd0, cnt_en };
+	    if (i_rst & (RESET_STRATEGY != "NONE")) begin
+	       o_cnt   <= 3'd0;
+	       cnt_en <= 1'b0;
+	    end
+	 end
+	 assign cnt_r = 4'b1111;
+	 assign o_cnt_en = cnt_en;
       end
-      if (i_rst) begin
-         if (RESET_STRATEGY != "NONE") begin
-            o_cnt   <= 3'd0;
-            if (W == 1)
-                cnt_r <= 4'b0000;
-            else if (W == 4)
-                o_cnt_en <= 1'b0;
-         end
-      end
-   end
-
-   always @(*)
-   if (W == 1)
-     o_cnt_en = |cnt_r;
-   else if (W == 4)
-     cnt_r = 4'b1111;
+   endgenerate
 
    assign o_ctrl_trap = WITH_CSR & (i_e_op | i_new_irq | misalign_trap_sync);
 
