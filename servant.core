@@ -135,6 +135,11 @@ filesets:
 
   icev_wireless : {files: [data/icev_wireless.pcf  : {file_type : PCF}]}
 
+  gmm7550:
+    files:
+      - data/gmm7550.ccf : {file_type : CCF}
+      - servant/servant_gmm7550.v : {file_type : verilogSource}
+
   lx9_microboard:
     files:
       - servant/servant_lx9_clock_gen.v : {file_type : verilogSource}
@@ -382,6 +387,18 @@ targets:
         nextpnr_options: [--up5k, --freq, 16]
         pnr: next
     toplevel : service
+
+  gmm7550:
+    default_tool: gatemate
+    description: CologneChip GateMate FPGA Module
+    filesets : [mem_files, soc, gmm7550]
+    parameters : [memfile=blinky.hex, memsize=8192]
+    toplevel : servant_gmm7550
+    tools:
+      gatemate:
+        device : CCGM1A1
+        yosys_synth_options : [ -nomx8 ]
+        p_r_options : [ +uCIO -cCP ]
 
   lint:
     filesets : [soc]
