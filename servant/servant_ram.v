@@ -38,7 +38,9 @@ module servant_ram
    initial
      if(|memfile) begin
 `ifndef ISE
+`ifndef CCGM
 	$display("Preloading %m from %s", memfile);
+`endif
 `endif
 	$readmemh(memfile, mem);
      end
