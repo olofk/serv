@@ -155,7 +155,7 @@ Pin 56 is used as the GPIO output which is connected to the board's LED1. Due to
 Nexys 2
 ^^^^^^^
 
-Pmod pin JA1 is conntected to UART tx with 57600 baud rate. A USB to TTL connector is used to display to hello world message on the serial monitor.
+Pmod pin JA1 is connected to UART tx with 57600 baud rate. A USB to TTL connector is used to display to hello world message on the serial monitor.
 (To use blinky.hex change L15 to J14 (led[0]) in data/nexys_2.ucf).
 
     fusesoc run --target=nexys_2_500 servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello.hex
@@ -208,7 +208,7 @@ Pin A6 is used for UART output with 115200 baud rate.
 Porting Servant to a new target
 -------------------------------
 
-Mostly any FPGA board can be used to run the Servant SoC. In its simplest form it just needs and FPGA with a clock input and an output that can be used to connect an UART or a LED.
+Mostly any FPGA board can be used to run the Servant SoC. In its simplest form it just needs an FPGA with a clock input and an output that can be used to connect an UART or a LED.
 
 The porting process consists of FIXME steps.
 We will use `<name>` as a placeholder for the name of the FPGA board.

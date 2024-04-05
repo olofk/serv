@@ -71,7 +71,7 @@ module servant_orangecrab
         .CLKOS2(),          // secondary output
         .CLKOS3(),          // secondary output
         .LOCK(pll_locked),  // lock indicator
-        .INTLOCK(),         // internal lock indictor
+        .INTLOCK(),         // internal lock indicator
         .REFCLK(),          // output of ref select mux
         .CLKINTFB()         // internal fb
     );

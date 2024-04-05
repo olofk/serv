@@ -12,9 +12,9 @@ In our case, DUT is SERV core and reference is the [sail-riscv](https://github.c
         sudo apt-get install -y gcc-riscv64-unknown-elf
 > :bulb: By default, RISCOF plugins uses [RV32](https://github.com/riscv-collab/riscv-gnu-toolchain#:~:text=To%20build%20the%2032%2Dbit%20RV32GC%20toolchain%2C%20use%3A) toolchain for compiling native `rv32` code. For SERV, this dependency has been removed from the plugin as RV64 is sufficient for 32-bit systems as well.
     
-- [SAIL-RISCV](https://github.com/riscv/sail-riscv) - The reference model can be build by following [these](https://riscof.readthedocs.io/en/stable/installation.html#install-plugin-models) instructions. The pre-built binaries of sail-riscv is available in [`bin`](/verif/bin/) directory. Extract the tarball somewhere and add the directory containing `riscv_sim_RV32` to your PATH
+- [SAIL-RISCV](https://github.com/riscv/sail-riscv) - The reference model can be built by following [these](https://riscof.readthedocs.io/en/stable/installation.html#install-plugin-models) instructions. The pre-built binaries of sail-riscv is available in [`bin`](/verif/bin/) directory. Extract the tarball somewhere and add the directory containing `riscv_sim_RV32` to your PATH
 
-- [RISCOF](https://riscof.readthedocs.io/en/stable/installation.html#install-python) - If you have installed [Python](https://riscof.readthedocs.io/en/stable/installation.html#install-python), run the folllowing command to [install RISCOF](https://riscof.readthedocs.io/en/stable/installation.html#).
+- [RISCOF](https://riscof.readthedocs.io/en/stable/installation.html#install-python) - If you have installed [Python](https://riscof.readthedocs.io/en/stable/installation.html#install-python), run the following command to [install RISCOF](https://riscof.readthedocs.io/en/stable/installation.html#).
 
         pip3 install riscof
 
@@ -55,7 +55,7 @@ if the tests are already installed and just needs to be updated.
     └── ...
 
 ## Running Compliance tests
-After completing all the steps in [Getting started](/README.md) followed by the [Prerequisites](##Prerequisites), we are all set to run the complaince tests.
+After completing all the steps in [Getting started](/README.md) followed by the [Prerequisites](#prerequisites), we are all set to run the compliance tests.
 
 :o: All the RISCOF commands will be run from the workspace
 
@@ -64,9 +64,9 @@ After completing all the steps in [Getting started](/README.md) followed by the 
     --env=riscv-arch-test/riscv-test-suite/env
 
 - `--config` - Configuration file is passed using this flag which contains the paths and the names of DUT and Reference plugins.
-- `--suite` - The arch-tests are passed to RISCOF using this flag. In the above command, it points `I` test directory. We can change path to `M`, `C`, `privilege` or `Zifencei` directories to run the respective tests.. 
+- `--suite` - The arch-tests are passed to RISCOF using this flag. In the above command, it points `I` test directory. We can change path to `M`, `C`, `privilege` or `Zifencei` directories to run the respective tests. 
 - `--env` - The header files of test framework are passed using this flag.
 
 > :bulb: Other optional arguments of RISCOF command can be found [here](https://riscof.readthedocs.io/en/stable/commands.html#run)
 
-When RISCOF run command successfully executed: an `html` report is generated which depicts the results of the tests. And a directory named `riscof_work` is created in the workspace which contains all the log files, signatures, executeables for Reference model and/or DUT.
+When RISCOF run command successfully executed: an `html` report is generated which depicts the results of the tests. And a directory named `riscof_work` is created in the workspace which contains all the log files, signatures, executables for Reference model and/or DUT.

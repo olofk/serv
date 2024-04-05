@@ -1,7 +1,7 @@
 Modules
 -------
 
-SERV is a bit-serial CPU which means that the internal datapath is one bit wide. :ref:`dataflow` show the internal dataflow. For each instruction, data is read from the register file or the immediate fields of the instruction word and the result of the operation is stored back into the register file. Reading and writing memory is handled through the memory interface module.
+SERV is a bit-serial CPU which means that the internal datapath is one bit wide. :ref:`dataflow` shows the internal dataflow. For each instruction, data is read from the register file or the immediate fields of the instruction word and the result of the operation is stored back into the register file. Reading and writing memory is handled through the memory interface module.
 
 .. _dataflow:
 
@@ -28,7 +28,7 @@ serv_alu
 
 serv_alu handles alu operations. The first input operand (A) comes from i_rs1 and the second operand (B) comes from i_rs2 or i_imm depending on the type of operation. The data passes through the add/sub or bool logic unit and finally ends up in o_rd to be written to the destination register. The output o_cmp is used for conditional branches to decide whether or not to take the branch.
 
-The add/sub unit can do additions A+B or subtractions A-B by converting it to A+B̅+1. Subtraction mode (i_sub = 1) is also used for the comparisions in the slt* and conditional branch instructions. The +1 used in subtraction mode is done by preloading the carry input with 1. Less-than comparisons are handled by converting the expression A<B to A-B<0 and checking the MSB, which will be set when the result is less than 0. This however requires sign-extending the operands to 33-bit inputs. For signed operands (when i_cmp_sig is set), the extra bit is the same as the MSB. For unsigned, the extra bit is always 0. Because the ALU is only active for 32 cycles, the 33rd bit must be calculated in parallel to the ordinary addition. The result from this operations is available in result_lt. For equality checks, result_eq checks that all bits are 0 from the subtraction.
+The add/sub unit can do additions A+B or subtractions A-B by converting it to A+B̅+1. Subtraction mode (i_sub = 1) is also used for the comparisons in the slt* and conditional branch instructions. The +1 used in subtraction mode is done by preloading the carry input with 1. Less-than comparisons are handled by converting the expression A<B to A-B<0 and checking the MSB, which will be set when the result is less than 0. This however requires sign-extending the operands to 33-bit inputs. For signed operands (when i_cmp_sig is set), the extra bit is the same as the MSB. For unsigned, the extra bit is always 0. Because the ALU is only active for 32 cycles, the 33rd bit must be calculated in parallel to the ordinary addition. The result from this operations is available in result_lt. For equality checks, result_eq checks that all bits are 0 from the subtraction.
 
 .. image:: serv_alu_int.png
 
@@ -37,7 +37,7 @@ serv_bufreg
 
 .. image:: serv_bufreg.png
 
-For two-stage operations, serv_bufreg holds data between stages. This data can be the effective address for branches or load/stores or data to be shifted for shift ops. It has a serial output for streaming out results during stage two and a parallel output that forms the dbus address. serv_bufreg also keeps track of the two lsb when calculating adresses. This is used to check for alignment errors. In order to support these different modes, the input to the shift register can come from rs1, the immediate (imm), rs1+imm or looped back from the shift register output. The latter is used for shift operations. For some operations, the LSB of the immediate is cleared before written to the shift register. The two LSB of the shift register are special. When the shift register is loaded, these two get written first before the rest of the register is filled up. This allows the memory interface to check data/address alignment early.
+For two-stage operations, serv_bufreg holds data between stages. This data can be the effective address for branches or load/stores or data to be shifted for shift ops. It has a serial output for streaming out results during stage two and a parallel output that forms the dbus address. serv_bufreg also keeps track of the two lsb when calculating addresses. This is used to check for alignment errors. In order to support these different modes, the input to the shift register can come from rs1, the immediate (imm), rs1+imm or looped back from the shift register output. The latter is used for shift operations. For some operations, the LSB of the immediate is cleared before written to the shift register. The two LSB of the shift register are special. When the shift register is loaded, these two get written first before the rest of the register is filled up. This allows the memory interface to check data/address alignment early.
 
 .. image:: serv_bufreg_int.png
 
@@ -46,7 +46,7 @@ serv_bufreg2
 
 .. image:: serv_bufreg2.png
 
-serv_bugreg2 is a 32-bit buffer register with some special features. It is used for shift operations to store the shift amount. It's used in load and store operations to store the data to be written or be read from the data bus, and it holds rs2 for the SERV extension interface. For shift and store operations, the register is shifted in from MSB when dat_en is asserted, while for loads and uses of the extension interface, the whole data word is written to when the i_load signal is asserted. Once the data is in the buffer, it is used differently depending on the operation. For stores and the extension interface the whole buffer is directly connected to the data bus as a 32-bit register. For load operations, the data is fed out serially once it has been fetched from the data bus. To better support load operations of varying sizes the buffer contains logic for reading out data serially from any of the byte LSBs of the 32-bit word. Finally, in shift mode, the 6 LSB of the register is used as a downcounter that is initialized during the init stage and then counts the remaining number of steps to shift the data and signals using sh_done and sh_done_r when finished.
+serv_bufreg2 is a 32-bit buffer register with some special features. It is used for shift operations to store the shift amount. It's used in load and store operations to store the data to be written or be read from the data bus, and it holds rs2 for the SERV extension interface. For shift and store operations, the register is shifted in from MSB when dat_en is asserted, while for loads and uses of the extension interface, the whole data word is written to when the i_load signal is asserted. Once the data is in the buffer, it is used differently depending on the operation. For stores and the extension interface the whole buffer is directly connected to the data bus as a 32-bit register. For load operations, the data is fed out serially once it has been fetched from the data bus. To better support load operations of varying sizes the buffer contains logic for reading out data serially from any of the byte LSBs of the 32-bit word. Finally, in shift mode, the 6 LSB of the register is used as a downcounter that is initialized during the init stage and then counts the remaining number of steps to shift the data and signals using sh_done and sh_done_r when finished.
 
 .. image:: serv_bufreg2_int.png
 
@@ -64,7 +64,7 @@ serv_ctrl
 
 .. image:: serv_ctrl.png
 
-serv_ctrl keeps track of the current PC and contains the logic needed to calculate the next PC. The PC is stored in shift register with a parellel output connected to the instruction bus.
+serv_ctrl keeps track of the current PC and contains the logic needed to calculate the next PC. The PC is stored in shift register with a parallel output connected to the instruction bus.
 
 The new PC can come from three sources. For normal instructions, it is incremented by four, which is the next 32-bit address. Jumps can be absolute or relative to the current PC. Absolute jumps are precalculated in serv_bufreg and written directly to the PC. PC relative jumps have the offset part precalculated in serv_bufreg which gets added to the current PC before storing as the new PC. The third source for the new PC comes from the CSR registers when entering or returning traps.
 
@@ -281,7 +281,7 @@ External timer interrupts and ecall/ebreak are also one-stage operations with so
 Two-stage operations
 ::::::::::::::::::::
 
-Some operations need to be executed in two stages. In the first stage the operands are read out from the instruction immediate fields and the rs1/rs2 registers. In the second stage rd and the PC are updated with the results from the operation. The operation-specific things happen between the aformentioned stages. SERV has four types of four two-stage operations; memory, shift, slt and branch operations. In all cases the first stage is distinguished by having the init signal raised and only performing reads from the RF.
+Some operations need to be executed in two stages. In the first stage the operands are read out from the instruction immediate fields and the rs1/rs2 registers. In the second stage rd and the PC are updated with the results from the operation. The operation-specific things happen between the aforementioned stages. SERV has four types of four two-stage operations; memory, shift, slt and branch operations. In all cases the first stage is distinguished by having the init signal raised and only performing reads from the RF.
 
 .. wavedrom::
 

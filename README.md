@@ -36,7 +36,7 @@ SERV can be easily integrated into any design, but if you are looking at just qu
 
 [CoreScore](https://corescore.store/) is an award-giving benchmark for FPGAs and their synthesis/P&R tools. It tests how many SERV cores that can be put into a particular FPGA.
 
-[Observer](https://github.com/olofk/observer) is a configurable and software-programmable sensor aggregation platform for heterogenous sensors.
+[Observer](https://github.com/olofk/observer) is a configurable and software-programmable sensor aggregation platform for heterogeneous sensors.
 
 [Subservient](https://github.com/olofk/subservient/) is a small technology-independent SERV-based SoC intended for ASIC implementations together with a single-port SRAM.
 
@@ -65,7 +65,7 @@ All the following commands will be run from this directory unless otherwise stat
         $ fusesoc library add serv https://github.com/olofk/serv
     >:warning: The SERV repo will now be available in `$WORKSPACE/fusesoc_libraries/serv`. We will refer to that directory as `$SERV`.
 - Install latest version of [Verilator](https://www.veripool.org/wiki/verilator)
-- (Optional) To support RISC-V M-extension extension, Multiplication and Division unit (MDU) can be added included into the SERV as a seprate library.
+- (Optional) To support RISC-V M-extension extension, Multiplication and Division unit (MDU) can be added included into the SERV as a separate library.
 
         $ fusesoc library add mdu https://github.com/zeeshanrafique23/mdu
     MDU will be available in `$WORKSPACE/fusesoc_libraries/mdu`
@@ -128,7 +128,7 @@ For a more advanced example, we can also run the Dining philosophers demo
 
 
 
-If the [toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) is installed, other applications can be tested by compiling the assembly prgram and converting to bin and then hex with makehex.py found in [`$SERV/sw`](/sw/). 
+If the [toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) is installed, other applications can be tested by compiling the assembly program and converting to bin and then hex with makehex.py found in [`$SERV/sw`](/sw/). 
 
 :bulb:RISC-V Compressed Extension can be enabled by passing `--compressed=1` parameter. 
 
