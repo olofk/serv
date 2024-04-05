@@ -10,7 +10,7 @@
 1.2.0 2022-07-25 Olof Kindgren
 ======================================================
 
-* New Servant ports: EBAZ4205, Chameleion96, Nexys2, Alinx AX309
+* New Servant ports: EBAZ4205, Chameleon96, Nexys2, Alinx AX309
 * Support for M ISA extension
 * Support for C ISA extension
 * Fix occasionally wrong sign on immediates

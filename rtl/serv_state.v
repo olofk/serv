@@ -105,10 +105,10 @@ module serv_state
    assign o_rf_rd_en = i_rd_op & !o_init;
 
    /*
-    bufreg is used during mem. branch and shift operations
+    bufreg is used during mem, branch, and shift operations
 
     mem : bufreg is used for dbus address. Shift in data during phase 1.
-          Shift out during phase 2 if there was an misalignment exception.
+          Shift out during phase 2 if there was a misalignment exception.
 
     branch : Shift in during phase 1. Shift out during phase 2
 
@@ -127,7 +127,7 @@ module serv_state
       //ibus_cyc changes on three conditions.
       //1. i_rst is asserted. Together with the async gating above, o_ibus_cyc
       //   will be asserted as soon as the reset is released. This is how the
-      //   first instruction is fetced
+      //   first instruction is fetched
       //2. o_cnt_done and o_ctrl_pc_en are asserted. This means that SERV just
       //   finished updating the PC, is done with the current instruction and
       //   o_ibus_cyc gets asserted to fetch a new instruction
