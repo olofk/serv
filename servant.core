@@ -128,6 +128,13 @@ filesets:
       - servant/servix_ebaz4205.v : {file_type : verilogSource}
       - data/ebaz4205.xdc : {file_type : xdc}
 
+  ecp5_evn:
+    files:
+      - data/ecp5_evn.lpf : {file_type : LPF}
+      - servant/ecp5_evn_pll.v : {file_type : verilogSource}
+      - servant/servant_ecp5_evn_clock_gen.v : {file_type : verilogSource}
+      - servant/servant_ecp5_evn.v : {file_type : verilogSource}
+
   go_board:
     files:
       - data/go_board.pcf : {file_type : PCF}
@@ -348,6 +355,16 @@ targets:
     tools:
       vivado: {part : xc7z010clg400-1}
     toplevel : servix_ebaz4205
+
+  ecp5_evn:
+    default_tool: trellis
+    description : ECP5 evaluation board
+    filesets : [mem_files, soc, ecp5_evn]
+    parameters : [memfile, memsize]
+    tools:
+      trellis:
+        nextpnr_options : [--package, CABGA381, --um5g-85k]
+    toplevel: servant_ecp5_evn
 
   go_board:
     default_tool : icestorm
