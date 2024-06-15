@@ -1,7 +1,7 @@
 `default_nettype none
 module servant_tb;
 
-   parameter memfile = "";
+   parameter memfile = "hello_uart.hex";
    parameter memsize = 8192;
    parameter with_csr = 1;
 

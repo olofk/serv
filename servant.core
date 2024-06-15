@@ -12,6 +12,7 @@ filesets:
 
   servant_tb:
     files:
+      - sw/hello_uart.hex : {file_type: user, copyto: .}
       - bench/servant_sim.v
       - bench/uart_decoder.v
       - bench/servant_tb.v
