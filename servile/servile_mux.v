@@ -92,7 +92,7 @@ module servile_mux
       end else begin
 	 assign sig_en = 1'b0;
 	 assign halt_en = 1'b0;
-	 always @(*) sim_ack = 1'b0;
+	 initial sim_ack = 1'b0;
       end
    endgenerate
 
