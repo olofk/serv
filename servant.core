@@ -1,6 +1,7 @@
 CAPI=2:
 
 name : ::servant:1.2.1
+description: Simple reference system for SERV
 
 filesets:
   # Common filesets
@@ -243,6 +244,7 @@ targets:
 
   ac701:
     default_tool: vivado
+    description: AC701 Evaluation Kit
     filesets : [mem_files, soc, ac701]
     parameters : [memfile, memsize, frequency=32]
     tools:
@@ -272,6 +274,7 @@ targets:
 
   arty_a7_35t:
     default_tool: vivado
+    description: Digilent Arty A7-35
     filesets : [mem_files, soc, arty_a7_35t]
     parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET]
     tools:
@@ -280,6 +283,7 @@ targets:
 
   arty_s7_50t:
     default_tool: vivado
+    description: Digilent Arty S7-50
     filesets : [mem_files, soc, arty_s7_50t]
     parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET]
     tools:
@@ -312,6 +316,7 @@ targets:
     toplevel: CV_96
 
   cmod_a7_35t:
+    description: Digilent CMOD A7-35
     filesets : [mem_files, soc, cmod_a7_35t]
     flow: vivado
     flow_options:
@@ -332,6 +337,7 @@ targets:
 
   de0_nano:
     default_tool : quartus
+    description: Terasic DE0 Nano
     filesets : [mem_files, soc, de0_nano]
     parameters : [memfile, memsize]
     tools:
@@ -384,6 +390,7 @@ targets:
 
   go_board:
     default_tool : icestorm
+    description: Nandland Go Board
     filesets : [mem_files, soc, go_board]
     tools:
       icestorm:
@@ -393,6 +400,7 @@ targets:
 
   icebreaker:
     default_tool : icestorm
+    description: 1Bit Squared iCEBreaker
     filesets : [mem_files, soc, service, icebreaker]
     generate: [ice40pll : {freq_out : 16}]
     parameters : [memfile, memsize, PLL=ICE40_PAD]
@@ -404,6 +412,7 @@ targets:
 
   icestick:
     default_tool : icestorm
+    description: Lattice iCEstick
     filesets : [mem_files, soc, service, icestick]
     generate: [ice40pll: {freq_in : 12, freq_out : 32}]
     parameters : [memfile=blinky.hex, memsize=7168, PLL=ICE40_CORE]
@@ -427,6 +436,7 @@ targets:
 
   icev_wireless:
     default_tool : icestorm
+    description: ICE-V Wireless
     filesets : [mem_files, soc, service, icev_wireless]
     generate: [ice40pll : {freq_out : 16}]
     parameters : [memfile, memsize, PLL=ICE40_PAD]
@@ -449,6 +459,7 @@ targets:
         p_r_options : [ +uCIO -cCP ]
 
   lint:
+    description: Run static code checks (linting)
     filesets : [soc]
     flow: lint
     flow_options:
@@ -495,6 +506,7 @@ targets:
 
   nexys_2_500:
     default_tool: ise
+    description: Digilent Nexys 2-500
     filesets : [mem_files, soc, nexys_2]
     parameters : [memfile, memsize, compressed]
     tools:
@@ -507,6 +519,7 @@ targets:
 
   nexys_2_1200:
     default_tool: ise
+    description: Digilent Nexys 2-1200
     filesets : [mem_files, soc, nexys_2]
     parameters : [memfile, memsize, compressed]
     tools:
@@ -518,6 +531,7 @@ targets:
     toplevel : servax
 
   nexys_a7:
+    description: Digilent Nexys A7
     filesets : [mem_files, soc, nexys_a7]
     flow: vivado
     flow_options:
@@ -562,6 +576,7 @@ targets:
 
   sim:
     default_tool: icarus
+    description: Simulation target
     filesets : [soc, servant_tb]
     parameters :
       - RISCV_FORMAL
@@ -583,6 +598,7 @@ targets:
     toplevel: servive
 
   tinyfpga_bx:
+    description: TinyFPGA BX
     filesets : [mem_files, soc, service, tinyfpga_bx]
     flow: icestorm
     flow_options:
@@ -605,6 +621,7 @@ targets:
 
   upduino2:
     default_tool : icestorm
+    description: Upduino2
     filesets : [mem_files, soc, upduino2]
     parameters : [memfile, memsize]
     tools:
@@ -614,6 +631,7 @@ targets:
     toplevel : servant_upduino2
 
   verilator_tb:
+    description: Verilator testbench
     filesets : [soc, verilator_tb]
     flow: sim
     flow_options:
