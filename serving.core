@@ -1,6 +1,7 @@
 CAPI=2:
 
 name : ::serving:1.2.1
+description: SERV-based subsystem for FPGAs
 
 filesets:
   rtl:
@@ -16,6 +17,7 @@ targets:
 
   lint:
     default_tool : verilator
+    description: Run static code checks (linting)
     filesets : [rtl]
     tools:
       verilator:
