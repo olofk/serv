@@ -19,6 +19,7 @@ targets:
     filesets: [rtl]
 
   lint:
+    description: Run static code checks (linting)
     filesets: [rtl]
     flow: lint
     flow_options:

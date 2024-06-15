@@ -45,6 +45,7 @@ targets:
 
   lint:
     default_tool : verilator
+    description: Run static code checks (linting)
     filesets : [core]
     tools:
       verilator:
@@ -55,6 +56,7 @@ targets:
 
   sky130:
     default_tool : openlane
+    description: Create GDSII for SkyWater 130nm using OpenLANE
     filesets : [core, openlane]
     toplevel : serv_synth_wrapper
 
