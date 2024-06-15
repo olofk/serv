@@ -1,6 +1,6 @@
 CAPI=2:
 
-name : ::serving:1.2.1
+name : ::serving:1.3.0
 description: SERV-based subsystem for FPGAs
 
 filesets:
