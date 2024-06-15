@@ -8,7 +8,7 @@ logger = logging.getLogger()
 
 class serv(pluginTemplate):
     __model__ = "serv"
-    __version__ = "1.2.1"
+    __version__ = "1.3.0"
 
     def __init__(self, *args, **kwargs):
         sclass = super().__init__(*args, **kwargs)
@@ -78,7 +78,7 @@ class serv(pluginTemplate):
           #to the old one
           exe = 'servant_test/verilator_tb/Vservant_sim'
           if not os.path.exists(exe):
-              exe = 'servant_test/servant_1.2.1/verilator_tb/Vservant_sim'
+              exe = 'servant_test/servant_1.3.0/verilator_tb/Vservant_sim'
           
           sigdump_run = [exe,
                          "+timeout=1000000000",
