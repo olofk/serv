@@ -24,6 +24,17 @@ Now we're ready to build. Note, for all the cases below, it's possible to run wi
 (or any other suitable program) as the last argument to preload the LED blink example
 instead of hello world.
 
+AC701
+^^^^^
+
+    fusesoc run --target=ac701 servant
+
+Alchistry AU
+^^^^^^^^^^^^
+
+    fusesoc run --target=alchistry_au servant
+
+
 Alhambra II
 ^^^^^^^^^^^
 
@@ -69,6 +80,11 @@ FPGA Pin J18 is used for UART output with 57600 baud rate. btn0 is used for rese
 
     fusesoc run --target=cmod_a7_35t servant
 
+CYC1000
+^^^^^^^
+
+    fusesoc run --target=cyc1000 servant
+
 DE0 Nano
 ^^^^^^^^
 
@@ -110,6 +126,11 @@ change B20 to W14 (red led) in `data/ebaz4205.xdc` file).
 
 Reference: https://github.com/fusesoc/blinky#ebaz4205-development-board
 
+ECP5 EVN
+^^^^^^^^
+
+    fusesoc run --target=ecp5_evn servant
+
 Icebreaker
 ^^^^^^^^^^
 
@@ -143,6 +164,16 @@ Pin 9 is used for UART output with 57600 baud rate.
 
     iceprog build/servant_1.2.1/icestick-icestorm/servant_1.2.1.bin
 
+GMM7550
+^^^^^^^
+
+    fusesoc run --target=gmm7550 servant
+
+LX9 Microboard
+^^^^^^^^^^^^^^
+
+    fusesoc run --target=lx9_microboard servant
+
 Machdyne Kolibri
 ^^^^^^^^^^^^^^^^
 
@@ -168,6 +199,11 @@ Pmod pin JA1 is connected to UART tx with 57600 baud rate. A USB to TTL connecto
 
     fusesoc run --target=nexys_2_500 servant --uart_baudrate=57600 --firmware=$SERV/sw/zephyr_hello.hex
 
+
+Nexys A7
+^^^^^^^^
+
+    fusesoc run --target=nexys_a7 servant
 
 OrangeCrab R0.2
 ^^^^^^^^^^^^^^^
@@ -212,6 +248,21 @@ Pin A6 is used for UART output with 115200 baud rate.
 
     fusesoc run --target=tinyfpga_bx servant
     tinyprog --program build/servant_1.0.1/tinyfpga_bx-icestorm/servant_1.0.1.bin
+
+ULX3S
+^^^^^
+
+    fusesoc run --target=ulx3s servant
+
+Upduino2
+^^^^^^^^
+
+    fusesoc run --target=upduino2 servant
+
+zcu106
+^^^^^^
+
+    fusesoc run --target=zcu106 servant
 
 Porting Servant to a new target
 -------------------------------
