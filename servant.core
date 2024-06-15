@@ -55,6 +55,12 @@ filesets:
 
   alhambra   : {files: [data/alhambra.pcf : {file_type : PCF}]}
 
+  alchitry_au:
+    files:
+      - servant/servix_clock_gen.v : {file_type : verilogSource}
+      - servant/servix.v : {file_type : verilogSource}
+      - data/alchitry_au.xdc : {file_type : xdc}
+
   arty_a7_35t:
     files:
       - servant/servix_clock_gen.v : {file_type : verilogSource}
@@ -214,6 +220,15 @@ targets:
     tools:
       vivado: {part : xc7a200t-fbg676-2}
     toplevel : servant_ac701
+
+  alchitry_au:
+    default_tool: vivado
+    description: Open-hardware Alchitry AU FPGA board
+    filesets : [mem_files, soc, alchitry_au]
+    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET]
+    tools:
+      vivado: {part : xc7a35tftg256-1}
+    toplevel : servix
 
   alhambra:
     default_tool : icestorm
