@@ -11,7 +11,7 @@ jobs:
       VLNV : serv
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: serv
       - run: sudo apt install verilator
