@@ -183,6 +183,13 @@ Pin B1 is used for UART output with 115200 baud rate. The serial port on Kolibri
 
     ldprog -Ks build/servant_1.2.1/machdyne_kolibri-icestorm/servant_1.2.1.bin
 
+MAX10 10M08 Evaluation Kit
+^^^^^^^^^^^^^^^^^^^^
+
+FPGA Pin 75 (Arduino_IO01 J5 pin 7) is used for UART output with 57600 baud rate. SW1 is reset and Led 1 q output.
+
+    fusesoc run --target=max10_10m08evk servant
+
 Nandland Go Board
 ^^^^^^^^^^^^^^^^^
 
