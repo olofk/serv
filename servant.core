@@ -172,6 +172,13 @@ filesets:
       - servant/servant_md_kolibri.v : {file_type : verilogSource}
       - data/machdyne_kolibri.pcf : {file_type : PCF}
 
+  max10_10m08evk:
+    files:
+      - data/max10_10m08evk.sdc : {file_type : SDC}
+      - data/max10_10m08evk.tcl : {file_type : tclSource}
+      - servant/servive_clock_gen.v : {file_type : verilogSource}
+      - servant/servive.v : {file_type : verilogSource}
+
   nexys_2:
     files:
       - servant/servax_clock_gen.v : {file_type : verilogSource}
@@ -472,6 +479,19 @@ targets:
         pnr: next
     toplevel : servant_md_kolibri
 
+  max10_10m08evk:
+    default_tool : quartus
+    description: MAX10 10M08 evaluation kit
+    hooks:
+      post_run: [jbc]
+    filesets : [mem_files, soc, max10_10m08evk]
+    parameters : [memfile, memsize]
+    tools:
+      quartus:
+        family : MAX 10
+        device : 10M08SAE144C8G
+    toplevel: servive
+
   nexys_2_500:
     default_tool: ise
     filesets : [mem_files, soc, nexys_2]
@@ -719,3 +739,8 @@ parameters:
 generate:
   ice40pll:
     generator: icepll
+
+scripts:
+  jbc:
+    cmd : [quartus_jbcc, "-n", servant_1_2_1_pof.jam, servant_1_2_1_pof.jbc]
+
