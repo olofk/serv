@@ -34,7 +34,7 @@ jobs:
         echo $GITHUB_WORKSPACE/sail-riscv >> $GITHUB_PATH
 
     - name: Init arch tests
-      run: riscof arch-test --clone
+      run: riscof arch-test --clone --get-version 3.9
 
     - name: Run RV32I compliance tests
       run: riscof run --config=$SERV/verif/config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/I --env=riscv-arch-test/riscv-test-suite/env --no-browser
