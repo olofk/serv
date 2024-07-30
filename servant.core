@@ -151,6 +151,8 @@ filesets:
       - servant/service_go_board.v : {file_type : verilogSource}
 
   icebreaker : {files: [data/icebreaker.pcf  : {file_type : PCF}]}
+  
+  icefun     : {files: [data/icefun.pcf  : {file_type : PCF}]}
 
   icestick   : {files: [data/icestick.pcf  : {file_type : PCF}]}
 
@@ -410,6 +412,18 @@ targets:
         pnr: next
     toplevel : service
 
+  icefun:
+    default_tool : icestorm
+    description: Devantech IceFUN
+    filesets : [mem_files, soc, service, icefun]
+    generate: [ice40pll : {freq_out : 16}]
+    parameters : [memfile, memsize, PLL=ICE40_CORE]
+    tools:
+      icestorm:
+        nextpnr_options: [--hx8k, --package, cb132 --freq, 16]
+        pnr: next
+    toplevel : service
+  
   icestick:
     default_tool : icestorm
     description: Lattice iCEstick
