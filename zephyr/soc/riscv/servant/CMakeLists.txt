@@ -4,4 +4,5 @@
 zephyr_sources(
     soc_irq.S
     vector.S
+    cpu_idle.c
     irq.c)
