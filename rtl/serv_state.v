@@ -20,6 +20,8 @@ module serv_state
    output wire 	     o_cnt2,
    output wire 	     o_cnt3,
    output wire 	     o_cnt7,
+   output wire 	     o_cnt11,
+   output wire 	     o_cnt12,
    output wire 	     o_cnt_done,
    output wire 	     o_bufreg_en,
    output wire 	     o_ctrl_pc_en,
@@ -77,6 +79,8 @@ module serv_state
    assign o_cnt2 = (o_cnt[4:2] == 3'd0) & cnt_r[2];
    assign o_cnt3 = (o_cnt[4:2] == 3'd0) & cnt_r[3];
    assign o_cnt7 = (o_cnt[4:2] == 3'd1) & cnt_r[3];
+   assign o_cnt11 = (o_cnt[4:2] == 3'd2) & cnt_r[3];
+   assign o_cnt12 = (o_cnt[4:2] == 3'd3) & cnt_r[0];
 
    //Take branch for jump or branch instructions (opcode == 1x0xx) if
    //a) It's an unconditional branch (opcode[0] == 1)

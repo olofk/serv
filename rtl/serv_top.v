@@ -117,6 +117,8 @@ module serv_top
    wire          cnt2;
    wire          cnt3;
    wire          cnt7;
+   wire          cnt11;
+   wire          cnt12;
 
    wire 	 cnt_done;
 
@@ -241,6 +243,8 @@ module serv_top
       .o_cnt2         (cnt2),
       .o_cnt3         (cnt3),
       .o_cnt7         (cnt7),
+      .o_cnt11        (cnt11),
+      .o_cnt12        (cnt12),
       .o_cnt_done     (cnt_done),
       .o_bufreg_en    (bufreg_en),
       .o_ctrl_pc_en   (ctrl_pc_en),
@@ -546,6 +550,8 @@ module serv_top
 	    .i_cnt0to3    (cnt0to3),
 	    .i_cnt3       (cnt3),
 	    .i_cnt7       (cnt7),
+	    .i_cnt11      (cnt11),
+	    .i_cnt12      (cnt12),
 	    .i_cnt_done   (cnt_done),
 	    .i_mem_op     (!mtval_pc),
 	    .i_mtip       (i_timer_irq),
