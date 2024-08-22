@@ -188,7 +188,7 @@ module serv_decode
    wire co_rd_csr_en = csr_op;
 
    wire co_csr_en         = csr_op & csr_valid;
-   wire co_csr_mstatus_en = csr_op & !op26 & !op22;
+   wire co_csr_mstatus_en = csr_op & !op26 & !op22 & !op20;
    wire co_csr_mie_en     = csr_op & !op26 &  op22 & !op20;
    wire co_csr_mcause_en  = csr_op         &  op21 & !op20;
 
