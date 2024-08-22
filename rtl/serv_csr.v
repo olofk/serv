@@ -14,6 +14,8 @@ module serv_csr
    input wire 	    i_cnt0to3,
    input wire 	    i_cnt3,
    input wire 	    i_cnt7,
+   input wire 	    i_cnt11,
+   input wire 	    i_cnt12,
    input wire 	    i_cnt_done,
    input wire 	    i_mem_op,
    input wire 	    i_mtip,
@@ -63,7 +65,7 @@ module serv_csr
 		   (i_csr_source == CSR_SOURCE_CSR) ? csr_out :
 		   {W{1'bx}};
 
-   assign csr_out = ({i_mstatus_en & mstatus_mie & i_cnt3 & i_en,{B{1'b0}}}) |
+   assign csr_out = (i_mstatus_en & i_en & ((mstatus_mie & i_cnt3) | (i_cnt11 | i_cnt12))) |
 		    i_rf_csr_out |
 		    ({W{i_mcause_en & i_en}} & mcause);
 
