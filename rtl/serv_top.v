@@ -580,6 +580,27 @@ module serv_top
       end
    endgenerate
 
+   serv_trace trace
+     (
+      .i_clk        (clk),
+      .i_ibus_rdt       (i_ibus_rdt),
+      .i_ibus_ack       (i_ibus_ack),
+      .i_rd_addr        (rd_addr       ),
+      .i_rd_csr_en      (rd_csr_en     ),
+      .i_cnt_en         (cnt_en        ),
+      .i_csr_in         (csr_in        ),
+      .i_csr_mstatus_en (csr_mstatus_en),
+      .i_csr_mie_en     (csr_mie_en    ),
+      .i_csr_mcause_en  (csr_mcause_en ),
+      .i_csr_en         (csr_en        ),
+      .i_csr_addr   (csr_addr),
+      .i_wen0       (o_wen0),
+      .i_wen1       (o_wen1),
+      .i_wdata0     (o_wdata0),
+      .i_wdata1     (o_wdata1),
+      .i_cnt_done   (cnt_done),
+      .i_ctrl_pc_en (ctrl_pc_en),
+      .i_rd_op      (rd_op));
 
 `ifdef RISCV_FORMAL
    reg [31:0] 	 pc = RESET_PC;
