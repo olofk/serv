@@ -48,12 +48,7 @@
     .align 4; .global end_signature; end_signature:   \
 
 
-#define RVMODEL_BOOT \
-.section .text.init;                                            \
-        .align  4;                                                      \
-        .globl _start;                                                  \
-_start:  
-
+#define RVMODEL_BOOT
 
 #define LOCAL_IO_WRITE_STR(_STR) RVMODEL_IO_WRITE_STR(x31, _STR)
 #define RVMODEL_IO_WRITE_STR(_SP, _STR)
