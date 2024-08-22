@@ -10,6 +10,7 @@ module servant
    parameter reset_strategy = "MINI";
    parameter width = 1;
    parameter sim = 0;
+   parameter [0:0] debug = 1'b0;
    parameter with_csr = 1;
    parameter [0:0] compress = 0;
    parameter [0:0] align = compress;
@@ -136,6 +137,7 @@ module servant
    servile
      #(.width    (width),
        .sim      (sim[0]),
+       .debug    (debug),
        .with_c   (compress[0]),
        .with_csr (with_csr[0]),
        .with_mdu (with_mdu))
