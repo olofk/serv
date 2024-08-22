@@ -18,6 +18,7 @@ filesets:
       - rtl/serv_rf_ram_if.v
       - rtl/serv_rf_ram.v
       - rtl/serv_state.v
+      - rtl/serv_debug.v
       - rtl/serv_top.v
       - rtl/serv_rf_top.v
       - rtl/serv_aligner.v

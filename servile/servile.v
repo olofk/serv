@@ -8,11 +8,12 @@
 `default_nettype none
 module servile
   #(
-    parameter       width = 1,
+    parameter	    width = 1,
     parameter	    reset_pc = 32'h00000000,
     parameter	    reset_strategy = "MINI",
     parameter	    rf_width = 2*width,
     parameter [0:0] sim = 1'b0,
+    parameter [0:0] debug = 1'b0,
     parameter [0:0] with_c = 1'b0,
     parameter [0:0] with_csr = 1'b0,
     parameter [0:0] with_mdu = 1'b0,
@@ -203,6 +204,7 @@ module servile
        .PRE_REGISTER   (1'b1),
        .RESET_STRATEGY (reset_strategy),
        .RESET_PC       (reset_pc),
+       .DEBUG          (debug),
        .MDU            (with_mdu),
        .COMPRESSED     (with_c))
    cpu

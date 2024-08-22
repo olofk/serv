@@ -27,6 +27,7 @@ module serv_rf_top
                  restart execution from the instruction at RESET_PC
      */
     parameter RESET_STRATEGY = "MINI",
+    parameter [0:0] DEBUG = 1'b0,
     parameter WITH_CSR = 1,
     parameter W        = 1,
     parameter RF_WIDTH = W * 2,
@@ -147,6 +148,7 @@ module serv_rf_top
        .PRE_REGISTER (PRE_REGISTER),
        .RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR),
+       .DEBUG (DEBUG),
        .MDU(MDU),
        .COMPRESSED(COMPRESSED),
        .ALIGN(ALIGN),

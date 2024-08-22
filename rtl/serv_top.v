@@ -1,12 +1,13 @@
 `default_nettype none
 
 module serv_top
-  #(parameter WITH_CSR = 1,
+  #(parameter	    WITH_CSR = 1,
     parameter	    W = 1,
     parameter	    B = W-1,
-    parameter PRE_REGISTER = 1,
-    parameter RESET_STRATEGY = "MINI",
-    parameter RESET_PC = 32'd0,
+    parameter	    PRE_REGISTER = 1,
+    parameter	    RESET_STRATEGY = "MINI",
+    parameter	    RESET_PC = 32'd0,
+    parameter [0:0] DEBUG = 1'b0,
     parameter [0:0] MDU = 1'b0,
     parameter [0:0] COMPRESSED=0,
     parameter [0:0] ALIGN = COMPRESSED)
@@ -586,6 +587,27 @@ module serv_top
       end
    endgenerate
 
+   generate
+      if (DEBUG) begin : gen_debug
+	 serv_debug #(.W (W)) debug
+	   (
+	    .i_clk            (clk),
+	    .i_rst            (i_rst),
+	    .i_ibus_rdt       (i_ibus_rdt),
+	    .i_ibus_ack       (i_ibus_ack),
+	    .i_rd_addr        (rd_addr       ),
+	    .i_cnt_en         (cnt_en        ),
+	    .i_csr_in         (csr_in        ),
+	    .i_csr_mstatus_en (csr_mstatus_en),
+	    .i_csr_mie_en     (csr_mie_en    ),
+	    .i_csr_mcause_en  (csr_mcause_en ),
+	    .i_csr_en         (csr_en        ),
+	    .i_csr_addr       (csr_addr),
+	    .i_wen0           (o_wen0),
+	    .i_wdata0         (o_wdata0),
+	    .i_cnt_done       (cnt_done));
+      end
+   endgenerate
 
 `ifdef RISCV_FORMAL
    reg [31:0] 	 pc = RESET_PC;

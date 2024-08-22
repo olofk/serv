@@ -24,6 +24,7 @@ module servant_sim
      #(.memfile  (memfile),
        .memsize  (memsize),
        .width    (width),
+       .debug    (1'b1),
        .sim      (1),
        .with_csr (with_csr),
        .compress (compressed[0:0]),
