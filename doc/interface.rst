@@ -1,6 +1,9 @@
 Interface
 =========
 
+Top level
+---------
+
 Users of SERV can choose to use either serv_top or serv_rf_top depending on what best fits the application. serv_top contains all the main logic of SERV except for the actual storage for the register file (RF).
 
 .. image:: serv_top.png
@@ -191,3 +194,29 @@ Signals
      - 1
      - in
      - RF interface channel 1 read data
+
+Extension interface
+-------------------
+
+The SERV CPU, being the smallest RISC-V CPU, has a design that is primarily focused on simplicity and minimalism. However, to increase its utility without complicating the core design, it can be extended using an extension interface. The extension interface allows additional functionality to be added to the SERV CPU core through custom accelerators that are called for when specific instructions are encountered. SERV has built-in support for connecting an MDU (Multiplication/Division Unit) that implements the M ISA extension by setting the MDU parameter. Other accelerators need changes to the decoder.
+
+When SERV detects instructions to be executed by an external accelerator through the extension interface, it will treat them as :ref:`two-stage operations`. In stage 1, the values in `o_ext_rs1` and `o_ext_rs2` are prepared to be sent to the accelerator. Once stage 1 is completed, SERV will assert the corresponding valid signal for the accelerator (e.g. `o_mdu_valid` for the M extension accelerator). The accelerator can now perform its work and when it has completed its result it will return that value in `i_ext_rd` and strobe `i_ext_ready` for one cycle. The following cycle, SERV will start stage two and store the received result. The waveform below explains this in more detail.
+
+.. wavedrom::
+
+        { signal: [
+          { name: "clk"        , wave: "P...|...|...|..."},
+          { name: "init"       , wave: "1...|..0|...|...", node: ".......d..", data: "r0"},
+          { name: "o_rf_wreq"  , wave: "0...|...|10.|...", node: ".........g", data: "r1"},
+          { name: "i_rf_ready" , wave: "010.|...|10.|...", node: ".a.......h.", data: "r1"},
+          { name: "cnt_en"     , wave: "0.1.|..0|.1.|..0", node: "..b.......i"},
+          { name: "cnt_done"   , wave: "0...|.10|...|.10", node: "......c.."},
+          { name: "o_ext_rs1"  , wave: ".234567x|...|...", node: "..", data: "d0 d1 ... d30 d31"},
+          { name: "o_ext_rs2"  , wave: ".234567x|...|...", node: "..", data: "d0 d1 ... d30 d31"},
+          { name: "o_mdu_valid", wave: "0...|..1|.0.|...", node: ".......e", data: "0 1 ... 30 31"},
+          { name: "i_ext_ready", wave: "0...|...|10.|...", node: ".........f", data: "0 1 ... 30 31"},
+          { name: "i_ext_rd"   , wave: "....|...|234567x", node: "..", data: "d0 d1 ... d30 d31"},
+          ],
+          edge : [
+          "a~>b", "c~>d", "e~>f", "f~>g", "h~>i"]
+        }
