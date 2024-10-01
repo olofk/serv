@@ -2,19 +2,23 @@ name: Build GDS using OpenLANE and sky130 PDK
 
 on: [push]
 jobs:
-  build-openlane:
+  build-openlane-sky130:
     runs-on: ubuntu-latest
+    env:
+      REPO : serv
+      VLNV : serv
     steps:
-      - name: Checkout subservient
+      - name: Checkout repo
         uses: actions/checkout@v4
-      - name: Build with Openlane
-        uses: librecores/ci-fusesoc-action@migrate-dockerized
         with:
-          core: serv
-          target: sky130
-          tool: openlane
+          path: serv
+      - run: echo "EDALIZE_LAUNCHER=el_docker" >> $GITHUB_ENV
+      - run: pip3 install fusesoc
+      - run: fusesoc library add $REPO $GITHUB_WORKSPACE/$REPO
+      - run: fusesoc run --target=sky130 $VLNV
+      - run: find -name *.gds
       - name: Store artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: serv.gds
-          path: /home/runner/work/serv/serv/build/serv_1.3.0/sky130-openlane/gds/serv_synth_wrapper.gds
+          path: /home/runner/work/serv/serv/serv/build/serv_1.3.0/sky130-openlane/runs/serv_synth_wrapper/results/final/gds/serv_synth_wrapper.gds
