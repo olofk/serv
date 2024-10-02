@@ -3,7 +3,7 @@
 # SERV
 
 [![Join the chat at https://gitter.im/librecores/serv](https://badges.gitter.im/librecores/serv.svg)](https://gitter.im/librecores/serv?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![CI status](https://github.com/olofk/serv/workflows/CI/badge.svg)](https://github.com/olofk/serv/actions?query=workflow%3ACI)
+[![Compliance tests](https://github.com/olofk/serv/actions/workflows/ci.yml/badge.svg)](https://github.com/olofk/serv/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/serv/badge/?version=latest)](https://serv.readthedocs.io/en/latest/?badge=latest)
 
 SERV is an award-winning bit-serial RISC-V core
