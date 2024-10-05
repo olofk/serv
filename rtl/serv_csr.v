@@ -65,7 +65,17 @@ module serv_csr
 		   (i_csr_source == CSR_SOURCE_CSR) ? csr_out :
 		   {W{1'bx}};
 
-   assign csr_out = (i_mstatus_en & i_en & ((mstatus_mie & i_cnt3) | (i_cnt11 | i_cnt12))) |
+   wire [B:0]	mstatus;
+
+   generate
+      if (W==1) begin : gen_mstatus_w1
+	 assign mstatus = ((mstatus_mie & i_cnt3) | (i_cnt11 | i_cnt12));
+      end else if (W==4) begin : gen_mstatus_w4
+	 assign mstatus = {i_cnt11 | (mstatus_mie & i_cnt3), 2'b00, i_cnt12};
+      end
+   endgenerate
+
+   assign csr_out = ({W{i_mstatus_en & i_en}} & mstatus) |
 		    i_rf_csr_out |
 		    ({W{i_mcause_en & i_en}} & mcause);
 
