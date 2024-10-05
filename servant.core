@@ -580,6 +580,7 @@ targets:
     filesets : [soc, servant_tb]
     parameters :
       - RISCV_FORMAL
+      - width
       - "mdu? (MDU=1)"
       - SERV_CLEAR_RAM=true
       - firmware
@@ -649,6 +650,7 @@ targets:
       - uart_baudrate
       - vcd
       - vcd_start
+      - width
       - compressed
       - align
       - with_csr=1
@@ -743,6 +745,11 @@ parameters:
     datatype    : int
     description : Delay start of VCD dumping until the specified time
     paramtype   : plusarg
+
+  width:
+    datatype    : int
+    description : Interal datapath width (1=SERV, 4=QERV)
+    paramtype   : vlogparam
 
   with_csr:
     datatype    : int

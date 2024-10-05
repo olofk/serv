@@ -1,14 +1,12 @@
 `verilator_config
 // Bits [1:0] in i_wb_rdt are not used at all
-lint_off -rule UNUSED -file "*/serv_top.v" -lines 179
+lint_off -rule UNUSED -file "*/serv_top.v" -lines 181
 
 //Some bits in the instruction word are not used in serv_decode but it's easier
 //to just send in the whole word than picking out bits
 lint_off -rule UNUSED -file "*/serv_decode.v" -lines 8
 
-lint_off -rule UNUSED -file "*/serv_top.v" -lines 177
-
 //Some variables are only used when we connect an Extension with serv_decode
-lint_off -rule UNUSED -file "*/serv_top.v" -lines 67
+lint_off -rule UNUSED -file "*/serv_top.v" -lines 69
 
 

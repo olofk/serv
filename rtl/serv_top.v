@@ -2,6 +2,8 @@
 
 module serv_top
   #(parameter WITH_CSR = 1,
+    parameter	    W = 1,
+    parameter	    B = W-1,
     parameter PRE_REGISTER = 1,
     parameter RESET_STRATEGY = "MINI",
     parameter RESET_PC = 32'd0,
@@ -43,12 +45,12 @@ module serv_top
    output wire [4+WITH_CSR:0] o_wreg1,
    output wire 		      o_wen0,
    output wire 		      o_wen1,
-   output wire 		      o_wdata0,
-   output wire 		      o_wdata1,
+   output wire [B:0] o_wdata0,
+   output wire [B:0] o_wdata1,
    output wire [4+WITH_CSR:0] o_rreg0,
    output wire [4+WITH_CSR:0] o_rreg1,
-   input wire 		      i_rdata0,
-   input wire 		      i_rdata1,
+   input wire  [B:0] i_rdata0,
+   input wire  [B:0] i_rdata1,
 
    output wire [31:0] 	      o_ibus_adr,
    output wire 		      o_ibus_cyc,
@@ -92,10 +94,10 @@ module serv_top
    wire 	 rd_alu_en;
    wire 	 rd_csr_en;
    wire 	 rd_mem_en;
-   wire          ctrl_rd;
-   wire          alu_rd;
-   wire          mem_rd;
-   wire          csr_rd;
+   wire [B:0]    ctrl_rd;
+   wire [B:0]    alu_rd;
+   wire [B:0]    mem_rd;
+   wire [B:0]    csr_rd;
    wire 	 mtval_pc;
 
    wire          ctrl_pc_en;
@@ -103,7 +105,7 @@ module serv_top
    wire          jal_or_jalr;
    wire          utype;
    wire 	 mret;
-   wire          imm;
+   wire [B:0]    imm;
    wire 	 trap;
    wire 	 pc_rel;
    wire          iscomp;
@@ -127,8 +129,8 @@ module serv_top
    wire 	 bufreg_rs1_en;
    wire 	 bufreg_imm_en;
    wire 	 bufreg_clr_lsb;
-   wire 	 bufreg_q;
-   wire 	 bufreg2_q;
+   wire [B:0]    bufreg_q;
+   wire [B:0]    bufreg2_q;
    wire [31:0] dbus_rdt;
    wire        dbus_ack;
 
@@ -139,11 +141,11 @@ module serv_top
    wire          alu_cmp;
    wire [2:0]    alu_rd_sel;
 
-   wire          rs1;
-   wire          rs2;
+   wire [B:0]    rs1;
+   wire [B:0]    rs2;
    wire          rd_en;
 
-   wire          op_b;
+   wire [B:0]    op_b;
    wire          op_b_sel;
 
    wire          mem_signed;
@@ -156,20 +158,20 @@ module serv_top
 
    wire 	 mem_misalign;
 
-   wire 	 bad_pc;
+   wire [B:0]    bad_pc;
 
    wire 	 csr_mstatus_en;
    wire 	 csr_mie_en;
    wire 	 csr_mcause_en;
    wire [1:0]	 csr_source;
-   wire 	 csr_imm;
+   wire	[B:0]	 csr_imm;
    wire 	 csr_d_sel;
    wire 	 csr_en;
    wire [1:0] 	 csr_addr;
-   wire 	 csr_pc;
+   wire [B:0]    csr_pc;
    wire 	 csr_imm_en;
-   wire 	 csr_in;
-   wire 	 rf_csr_out;
+   wire [B:0]    csr_in;
+   wire [B:0]    rf_csr_out;
    wire 	 dbus_en;
 
    wire 	 new_irq;
@@ -226,7 +228,8 @@ module serv_top
      #(.RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR[0:0]),
        .MDU(MDU),
-       .ALIGN(ALIGN))
+       .ALIGN(ALIGN),
+       .W(W))
    state
      (
       .i_clk (clk),
@@ -420,7 +423,8 @@ module serv_top
    serv_ctrl
      #(.RESET_PC (RESET_PC),
        .RESET_STRATEGY (RESET_STRATEGY),
-       .WITH_CSR (WITH_CSR))
+       .WITH_CSR (WITH_CSR),
+       .W (W))
    ctrl
      (
       .clk        (clk),
@@ -447,7 +451,7 @@ module serv_top
       //External
       .o_ibus_adr (wb_ibus_adr));
 
-   serv_alu alu
+   serv_alu #(.W (W)) alu
      (
       .clk        (clk),
       //State
@@ -467,7 +471,7 @@ module serv_top
       .o_rd       (alu_rd));
 
    serv_rf_if
-     #(.WITH_CSR (WITH_CSR))
+     #(.WITH_CSR (WITH_CSR), .W(W))
    rf_if
      (//RF interface
       .i_cnt_en    (cnt_en),
@@ -485,7 +489,7 @@ module serv_top
       //Trap interface
       .i_trap      (trap),
       .i_mret      (mret),
-      .i_mepc      (wb_ibus_adr[0]),
+      .i_mepc      (wb_ibus_adr[B:0]),
       .i_mtval_pc  (mtval_pc),
       .i_bufreg_q  (bufreg_q),
       .i_bad_pc    (bad_pc),
@@ -516,7 +520,8 @@ module serv_top
       .o_csr       (rf_csr_out));
 
    serv_mem_if
-     #(.WITH_CSR (WITH_CSR[0:0]))
+     #(.WITH_CSR (WITH_CSR[0:0]),
+       .W (W))
    mem_if
      (
       .i_clk        (clk),
@@ -539,7 +544,8 @@ module serv_top
    generate
       if (|WITH_CSR) begin : gen_csr
 	 serv_csr
-	   #(.RESET_STRATEGY (RESET_STRATEGY))
+	   #(.RESET_STRATEGY (RESET_STRATEGY),
+	     .W(W))
 	 csr
 	   (
 	    .i_clk        (clk),
@@ -574,8 +580,8 @@ module serv_top
 	    .i_rs1        (rs1),
 	    .o_q          (csr_rd));
       end else begin : gen_no_csr
-	 assign csr_in = 1'b0;
-	 assign csr_rd = 1'b0;
+	 assign csr_in = {W{1'b0}};
+	 assign csr_rd = {W{1'b0}};
 	 assign new_irq = 1'b0;
       end
    endgenerate
@@ -597,7 +603,7 @@ module serv_top
 
       /* Store data written to rd */
       if (o_wen0)
-        rvfi_rd_wdata <= {o_wdata0,rvfi_rd_wdata[31:1]};
+        rvfi_rd_wdata <= {o_wdata0,rvfi_rd_wdata[31:W]};
 
       if (cnt_done & ctrl_pc_en) begin
          rvfi_pc_rdata <= pc;
@@ -626,8 +632,8 @@ module serv_top
 	 rvfi_rd_addr  <= rd_addr;
       end
       if (rs_en) begin
-         rvfi_rs1_rdata <= {!immdec_en[1] & rs1,rvfi_rs1_rdata[31:1]};
-         rvfi_rs2_rdata <= {!immdec_en[2] & rs2,rvfi_rs2_rdata[31:1]};
+         rvfi_rs1_rdata <= {(!immdec_en[1] ? rs1 : {W{1'b0}}),rvfi_rs1_rdata[31:W]};
+         rvfi_rs2_rdata <= {(!immdec_en[2] ? rs2 : {W{1'b0}}),rvfi_rs2_rdata[31:W]};
       end
 
       if (i_dbus_ack) begin
