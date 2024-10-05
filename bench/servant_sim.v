@@ -8,6 +8,7 @@ module servant_sim
 
    parameter memfile = "";
    parameter memsize = 8192;
+   parameter width = 1;
    parameter with_csr = 1;
    parameter compressed = 0;
    parameter align = compressed;
@@ -22,6 +23,7 @@ module servant_sim
    servant
      #(.memfile  (memfile),
        .memsize  (memsize),
+       .width    (width),
        .sim      (1),
        .with_csr (with_csr),
        .compress (compressed[0:0]),

@@ -8,6 +8,7 @@ module servant
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
    parameter reset_strategy = "MINI";
+   parameter width = 1;
    parameter sim = 0;
    parameter with_csr = 1;
    parameter [0:0] compress = 0;
@@ -23,7 +24,7 @@ module servant
    localparam	   aw = $clog2(memsize);
    localparam	   csr_regs = with_csr*4;
 
-   localparam	   rf_width = 2;
+   localparam	   rf_width = width * 2;
    localparam	   rf_l2d   = $clog2((32+csr_regs)*32/rf_width);
 
    wire 	timer_irq;
@@ -133,7 +134,7 @@ module servant
       .o_rdata  (rf_rdata));
 
    servile
-     #(.rf_width (rf_width),
+     #(.width    (width),
        .sim      (sim[0]),
        .with_c   (compress[0]),
        .with_csr (with_csr[0]),
@@ -159,7 +160,7 @@ module servant
       .o_wb_ext_stb   (wb_ext_stb),
       .i_wb_ext_rdt   (wb_ext_rdt),
       .i_wb_ext_ack   (wb_ext_ack),
-      
+
       .o_rf_waddr  (rf_waddr),
       .o_rf_wdata  (rf_wdata),
       .o_rf_wen    (rf_wen),
