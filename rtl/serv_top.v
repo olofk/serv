@@ -16,27 +16,27 @@ module serv_top
    input wire 		      i_rst,
    input wire 		      i_timer_irq,
 `ifdef RISCV_FORMAL
-   output reg 		      rvfi_valid = 1'b0,
-   output reg [63:0] 	      rvfi_order = 64'd0,
-   output reg [31:0] 	      rvfi_insn = 32'd0,
-   output reg 		      rvfi_trap = 1'b0,
-   output reg 		      rvfi_halt = 1'b0,
-   output reg 		      rvfi_intr = 1'b0,
-   output reg [1:0] 	      rvfi_mode = 2'b11,
-   output reg [1:0] 	      rvfi_ixl = 2'b01,
-   output reg [4:0] 	      rvfi_rs1_addr,
-   output reg [4:0] 	      rvfi_rs2_addr,
-   output reg [31:0] 	      rvfi_rs1_rdata,
-   output reg [31:0] 	      rvfi_rs2_rdata,
-   output reg [4:0] 	      rvfi_rd_addr,
-   output reg [31:0] 	      rvfi_rd_wdata,
-   output reg [31:0] 	      rvfi_pc_rdata,
-   output reg [31:0] 	      rvfi_pc_wdata,
-   output reg [31:0] 	      rvfi_mem_addr,
-   output reg [3:0] 	      rvfi_mem_rmask,
-   output reg [3:0] 	      rvfi_mem_wmask,
-   output reg [31:0] 	      rvfi_mem_rdata,
-   output reg [31:0] 	      rvfi_mem_wdata,
+   output wire 		      rvfi_valid,
+   output wire [63:0] 	      rvfi_order,
+   output wire [31:0] 	      rvfi_insn,
+   output wire 		      rvfi_trap,
+   output wire 		      rvfi_halt,
+   output wire 		      rvfi_intr,
+   output wire [1:0] 	      rvfi_mode,
+   output wire [1:0] 	      rvfi_ixl,
+   output wire [4:0] 	      rvfi_rs1_addr,
+   output wire [4:0] 	      rvfi_rs2_addr,
+   output wire [31:0] 	      rvfi_rs1_rdata,
+   output wire [31:0] 	      rvfi_rs2_rdata,
+   output wire [4:0] 	      rvfi_rd_addr,
+   output wire [31:0] 	      rvfi_rd_wdata,
+   output wire [31:0] 	      rvfi_pc_rdata,
+   output wire [31:0] 	      rvfi_pc_wdata,
+   output wire [31:0] 	      rvfi_mem_addr,
+   output wire [3:0] 	      rvfi_mem_rmask,
+   output wire [3:0] 	      rvfi_mem_wmask,
+   output wire [31:0] 	      rvfi_mem_rdata,
+   output wire [31:0] 	      rvfi_mem_wdata,
 `endif
    //RF Interface
    output wire 		      o_rf_rreq,
@@ -589,8 +589,50 @@ module serv_top
 
    generate
       if (DEBUG) begin : gen_debug
-	 serv_debug #(.W (W)) debug
+	 serv_debug #(.W (W), .RESET_PC (RESET_PC)) debug
 	   (
+`ifdef RISCV_FORMAL
+	    .rvfi_valid     (rvfi_valid    ),
+	    .rvfi_order     (rvfi_order    ),
+	    .rvfi_insn      (rvfi_insn     ),
+	    .rvfi_trap      (rvfi_trap     ),
+	    .rvfi_halt      (rvfi_halt     ),
+	    .rvfi_intr      (rvfi_intr     ),
+	    .rvfi_mode      (rvfi_mode     ),
+	    .rvfi_ixl       (rvfi_ixl      ),
+	    .rvfi_rs1_addr  (rvfi_rs1_addr ),
+	    .rvfi_rs2_addr  (rvfi_rs2_addr ),
+	    .rvfi_rs1_rdata (rvfi_rs1_rdata),
+	    .rvfi_rs2_rdata (rvfi_rs2_rdata),
+	    .rvfi_rd_addr   (rvfi_rd_addr  ),
+	    .rvfi_rd_wdata  (rvfi_rd_wdata ),
+	    .rvfi_pc_rdata  (rvfi_pc_rdata ),
+	    .rvfi_pc_wdata  (rvfi_pc_wdata ),
+	    .rvfi_mem_addr  (rvfi_mem_addr ),
+	    .rvfi_mem_rmask (rvfi_mem_rmask),
+	    .rvfi_mem_wmask (rvfi_mem_wmask),
+	    .rvfi_mem_rdata (rvfi_mem_rdata),
+	    .rvfi_mem_wdata (rvfi_mem_wdata),
+	    .i_dbus_adr     (o_dbus_adr),
+	    .i_dbus_dat     (o_dbus_dat),
+	    .i_dbus_sel     (o_dbus_sel),
+	    .i_dbus_we      (o_dbus_we ),
+	    .i_dbus_rdt     (i_dbus_rdt),
+	    .i_dbus_ack     (i_dbus_ack),
+	    .i_ctrl_pc_en   (ctrl_pc_en),
+	    .rs1            (rs1),
+	    .rs2            (rs2),
+	    .rs1_addr       (rs1_addr),
+	    .rs2_addr       (rs2_addr),
+	    .immdec_en      (immdec_en),
+	    .rd_en          (rd_en),
+	    .trap           (trap),
+	    .i_rf_ready     (i_rf_ready),
+	    .i_ibus_cyc     (o_ibus_cyc),
+	    .two_stage_op   (two_stage_op),
+	    .init           (init),
+	    .i_ibus_adr     (o_ibus_adr),
+`endif
 	    .i_clk            (clk),
 	    .i_rst            (i_rst),
 	    .i_ibus_rdt       (i_ibus_rdt),
@@ -609,74 +651,6 @@ module serv_top
       end
    endgenerate
 
-`ifdef RISCV_FORMAL
-   reg [31:0] 	 pc = RESET_PC;
-
-   wire rs_en = two_stage_op ? init : ctrl_pc_en;
-
-   always @(posedge clk) begin
-      /* End of instruction */
-      rvfi_valid <= cnt_done & ctrl_pc_en & !i_rst;
-      rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
-
-      /* Get instruction word when it's fetched from ibus */
-      if (wb_ibus_cyc & wb_ibus_ack)
-	rvfi_insn <= i_wb_rdt;
-
-      /* Store data written to rd */
-      if (o_wen0)
-        rvfi_rd_wdata <= {o_wdata0,rvfi_rd_wdata[31:W]};
-
-      if (cnt_done & ctrl_pc_en) begin
-         rvfi_pc_rdata <= pc;
-	 if (!(rd_en & (|rd_addr))) begin
-	   rvfi_rd_addr <= 5'd0;
-	   rvfi_rd_wdata <= 32'd0;
-	 end
-      end
-      rvfi_trap <= trap;
-      if (rvfi_valid) begin
-         rvfi_trap <= 1'b0;
-         pc <= rvfi_pc_wdata;
-      end
-
-      /* Not used */
-      rvfi_halt <= 1'b0;
-      rvfi_intr <= 1'b0;
-      rvfi_mode <= 2'd3;
-      rvfi_ixl = 2'd1;
-
-      /* RS1 not valid during J, U instructions (immdec_en[1]) */
-      /* RS2 not valid during I, J, U instructions (immdec_en[2]) */
-      if (i_rf_ready) begin
-	 rvfi_rs1_addr <= !immdec_en[1] ? rs1_addr : 5'd0;
-         rvfi_rs2_addr <= !immdec_en[2] /*rs2_valid*/ ? rs2_addr : 5'd0;
-	 rvfi_rd_addr  <= rd_addr;
-      end
-      if (rs_en) begin
-         rvfi_rs1_rdata <= {(!immdec_en[1] ? rs1 : {W{1'b0}}),rvfi_rs1_rdata[31:W]};
-         rvfi_rs2_rdata <= {(!immdec_en[2] ? rs2 : {W{1'b0}}),rvfi_rs2_rdata[31:W]};
-      end
-
-      if (i_dbus_ack) begin
-         rvfi_mem_addr <= o_dbus_adr;
-         rvfi_mem_rmask <= o_dbus_we ? 4'b0000 : o_dbus_sel;
-         rvfi_mem_wmask <= o_dbus_we ? o_dbus_sel : 4'b0000;
-         rvfi_mem_rdata <= i_dbus_rdt;
-         rvfi_mem_wdata <= o_dbus_dat;
-      end
-      if (wb_ibus_ack) begin
-         rvfi_mem_rmask <= 4'b0000;
-         rvfi_mem_wmask <= 4'b0000;
-      end
-   end
-   /* verilator lint_off COMBDLY */
-   always @(wb_ibus_adr)
-     rvfi_pc_wdata <= wb_ibus_adr;
-   /* verilator lint_on COMBDLY */
-
-
-`endif
 
 generate
   if (MDU) begin: gen_mdu

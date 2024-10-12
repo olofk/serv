@@ -1,10 +1,55 @@
 module serv_debug
-  #(parameter W = 1)
+  #(parameter W = 1,
+    parameter RESET_PC = 0,
+    //Internally calculated. Do not touch
+    parameter B=W-1)
    (
+`ifdef RISCV_FORMAL
+    output reg	      rvfi_valid = 1'b0,
+    output reg [63:0]  rvfi_order = 64'd0,
+    output reg [31:0]  rvfi_insn = 32'd0,
+    output reg	      rvfi_trap = 1'b0,
+    output reg	      rvfi_halt = 1'b0,  // Not used
+    output reg	      rvfi_intr = 1'b0,  // Not used
+    output reg [1:0]   rvfi_mode = 2'b11, // Not used
+    output reg [1:0]   rvfi_ixl = 2'b01,  // Not used
+    output reg [4:0]   rvfi_rs1_addr,
+    output reg [4:0]   rvfi_rs2_addr,
+    output reg [31:0]  rvfi_rs1_rdata,
+    output reg [31:0]  rvfi_rs2_rdata,
+    output reg [4:0]   rvfi_rd_addr,
+    output wire [31:0] rvfi_rd_wdata,
+    output reg [31:0]  rvfi_pc_rdata,
+    output wire [31:0]  rvfi_pc_wdata,
+    output reg [31:0]  rvfi_mem_addr,
+    output reg [3:0]   rvfi_mem_rmask,
+    output reg [3:0]   rvfi_mem_wmask,
+    output reg [31:0]  rvfi_mem_rdata,
+    output reg [31:0]  rvfi_mem_wdata,
+    input wire [31:0]  i_dbus_adr,
+    input wire [31:0]  i_dbus_dat,
+    input wire [3:0]   i_dbus_sel,
+    input wire	      i_dbus_we,
+    input wire [31:0]  i_dbus_rdt,
+    input wire	      i_dbus_ack,
+    input wire	      i_ctrl_pc_en,
+    input wire	[B:0]      rs1,
+    input wire [B:0]	      rs2,
+    input wire [4:0]   rs1_addr,
+    input wire [4:0]   rs2_addr,
+    input wire [3:0]   immdec_en,
+    input wire	      rd_en,
+    input wire	      trap,
+    input wire	      i_rf_ready,
+    input wire	      i_ibus_cyc,
+    input wire	      two_stage_op,
+    input wire	      init,
+    input wire [31:0]  i_ibus_adr,
+`endif
     input wire	      i_clk,
     input wire	      i_rst,
-    input wire	      i_ibus_ack,
     input wire [31:0] i_ibus_rdt,
+    input wire	      i_ibus_ack,
     input wire [4:0]  i_rd_addr,
     input wire	      i_cnt_en,
     input wire	      i_csr_in,
@@ -14,7 +59,7 @@ module serv_debug
     input wire	      i_csr_en,
     input wire [1:0]  i_csr_addr,
     input wire	      i_wen0,
-    input wire	      i_wdata0,
+    input wire [B:0]  i_wdata0,
     input wire	      i_cnt_done);
 
    reg		      update_rd = 1'b0;
@@ -228,5 +273,63 @@ module serv_debug
 	 endcase
       end
    end
+
+`ifdef RISCV_FORMAL
+   reg [31:0] 	 pc = RESET_PC;
+
+   wire rs_en = two_stage_op ? init : i_ctrl_pc_en;
+
+   assign rvfi_rd_wdata = update_rd ? dbg_rd : 32'd0;
+
+   always @(posedge i_clk) begin
+      /* End of instruction */
+      rvfi_valid <= i_cnt_done & i_ctrl_pc_en & !i_rst;
+      rvfi_order <= rvfi_order + {63'd0,rvfi_valid};
+
+      /* Get instruction word when it's fetched from ibus */
+      if (i_ibus_cyc & i_ibus_ack)
+	rvfi_insn <= i_ibus_rdt;
+
+
+      if (i_cnt_done & i_ctrl_pc_en) begin
+         rvfi_pc_rdata <= pc;
+	 if (!(rd_en & (|i_rd_addr))) begin
+	   rvfi_rd_addr <= 5'd0;
+	 end
+      end
+      rvfi_trap <= trap;
+      if (rvfi_valid) begin
+         rvfi_trap <= 1'b0;
+         pc <= rvfi_pc_wdata;
+      end
+
+      /* RS1 not valid during J, U instructions (immdec_en[1]) */
+      /* RS2 not valid during I, J, U instructions (immdec_en[2]) */
+      if (i_rf_ready) begin
+	 rvfi_rs1_addr <= !immdec_en[1] ? rs1_addr : 5'd0;
+         rvfi_rs2_addr <= !immdec_en[2] /*rs2_valid*/ ? rs2_addr : 5'd0;
+	 rvfi_rd_addr  <= i_rd_addr;
+      end
+      if (rs_en) begin
+         rvfi_rs1_rdata <= {(!immdec_en[1] ? rs1 : {W{1'b0}}),rvfi_rs1_rdata[31:W]};
+         rvfi_rs2_rdata <= {(!immdec_en[2] ? rs2 : {W{1'b0}}),rvfi_rs2_rdata[31:W]};
+      end
+
+      if (i_dbus_ack) begin
+         rvfi_mem_addr  <= i_dbus_adr;
+         rvfi_mem_rmask <= i_dbus_we ? 4'b0000 : i_dbus_sel;
+         rvfi_mem_wmask <= i_dbus_we ? i_dbus_sel : 4'b0000;
+         rvfi_mem_rdata <= i_dbus_rdt;
+         rvfi_mem_wdata <= i_dbus_dat;
+      end
+      if (i_ibus_ack) begin
+         rvfi_mem_rmask <= 4'b0000;
+         rvfi_mem_wmask <= 4'b0000;
+      end
+   end
+
+   assign rvfi_pc_wdata = i_ibus_adr;
+
+`endif
 
 endmodule
