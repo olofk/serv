@@ -9,7 +9,8 @@ jobs:
       - name: Checkout riscv-formal
         uses: actions/checkout@v4
         with:
-          repository: YosysHQ/riscv-formal
+          repository: olofk/riscv-formal
+          ref: serv
       - name: Checkout SERV
         uses: actions/checkout@v4
         with:
