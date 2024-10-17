@@ -52,7 +52,7 @@ module serv_debug
     input wire	      i_ibus_ack,
     input wire [4:0]  i_rd_addr,
     input wire	      i_cnt_en,
-    input wire	      i_csr_in,
+    input wire [B:0]  i_csr_in,
     input wire	      i_csr_mstatus_en,
     input wire	      i_csr_mie_en,
     input wire	      i_csr_mcause_en,
@@ -149,7 +149,7 @@ module serv_debug
       end
 
       if (i_cnt_en)
-	dbg_csr <= {i_csr_in, dbg_csr[31:1]};
+	dbg_csr <= {i_csr_in, dbg_csr[31:W]};
       if (update_rd)
 	if (i_csr_mstatus_en)
 	  dbg_mstatus <= dbg_csr;
