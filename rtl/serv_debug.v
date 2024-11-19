@@ -63,6 +63,14 @@ module serv_debug
     input wire	      i_cnt_done);
 
    reg		      update_rd = 1'b0;
+   reg		      update_mscratch;
+   reg		      update_mtvec;
+   reg		      update_mepc;
+   reg		      update_mtval;
+   reg		      update_mstatus;
+   reg		      update_mie;
+   reg		      update_mcause;
+
    reg [31:0]	      dbg_rd = 32'hxxxxxxxx;
    reg [31:0]	      dbg_csr = 32'hxxxxxxxx;
    reg [31:0]	      dbg_mstatus  = 32'hxxxxxxxx;
@@ -148,22 +156,24 @@ module serv_debug
 	 endcase
       end
 
+      update_mscratch <= i_cnt_done & i_csr_en & (i_csr_addr == 2'b00);
+      update_mtvec    <= i_cnt_done & i_csr_en & (i_csr_addr == 2'b01);
+      update_mepc     <= i_cnt_done & i_csr_en & (i_csr_addr == 2'b10);
+      update_mtval    <= i_cnt_done & i_csr_en & (i_csr_addr == 2'b11);
+      update_mstatus  <= i_cnt_done & i_csr_mstatus_en;
+      update_mie      <= i_cnt_done & i_csr_mie_en;
+      update_mcause   <= i_cnt_done & i_csr_mcause_en;
+
       if (i_cnt_en)
 	dbg_csr <= {i_csr_in, dbg_csr[31:W]};
-      if (update_rd)
-	if (i_csr_mstatus_en)
-	  dbg_mstatus <= dbg_csr;
-	else if (i_csr_mie_en)
-	  dbg_mie <= dbg_csr;
-	else if (i_csr_mcause_en)
-	  dbg_mcause <= dbg_csr;
-	else if (i_csr_en)
-	  case (i_csr_addr)
-	    2'b00 : dbg_mscratch <= dbg_csr;
-	    2'b01 : dbg_mtvec    <= dbg_csr;
-	    2'b10 : dbg_mepc     <= dbg_csr;
-	    2'b11 : dbg_mtval    <= dbg_csr;
-	  endcase
+
+      if (update_mscratch) dbg_mscratch <= dbg_csr;
+      if (update_mtvec)    dbg_mtvec    <= dbg_csr;
+      if (update_mepc )    dbg_mepc     <= dbg_csr;
+      if (update_mtval)    dbg_mtval    <= dbg_csr;
+      if (update_mstatus)  dbg_mstatus  <= dbg_csr;
+      if (update_mie)      dbg_mie      <= dbg_csr;
+      if (update_mcause)   dbg_mcause   <= dbg_csr;
    end
 
    reg LUI, AUIPC, JAL, JALR, BEQ, BNE, BLT, BGE, BLTU, BGEU, LB, LH, LW, LBU, LHU, SB, SH, SW, ADDI, SLTI, SLTIU, XORI, ORI, ANDI,SLLI, SRLI, SRAI, ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND, FENCE, ECALL, EBREAK;
