@@ -61,11 +61,12 @@ module servile_mux
    generate
       if (sim) begin
 
+	 integer      f = 0;
+
 	 assign sig_en  = |f & i_wb_cpu_we & (i_wb_cpu_adr == sim_sig_adr);
 	 assign halt_en = i_wb_cpu_we & (i_wb_cpu_adr == sim_halt_adr);
 
 	 reg [1023:0] signature_file;
-	 integer      f = 0;
 
 	 initial
 	   /* verilator lint_off WIDTH */
