@@ -248,6 +248,13 @@ FPGA Pin F14 (HSTC GPIO addon connector J2, pin 2) is used for UART output with 
 
     fusesoc run --target=sockit servant
 
+Trenz Electronic TE0802
+^^^^^^^^^^^^^^^^^^^^^^^
+
+PMOD A marked J5, pin two, on the board is used for UART output with 115200 baud rate.  
+
+    fusesoc run --target=te0802 servant
+
 TinyFPGA BX
 ^^^^^^^^^^^
 
