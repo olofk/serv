@@ -8,6 +8,7 @@
 #include <zephyr/arch/cpu.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/uart.h>
+#include <soc.h>
 
 #define DT_DRV_COMPAT olofk_serial
 
