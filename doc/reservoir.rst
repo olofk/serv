@@ -9,3 +9,4 @@ Welcome to the reservoir, a pool of ready-made designs and subsystems for differ
 .. include::   servile.rst
 .. include::   serving.rst
 .. include::   servant.rst
+.. include::   subservient.rst
