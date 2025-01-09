@@ -109,6 +109,7 @@ module serving
    servile
      #(.reset_pc (32'h0000_0000),
        .reset_strategy (RESET_STRATEGY),
+       .rf_width (rf_width),
        .sim (sim),
        .with_csr (WITH_CSR))
    servile

@@ -218,6 +218,12 @@ filesets:
       - servant/servive_clock_gen.v : {file_type : verilogSource}
       - servant/servive.v : {file_type : verilogSource}
 
+  te0802:
+    files:
+      - servant/servant_te0802_clock_gen.v : {file_type : verilogSource}
+      - servant/servant_te0802.v : {file_type : verilogSource}
+      - data/te0802.xdc : {file_type : xdc}
+
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
 
   ulx3s:
@@ -580,6 +586,7 @@ targets:
     filesets : [soc, servant_tb]
     parameters :
       - RISCV_FORMAL
+      - width
       - "mdu? (MDU=1)"
       - SERV_CLEAR_RAM=true
       - firmware
@@ -596,6 +603,15 @@ targets:
         family : CycloneV
         device : 5CSXFC6D6F31C6
     toplevel: servive
+
+  te0802:
+    default_tool: vivado
+    description : Trenz Electronic TE0802
+    filesets : [mem_files, soc, te0802]
+    parameters : [memfile, memsize]
+    tools:
+      vivado: {part : xczu2cg-sbva484-1-e}
+    toplevel : servant_te0802
 
   tinyfpga_bx:
     description: TinyFPGA BX
@@ -649,6 +665,7 @@ targets:
       - uart_baudrate
       - vcd
       - vcd_start
+      - width
       - compressed
       - align
       - with_csr=1
@@ -743,6 +760,11 @@ parameters:
     datatype    : int
     description : Delay start of VCD dumping until the specified time
     paramtype   : plusarg
+
+  width:
+    datatype    : int
+    description : Interal datapath width (1=SERV, 4=QERV)
+    paramtype   : vlogparam
 
   with_csr:
     datatype    : int

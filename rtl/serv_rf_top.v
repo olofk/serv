@@ -27,8 +27,10 @@ module serv_rf_top
                  restart execution from the instruction at RESET_PC
      */
     parameter RESET_STRATEGY = "MINI",
+    parameter [0:0] DEBUG = 1'b0,
     parameter WITH_CSR = 1,
-    parameter RF_WIDTH = 2,
+    parameter W        = 1,
+    parameter RF_WIDTH = W * 2,
 	parameter RF_L2D   = $clog2((32+(WITH_CSR*4))*32/RF_WIDTH))
   (
    input wire 	      clk,
@@ -86,13 +88,13 @@ module serv_rf_top
    wire [4+WITH_CSR:0] wreg1;
    wire 	      wen0;
    wire 	      wen1;
-   wire 	      wdata0;
-   wire 	      wdata1;
+   wire [W-1:0]	      wdata0;
+   wire [W-1:0]	      wdata1;
    wire [4+WITH_CSR:0] rreg0;
    wire [4+WITH_CSR:0] rreg1;
    wire 	      rf_ready;
-   wire 	      rdata0;
-   wire 	      rdata1;
+   wire [W-1:0]	      rdata0;
+   wire [W-1:0]	      rdata1;
 
    wire [RF_L2D-1:0]   waddr;
    wire [RF_WIDTH-1:0] wdata;
@@ -104,7 +106,8 @@ module serv_rf_top
    serv_rf_ram_if
      #(.width    (RF_WIDTH),
        .reset_strategy (RESET_STRATEGY),
-       .csr_regs (CSR_REGS))
+       .csr_regs (CSR_REGS),
+       .W(W))
    rf_ram_if
      (.i_clk    (clk),
       .i_rst    (i_rst),
@@ -145,9 +148,11 @@ module serv_rf_top
        .PRE_REGISTER (PRE_REGISTER),
        .RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR),
+       .DEBUG (DEBUG),
        .MDU(MDU),
        .COMPRESSED(COMPRESSED),
-       .ALIGN(ALIGN))
+       .ALIGN(ALIGN),
+       .W(W))
    cpu
      (
       .clk      (clk),

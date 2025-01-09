@@ -23,4 +23,16 @@ config SERV_TIMER
 	bool
 	default y
 
+config ARCH_HAS_CUSTOM_CPU_IDLE
+        bool
+        default y
+
+config ARCH_HAS_CUSTOM_CPU_ATOMIC_IDLE
+        bool
+        default y
+
+config RISCV_SOC_EXCEPTION_FROM_IRQ
+	bool
+	default y
+
 endif # SOC_RISCV32_SERVANT

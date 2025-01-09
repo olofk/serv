@@ -8,14 +8,17 @@
 `default_nettype none
 module servile
   #(
+    parameter	    width = 1,
     parameter	    reset_pc = 32'h00000000,
     parameter	    reset_strategy = "MINI",
-    parameter	    rf_width = 8,
+    parameter	    rf_width = 2*width,
     parameter [0:0] sim = 1'b0,
+    parameter [0:0] debug = 1'b0,
     parameter [0:0] with_c = 1'b0,
     parameter [0:0] with_csr = 1'b0,
     parameter [0:0] with_mdu = 1'b0,
     //Internally calculated. Do not touch
+    parameter	    B = width-1,
     parameter	    regs = 32+with_csr*4,
     parameter	    rf_l2d = $clog2(regs*32/rf_width))
   (
@@ -78,13 +81,13 @@ module servile
    wire [$clog2(regs)-1:0] wreg1;
    wire 		   wen0;
    wire 		   wen1;
-   wire 		   wdata0;
-   wire 		   wdata1;
+   wire [B:0]		   wdata0;
+   wire [B:0]		   wdata1;
    wire [$clog2(regs)-1:0] rreg0;
    wire [$clog2(regs)-1:0] rreg1;
    wire 		   rf_ready;
-   wire 		   rdata0;
-   wire 		   rdata1;
+   wire [B:0]		   rdata0;
+   wire [B:0]		   rdata1;
 
    wire [31:0]		   mdu_rs1;
    wire [31:0]		   mdu_rs2;
@@ -149,6 +152,7 @@ module servile
 
    serv_rf_ram_if
      #(.width    (rf_width),
+       .W        (width),
        .reset_strategy (reset_strategy),
        .csr_regs (with_csr*4))
    rf_ram_if
@@ -196,9 +200,11 @@ module servile
    serv_top
      #(
        .WITH_CSR       (with_csr?1:0),
+       .W              (width),
        .PRE_REGISTER   (1'b1),
        .RESET_STRATEGY (reset_strategy),
        .RESET_PC       (reset_pc),
+       .DEBUG          (debug),
        .MDU            (with_mdu),
        .COMPRESSED     (with_c))
    cpu

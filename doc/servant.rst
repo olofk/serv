@@ -184,7 +184,7 @@ Pin B1 is used for UART output with 115200 baud rate. The serial port on Kolibri
     ldprog -Ks build/servant_1.3.0/machdyne_kolibri-icestorm/servant_1.3.0.bin
 
 MAX10 10M08 Evaluation Kit
-^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 FPGA Pin 75 (Arduino_IO01 J5 pin 7) is used for UART output with 57600 baud rate. SW1 is reset and Led 1 q output.
 
@@ -247,6 +247,13 @@ SoCKit development kit
 FPGA Pin F14 (HSTC GPIO addon connector J2, pin 2) is used for UART output with 57600 baud rate.
 
     fusesoc run --target=sockit servant
+
+Trenz Electronic TE0802
+^^^^^^^^^^^^^^^^^^^^^^^
+
+PMOD A marked J5, pin two, on the board is used for UART output with 115200 baud rate.  
+
+    fusesoc run --target=te0802 servant
 
 TinyFPGA BX
 ^^^^^^^^^^^
