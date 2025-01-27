@@ -20,6 +20,22 @@ filesets:
     file_type : verilogSource
     depend : [vlog_tb_utils]
 
+  servant_timer_tb:
+    files:
+      - sw/timer_interrupt.hex : {file_type: user, copyto: .}
+      - bench/servant_timer_sim.v
+      - bench/servant_timer_tb.v
+    file_type : verilogSource
+    depend : [vlog_tb_utils]
+
+  servant_external_tb:
+    files:
+      - sw/external_interrupt.hex : {file_type: user, copyto: .}
+      - bench/servant_external_sim.v
+      - bench/servant_external_tb.v
+    file_type : verilogSource
+    depend : [vlog_tb_utils]
+
   service:
     files:
       - servant/ice40_pll.v
@@ -37,7 +53,13 @@ filesets:
       - "!tool_quartus? (servant/servant_ram.v)"
       - servant/servant.v
     file_type : verilogSource
-    depend : [servile, "mdu? (mdu)"]
+    depend : [servile, "mdu? (mdu)", "ei? (ei)"]
+
+  sleep_dummy:
+    files:
+      - servant/servant_sleep_dummy.v
+    file_type : verilogSource
+    depend : [servile]
 
   verilator_tb:
     files:
@@ -46,6 +68,18 @@ filesets:
       - "!vidbo? (bench/servant_tb.cpp)" : {file_type : cppSource}
     file_type : verilogSource
     depend : ["vidbo? (vidbo)"]
+
+  verilator_timer_tb:
+    files:
+      - bench/servant_timer_sim.v
+      - "bench/servant_timer_tb.cpp" : {file_type : cppSource}
+    file_type : verilogSource
+
+  verilator_external_tb:
+    files:
+      - bench/servant_external_sim.v
+      - "bench/servant_external_tb.cpp" : {file_type : cppSource}
+    file_type : verilogSource
 
   # Target-specific filesets. Alphabetically sorted
 
@@ -95,6 +129,19 @@ filesets:
       - servant/servant_cmod_a7_clock_gen.v : {file_type : verilogSource}
       - servant/servant_cmod_a7.v : {file_type : verilogSource}
       - data/cmod_a7_35t.xdc : {file_type : xdc}
+
+  nexys_4:
+    files:
+      - servant/servant_nexys_4_clock_gen.v : {file_type : verilogSource}
+      - servant/servant_nexys_4.v : {file_type : verilogSource}
+      - data/nexys_4.xdc : {file_type : xdc}
+
+  nexys_a7:
+    files:
+      - servant/servant_nexys_a7_clock_gen.v : {file_type : verilogSource}
+      - servant/servant_nexys_a7.v : {file_type : verilogSource}
+      - data/nexys_a7.xdc : {file_type : xdc}
+
 
   cyc1000:
     files:
@@ -188,11 +235,11 @@ filesets:
       - data/nexys_2.tcl : {file_type : tclSource}
       - data/nexys_2.ucf : {file_type : UCF}
 
-  nexys_a7:
-    files:
-      - servant/servix_clock_gen.v : {file_type : verilogSource}
-      - servant/servix.v : {file_type : verilogSource}
-      - data/nexys_a7.xdc : {file_type : xdc}
+#  nexys_a7:
+#    files:
+#      - servant/servix_clock_gen.v : {file_type : verilogSource}
+#      - servant/servix.v : {file_type : verilogSource}
+#      - data/nexys_a7.xdc : {file_type : xdc}
 
   orangecrab:
     files:
@@ -329,6 +376,24 @@ targets:
       part : xc7a35tcpg236-1
     parameters : [memfile, memsize]
     toplevel : servant_cmod_a7
+
+  nexys_4:
+    description: Digilent Nexys 4
+    filesets : [mem_files, soc, nexys_4]
+    flow: vivado
+    flow_options:
+      part : xc7a100tcsg324-1
+    parameters : [memfile, memsize]
+    toplevel : servant_nexys_4
+
+  nexys_a7:
+    description: Digilent Nexys A7
+    filesets : [mem_files, soc, nexys_a7]
+    flow: vivado
+    flow_options:
+      part : xc7a100tcsg324-1
+    parameters : [memfile, memsize]
+    toplevel : servant_nexys_a7
 
   cyc1000:
     default_tool: quartus
@@ -536,15 +601,6 @@ targets:
         speed   : -4
     toplevel : servax
 
-  nexys_a7:
-    description: Digilent Nexys A7
-    filesets : [mem_files, soc, nexys_a7]
-    flow: vivado
-    flow_options:
-      part : xc7a100tcsg324-1
-    parameters : [memfile, memsize, frequency=32]
-    toplevel : servix
-
   orangecrab_r0.2:
     default_tool: trellis
     description : OrangeCrab R0.2
@@ -588,6 +644,7 @@ targets:
       - RISCV_FORMAL
       - width
       - "mdu? (MDU=1)"
+      - "ei? (EI=1)"
       - SERV_CLEAR_RAM=true
       - firmware
       - memsize
@@ -656,6 +713,7 @@ targets:
     parameters :
       - RISCV_FORMAL
       - "mdu? (MDU=1)"
+      - "ei? (EI=1)"
       - cps
       - firmware
       - memsize
@@ -670,6 +728,54 @@ targets:
       - align
       - with_csr=1
     toplevel : servant_sim
+
+  verilator_timer_tb:
+    description: Verilator timer testbench
+    filesets : [soc, sleep_dummy, verilator_timer_tb]
+    flow: sim
+    flow_options:
+      tool: verilator
+      verilator_options : [--trace]
+    parameters :
+      - RISCV_FORMAL
+      - "mdu? (MDU=1)"
+      - cps
+      - firmware
+      - memsize
+      - signature
+      - timeout
+      - trace_pc
+      - vcd
+      - vcd_start
+      - width
+      - compressed
+      - align
+      - with_csr=1
+    toplevel : servant_timer_sim
+
+  verilator_external_tb:
+    description: Verilator timer testbench
+    filesets : [soc, sleep_dummy, verilator_external_tb]
+    flow: sim
+    flow_options:
+      tool: verilator
+      verilator_options : [--trace]
+    parameters :
+      - RISCV_FORMAL
+      - "mdu? (MDU=1)"
+      - cps
+      - firmware
+      - memsize
+      - signature
+      - timeout
+      - trace_pc
+      - vcd
+      - vcd_start
+      - width
+      - compressed
+      - align
+      - with_csr=1
+    toplevel : servant_external_sim
 
   zcu106:
     default_tool: vivado
@@ -710,6 +816,11 @@ parameters:
     datatype  : int
     description : Enables RISC-V standard M-extension
     paramtype : vlogdefine
+
+  EI:
+    datatype    : int
+    description : Enable interface for RISC-V external interrupts
+    paramtype   : vlogdefine
 
   memfile:
     datatype    : file

@@ -29,7 +29,7 @@ module servant_sim
        .with_csr (with_csr),
        .compress (compressed[0:0]),
        .align    (align[0:0]))
-   dut(wb_clk, wb_rst, q);
+   dut(wb_clk, wb_clk, wb_rst, q);
 
    assign pc_adr = dut.wb_mem_adr;
    assign pc_vld = dut.wb_mem_ack;

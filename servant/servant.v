@@ -2,8 +2,11 @@
 module servant
 (
  input wire  wb_clk,
+   input wire  main_clk,
  input wire  wb_rst,
- output wire q);
+   input wire  ext_irq,
+ output wire q,
+   output reg  o_sleep);
 
    parameter memfile = "zephyr_hello.hex";
    parameter memsize = 8192;
@@ -20,6 +23,12 @@ module servant
    localparam [0:0] with_mdu = 1'b1;
 `else
    localparam [0:0] with_mdu = 1'b0;
+`endif
+
+`ifdef EI
+   localparam [0:0] with_ei = 1'b1;
+`else
+   localparam [0:0] with_ei = 1'b0;
 `endif
 
    localparam	   aw = $clog2(memsize);
@@ -63,6 +72,8 @@ module servant
    wire [rf_l2d-1:0]   rf_raddr;
    wire		       rf_ren;
    wire [rf_width-1:0] rf_rdata;
+   wire                sleep_req;
+   wire                wakeup_req;
 
    servant_mux servant_mux
      (
@@ -106,7 +117,7 @@ module servant
      #(.RESET_STRATEGY (reset_strategy),
        .WIDTH (32))
    timer
-     (.i_clk    (wb_clk),
+     (.i_clk    (main_clk),
       .i_rst    (wb_rst),
       .o_irq    (timer_irq),
       .i_wb_cyc (wb_timer_stb),
@@ -140,12 +151,16 @@ module servant
        .debug    (debug),
        .with_c   (compress[0]),
        .with_csr (with_csr[0]),
-       .with_mdu (with_mdu))
+       .with_mdu (with_mdu),
+       .with_ei  (with_ei))
    cpu
      (
       .i_clk        (wb_clk),
       .i_rst        (wb_rst),
       .i_timer_irq  (timer_irq),
+      .i_external_irq (ext_irq),
+      .o_wakeup_req   (wakeup_req),
+      .o_sleep_req    (sleep_req),
 
       .o_wb_mem_adr   (wb_mem_adr),
       .o_wb_mem_dat   (wb_mem_dat),
@@ -169,5 +184,14 @@ module servant
       .o_rf_raddr  (rf_raddr),
       .o_rf_ren    (rf_ren),
       .i_rf_rdata  (rf_rdata));
+
+   always @(posedge main_clk) begin
+      if (sleep_req)
+        o_sleep <= 1;
+      if (wakeup_req)
+        o_sleep <= 0;
+      if (wb_rst)
+        o_sleep <= 0;
+   end
 
 endmodule

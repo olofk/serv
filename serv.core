@@ -23,12 +23,28 @@ filesets:
       - rtl/serv_rf_top.v
       - rtl/serv_aligner.v
       - rtl/serv_compdec.v
+      - rtl/serv_sleep.v
     file_type : verilogSource
 
   openlane:
     files:
       - data/params.tcl : {file_type : tclSource}
       - rtl/serv_synth_wrapper.v : {file_type : verilogSource}
+
+  verilator_decoder_tb:
+    files:
+      - bench/decoder_sim.v
+      - "bench/decoder_tb.cpp" : {file_type : cppSource}
+    file_type : verilogSource
+
+
+  decoder_tb:
+    files:
+      - bench/decoder_sim.v
+      - bench/decoder_tb.v
+    file_type : verilogSource
+    depend : [vlog_tb_utils]
+
 
 targets:
   default:
@@ -37,6 +53,7 @@ targets:
       - "is_toplevel? (ALIGN)"
       - "is_toplevel? (COMPRESSED)"
       - "is_toplevel? (MDU)"
+      - "is_toplevel? (EI)"
       - "is_toplevel? (PRE_REGISTER)"
       - "is_toplevel? (RESET_STRATEGY)"
       - RISCV_FORMAL
@@ -63,11 +80,28 @@ targets:
     filesets : [core, openlane]
     toplevel : serv_synth_wrapper
 
+  verilator_decoder_tb:
+    description: Verilator decoder testbench
+    filesets : [core, verilator_decoder_tb]
+    flow: sim
+    flow_options:
+      tool: verilator
+      verilator_options : [--trace]
+    parameters :
+      - RISCV_FORMAL
+      - "mdu? (MDU=1)"
+    toplevel : decoder_sim
+
 parameters:
   MDU:
     datatype   : int
     description: Enables interface for RISC-V standard M-extension
     paramtype  : vlogparam
+
+  EI:
+    datatype    : int
+    description : Enable interface for RISC-V external interrupts
+    paramtype   : vlogparam
 
   PRE_REGISTER:
     datatype    : int

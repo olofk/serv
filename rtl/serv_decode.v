@@ -13,6 +13,7 @@ module serv_decode
    output reg       o_cond_branch,
    output reg       o_e_op,
    output reg       o_ebreak,
+   output reg       o_wfi,
    output reg       o_branch_op,
    output reg       o_shift_op,
    output reg       o_rd_op,
@@ -76,7 +77,7 @@ module serv_decode
 
    wire co_two_stage_op =
 	~opcode[2] | (funct3[0] & ~funct3[1] & ~opcode[0] & ~opcode[4]) |
-	(funct3[1] & ~funct3[2] & ~opcode[0] & ~opcode[4]) | co_mdu_op;
+	(funct3[1] & ~funct3[2] & ~opcode[0] & ~opcode[4]) | co_mdu_op | o_wfi;
    wire co_shift_op = (opcode[2] & ~funct3[1]) & !co_mdu_op;
    wire co_branch_op = opcode[4];
    wire co_dbus_en    = ~opcode[2] & ~opcode[4];
@@ -127,20 +128,22 @@ module serv_decode
    wire co_sh_right   = funct3[2];
    wire co_bne_or_bge = funct3[0];
 
-   //Matches system ops except eceall/ebreak/mret
+   //Matches system ops except ecall/ebreak/mret/wfi
    wire csr_op = opcode[4] & opcode[2] & (|funct3);
 
 
    //op20
-   wire co_ebreak = op20;
+   wire co_ebreak = op20 & !op22;
+
+   wire co_wfi = opcode[4] & opcode[2] & op22 & !(|funct3);
 
 
    //opcode & funct3 & op21
 
    wire co_ctrl_mret = opcode[4] & opcode[2] & op21 & !(|funct3);
    //Matches system opcodes except CSR accesses (funct3 == 0)
-   //and mret (!op21)
-   wire co_e_op = opcode[4] & opcode[2] & !op21 & !(|funct3);
+   //and mret (!op21) and wfi (!op22)
+   wire co_e_op = opcode[4] & opcode[2] & !op21 & !op22 & !(|funct3);
 
    //opcode & funct3 & imm30
 
@@ -255,6 +258,7 @@ module serv_decode
 	    o_two_stage_op     = co_two_stage_op;
             o_e_op             = co_e_op;
             o_ebreak           = co_ebreak;
+            o_wfi              = co_wfi;
             o_branch_op        = co_branch_op;
             o_shift_op         = co_shift_op;
             o_rd_op            = co_rd_op;
@@ -313,6 +317,7 @@ module serv_decode
                o_cond_branch      <= co_cond_branch;
                o_e_op             <= co_e_op;
                o_ebreak           <= co_ebreak;
+               o_wfi              <= co_wfi;
                o_two_stage_op     <= co_two_stage_op;
                o_dbus_en          <= co_dbus_en;
                o_mtval_pc         <= co_mtval_pc;

@@ -9,12 +9,14 @@ module serv_top
     parameter	    RESET_PC = 32'd0,
     parameter [0:0] DEBUG = 1'b0,
     parameter [0:0] MDU = 1'b0,
+    parameter [0:0] EI = 1'b0,
     parameter [0:0] COMPRESSED=0,
     parameter [0:0] ALIGN = COMPRESSED)
    (
    input wire 		      clk,
    input wire 		      i_rst,
    input wire 		      i_timer_irq,
+   input wire		      i_external_irq,
 `ifdef RISCV_FORMAL
    output wire 		      rvfi_valid,
    output wire [63:0] 	      rvfi_order,
@@ -70,6 +72,11 @@ module serv_top
    input wire  [31:0] i_ext_rd,
    output wire [31:0] o_ext_rs1,
    output wire [31:0] o_ext_rs2,
+
+   // Sleep functionality
+   output wire		      o_sleep_req,
+   output wire		      o_wakeup_req,
+
    //MDU
    output wire        o_mdu_valid);
 
@@ -86,6 +93,7 @@ module serv_top
    wire 	 two_stage_op;
    wire 	 e_op;
    wire 	 ebreak;
+   wire    wfi;
    wire 	 branch_op;
    wire 	 shift_op;
    wire 	 rd_op;
@@ -183,6 +191,9 @@ module serv_top
    wire [31:0] wb_ibus_rdt;
    wire        wb_ibus_ack;
 
+   wire	       mie_meie;
+   wire	       mie_mtie;
+
    generate
       if (ALIGN) begin : gen_align
          serv_aligner  align
@@ -221,6 +232,20 @@ module serv_top
          assign iscomp   =  1'b0;
       end
    endgenerate
+
+   serv_sleep sleep
+     (
+      .i_clk            (clk),
+      .i_rst            (i_rst),
+      .i_timer_irq      (i_timer_irq),
+      .i_external_irq   (i_external_irq),
+      .i_cnt0           (cnt0),
+      .i_wfi            (wfi),
+      .i_init           (init),
+      .o_sleep_req      (o_sleep_req),
+      .o_wakeup_req     (o_wakeup_req),
+      .i_meie           (mie_meie),
+      .i_mtie           (mie_mtie));
 
    serv_state
      #(.RESET_STRATEGY (RESET_STRATEGY),
@@ -298,6 +323,7 @@ module serv_top
       .o_dbus_en          (dbus_en),
       .o_e_op             (e_op),
       .o_ebreak           (ebreak),
+      .o_wfi              (wfi),
       .o_branch_op        (branch_op),
       .o_shift_op         (shift_op),
       .o_rd_op            (rd_op),
@@ -563,6 +589,7 @@ module serv_top
 	    .i_cnt_done   (cnt_done),
 	    .i_mem_op     (!mtval_pc),
 	    .i_mtip       (i_timer_irq),
+	    .i_meip       (i_external_irq),
 	    .i_trap       (trap),
 	    .o_new_irq    (new_irq),
 	    //Control
@@ -580,7 +607,9 @@ module serv_top
 	    .o_csr_in     (csr_in),
 	    .i_csr_imm    (csr_imm),
 	    .i_rs1        (rs1),
-	    .o_q          (csr_rd));
+	    .o_q          (csr_rd),
+	    .o_meie (mie_meie),
+	    .o_mtie (mie_mtie));
       end else begin : gen_no_csr
 	 assign csr_in = {W{1'b0}};
 	 assign csr_rd = {W{1'b0}};

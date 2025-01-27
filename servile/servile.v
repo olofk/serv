@@ -16,6 +16,7 @@ module servile
     parameter [0:0] debug = 1'b0,
     parameter [0:0] with_c = 1'b0,
     parameter [0:0] with_csr = 1'b0,
+    parameter [0:0] with_ei = 1'b0,
     parameter [0:0] with_mdu = 1'b0,
     //Internally calculated. Do not touch
     parameter	    B = width-1,
@@ -25,6 +26,10 @@ module servile
    input wire		      i_clk,
    input wire		      i_rst,
    input wire		      i_timer_irq,
+   input wire         i_external_irq,
+
+   output wire        o_sleep_req,
+   output wire        o_wakeup_req,
 
    //Memory (WB) interface
    output wire [31:0]	      o_wb_mem_adr,
@@ -95,6 +100,8 @@ module servile
    wire			   mdu_valid;
    wire [31:0]		   mdu_rd;
    wire			   mdu_ready;
+
+   wire			   ei_irq;
 
    servile_mux
      #(.sim (sim))
@@ -194,7 +201,16 @@ module servile
       end else begin
 	 assign mdu_ready = 1'b0;
 	 assign mdu_rd = 32'd0;
-      end
+      end // else: !if(with_mdu)
+
+      if (with_ei) begin : gen_ei
+	 ei_top ei_serv
+	   (.i_clk (i_clk),
+	    .i_rst (i_rst),
+	    .o_eirq (ei_irq));
+      end else begin
+	 assign ei_irq = 1'b0;
+      end // else !if(with_ei)
    endgenerate
 
    serv_top
@@ -206,12 +222,15 @@ module servile
        .RESET_PC       (reset_pc),
        .DEBUG          (debug),
        .MDU            (with_mdu),
+       .EI             (with_ei),
        .COMPRESSED     (with_c))
    cpu
      (
       .clk         (i_clk),
       .i_rst       (i_rst),
       .i_timer_irq (i_timer_irq),
+      .i_external_irq (i_external_irq),
+
 
 `ifdef RISCV_FORMAL
       .rvfi_valid     (),
@@ -265,6 +284,10 @@ module servile
       .o_dbus_cyc  (wb_dbus_stb),
       .i_dbus_rdt  (wb_dbus_rdt),
       .i_dbus_ack  (wb_dbus_ack),
+
+      // Sleep
+      .o_sleep_req      (o_sleep_req),
+      .o_wakeup_req     (o_wakeup_req),
 
       //Extension IF
       .o_ext_rs1    (mdu_rs1),
