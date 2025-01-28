@@ -8,7 +8,6 @@ module serv_bufreg2
    input wire [1:0]   i_lsb,
    input wire 	      i_byte_valid,
    output wire 	      o_sh_done,
-   output wire 	      o_sh_done_r,
    //Control
    input wire 	      i_op_b_sel,
    input wire 	      i_shift_op,
@@ -36,8 +35,8 @@ module serv_bufreg2
             shifted out at the appropriate time to end up in the correct
             position in rd
     shift : Data is shifted in during init. After that, the six LSB are used as
-            a downcounter (with bit 5 initially set to 0) that triggers
-            o_sh_done and o_sh_done_r when they wrap around to indicate that
+            a downcounter (with bit 5 initially set to 0) that trigger
+            o_sh_done when they wrap around to indicate that
             the requested number of shifts have been performed
     */
    wire [5:0] dat_shamt = (i_shift_op & !i_init) ?
@@ -47,7 +46,6 @@ module serv_bufreg2
 	      {dat[6] & !(i_shift_op & i_cnt_done),dat[5:1]};
 
    assign o_sh_done = dat_shamt[5];
-   assign o_sh_done_r = dat[5];
 
    assign o_q =
 	       ((i_lsb == 2'd3) & dat[24]) |

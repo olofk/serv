@@ -153,7 +153,6 @@ module serv_top
    wire          mem_half;
    wire [1:0] 	 mem_bytecnt;
    wire 	 sh_done;
-   wire 	 sh_done_r;
    wire 	 byte_valid;
 
    wire 	 mem_misalign;
@@ -255,7 +254,6 @@ module serv_top
       .o_ctrl_trap    (trap),
       .i_ctrl_misalign(lsb[1]),
       .i_sh_done      (sh_done),
-      .i_sh_done_r    (sh_done_r),
       .o_mem_bytecnt  (mem_bytecnt),
       .i_mem_misalign (mem_misalign),
       //Control
@@ -406,7 +404,6 @@ module serv_top
       .i_lsb        (lsb),
       .i_byte_valid (byte_valid),
       .o_sh_done    (sh_done),
-      .o_sh_done_r  (sh_done_r),
       //Control
       .i_op_b_sel   (op_b_sel),
       .i_shift_op   (shift_op),
