@@ -29,7 +29,6 @@ module serv_state
    output wire 	     o_ctrl_trap,
    input wire 	     i_ctrl_misalign,
    input wire 	     i_sh_done,
-   input wire 	     i_sh_done_r,
    output wire [1:0] o_mem_bytecnt,
    input wire 	     i_mem_misalign,
    //Control
@@ -91,6 +90,8 @@ module serv_state
    //been calculated.
    wire      take_branch = i_branch_op & (!i_cond_branch | (i_alu_cmp^i_bne_or_bge));
 
+   wire last_init = o_cnt_done & o_init;
+
    //valid signal for mdu
    assign o_mdu_valid = MDU & !o_cnt_en & init_done & i_mdu_op;
 
@@ -100,16 +101,16 @@ module serv_state
    //Right shift. o_sh_done
    //Mem ops. i_dbus_ack
    //MDU ops. i_mdu_ready
-   assign o_rf_wreq = (i_shift_op & (i_sh_right ? (i_sh_done & !o_cnt_en & init_done) : stage_two_req)) |
+   assign o_rf_wreq = (i_shift_op & (i_sh_right ? (i_sh_done & !o_cnt_en & init_done) : last_init)) |
 	   	       i_dbus_ack | (MDU & i_mdu_ready) |
-	   	      (i_branch_op & stage_two_req & !misalign_trap_sync) |
-	   	      (i_rd_alu_en & i_alu_rd_sel1 & stage_two_req);
+	   	      (i_branch_op & (last_init & !trap_pending)) |
+	   	      (i_rd_alu_en & i_alu_rd_sel1 & last_init);
 
    assign o_dbus_cyc = !o_cnt_en & init_done & i_dbus_en & !i_mem_misalign;
 
    //Prepare RF for reads when a new instruction is fetched
    // or when stage one caused an exception (rreq implies a write request too)
-   assign o_rf_rreq = i_ibus_ack | (stage_two_req & misalign_trap_sync);
+   assign o_rf_rreq = i_ibus_ack | (trap_pending & last_init);
 
    assign o_rf_rd_en = i_rd_op & !o_init;
 
@@ -124,7 +125,8 @@ module serv_state
     shift : Shift in during phase 1. Continue shifting between phases (except
             for the first cycle after init). Shift out during phase 2
     */
-   assign o_bufreg_en = (o_cnt_en & (o_init | ((o_ctrl_trap | i_branch_op) & i_two_stage_op))) | (i_shift_op & !stage_two_req & (i_sh_right | i_sh_done_r) & init_done);
+   
+   assign o_bufreg_en = (o_cnt_en & (o_init | ((o_ctrl_trap | i_branch_op) & i_two_stage_op))) | (i_shift_op & init_done & (i_sh_right ? !stage_two_req : i_sh_done));
 
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
@@ -215,14 +217,14 @@ module serv_state
 
    assign o_ctrl_trap = WITH_CSR & (i_e_op | i_new_irq | misalign_trap_sync);
 
-   generate
-      if (WITH_CSR) begin : gen_csr
-	 reg 	misalign_trap_sync_r;
-
 	 //trap_pending is only guaranteed to have correct value during the
 	 // last cycle of the init stage
 	 wire trap_pending = WITH_CSR & ((take_branch & i_ctrl_misalign & !ALIGN) |
 					 (i_dbus_en   & i_mem_misalign));
+
+   generate
+      if (WITH_CSR) begin : gen_csr
+	 reg 	misalign_trap_sync_r;
 
 	 always @(posedge i_clk) begin
 	    if (i_ibus_ack | o_cnt_done | i_rst)
