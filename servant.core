@@ -491,7 +491,6 @@ targets:
     filesets : [mem_files, soc, machdyne_kolibri]
     parameters : [memfile, memsize]
     tools:
-    tools:
       icestorm:
         nextpnr_options : [--hx4k, --package, bg121, --freq, 48]
         pnr: next
