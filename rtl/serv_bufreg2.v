@@ -6,7 +6,7 @@ module serv_bufreg2
    input wire 	      i_init,
    input wire 	      i_cnt_done,
    input wire [1:0]   i_lsb,
-   input wire 	      i_byte_valid,
+   input wire [1:0]   i_bytecnt,
    output wire 	      o_sh_done,
    //Control
    input wire 	      i_op_b_sel,
@@ -23,9 +23,24 @@ module serv_bufreg2
 
    reg [31:0] 	 dat;
 
+   /*
+    Before a store operation, the data to be written needs to be shifted into
+    place. Depending on the address alignment, we need to shift different
+    amounts. One formula for calculating this is to say that we shift when
+    i_lsb + i_bytecnt < 4. Unfortunately, the synthesis tools don't seem to be
+    clever enough so the hideous expression below is used to achieve the same
+    thing in a more optimal way.
+    */
+   wire byte_valid
+     = (!i_lsb[0] & !i_lsb[1])         |
+       (!i_bytecnt[0] & !i_bytecnt[1]) |
+       (!i_bytecnt[1] & !i_lsb[1])     |
+       (!i_bytecnt[1] & !i_lsb[0])     |
+       (!i_bytecnt[0] & !i_lsb[1]);
+
    assign o_op_b = i_op_b_sel ? i_rs2 : i_imm;
 
-   wire 	 dat_en = i_shift_op | (i_en & i_byte_valid);
+   wire 	 dat_en = i_shift_op | (i_en & byte_valid);
 
    /* The dat register has three different use cases for store, load and
     shift operations.
