@@ -153,7 +153,6 @@ module serv_top
    wire          mem_half;
    wire [1:0] 	 mem_bytecnt;
    wire 	 sh_done;
-   wire 	 byte_valid;
 
    wire 	 mem_misalign;
 
@@ -402,7 +401,7 @@ module serv_top
       .i_init       (init),
       .i_cnt_done   (cnt_done),
       .i_lsb        (lsb),
-      .i_byte_valid (byte_valid),
+      .i_bytecnt    (mem_bytecnt),
       .o_sh_done    (sh_done),
       //Control
       .i_op_b_sel   (op_b_sel),
@@ -525,7 +524,6 @@ module serv_top
       //State
       .i_bytecnt    (mem_bytecnt),
       .i_lsb        (lsb),
-      .o_byte_valid (byte_valid),
       .o_misalign   (mem_misalign),
       //Control
       .i_mdu_op     (mdu_op),

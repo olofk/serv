@@ -10,7 +10,6 @@ module serv_mem_if
    //State
    input wire [1:0]  i_bytecnt,
    input wire [1:0]  i_lsb,
-   output wire 	     o_byte_valid,
    output wire 	     o_misalign,
    //Control
    input wire 	     i_signed,
@@ -25,21 +24,6 @@ module serv_mem_if
    output wire [3:0] o_wb_sel);
 
    reg signbit;
-
-   /*
-    Before a store operation, the data to be written needs to be shifted into
-    place. Depending on the address alignment, we need to shift different
-    amounts. One formula for calculating this is to say that we shift when
-    i_lsb + i_bytecnt < 4. Unfortunately, the synthesis tools don't seem to be
-    clever enough so the hideous expression below is used to achieve the same
-    thing in a more optimal way.
-    */
-   assign o_byte_valid
-     = (!i_lsb[0] & !i_lsb[1])         |
-       (!i_bytecnt[0] & !i_bytecnt[1]) |
-       (!i_bytecnt[1] & !i_lsb[1])     |
-       (!i_bytecnt[1] & !i_lsb[0])     |
-       (!i_bytecnt[0] & !i_lsb[1]);
 
    wire dat_valid =
 	i_mdu_op |
