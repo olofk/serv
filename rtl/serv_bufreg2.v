@@ -40,12 +40,14 @@ module serv_bufreg2
 
    assign o_op_b = i_op_b_sel ? i_rs2 : i_imm;
 
-   wire 	 dat_en = i_shift_op | (i_en & byte_valid);
+   wire 	 shift_en = i_shift_op ? (i_en & i_init) : (i_en & byte_valid);
+
+   wire		 cnt_en = (i_shift_op & !i_init);
 
    /* The dat register has three different use cases for store, load and
     shift operations.
     store : Data to be written is shifted to the correct position in dat during
-            init by dat_en and is presented on the data bus as o_wb_dat
+            init by shift_en and is presented on the data bus as o_wb_dat
     load  : Data from the bus gets latched into dat during i_wb_ack and is then
             shifted out at the appropriate time to end up in the correct
             position in rd
@@ -54,7 +56,7 @@ module serv_bufreg2
             o_sh_done when they wrap around to indicate that
             the requested number of shifts have been performed
     */
-   wire [5:0] dat_shamt = (i_shift_op & !i_init) ?
+   wire [5:0] dat_shamt = cnt_en ?
 	      //Down counter mode
 	      dat[5:0]-1 :
 	      //Shift reg mode with optional clearing of bit 5
@@ -71,7 +73,7 @@ module serv_bufreg2
    assign o_dat = dat;
 
    always @(posedge i_clk) begin
-      if (dat_en | i_load)
+      if (shift_en | cnt_en | i_load)
 	dat <= i_load ? i_dat : {o_op_b, dat[31:7], dat_shamt};
    end
 
