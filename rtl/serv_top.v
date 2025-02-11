@@ -400,6 +400,8 @@ module serv_top
       .i_en         (cnt_en),
       .i_init       (init),
       .i_cnt7       (cnt7),
+      .i_cnt_done   (cnt_done),
+      .i_sh_right   (sh_right),
       .i_lsb        (lsb),
       .i_bytecnt    (mem_bytecnt),
       .o_sh_done    (sh_done),

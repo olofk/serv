@@ -5,6 +5,8 @@ module serv_bufreg2
    input wire 	      i_en,
    input wire 	      i_init,
    input wire 	      i_cnt7,
+   input wire 	      i_cnt_done,
+   input wire 	      i_sh_right,
    input wire [1:0]   i_lsb,
    input wire [1:0]   i_bytecnt,
    output wire 	      o_sh_done,
@@ -42,7 +44,7 @@ module serv_bufreg2
 
    wire 	 shift_en = i_shift_op ? (i_en & i_init & (i_bytecnt == 2'b00)) : (i_en & byte_valid);
 
-   wire		 cnt_en = (i_shift_op & !i_init);
+   wire		 cnt_en = (i_shift_op & (!i_init | (i_cnt_done & i_sh_right)));
 
    /* The dat register has three different use cases for store, load and
     shift operations.

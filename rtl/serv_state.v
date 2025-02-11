@@ -59,7 +59,6 @@ module serv_state
    input wire 	     i_rf_ready,
    output wire 	     o_rf_rd_en);
 
-   reg 	stage_two_req;
    reg 	init_done;
    wire misalign_trap_sync;
 
@@ -101,7 +100,7 @@ module serv_state
    //Right shift. o_sh_done
    //Mem ops. i_dbus_ack
    //MDU ops. i_mdu_ready
-   assign o_rf_wreq = (i_shift_op & (i_sh_right ? (i_sh_done & !o_cnt_en & init_done) : last_init)) |
+   assign o_rf_wreq = (i_shift_op & (i_sh_right ? (i_sh_done & (last_init | !o_cnt_en & init_done)) : last_init)) |
 	   	       i_dbus_ack | (MDU & i_mdu_ready) |
 	   	      (i_branch_op & (last_init & !trap_pending)) |
 	   	      (i_rd_alu_en & i_alu_rd_sel1 & last_init);
@@ -126,7 +125,7 @@ module serv_state
             for the first cycle after init). Shift out during phase 2
     */
    
-   assign o_bufreg_en = (o_cnt_en & (o_init | ((o_ctrl_trap | i_branch_op) & i_two_stage_op))) | (i_shift_op & init_done & (i_sh_right ? !stage_two_req : i_sh_done));
+   assign o_bufreg_en = (o_cnt_en & (o_init | ((o_ctrl_trap | i_branch_op) & i_two_stage_op))) | (i_shift_op & init_done & (i_sh_right | i_sh_done));
 
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
@@ -152,14 +151,10 @@ module serv_state
 	 o_ctrl_jump <= o_init & take_branch;
       end
 
-      //Need a strobe for the first cycle in the IDLE state after INIT
-      stage_two_req <= o_cnt_done & o_init;
-
       if (i_rst) begin
 	 if (RESET_STRATEGY != "NONE") begin
 	    init_done <= 1'b0;
 	    o_ctrl_jump <= 1'b0;
-	    stage_two_req <= 1'b0;
 	 end
       end
    end
