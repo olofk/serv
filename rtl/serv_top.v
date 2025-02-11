@@ -399,7 +399,7 @@ module serv_top
       //State
       .i_en         (cnt_en),
       .i_init       (init),
-      .i_cnt_done   (cnt_done),
+      .i_cnt7       (cnt7),
       .i_lsb        (lsb),
       .i_bytecnt    (mem_bytecnt),
       .o_sh_done    (sh_done),

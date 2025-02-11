@@ -4,7 +4,7 @@ module serv_bufreg2
    //State
    input wire 	      i_en,
    input wire 	      i_init,
-   input wire 	      i_cnt_done,
+   input wire 	      i_cnt7,
    input wire [1:0]   i_lsb,
    input wire [1:0]   i_bytecnt,
    output wire 	      o_sh_done,
@@ -40,7 +40,7 @@ module serv_bufreg2
 
    assign o_op_b = i_op_b_sel ? i_rs2 : i_imm;
 
-   wire 	 shift_en = i_shift_op ? (i_en & i_init) : (i_en & byte_valid);
+   wire 	 shift_en = i_shift_op ? (i_en & i_init & (i_bytecnt == 2'b00)) : (i_en & byte_valid);
 
    wire		 cnt_en = (i_shift_op & !i_init);
 
@@ -58,9 +58,9 @@ module serv_bufreg2
     */
    wire [5:0] dat_shamt = cnt_en ?
 	      //Down counter mode
-	      dat[5:0]-1 :
+	      dat[29:24]-1 :
 	      //Shift reg mode with optional clearing of bit 5
-	      {dat[6] & !(i_shift_op & i_cnt_done),dat[5:1]};
+	      {dat[30] & !(i_shift_op & i_cnt7),dat[29:25]};
 
    assign o_sh_done = dat_shamt[5];
 
@@ -74,7 +74,7 @@ module serv_bufreg2
 
    always @(posedge i_clk) begin
       if (shift_en | cnt_en | i_load)
-	dat <= i_load ? i_dat : {o_op_b, dat[31:7], dat_shamt};
+	dat <= i_load ? i_dat : {o_op_b, dat[31], dat_shamt, dat[24:1]};
    end
 
 endmodule
