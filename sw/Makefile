@@ -1,9 +1,11 @@
 TOOLCHAIN_PREFIX?=riscv64-unknown-elf-
+CC?=$(TOOLCHAIN_PREFIX)gcc
+OBJCOPY=$(TOOLCHAIN_PREFIX)objcopy
 
 %.elf: %.S link.ld
-	$(TOOLCHAIN_PREFIX)gcc -nostartfiles -nostdlib -march=rv32i_zicsr -mabi=ilp32 -Tlink.ld -o$@ $<
+	$(CC) -nostartfiles -nostdlib -march=rv32i_zicsr -mabi=ilp32 -Tlink.ld -o$@ $<
 %.bin: %.elf
-	$(TOOLCHAIN_PREFIX)objcopy -O binary $< $@
+	$(OBJCOPY) -O binary $< $@
 %.hex: %.bin
 	python3 makehex.py $< > $@
 
