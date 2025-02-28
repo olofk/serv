@@ -155,6 +155,19 @@ serial console will show up.
 
     fusesoc run --target=icesugar servant
 
+iCESugar-nano
+^^^^^^^^^^^^^
+
+Pin B3 is used for LED output. As the default clock of 12 MHz is rather slow
+the LED only toggles every 9 seconds with the default blinky example.
+
+Thanks to the onboard debugger, you can just connect the USB Type-C connector
+to the PC, and a serial console will show up. However, the device doesn't have
+enough RAM to run the Zephyr hello-world example so the UART pins are not
+connect but they are defined in the PCF for easy reference.
+
+    fusesoc run --target=icesugar-nano servant
+
 ICE-V Wireless
 ^^^^^^^^^^^^^^
 
