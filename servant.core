@@ -157,6 +157,11 @@ filesets:
 
   icesugar   : {files: [data/icesugar.pcf : {file_type : PCF}]}
 
+  icesugar_nano:
+    files:
+      - data/icesugar_nano.pcf : {file_type : PCF}
+      - servant/servant_ice40_cm36.v : {file_type : verilogSource}
+
   icev_wireless : {files: [data/icev_wireless.pcf  : {file_type : PCF}]}
 
   gmm7550:
@@ -440,6 +445,17 @@ targets:
         nextpnr_options: [--up5k, --package, sg48, --freq, 32]
         pnr: next
     toplevel : service
+
+  icesugar-nano:
+    default_tool : icestorm
+    description : iCE40LP1K Development Board by MuseLab
+    filesets : [mem_files, soc, icesugar_nano]
+    parameters : [memfile=blinky.hex, memsize=7168]
+    tools:
+      icestorm:
+        nextpnr_options: [--lp1k, --package, cm36, --freq, 12]
+        pnr: next
+    toplevel : servant_ice40_cm36
 
   icev_wireless:
     default_tool : icestorm

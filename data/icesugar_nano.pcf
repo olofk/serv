@@ -1,0 +1,9 @@
+# 12 MHz external clock
+set_io i_clk        D1
+
+# LED
+set_io o_led        B6
+
+# UART
+set_io i_uart_rx    A3
+set_io o_uart_tx    B3
