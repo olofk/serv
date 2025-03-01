@@ -15,7 +15,6 @@ module serv_decode
    output reg       o_ebreak,
    output reg       o_branch_op,
    output reg       o_shift_op,
-   output reg       o_slt_or_branch,
    output reg       o_rd_op,
    output reg       o_two_stage_op,
    output reg       o_dbus_en,
@@ -79,7 +78,6 @@ module serv_decode
 	~opcode[2] | (funct3[0] & ~funct3[1] & ~opcode[0] & ~opcode[4]) |
 	(funct3[1] & ~funct3[2] & ~opcode[0] & ~opcode[4]) | co_mdu_op;
    wire co_shift_op = (opcode[2] & ~funct3[1]) & !co_mdu_op;
-   wire co_slt_or_branch = (opcode[4] | (funct3[1] & opcode[2]) | (imm30 & opcode[2] & opcode[3] & ~funct3[2])) & !co_mdu_op;
    wire co_branch_op = opcode[4];
    wire co_dbus_en    = ~opcode[2] & ~opcode[4];
    wire co_mtval_pc   = opcode[4];
@@ -259,7 +257,6 @@ module serv_decode
             o_ebreak           = co_ebreak;
             o_branch_op        = co_branch_op;
             o_shift_op         = co_shift_op;
-            o_slt_or_branch    = co_slt_or_branch;
             o_rd_op            = co_rd_op;
             o_mdu_op           = co_mdu_op;
             o_ext_funct3       = co_ext_funct3;
@@ -321,7 +318,6 @@ module serv_decode
                o_mtval_pc         <= co_mtval_pc;
                o_branch_op        <= co_branch_op;
                o_shift_op         <= co_shift_op;
-               o_slt_or_branch    <= co_slt_or_branch;
                o_rd_op            <= co_rd_op;
                o_mdu_op           <= co_mdu_op;
                o_ext_funct3       <= co_ext_funct3;
