@@ -189,7 +189,7 @@ module serv_state
 	 reg [3:0] cnt_lsb;
 	 always @(posedge i_clk) begin
             o_cnt <= o_cnt + {2'd0,cnt_r[3]};
-            cnt_lsb <= {cnt_lsb[2:0],(cnt_lsb[3] & !o_cnt_done) | (i_rf_ready & !o_cnt_en)};
+            cnt_lsb <= {cnt_lsb[2:0],(cnt_lsb[3] & !o_cnt_done) | i_rf_ready};
 	    if (i_rst & (RESET_STRATEGY != "NONE")) begin
 	       o_cnt   <= 3'd0;
 	       cnt_lsb <= 4'b0000;
