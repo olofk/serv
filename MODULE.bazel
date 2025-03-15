@@ -1,0 +1,32 @@
+"""Bazel depedencies"""
+
+module(
+    name = "serv",
+    version = "0.0.1",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "rules_python", version = "1.2.0")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    ignore_root_user_error = True,
+    is_default = True,
+    python_version = "3.12",
+)
+
+bazel_dep(name = "bazel-orfs")
+git_override(
+    module_name = "bazel-orfs",
+    commit = "e153c70cebe9416db4e2de33d0bcee2749d0e539",
+    remote = "https://github.com/The-OpenROAD-Project/bazel-orfs.git",
+)
+
+orfs = use_extension("@bazel-orfs//:extension.bzl", "orfs_repositories")
+orfs.default(
+    # To update, find latest at https://hub.docker.com/r/openroad/orfs/tags
+    image = "docker.io/openroad/orfs:v3.0-2591-g9bca87d7",
+    sha256 = "673181c3b49235cf5b43e386e4cf478d676b797c8b7736a3ed79fc90f4c8acb7",
+)
+use_repo(orfs, "com_github_nixos_patchelf_download")
+use_repo(orfs, "docker_orfs")
