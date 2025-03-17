@@ -37,7 +37,9 @@ PDKS = [
                     {
                         "IO_PLACER_H": "M2 M4",
                         "IO_PLACER_V": "M3 M5",
-                    } if pdk == "asa7" else {
+                    } if pdk == "asap7" else {
+                        "IO_PLACER_H":"met3 met5",
+                        "IO_PLACER_V": "met2 met4",
                     }
                 ),
     pdk = "@docker_orfs//:{}".format(pdk),
