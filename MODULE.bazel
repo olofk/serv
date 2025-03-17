@@ -25,8 +25,8 @@ git_override(
 orfs = use_extension("@bazel-orfs//:extension.bzl", "orfs_repositories")
 orfs.default(
     # To update, find latest at https://hub.docker.com/r/openroad/orfs/tags
-    image = "docker.io/openroad/orfs:v3.0-2591-g9bca87d7",
-    sha256 = "673181c3b49235cf5b43e386e4cf478d676b797c8b7736a3ed79fc90f4c8acb7",
+    image = "docker.io/openroad/orfs:v3.0-2601-g8f68e19a",
+    sha256 = "90f10e4d287e1223647ac75a456efdcb61d8ca8b255b4946ff0d2e537806b32b",
 )
 use_repo(orfs, "com_github_nixos_patchelf_download")
 use_repo(orfs, "docker_orfs")
