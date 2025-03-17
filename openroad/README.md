@@ -40,6 +40,13 @@ View sky130hd PPA plots:
 
 ![alt text](ppa_sky130hd.png)
 
+Tuning parameters
+=================
+
+To tune a parameter, it can be convenient to run one stage to quickly see if it works. For instance, the floorplan needs to be able to fit the pins on the bottom edge:
+
+    bazel run serv_top_sky130hd_1_floorplan_deps /tmp/foo do-floorplan CORE_UTILIZATION=10 gui_floorplan
+
 Ideas for future work
 =====================
 
