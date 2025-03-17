@@ -31,6 +31,7 @@ PDKS = [
                     "CORE_UTILIZATION": "5",
                     "PLACE_DENSITY": "0.8",
                     "CORE_MARGIN": "1",
+                    "VERILOG_TOP_PARAMS": "W {width}".format(width = width),
                 } |
                 (
                     {
@@ -48,22 +49,8 @@ PDKS = [
         pdk = pdk,
         width = width,
     ),
-    verilog_files = [
-        ":serv_top_{width}".format(width = width),
-        "//:verilog",
-    ],
+    verilog_files = ["//:verilog"],
 ) for width in WIDTHS for pdk in PDKS]
-
-# FIXME workaround for https://github.com/The-OpenROAD-Project/OpenROAD-flow-scripts/pull/2943
-[genrule(
-    name = "serv_top_{width}".format(width = width),
-    srcs = ["//:rtl/serv_top.v"],
-    outs = ["serv_top_{width}.v".format(width = width)],
-    #     parameter	    W = 1,
-    cmd = """
-    sed -E 's/parameter\\s+W = 1,/parameter W = {width},/' < $< > $@
-    """.format(width = width),
-) for width in WIDTHS]
 
 [orfs_ppa(
     name = "ppa_" + pdk,

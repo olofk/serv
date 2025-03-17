@@ -9,9 +9,6 @@ exports_files(
 
 filegroup(
     name = "verilog",
-    srcs = glob(
-        ["rtl/**/*.v"],
-        exclude = ["rtl/serv_top.v"],
-    ),
+    srcs = glob(["rtl/**/*.v"]),
     visibility = [":__subpackages__"],
 )
