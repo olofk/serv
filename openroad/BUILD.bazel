@@ -3,12 +3,14 @@ load("@bazel-orfs//:ppa.bzl", "orfs_ppa")
 
 FASTER = {
     # ignore timing repair for now
-    #"SETUP_SLACK_MARGIN": "-1000",
+    "SETUP_SLACK_MARGIN": "-1000",
+    "SETUP_HOLD_MARGIN": "-1000",
     "SKIP_REPORT_METRICS": "1",
     "SKIP_LAST_GASP": "1",
     # skip checks for now, faster
     "PWR_NETS_VOLTAGES": "",
     "GND_NETS_VOLTAGES": "",
+    "TNS_END_PERCENT": "0",
 }
 
 filegroup(
@@ -28,7 +30,7 @@ PDKS = [
     name = "serv_top",
     arguments = FASTER | {
                     "SYNTH_HIERARCHICAL": "1",
-                    "CORE_UTILIZATION": "5",
+                    "CORE_UTILIZATION": "15",
                     "PLACE_DENSITY": "0.8",
                     "CORE_MARGIN": "1",
                     "VERILOG_TOP_PARAMS": "W {width}".format(width = width),
@@ -38,7 +40,7 @@ PDKS = [
                         "IO_PLACER_H": "M2 M4",
                         "IO_PLACER_V": "M3 M5",
                     } if pdk == "asap7" else {
-                        "IO_PLACER_H":"met3 met5",
+                        "IO_PLACER_H": "met3 met5",
                         "IO_PLACER_V": "met2 met4",
                     }
                 ),
