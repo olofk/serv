@@ -154,7 +154,7 @@ int main(int argc, char **argv, char **env)
       do_gpio(&gpio_context, top->q);
     }
     if (tf && top->wb_clk && top->pc_vld)
-      write(tf, (void *)&top->pc_adr, 4);
+      if (write(tf, (void *)&top->pc_adr, 4) < 0) exit(1);
     if (timeout && (main_time >= timeout)) {
       printf("Timeout: Exiting at time %lu\n", main_time);
       done = true;
