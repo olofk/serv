@@ -7,6 +7,8 @@ FASTER = {
     "SETUP_HOLD_MARGIN": "-1000",
     "SKIP_REPORT_METRICS": "1",
     "SKIP_LAST_GASP": "1",
+    "GPL_ROUTABILITY_DRIVEN": "0",
+    "GPL_TIMING_DRIVEN": "0",
     # skip checks for now, faster
     "PWR_NETS_VOLTAGES": "",
     "GND_NETS_VOLTAGES": "",
@@ -30,7 +32,10 @@ PDKS = [
     name = "serv_top",
     arguments = FASTER | {
                     "SYNTH_HIERARCHICAL": "1",
-                    "CORE_UTILIZATION": "15",
+                    "CORE_UTILIZATION": "50",
+                    # much wider than tall to make space for pins
+                    # at bottom.
+                    "CORE_ASPECT_RATIO": "0.25",
                     "PLACE_DENSITY": "0.8",
                     "CORE_MARGIN": "1",
                     "VERILOG_TOP_PARAMS": "W {width}".format(width = width),
