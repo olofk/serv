@@ -1,29 +1,34 @@
 module serv_bufreg2
+  #(parameter W = 1,
+    //Internally calculated. Do not touch
+    parameter B=W-1)
   (
-   input wire 	      i_clk,
+   input wire	      i_clk,
    //State
-   input wire 	      i_en,
-   input wire 	      i_init,
-   input wire 	      i_cnt7,
-   input wire 	      i_cnt_done,
-   input wire 	      i_sh_right,
+   input wire	      i_en,
+   input wire	      i_init,
+   input wire	      i_cnt7,
+   input wire	      i_cnt_done,
+   input wire	      i_sh_right,
    input wire [1:0]   i_lsb,
    input wire [1:0]   i_bytecnt,
-   output wire 	      o_sh_done,
+   output wire	      o_sh_done,
    //Control
-   input wire 	      i_op_b_sel,
-   input wire 	      i_shift_op,
+   input wire	      i_op_b_sel,
+   input wire	      i_shift_op,
    //Data
-   input wire 	      i_rs2,
-   input wire 	      i_imm,
-   output wire 	      o_op_b,
-   output wire 	      o_q,
+   input wire [B:0]   i_rs2,
+   input wire [B:0]   i_imm,
+   output wire [B:0]  o_op_b,
+   output wire [B:0]  o_q,
    //External
    output wire [31:0] o_dat,
-   input wire 	      i_load,
+   input wire	      i_load,
    input wire [31:0]  i_dat);
 
-   reg [31:0] 	 dat;
+   // High and low data words form a 32-bit word
+   reg [7:0] 	 dhi;
+   reg [23:0] 	 dlo;
 
    /*
     Before a store operation, the data to be written needs to be shifted into
@@ -58,25 +63,37 @@ module serv_bufreg2
             o_sh_done when they wrap around to indicate that
             the requested number of shifts have been performed
     */
-   wire [5:0] dat_shamt = cnt_en ?
+
+   wire [7:0]	 cnt_next;
+   generate
+      if (W == 1) begin : gen_cnt_w_eq_1
+	 assign cnt_next = {o_op_b, dhi[7], dhi[5:0]-6'd1};
+      end else if (W == 4) begin : gen_cnt_w_eq_4
+	 assign cnt_next = {o_op_b[3:2], dhi[5:0]-6'd4};
+      end
+   endgenerate
+
+   wire [7:0] dat_shamt = cnt_en ?
 	      //Down counter mode
-	      dat[29:24]-1 :
-	      //Shift reg mode with optional clearing of bit 5
-	      {dat[30] & !(i_shift_op & i_cnt7),dat[29:25]};
+	      cnt_next :
+	      //Shift reg mode
+	      {o_op_b, dhi[7:W]};
 
    assign o_sh_done = dat_shamt[5];
 
    assign o_q =
-	       ((i_lsb == 2'd3) & dat[24]) |
-	       ((i_lsb == 2'd2) & dat[16]) |
-	       ((i_lsb == 2'd1) & dat[8]) |
-	       ((i_lsb == 2'd0) & dat[0]);
+	       ({W{(i_lsb == 2'd3)}} & o_dat[W+23:24]) |
+	       ({W{(i_lsb == 2'd2)}} & o_dat[W+15:16]) |
+	       ({W{(i_lsb == 2'd1)}} & o_dat[W+7:8])   |
+	       ({W{(i_lsb == 2'd0)}} & o_dat[W-1:0]);
 
-   assign o_dat = dat;
+   assign o_dat = {dhi,dlo};
 
    always @(posedge i_clk) begin
       if (shift_en | cnt_en | i_load)
-	dat <= i_load ? i_dat : {o_op_b, dat[31], dat_shamt, dat[24:1]};
+	dhi <= i_load ? i_dat[31:24] : dat_shamt & {2'b11, !(i_shift_op & i_cnt7 & !cnt_en), 5'b11111};
+      if (shift_en | i_load)
+	dlo <= i_load ? i_dat[23:0] : {dhi[B:0], dlo[23:W]};
    end
 
 endmodule
