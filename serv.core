@@ -42,6 +42,7 @@ targets:
       - RISCV_FORMAL
       - SERV_CLEAR_RAM
       - "is_toplevel? (WITH_CSR)"
+      - "is_toplevel? (W)"
     toplevel : ["is_toplevel? (serv_rf_top)"]
 
   lint:
@@ -97,4 +98,9 @@ parameters:
     datatype    : int
     paramtype   : vlogparam
     description : Enable/Disable the support of misaligned instructions
+
+  W:
+    datatype    : int
+    description : Internal datapath width (1=SERV, 4=QERV)
+    paramtype   : vlogparam
 
