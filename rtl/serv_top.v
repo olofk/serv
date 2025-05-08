@@ -369,13 +369,15 @@ module serv_top
       .i_wb_rdt     (i_wb_rdt[31:7]));
 
    serv_bufreg
-      #(.MDU(MDU))
+      #(.MDU(MDU),
+	.W(W))
    bufreg
      (
       .i_clk    (clk),
       //State
       .i_cnt0   (cnt0),
       .i_cnt1   (cnt1),
+      .i_cnt_done (cnt_done),
       .i_en     (bufreg_en),
       .i_init   (init),
       .i_mdu_op (mdu_op),
@@ -385,6 +387,9 @@ module serv_top
       .i_rs1_en    (bufreg_rs1_en),
       .i_imm_en    (bufreg_imm_en),
       .i_clr_lsb   (bufreg_clr_lsb),
+      .i_shift_op   (shift_op),
+      .i_right_shift_op (sh_right),
+      .i_shamt (o_dbus_dat[26:24]),
       //Data
       .i_rs1    (rs1),
       .i_imm    (imm),
