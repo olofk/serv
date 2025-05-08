@@ -348,7 +348,7 @@ module serv_top
       .o_rd_csr_en        (rd_csr_en),
       .o_rd_alu_en        (rd_alu_en));
 
-   serv_immdec immdec
+   serv_immdec #(.W (W)) immdec
      (
       .i_clk        (clk),
       //State
