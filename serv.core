@@ -49,6 +49,7 @@ targets:
     default_tool : verilator
     description: Run static code checks (linting)
     filesets : [core]
+    parameters: [W]
     tools:
       verilator:
         mode : lint-only

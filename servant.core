@@ -470,6 +470,7 @@ targets:
     flow: lint
     flow_options:
       tool : verilator
+    parameters : [width]
     toplevel : servant
 
   lx9_microboard:

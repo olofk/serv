@@ -12,3 +12,8 @@ lint_off -rule UNUSED -file "*/serv_top.v" -lines 70
 //Some bufreg signals are not used in 1-bit mode
 lint_off -rule UNUSED -file "*/serv_bufreg.v" -lines 10
 lint_off -rule UNUSED -file "*/serv_bufreg.v" -lines 19-21
+
+//Some signals not used in 4-bit mode
+lint_off -rule UNUSED -file "*/serv_immdec.v" -lines 12
+lint_off -rule UNUSED -file "*/serv_bufreg.v" -lines 9
+lint_off -rule UNUSED -file "*/serv_ctrl.v" -lines 17
