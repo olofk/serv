@@ -5,6 +5,9 @@ on: [push, pull_request]
 jobs:
   lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        width: [1, 4]
     name: Linter
     env:
       REPO : serv
@@ -17,6 +20,6 @@ jobs:
       - run: sudo apt install verilator
       - run: pip3 install fusesoc
       - run: fusesoc library add $REPO $GITHUB_WORKSPACE/$REPO
-      - run: fusesoc run --target=lint $VLNV
-      - run: fusesoc run --target=lint servant
+      - run: fusesoc run --target=lint $VLNV --W=${{ matrix.width }}
+      - run: fusesoc run --target=lint servant --width=${{ matrix.width }}
       - run: fusesoc run --target=lint serving
