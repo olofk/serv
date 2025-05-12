@@ -32,6 +32,19 @@ filesets:
       - data/params.tcl : {file_type : tclSource}
       - rtl/serv_synth_wrapper.v : {file_type : verilogSource}
 
+  verilator_decoder_tb:
+    files:
+      - bench/decoder_sim.v
+      - "bench/decoder_tb.cpp" : {file_type : cppSource}
+    file_type : verilogSource
+
+  decoder_tb:
+    files:
+      - bench/decoder_sim.v
+      - bench/decoder_tb.v
+    file_type : verilogSource
+    depend : [vlog_tb_utils]
+
 targets:
   default:
     filesets : [core]
@@ -64,6 +77,18 @@ targets:
     description: Create GDSII for SkyWater 130nm using OpenLANE
     filesets : [core, openlane]
     toplevel : serv_synth_wrapper
+
+  verilator_decoder_tb:
+    description: Verilator decoder testbench
+    filesets : [core, verilator_decoder_tb]
+    flow: sim
+    flow_options:
+      tool: verilator
+      verilator_options : [--trace]
+    parameters :
+      - RISCV_FORMAL
+      - "mdu? (MDU=1)"
+    toplevel : decoder_sim
 
 parameters:
   MDU:

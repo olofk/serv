@@ -182,7 +182,7 @@ module serv_debug
       if (update_mcause)   dbg_mcause   <= dbg_csr;
    end
 
-   reg LUI, AUIPC, JAL, JALR, BEQ, BNE, BLT, BGE, BLTU, BGEU, LB, LH, LW, LBU, LHU, SB, SH, SW, ADDI, SLTI, SLTIU, XORI, ORI, ANDI,SLLI, SRLI, SRAI, ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND, FENCE, ECALL, EBREAK;
+   reg LUI, AUIPC, JAL, JALR, BEQ, BNE, BLT, BGE, BLTU, BGEU, LB, LH, LW, LBU, LHU, SB, SH, SW, ADDI, SLTI, SLTIU, XORI, ORI, ANDI,SLLI, SRLI, SRAI, ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND, FENCE, ECALL, EBREAK, WFI;
    reg CSRRW, CSRRS, CSRRC, CSRRWI, CSRRSI, CSRRCI;
    reg OTHER;
 
@@ -228,6 +228,7 @@ module serv_debug
 	 FENCE  <= 1'b0;
 	 ECALL  <= 1'b0;
 	 EBREAK <= 1'b0;
+	 WFI    <= 1'b0;
 	 CSRRW  <= 1'b0;
 	 CSRRS  <= 1'b0;
 	 CSRRC  <= 1'b0;
@@ -279,6 +280,7 @@ module serv_debug
 	   32'b???????_?????_?????_000_?????_00011_11 : FENCE  <= 1'b1;
 	   32'b0000000_00000_00000_000_00000_11100_11 : ECALL  <= 1'b1;
 	   32'b0000000_00001_00000_000_00000_11100_11 : EBREAK <= 1'b1;
+	   32'b0001000_00010_00000_000_00000_11100_11 : WFI    <= 1'b1;
 	   32'b???????_?????_?????_001_?????_11100_11 : CSRRW  <= 1'b1;
 	   32'b???????_?????_?????_010_?????_11100_11 : CSRRS  <= 1'b1;
 	   32'b???????_?????_?????_011_?????_11100_11 : CSRRC  <= 1'b1;
