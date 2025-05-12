@@ -14,7 +14,8 @@ module serv_state
    output wire 	     o_init,
    output wire	     o_cnt_en,
    output wire 	     o_cnt0to3,
-   output wire 	     o_cnt12to31,
+   output wire 	     o_cnt12to15,
+   output wire 	     o_cnt16to31,
    output wire 	     o_cnt0,
    output wire 	     o_cnt1,
    output wire 	     o_cnt2,
@@ -72,7 +73,8 @@ module serv_state
    assign o_mem_bytecnt = o_cnt[4:3];
 
    assign o_cnt0to3   = (o_cnt[4:2] == 3'd0);
-   assign o_cnt12to31 = (o_cnt[4] | (o_cnt[3:2] == 2'b11));
+   assign o_cnt12to15 = (!o_cnt[4] & (o_cnt[3:2] == 2'b11));
+   assign o_cnt16to31 = o_cnt[4];
    assign o_cnt0 = (o_cnt[4:2] == 3'd0) & cnt_r[0];
    assign o_cnt1 = (o_cnt[4:2] == 3'd0) & cnt_r[1];
    assign o_cnt2 = (o_cnt[4:2] == 3'd0) & cnt_r[2];

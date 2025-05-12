@@ -113,7 +113,8 @@ module serv_top
    wire          init;
    wire          cnt_en;
    wire 	 cnt0to3;
-   wire 	 cnt12to31;
+   wire 	 cnt12to15;
+   wire 	 cnt16to31;
    wire          cnt0;
    wire          cnt1;
    wire          cnt2;
@@ -238,7 +239,8 @@ module serv_top
       .o_init         (init),
       .o_cnt_en       (cnt_en),
       .o_cnt0to3      (cnt0to3),
-      .o_cnt12to31    (cnt12to31),
+      .o_cnt12to15    (cnt12to15),
+      .o_cnt16to31    (cnt16to31),
       .o_cnt0         (cnt0),
       .o_cnt1         (cnt1),
       .o_cnt2         (cnt2),
@@ -434,7 +436,8 @@ module serv_top
       .i_rst      (i_rst),
       //State
       .i_pc_en    (ctrl_pc_en),
-      .i_cnt12to31 (cnt12to31),
+      .i_cnt12to15 (cnt12to15),
+      .i_cnt16to31 (cnt16to31),
       .i_cnt0     (cnt0),
       .i_cnt1     (cnt1),
       .i_cnt2     (cnt2),

@@ -11,7 +11,8 @@ module serv_ctrl
    input wire 	     i_rst,
    //State
    input wire 	     i_pc_en,
-   input wire 	     i_cnt12to31,
+   input wire 	     i_cnt12to15,
+   input wire 	     i_cnt16to31,
    input wire 	     i_cnt0,
    input wire        i_cnt1,
    input wire 	     i_cnt2,
@@ -77,7 +78,7 @@ module serv_ctrl
    assign o_rd  = ({W{i_utype}} & pc_plus_offset_aligned) | (pc_plus_4 & {W{i_jal_or_jalr}});
 
    assign offset_a = {W{i_pc_rel}} & pc;
-   assign offset_b = i_utype ? (i_imm & {W{i_cnt12to31}}) : i_buf;
+   assign offset_b = i_utype ? (i_imm & {W{i_cnt12to15 | i_cnt16to31}}) : i_buf;
    assign {pc_plus_offset_cy,pc_plus_offset} = offset_a+offset_b+pc_plus_offset_cy_r_w;
 
    generate
