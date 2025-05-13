@@ -40,7 +40,7 @@ class serv(pluginTemplate):
 
        build_serv = 'fusesoc run --target=verilator_tb --flag=mdu\
          --build --build-root=servant_test servant\
-         --memsize=8388608 --compressed=1'
+         --memsize=8388608 --compressed=1 --width=8'
        utils.shellCommand(build_serv).run()
 
     def build(self, isa_yaml, platform_yaml):

@@ -65,11 +65,17 @@ module serv_bufreg2
     */
 
    wire [7:0]	 cnt_next;
+   wire [7:0]	 sh_next;
    generate
       if (W == 1) begin : gen_cnt_w_eq_1
 	 assign cnt_next = {o_op_b, dhi[7], dhi[5:0]-6'd1};
+	 assign sh_next = {o_op_b, dhi[7:W]};
       end else if (W == 4) begin : gen_cnt_w_eq_4
 	 assign cnt_next = {o_op_b[3:2], dhi[5:0]-6'd4};
+	 assign sh_next = {o_op_b, dhi[7:W]};
+      end else if (W == 8) begin : gen_cnt_w_eq_8
+	 assign cnt_next = {o_op_b[7:6], dhi[5:0]-6'd8};
+	 assign sh_next = o_op_b;
       end
    endgenerate
 
@@ -77,7 +83,7 @@ module serv_bufreg2
 	      //Down counter mode
 	      cnt_next :
 	      //Shift reg mode
-	      {o_op_b, dhi[7:W]};
+	      sh_next;
 
    assign o_sh_done = dat_shamt[5];
 

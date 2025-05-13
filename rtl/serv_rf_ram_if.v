@@ -91,7 +91,13 @@ module serv_rf_ram_if
 
    assign o_wen = (wtrig0 & wen0_r) | (wtrig1 & wen1_r);
 
-   assign wcnt = rcnt-4;
+   generate
+      if (W > 4) begin : gen_wcnt_w_gt_4
+	 assign wcnt = rcnt;
+      end else begin : gen_wcnt_w_le_4
+	 assign wcnt = rcnt-4;
+      end
+   endgenerate
 
    always @(posedge i_clk) begin
       if (wcnt[0]) begin

@@ -55,7 +55,7 @@ module serv_ctrl
    generate
       if (W == 1) begin : gen_plus_4_w_eq_1
 	 assign plus_4 = i_iscomp ? i_cnt1 : i_cnt2;
-      end else if (W == 4) begin : gen_plus_4_w_eq_4
+      end else if (W >= 4) begin : gen_plus_4_w_ge_4
 	 assign plus_4 = (i_cnt0 | i_cnt1) ? (i_iscomp ? 2 : 4) : 0;
       end
    endgenerate
@@ -70,6 +70,8 @@ module serv_ctrl
 	    assign new_pc = i_trap ? (i_csr_pc & !(i_cnt0 || i_cnt1)) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
          end else if (W == 4) begin : gen_new_pc_w_eq_4
 	    assign new_pc = i_trap ? (i_csr_pc & ((i_cnt0 || i_cnt1) ? 4'b1100 : 4'b1111)) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
+         end else if (W == 8) begin : gen_new_pc_w_eq_8
+	    assign new_pc = i_trap ? (i_csr_pc & ((i_cnt0 || i_cnt1) ? 8'b11111100 : 8'b11111111)) : i_jump ? pc_plus_offset_aligned : pc_plus_4;
 	 end
       end else begin : gen_no_csr
 	 assign new_pc = i_jump ? pc_plus_offset_aligned : pc_plus_4;
@@ -78,7 +80,14 @@ module serv_ctrl
    assign o_rd  = ({W{i_utype}} & pc_plus_offset_aligned) | (pc_plus_4 & {W{i_jal_or_jalr}});
 
    assign offset_a = {W{i_pc_rel}} & pc;
-   assign offset_b = i_utype ? (i_imm & {W{i_cnt12to15 | i_cnt16to31}}) : i_buf;
+   generate
+      if (W == 8) begin : gen_offset_w_eq_8
+	 assign offset_b = i_utype ? (i_imm & {{4{i_cnt12to15 | i_cnt16to31}}, {4{i_cnt16to31}}}) : i_buf;
+      end else begin : gen_offset_w_lt_8
+	 assign offset_b = i_utype ? (i_imm & {W{i_cnt12to15 | i_cnt16to31}}) : i_buf;
+      end
+   endgenerate
+
    assign {pc_plus_offset_cy,pc_plus_offset} = offset_a+offset_b+pc_plus_offset_cy_r_w;
 
    generate

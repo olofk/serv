@@ -72,6 +72,8 @@ module serv_csr
 	 assign mstatus = ((mstatus_mie & i_cnt3) | (i_cnt11 | i_cnt12));
       end else if (W==4) begin : gen_mstatus_w4
 	 assign mstatus = {i_cnt11 | (mstatus_mie & i_cnt3), 2'b00, i_cnt12};
+      end else if (W==8) begin : gen_mstatus_w8
+	 assign mstatus = {3'b000, i_cnt12, i_cnt11 | (mstatus_mie & i_cnt3), 3'b000};
       end
    endgenerate
 
@@ -83,9 +85,28 @@ module serv_csr
 
    wire 	timer_irq = i_mtip & mstatus_mie & mie_mtie;
 
+   generate
+      if (W > 4) begin : gen_mcause_w_gt_4
+   assign mcause = i_cnt0to3 ? {{W-4{1'b0}},mcause3_0} : //[3:0]
+		   i_cnt_done ? {mcause31,{B{1'b0}}} //[31]
+		   : {W{1'b0}};
+      end else begin : gen_mcause_w_le_4
    assign mcause = i_cnt0to3 ? mcause3_0[B:0] : //[3:0]
 		   i_cnt_done ? {mcause31,{B{1'b0}}} //[31]
 		   : {W{1'b0}};
+      end
+   endgenerate
+	 
+
+   wire [3:0] mcause3_0_next;
+
+   generate
+      if (W == 1) begin : gen_mcause_next_w_eq_1
+	 assign mcause3_0_next = {csr_in, mcause3_0[3:1]};
+      end else begin : gen_mcause_next_w_eq_4
+	 assign mcause3_0_next = csr_in[3:0];
+      end
+   endgenerate
 
    assign o_csr_in = csr_in;
 
@@ -109,7 +130,7 @@ module serv_csr
        These conditions are all mutually exclusive
        */
       if ((i_trap & i_cnt_done) | i_mstatus_en & i_cnt3 & i_en | i_mret)
-	mstatus_mie <= !i_trap & (i_mret ?  mstatus_mpie : csr_in[B]);
+	mstatus_mie <= !i_trap & (i_mret ?  mstatus_mpie : csr_in[(W>4) ? 3 : B]);
 
       /*
        Note: To save resources mstatus_mpie (mstatus bit 7) is not
@@ -141,10 +162,10 @@ module serv_csr
        ctrl => 0000 (jump=0)
        */
       if (i_mcause_en & i_en & i_cnt0to3 | (i_trap & i_cnt_done)) begin
-	 mcause3_0[3] <= (i_e_op & !i_ebreak) | (!i_trap & csr_in[B]);
-	 mcause3_0[2] <= o_new_irq | i_mem_op | (!i_trap & ((W == 1) ? mcause3_0[3] : csr_in[(W == 1) ? 0 : 2]));
-	 mcause3_0[1] <= o_new_irq | i_e_op | (i_mem_op & i_mem_cmd) | (!i_trap & ((W == 1) ? mcause3_0[2] : csr_in[(W == 1) ? 0 : 1]));
-	 mcause3_0[0] <= o_new_irq | i_e_op | (!i_trap & ((W == 1) ? mcause3_0[1] : csr_in[0]));
+	 mcause3_0[3] <= (i_e_op & !i_ebreak) | (!i_trap & mcause3_0_next[3]);
+	 mcause3_0[2] <= o_new_irq | i_mem_op | (!i_trap & mcause3_0_next[2]);
+	 mcause3_0[1] <= o_new_irq | i_e_op   | (!i_trap & mcause3_0_next[1]) | (i_mem_op & i_mem_cmd);
+	 mcause3_0[0] <= o_new_irq | i_e_op   | (!i_trap & mcause3_0_next[0]);
       end
       if (i_mcause_en & i_cnt_done | i_trap)
 	mcause31 <= i_trap ? o_new_irq : csr_in[B];

@@ -73,15 +73,26 @@ module serv_state
    assign o_mem_bytecnt = o_cnt[4:3];
 
    assign o_cnt0to3   = (o_cnt[4:2] == 3'd0);
-   assign o_cnt12to15 = (!o_cnt[4] & (o_cnt[3:2] == 2'b11));
    assign o_cnt16to31 = o_cnt[4];
    assign o_cnt0 = (o_cnt[4:2] == 3'd0) & cnt_r[0];
    assign o_cnt1 = (o_cnt[4:2] == 3'd0) & cnt_r[1];
    assign o_cnt2 = (o_cnt[4:2] == 3'd0) & cnt_r[2];
    assign o_cnt3 = (o_cnt[4:2] == 3'd0) & cnt_r[3];
-   assign o_cnt7 = (o_cnt[4:2] == 3'd1) & cnt_r[3];
    assign o_cnt11 = (o_cnt[4:2] == 3'd2) & cnt_r[3];
-   assign o_cnt12 = (o_cnt[4:2] == 3'd3) & cnt_r[0];
+
+   generate
+      if (W == 8) begin : gen_cnt_w_8
+	 assign o_cnt12to15 = (o_cnt[4:3] == 2'b01);
+	 assign o_cnt7 = o_cnt0 & o_cnt_en;
+	 assign o_cnt12 = o_cnt11;
+	 assign o_cnt_done = (o_cnt[4:3] == 2'b11) & cnt_r[3];
+      end else begin : gen_cnt_w_lt_8
+	 assign o_cnt12to15 = (o_cnt[4:2] == 3'b011);
+	 assign o_cnt7 = (o_cnt[4:2] == 3'd1) & cnt_r[3];
+	 assign o_cnt12 = (o_cnt[4:2] == 3'd3) & cnt_r[0];
+	 assign o_cnt_done = (o_cnt[4:2] == 3'b111) & cnt_r[3];
+      end
+   endgenerate
 
    //Take branch for jump or branch instructions (opcode == 1x0xx) if
    //a) It's an unconditional branch (opcode[0] == 1)
@@ -132,8 +143,6 @@ module serv_state
    assign o_ibus_cyc = ibus_cyc & !i_rst;
 
    assign o_init = i_two_stage_op & !i_new_irq & !init_done;
-
-   assign o_cnt_done = (o_cnt[4:2] == 3'b111) & cnt_r[3];
 
    always @(posedge i_clk) begin
       //ibus_cyc changes on three conditions.
@@ -202,6 +211,19 @@ module serv_state
             if (i_rf_ready) cnt_en <= 1; else
             if (o_cnt_done) cnt_en <= 0;
             o_cnt <= o_cnt + { 2'd0, cnt_en };
+	    if (i_rst & (RESET_STRATEGY != "NONE")) begin
+	       o_cnt   <= 3'd0;
+	       cnt_en <= 1'b0;
+	    end
+	 end
+	 assign cnt_r = 4'b1111;
+	 assign o_cnt_en = cnt_en;
+      end else if (W == 8) begin : gen_cnt_w_eq_8
+	 reg cnt_en;
+	 always @(posedge i_clk) begin
+            if (i_rf_ready) cnt_en <= 1; else
+            if (o_cnt_done) cnt_en <= 0;
+            o_cnt <= o_cnt + { 1'd0, cnt_en, 1'b0};
 	    if (i_rst & (RESET_STRATEGY != "NONE")) begin
 	       o_cnt   <= 3'd0;
 	       cnt_en <= 1'b0;

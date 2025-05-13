@@ -85,6 +85,29 @@ module serv_bufreg #(
 
 	 assign o_lsb = (MDU & i_mdu_op) ? 2'b00 : lsb;
 	 assign o_q = i_en ? muxout : {W{1'b0}};
+      end else if (W == 8) begin : gen_lsb_w_8
+	 reg [1:0] lsb;
+	 reg [W-2:0] data_tail;
+
+	 wire [3:0] shift_amount
+	   = !i_shift_op ? 4'd7 :
+	     i_right_shift_op ? (4'd7+{1'b0,i_shamt[2:0]}) :
+	     ({1'b0,~i_shamt[2:0]});
+
+	 always @(posedge i_clk) begin
+            if (i_en)
+              if (i_cnt0) lsb <= q[1:0];
+	    if (i_en)
+              data <= {i_init ? q : {W{i_sh_signed & data[31]}}, data[31:W]};
+	    if (i_en)
+	      data_tail <= data[B:1] & {B{~i_cnt_done}};
+	 end
+
+	 wire [2*W+B-2:0] muxdata = {data[W+B-1:0],data_tail};
+	 wire [B:0]	  muxout = muxdata[{1'b0,shift_amount}+:W];
+
+	 assign o_lsb = (MDU & i_mdu_op) ? 2'b00 : lsb;
+	 assign o_q = i_en ? muxout : {W{1'b0}};
       end
    endgenerate
 
