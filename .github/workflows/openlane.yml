@@ -21,4 +21,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: serv.gds
-          path: /home/runner/work/serv/serv/serv/build/serv_1.3.0/sky130-openlane/runs/serv_synth_wrapper/results/final/gds/serv_synth_wrapper.gds
+          path: build/serv_1.3.0/sky130-openlane/runs/serv_synth_wrapper/results/finishing/serv_synth_wrapper.gds
+
