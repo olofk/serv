@@ -37,9 +37,17 @@ module serving_ram
       o_rdata <= mem[i_raddr];
    end
 
-   initial
+   initial begin
      if(|memfile) begin
 	$display("Preloading %m from %s", memfile);
 	$readmemh(memfile, mem);
      end
+
+     // The last 4 bytes are the `x0` (zero) register. Zero them out
+     // to avoid starting the simulation with `x0` undefined.
+     mem[depth-4] = 8'h0;
+     mem[depth-3] = 8'h0;
+     mem[depth-2] = 8'h0;
+     mem[depth-1] = 8'h0;
+   end
 endmodule
