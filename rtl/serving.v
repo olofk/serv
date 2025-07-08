@@ -29,8 +29,8 @@ module serving
    input wire 	      i_rst,
    input wire 	      i_timer_irq,
    // SIGNALS TO BRIDGE //wishbone master interface
-   output wire [31:0] o_wb_addr,
-   output wire [12:2] o_wb_adr,
+    output wire [12:2] o_wb_addr,
+    //output wire [31:0] o_wb_adr,
    output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
    output wire 	      o_wb_we ,
@@ -102,7 +102,7 @@ module serving
       // ------ DATA SLICING ---------- //
       
    wire intermediate;
-   //wire [31:0] o_wb_adr;
+   wire [31:0] o_wb_adr;
    //reg [31:0] wdata_ext;      // Changed to 32 bits for clarity
    reg [7:0]  byte_to_write;
    reg        done_w, done_r;
