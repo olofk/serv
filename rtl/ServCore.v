@@ -185,8 +185,7 @@ module ServCore #(
         .i_timer_irq(i_timer_irq),
 
         // Master WB (SERV → Bridge)
-        .o_wb_addr(), // optional full address
-        .o_wb_adr(i_swb_adr),
+        .o_wb_addr(i_swb_adr),
         .o_wb_dat(i_swb_dat),
         .o_wb_sel(i_swb_sel),
         .o_wb_we(i_swb_we),
