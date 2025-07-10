@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 module ServCore #(
-    parameter AW             = 13,
+    parameter AW             = 32,
     parameter USER_WIDTH     = 0,
     parameter ID_WIDTH       = 0,
     parameter memfile        = "",
@@ -69,57 +69,57 @@ module ServCore #(
     input  wire [AW-1:0] i_awaddr,
     input  wire          i_awvalid,
     output wire          o_awready,
-    input  wire [ID_WIDTH:0]    i_awid,
-    input  wire [7:0]           i_awlen,
-    input  wire [2:0]           i_awsize,
-    input  wire [1:0]           i_awburst,
-    input  wire                 i_awlock,
-    input  wire [3:0]           i_awcache,
-    input  wire [2:0]           i_awprot,
-    input  wire [3:0]           i_awqos,
-    input  wire [3:0]            i_awregion,
-    input  wire [USER_WIDTH:0]  i_awuser,
-    input wire [5:0]            i_awtop, 
+    input  wire [ID_WIDTH-1:0]    i_aw_id,
+    input  wire [7:0]           i_aw_len,
+    input  wire [2:0]           i_aw_size,
+    input  wire [1:0]           i_aw_burst,
+    input  wire                 i_aw_lock,
+    input  wire [3:0]           i_aw_cache,
+    input  wire [2:0]           i_aw_prot,
+    input  wire [3:0]           i_aw_qos,
+    input  wire [3:0]            i_aw_region,
+    input  wire [USER_WIDTH-1:0]  i_aw_user,
+    input wire [5:0]            i_aw_top, 
     
     input  wire [AW-1:0] i_araddr,
     input  wire          i_arvalid,
     output wire          o_arready,
-    input  wire [ID_WIDTH:0]    i_arid,
-    input  wire [7:0]           i_arlen,
-    input  wire [2:0]           i_arsize,
-    input  wire [1:0]           i_arburst,
-    input  wire                 i_arlock,
-    input  wire [3:0]           i_arcache,
-    input  wire [2:0]           i_arprot,
-    input  wire [3:0]           i_arqos,
-    input  wire [3:0]           i_arregion,
-    input  wire [USER_WIDTH:0]  i_aruser
+    input  wire [ID_WIDTH-1:0]    i_ar_id,
+    input  wire [7:0]           i_ar_len,
+    input  wire [2:0]           i_ar_size,
+    input  wire [1:0]           i_ar_burst,
+    input  wire                 i_ar_lock,
+    input  wire [3:0]           i_ar_cache,
+    input  wire [2:0]           i_ar_prot,
+    input  wire [3:0]           i_ar_qos,
+    input  wire [3:0]           i_ar_region,
+    input  wire [USER_WIDTH-1:0]  i_ar_user,
 
     
     input  wire [31:0]   i_wdata,
     input  wire [3:0]    i_wstrb,
     input  wire          i_wvalid,
     output wire          o_wready,
-    input  wire                 i_wlast,
-    input  wire [USER_WIDTH:0]  i_wuser,
+    input  wire                 i_w_last,
+    input  wire [USER_WIDTH-1:0]  i_w_user,
     
     output wire [1:0]    o_bresp,
     output wire          o_bvalid,
     input  wire          i_bready,
-    output wire [ID_WIDTH:0]     o_bid,
-    output wire [USER_WIDTH:0]   o_buser,
+    output wire [ID_WIDTH-1:0]     o_b_id,
+    output wire [USER_WIDTH-1:0]   o_b_user,
     
     output wire [31:0]   o_rdata,
     output wire [1:0]    o_rresp,
     output wire          o_rlast,
     output wire          o_rvalid,
     input  wire          i_rready,
-    output wire [ID_WIDTH:0]     o_rid,
-    output wire [USER_WIDTH:0]   o_ruser    
+    output wire [ID_WIDTH-1:0]     o_r_id,
+    output wire [USER_WIDTH-1:0]   o_r_user    
 );
 
     // Internal Wishbone interface (SERV <-> Bridge)
-    wire [AW-1:2] i_swb_adr;
+    wire [AW-1:0] i_swb_adr;
     wire [31:0]   i_swb_dat;
     wire [3:0]    i_swb_sel;
     wire         i_swb_we;
@@ -128,7 +128,7 @@ module ServCore #(
     wire         o_swb_ack;
 
     // External Wishbone interface (Bridge <-> SERV)
-    wire [AW-1:2] o_mwb_adr;
+    wire [AW-1:0] o_mwb_adr;
     wire [31:0]   o_mwb_dat;
     wire [3:0]    o_mwb_sel;
     wire         o_mwb_we;
@@ -140,11 +140,19 @@ module ServCore #(
     wire sel_wadr, sel_wdata, sel_radr, sel_rdata, sel_wen;
 
        // Tie off unused AXI signals
-    assign o_bid=1'b0;
-    assign o_buser=1'b0;
+    generate
+  if (ID_WIDTH > 0) begin
+    assign o_b_id = {ID_WIDTH{1'b0}};
+    assign o_r_id = {ID_WIDTH{1'b0}};
+  end
+endgenerate
 
-    assign o_rid=1'b0;
-    assign o_ruser=1'b0;
+generate
+  if (USER_WIDTH > 0) begin
+    assign o_b_user = {USER_WIDTH{1'b0}};
+    assign o_r_user = {USER_WIDTH{1'b0}};
+  end
+endgenerate
     
     assign o_awm_id     = 1'b0;
     assign o_awm_len    = 8'b0;
@@ -185,7 +193,7 @@ module ServCore #(
         .i_timer_irq(i_timer_irq),
 
         // Master WB (SERV → Bridge)
-        .o_wb_addr(i_swb_adr),
+        .o_wb_adr(i_swb_adr),
         .o_wb_dat(i_swb_dat),
         .o_wb_sel(i_swb_sel),
         .o_wb_we(i_swb_we),
