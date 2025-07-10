@@ -1,12 +1,12 @@
 `default_nettype none
 module complete_bridge
-  #(parameter AW = 13)
+  #(parameter AW = 32)
   (
    input wire i_clk,
    input wire i_rst,
 
    // AXI2WB WISHBONE SIGNALS FROM BRIDGE TO SERVING
-   output reg [AW-1:2] o_mwb_adr,
+   output reg [AW-1:0] o_mwb_adr,
    output reg [31:0] o_mwb_dat,
    output reg [3:0] o_mwb_sel,
    output reg o_mwb_we,
@@ -75,7 +75,13 @@ module complete_bridge
    input wire [1:0] i_rmresp,
    input wire i_rmlast,
    input wire i_rmvalid,
-   output reg o_rmready
+   output reg o_rmready,
+   //output sel lines
+   output reg sel_radr,
+   output reg sel_wadr,           //1 for ext and 0 for if
+   output reg sel_wdata,
+   output reg sel_rdata,
+   output reg sel_wen
    );
 
 localparam          bridge_idle=4'd0, 
@@ -162,12 +168,12 @@ end
          // WISHBONE SIGNALS (WB2AXI)
          o_swb_rdt <= 32'b0;
          o_swb_ack <= 1'b0;
-         //sel lines
+         // sel lines
          sel_radr <=1'b0;    //1 for external 0 for internal
          sel_wadr <=1'b0;    //1 for external 0 for internal         
          sel_wdata <= 1'b0;  //1 for external 0 for internal
          sel_rdata <= 1'b1;  //1 to return rdt to interface and 0 to return rdt to brg
-         sel_wen <=1'b0;     //1 for external 0 for internal 
+         sel_wen <=1'b0;     //1 for external 0 for internal
       end
       else begin
       
@@ -211,7 +217,7 @@ end
 // AXI2WB Bridge states start  /////
         AXI2WB_start: begin
             if (i_awvalid && arbiter) begin
-                o_mwb_adr[AW-1:2] <= i_awaddr[AW-1:2];
+                o_mwb_adr <= i_awaddr;
                 o_awready <= 1'b1;
                 arbiter <= 1'b0;
                 //sel lines asserted for external read and write to serving ram
@@ -237,7 +243,7 @@ end
                  end
             end
             else if (i_arvalid) begin
-                 o_mwb_adr[AW-1:2] <= i_araddr[AW-1:2];
+                 o_mwb_adr <= i_araddr;
                  o_mwb_sel <= 4'hF;
                  o_mwb_stb <= 1'b1;
                  o_arready <= 1'b1;
@@ -342,7 +348,6 @@ end
                                          o_armvalid <= 1'b1;
                                            if (i_armready)
                                              o_armaddr <= {i_swb_adr, 2'b00};
-                                              $display("data read address is: 0x%h",i_swb_adr);
                                      end
                                 
                              end
@@ -404,7 +409,6 @@ end
                                               o_swb_rdt <= i_rmdata;
                                               o_swb_ack <= 1'b1;
                                               $display("Successfully data read -----message from bridge");
-                                              $display("data read is: 0x%h",i_rmdata);
                                           end
                              end
                           default: begin
@@ -440,7 +444,7 @@ end
                                sel_wadr <=1'b0;    //1 for external 0 for internal         
                                sel_wdata <= 1'b0;  //1 for external 0 for internal
                                sel_rdata <= 1'b1;  //1 to return rdt to interface and 0 to return rdt to brg
-                               sel_wen <=1'b0;     //1 for external 0 for internal 
+                               sel_wen <=1'b0;     //1 for external 0 for internal
                           end
                          
                         endcase
