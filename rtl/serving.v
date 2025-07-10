@@ -20,7 +20,7 @@
 `default_nettype none
 module serving
   #(        parameter memfile = "",
-            parameter memsize = 1024,
+            parameter memsize = 8192,
             parameter sim = 1'b0,
             parameter RESET_STRATEGY = "NONE",
             parameter WITH_CSR = 1)
@@ -29,8 +29,7 @@ module serving
    input wire 	      i_rst,
    input wire 	      i_timer_irq,
    // SIGNALS TO BRIDGE //wishbone master interface
-    output wire [12:2] o_wb_addr,
-    //output wire [31:0] o_wb_adr,
+   output wire [31:0] o_wb_adr,
    output wire [31:0] o_wb_dat,
    output wire [3:0]  o_wb_sel,
    output wire 	      o_wb_we ,
@@ -38,7 +37,7 @@ module serving
    input wire [31:0]  i_wb_rdt,
    input wire 	      i_wb_ack,
    // SIGNALS FROM BRIDGE //wishbone slave interfcae
-   input wire [12:2]  adr_brg,
+   input wire [31:0]  adr_brg,
    input wire [31:0]  data_brg,
    input wire         stb_brg,
    input wire         wen_brg,
@@ -85,7 +84,7 @@ module serving
       wire [rf_width-1:0] sram_rdata;
       wire    sram_ren;
       
-      localparam w = 12;
+      localparam w = 31;
       wire [w:0] wadr_if;    // Write address from interface
       wire [w:0] wadr;       // Final write address (either external or from interface)
       wire [7:0] wdata_if;    // Write data from interface
@@ -102,7 +101,7 @@ module serving
       // ------ DATA SLICING ---------- //
       
    wire intermediate;
-   wire [31:0] o_wb_adr;
+   //wire [31:0] o_wb_adr;
    //reg [31:0] wdata_ext;      // Changed to 32 bits for clarity
    reg [7:0]  byte_to_write;
    reg        done_w, done_r;
@@ -112,7 +111,7 @@ module serving
    reg [w:0] base_rd_addr;
    
    
-  assign o_wb_addr = o_wb_adr[12:2];
+//  assign o_wb_addr = o_wb_adr[12:2];
   always @(posedge i_clk) begin
        if (i_rst) begin
            bsel <= 2'b00;
