@@ -1,3 +1,9 @@
+/*
+ * serv_state.v : SERV module for handling internal state during instructions
+ *
+ * SPDX-FileCopyrightText: 2019 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 module serv_state
   #(parameter RESET_STRATEGY = "MINI",
     parameter [0:0] WITH_CSR = 1,

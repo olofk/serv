@@ -1,3 +1,9 @@
+/*
+ * serv_rf_ram.v : SRAM-based RF storage for SERV
+ *
+ * SPDX-FileCopyrightText: 2019 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 module serv_rf_ram
   #(parameter width=0,
     parameter csr_regs=4,

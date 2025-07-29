@@ -1,3 +1,9 @@
+/*
+ * serv_decode.v : SERV module decoding instruction word into control signals
+ *
+ * SPDX-FileCopyrightText: 2018 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 `default_nettype none
 module serv_decode
   #(parameter [0:0] PRE_REGISTER = 1,

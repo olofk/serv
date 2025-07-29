@@ -1,3 +1,9 @@
+/*
+ * serv_ctrl.v : SERV module for updating program counter
+ *
+ * SPDX-FileCopyrightText: 2018 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 `default_nettype none
 module serv_ctrl
   #(parameter RESET_STRATEGY = "MINI",

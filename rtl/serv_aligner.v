@@ -1,3 +1,9 @@
+/*
+ * serv_aligner.v : Realign a misaligned 32-bit word fetched from memory
+ *
+ * SPDX-FileCopyrightText: 2022 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 module serv_aligner
    (
     input wire clk,

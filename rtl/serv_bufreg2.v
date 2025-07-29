@@ -1,3 +1,9 @@
+/*
+ * serv_bufreg2.v : SERV buffer register for load/store data and shift amount
+ *
+ * SPDX-FileCopyrightText: 2022 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 module serv_bufreg2
   #(parameter W = 1,
     //Internally calculated. Do not touch

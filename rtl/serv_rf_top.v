@@ -1,3 +1,9 @@
+/*
+ * serv_rf_top.v : Toplevel including SERV and SRAM-based RF storage
+ *
+ * SPDX-FileCopyrightText: 2019 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 `default_nettype none
 
 module serv_rf_top

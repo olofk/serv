@@ -1,3 +1,9 @@
+/*
+ * serv_mem_if.v : SERV memory interface
+ *
+ * SPDX-FileCopyrightText: 2018 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 `default_nettype none
 module serv_mem_if
   #(
