@@ -1,3 +1,9 @@
+/*
+ * serv_debug.v : SERV module for introspecting CPU/RF state during simulations
+ *
+ * SPDX-FileCopyrightText: 2024 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 module serv_debug
   #(parameter W = 1,
     parameter RESET_PC = 0,

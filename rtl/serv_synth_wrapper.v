@@ -1,3 +1,9 @@
+/*
+ * serv_synth_wrapper.v : SERV wrapper for synthesis
+ *
+ * SPDX-FileCopyrightText: 2021 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 `default_nettype none
 
 module serv_synth_wrapper

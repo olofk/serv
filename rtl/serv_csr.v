@@ -1,3 +1,9 @@
+/*
+ * serv_csr.v : SERV module for handling CSR registers
+ *
+ * SPDX-FileCopyrightText: 2018 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 `default_nettype none
 module serv_csr
   #(

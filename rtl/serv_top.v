@@ -1,3 +1,9 @@
+/*
+ * serv_top.v : SERV toplevel
+ *
+ * SPDX-FileCopyrightText: 2018 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 `default_nettype none
 
 module serv_top

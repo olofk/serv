@@ -1,4 +1,9 @@
-// SPDX-License-Identifier: ISC
+/*
+ * serv_immdec.v : SERV module for decoding immediates from instruction words
+ *
+ * SPDX-FileCopyrightText: 2020 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 `default_nettype none
 module serv_immdec
   #(parameter SHARED_RFADDR_IMM_REGS = 1,

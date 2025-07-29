@@ -1,3 +1,9 @@
+/*
+ * serv_rf_ram_if.v : Interface between SERV and SRAM-based RF storage
+ *
+ * SPDX-FileCopyrightText: 2019 Olof Kindgren <olof@award-winning.me>
+ * SPDX-License-Identifier: ISC
+ */
 `default_nettype none
 module serv_rf_ram_if
   #(//Data width. Adjust to preferred width of SRAM data interface
