@@ -47,30 +47,41 @@ SERV can be easily integrated into any design, but if you are looking at just qu
 
 ## Getting started
 
-:o: Create a root directory to keep all the different parts of the project together. We
-will refer to this directory as `$WORKSPACE` from now on.
+:o: Create a directory to keep all the different parts of the project together.
+        
+        $ mkdir servWorkspace
+        $ cd servWorkspace
 
-    $ export WORKSPACE=$(pwd)
+- Create and export an environment variable, WORKSPACE, for easy reference to that directory:
 
-All the following commands will be run from this directory unless otherwise stated.
+        $ export WORKSPACE=$(pwd)
+
+Each of the following commands should be run from the workspace directory:
+
 - Install FuseSoC
 
         $ pip install fusesoc
 - Add the FuseSoC standard library 
 
         $ fusesoc library add fusesoc_cores https://github.com/fusesoc/fusesoc-cores
+  
 - The FuseSoC standard library already contain a version of SERV, but if we want to make changes to SERV, run the bundled example or use the Zephyr support, it is better to add SERV as a separate library into the workspace
 
-
         $ fusesoc library add serv https://github.com/olofk/serv
-    >:warning: The SERV repo will now be available in `$WORKSPACE/fusesoc_libraries/serv`. We will refer to that directory as `$SERV`.
+
+:blue_book: The SERV repo will now be available in `$WORKSPACE/fusesoc_libraries/serv`. We will refer to that directory as `$SERV`.
+- Create and export its environment variable
+
+        $ export SERV="$WORKSPACE/fusesoc_libraries/serv"
+    
 - Install latest version of [Verilator](https://www.veripool.org/wiki/verilator)
 - (Optional) To support RISC-V M-extension extension, Multiplication and Division unit (MDU) can be added included into the SERV as a separate library.
 
         $ fusesoc library add mdu https://github.com/zeeshanrafique23/mdu
     MDU will be available in `$WORKSPACE/fusesoc_libraries/mdu`
+  
 
-We are now ready to do our first exercises with SERV. If everything above is done correctly,we can use Verilator as a linter to check the SERV source code.
+:green_book: We are now ready to do our first exercises with SERV. If everything above is done correctly,we can use Verilator as a linter to check the SERV source code.
 
     $ fusesoc run --target=lint serv
 
