@@ -28,6 +28,8 @@ All SERV videos and more can also be found [here](https://www.award-winning.me/v
 
 Apart from being the world's smallest RISC-V CPU, SERV also aims at being the best documented RISC-V CPU. For this there is an official [SERV user manual](https://serv.readthedocs.io/en/latest/#) with block diagrams that are correct to the gate-level, cycle-accurate timing diagrams and an in-depth description of how things work.
 
+SERV is open source released under the ISC license. If you need a commercial license with patent grants, professional paid support or addded features, please contact <olof@award-winning.me>
+
 ## Systems using SERV
 
 SERV can be easily integrated into any design, but if you are looking at just quickly trying it out, here is a list of some systems that are already using SERV:
