@@ -1,19 +1,19 @@
 `verilator_config
 // Bits [1:0] in i_wb_rdt are not used at all
-lint_off -rule UNUSED -file "*/serv_top.v" -lines 179
+lint_off -rule UNUSED -file "*/serv_top.v" -lines 185
 
 //Some bits in the instruction word are not used in serv_decode but it's easier
 //to just send in the whole word than picking out bits
-lint_off -rule UNUSED -file "*/serv_decode.v" -lines 8
+lint_off -rule UNUSED -file "*/serv_decode.v" -lines 14
 
 //Some variables are only used when we connect an Extension with serv_decode
-lint_off -rule UNUSED -file "*/serv_top.v" -lines 70
+lint_off -rule UNUSED -file "*/serv_top.v" -lines 76
 
 //Some bufreg signals are not used in 1-bit mode
-lint_off -rule UNUSED -file "*/serv_bufreg.v" -lines 10
-lint_off -rule UNUSED -file "*/serv_bufreg.v" -lines 19-21
+lint_off -rule UNUSED -file "*/serv_bufreg.v" -lines 16
+lint_off -rule UNUSED -file "*/serv_bufreg.v" -lines 25-27
 
 //Some signals not used in 4-bit mode
-lint_off -rule UNUSED -file "*/serv_immdec.v" -lines 12
-lint_off -rule UNUSED -file "*/serv_bufreg.v" -lines 9
-lint_off -rule UNUSED -file "*/serv_ctrl.v" -lines 17
+lint_off -rule UNUSED -file "*/serv_immdec.v" -lines 17
+lint_off -rule UNUSED -file "*/serv_bufreg.v" -lines 15
+lint_off -rule UNUSED -file "*/serv_ctrl.v" -lines 23
