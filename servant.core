@@ -1,7 +1,8 @@
 CAPI=2:
 
-name : ::servant:1.3.0
+name : award-winning:serv:servant:1.4.0
 description: Simple reference system for SERV
+license: ISC
 
 filesets:
   # Common filesets
@@ -37,7 +38,7 @@ filesets:
       - "!tool_quartus? (servant/servant_ram.v)"
       - servant/servant.v
     file_type : verilogSource
-    depend : [servile, "mdu? (mdu)"]
+    depend : [award-winning:serv:servile, "mdu? (mdu)"]
 
   verilator_tb:
     files:

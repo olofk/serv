@@ -144,7 +144,7 @@ iCEstick
 Pin 95 is used as the GPIO output which is connected to the board's green LED. Due to this board's limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.
 
     fusesoc run --target=icestick servant
-    iceprog build/servant_1.3.0/icestick-icestorm/servant_1.3.0.bin
+    iceprog build/servant_1.4.0/icestick-icestorm/servant_1.4.0.bin
 
 iCESugar
 ^^^^^^^^
@@ -162,7 +162,7 @@ Pin 9 is used for UART output with 57600 baud rate.
 
     fusesoc run --target=icev_wireless servant
 
-    iceprog build/servant_1.3.0/icestick-icestorm/servant_1.3.0.bin
+    iceprog build/servant_1.4.0/icestick-icestorm/servant_1.4.0.bin
 
 GMM7550
 ^^^^^^^
@@ -181,7 +181,7 @@ Pin B1 is used for UART output with 115200 baud rate. The serial port on Kolibri
 
     fusesoc run --target=machdyne_kolibri servant
 
-    ldprog -Ks build/servant_1.3.0/machdyne_kolibri-icestorm/servant_1.3.0.bin
+    ldprog -Ks build/servant_1.4.0/machdyne_kolibri-icestorm/servant_1.4.0.bin
 
 MAX10 10M08 Evaluation Kit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -196,7 +196,7 @@ Nandland Go Board
 Pin 56 is used as the GPIO output which is connected to the board's LED1. Due to this board's limited Embedded BRAM, programs with a maximum of 7168 bytes can be loaded. The default program for this board is blinky.hex.
 
     fusesoc run --target=go_board servant
-    iceprog build/servant_1.3.0/go_board-icestorm/servant_1.3.0.bin
+    iceprog build/servant_1.4.0/go_board-icestorm/servant_1.4.0.bin
 
 Nexys 2
 ^^^^^^^
@@ -218,7 +218,7 @@ OrangeCrab R0.2
 Pin D1 is used for UART output with 115200 baud rate.
 
     fusesoc run --target=orangecrab_r0.2 servant
-    dfu-util -d 1209:5af0 -D build/servant_1.3.0/orangecrab_r0.2-trellis/servant_1.3.0.bit
+    dfu-util -d 1209:5af0 -D build/servant_1.4.0/orangecrab_r0.2-trellis/servant_1.4.0.bit
 
 PolarFire Splash Kit
 ^^^^^^^^^^^^^^^^^^^^

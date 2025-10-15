@@ -89,7 +89,7 @@ Each of the following commands should be run from the workspace directory:
 
 If everything worked, the output should look like
 
-    INFO: Preparing ::serv:1.3.0
+    INFO: Preparing award-winning:serv:serv:1.4.0
     INFO: Setting up project
 
     INFO: Building simulation model

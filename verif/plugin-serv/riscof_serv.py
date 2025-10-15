@@ -8,7 +8,7 @@ logger = logging.getLogger()
 
 class serv(pluginTemplate):
     __model__ = "serv"
-    __version__ = "1.3.0"
+    __version__ = "1.4.0"
 
     def __init__(self, *args, **kwargs):
         sclass = super().__init__(*args, **kwargs)
@@ -39,7 +39,7 @@ class serv(pluginTemplate):
        utils.shellCommand(add_mdu).run()
 
        build_serv = 'fusesoc run --target=verilator_tb --flag=mdu\
-         --build --build-root=servant_test servant\
+         --build --work-root=servant_test award-winning:serv:servant\
          --memsize=8388608 --compressed=1'
        utils.shellCommand(build_serv).run()
 
@@ -76,9 +76,7 @@ class serv(pluginTemplate):
           #The behavior of --build-root in FuseSoC has changed since version 2.2.1
           #Check first for executable model in the new location and else fall back
           #to the old one
-          exe = 'servant_test/verilator_tb/Vservant_sim'
-          if not os.path.exists(exe):
-              exe = 'servant_test/servant_1.3.0/verilator_tb/Vservant_sim'
+          exe = 'servant_test/Vservant_sim'
           
           sigdump_run = [exe,
                          "+timeout=1000000000",
