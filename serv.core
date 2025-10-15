@@ -1,6 +1,8 @@
 CAPI=2:
 
-name : ::serv:1.3.0
+name : award-winning:serv:serv:1.4.0
+description: The award-winning SERV, the world's smallest RISC-V CPU
+license: ISC
 
 filesets:
   core:

@@ -1,3 +1,16 @@
+1.4.0 2025-10-15 Olof Kindgren
+======================================================
+
+* Zephyr BSP: Port to Zephyr 4.0.0
+* Fix mstatus[mpp] field
+* Fix misa and mstatus being triggered at the same time
+* Add documentation for extension interface
+* Add Subservient documentation
+* Add 4-bit mode (QERV)
+* Add simulation debug module
+* New servant ports: Trenz Electronic TE0802
+* Make slt, branches and shifts one cycle faster
+
 1.3.0 2024-07-05 Olof Kindgren
 ======================================================
 

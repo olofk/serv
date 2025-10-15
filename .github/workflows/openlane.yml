@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO : serv
-      VLNV : serv
+      VLNV : award-winning:serv:serv
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -15,11 +15,11 @@ jobs:
       - run: echo "EDALIZE_LAUNCHER=el_docker" >> $GITHUB_ENV
       - run: pip3 install fusesoc
       - run: fusesoc library add $REPO $GITHUB_WORKSPACE/$REPO
-      - run: fusesoc run --target=sky130 $VLNV
+      - run: fusesoc run --target=sky130 --work-root=openlane_work $VLNV
       - run: find -name *.gds
       - name: Store artifacts
         uses: actions/upload-artifact@v4
         with:
           name: serv.gds
-          path: build/serv_1.3.0/sky130-openlane/runs/serv_synth_wrapper/results/finishing/serv_synth_wrapper.gds
+          path: openlane_work/runs/serv_synth_wrapper/results/finishing/serv_synth_wrapper.gds
 
