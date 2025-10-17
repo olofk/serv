@@ -100,6 +100,11 @@ module serv_state
    //valid signal for mdu
    assign o_mdu_valid = MDU & !o_cnt_en & init_done & i_mdu_op;
 
+   //trap_pending is only guaranteed to have correct value during the
+   // last cycle of the init stage
+   wire	trap_pending = WITH_CSR & ((take_branch & i_ctrl_misalign & !ALIGN) |
+					 (i_dbus_en   & i_mem_misalign));
+
    //Prepare RF for writes when everything is ready to enter stage two
    // and the first stage didn't cause a misalign exception
    //Left shifts, SLT & Branch ops. First cycle after init
@@ -217,11 +222,6 @@ module serv_state
    endgenerate
 
    assign o_ctrl_trap = WITH_CSR & (i_e_op | i_new_irq | misalign_trap_sync);
-
-	 //trap_pending is only guaranteed to have correct value during the
-	 // last cycle of the init stage
-	 wire trap_pending = WITH_CSR & ((take_branch & i_ctrl_misalign & !ALIGN) |
-					 (i_dbus_en   & i_mem_misalign));
 
    generate
       if (WITH_CSR) begin : gen_csr
