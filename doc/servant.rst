@@ -248,6 +248,16 @@ FPGA Pin F14 (HSTC GPIO addon connector J2, pin 2) is used for UART output with 
 
     fusesoc run --target=sockit servant
 
+Sipeed Tang Nano 20k
+^^^^^^^^^^^^^^^^^^^^
+
+57600 baud UART output is connected to then onboard UART to USB controller, as well as LED0.
+If a large amount of UART data is output, the onboard UART does not work well, use an external FTDI adapter.
+
+    fusesoc run --target=tang_nano_20k servant
+    openFPGALoader build/servant_1.3.0/tang_nano_20k/impl/pnr/project.fs
+
+
 Trenz Electronic TE0802
 ^^^^^^^^^^^^^^^^^^^^^^^
 
