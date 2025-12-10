@@ -83,7 +83,7 @@ Each of the following commands should be run from the workspace directory:
     MDU will be available in `$WORKSPACE/fusesoc_libraries/mdu`
   
 
-:green_book: We are now ready to do our first exercises with SERV. If everything above is done correctly,we can use Verilator as a linter to check the SERV source code.
+:green_book: We are now ready to do our first exercises with SERV. If everything above is done correctly, we can use Verilator as a linter to check the SERV source code.
 
     $ fusesoc run --target=lint serv
 
