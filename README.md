@@ -28,13 +28,13 @@ All SERV videos and more can also be found [here](https://www.award-winning.me/v
 
 Apart from being the world's smallest RISC-V CPU, SERV also aims at being the best documented RISC-V CPU. For this there is an official [SERV user manual](https://serv.readthedocs.io/en/latest/#) with block diagrams that are correct to the gate-level, cycle-accurate timing diagrams and an in-depth description of how things work.
 
-SERV is open source released under the ISC license. If you need a commercial license with patent grants, professional paid support or addded features, please contact <olof@award-winning.me>
+SERV is open source released under the ISC license. If you need a commercial license with patent grants, professional paid support or added features, please contact <olof@award-winning.me>
 
 ## Systems using SERV
 
 SERV can be easily integrated into any design, but if you are looking at just quickly trying it out, here is a list of some systems that are already using SERV:
 
-[Servant](https://serv.readthedocs.io/en/latest/servant.html) is the reference platform for SERV. It is a very basic SoC that contains just enough runs Zephyr RTOS. Servant is intended for FPGAs and has been ported to around 20 different FPGA boards. It is also used to run the RISC-V regression test suite.
+[Servant](https://serv.readthedocs.io/en/latest/servant.html) is the reference platform for SERV. It is a very basic SoC that contains just enough to run Zephyr RTOS. Servant is intended for FPGAs and has been ported to around 20 different FPGA boards. It is also used to run the RISC-V regression test suite.
 
 [CoreScore](https://corescore.store/) is an award-giving benchmark for FPGAs and their synthesis/P&R tools. It tests how many SERV cores that can be put into a particular FPGA.
 
@@ -76,8 +76,8 @@ Each of the following commands should be run from the workspace directory:
 
         $ export SERV="$WORKSPACE/fusesoc_libraries/serv"
     
-- Install latest version of [Verilator](https://www.veripool.org/wiki/verilator)
-- (Optional) To support RISC-V M-extension extension, Multiplication and Division unit (MDU) can be added included into the SERV as a separate library.
+- Install the latest version of [Verilator](https://www.veripool.org/wiki/verilator)
+- (Optional) To support RISC-V M extension, Multiplication and Division unit (MDU) can be included in SERV as a separate library.
 
         $ fusesoc library add mdu https://github.com/zeeshanrafique23/mdu
     MDU will be available in `$WORKSPACE/fusesoc_libraries/mdu`
