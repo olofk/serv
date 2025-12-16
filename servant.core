@@ -459,11 +459,9 @@ targets:
     filesets : [mem_files, soc, gmm7550]
     parameters : [memfile=blinky.hex, memsize=8192]
     toplevel : servant_gmm7550
-    tools:
-      gatemate:
+    flow: gatemate
+    flow_options:
         device : CCGM1A1
-        yosys_synth_options : [ -nomx8 ]
-        p_r_options : [ +uCIO -cCP ]
 
   lint:
     description: Run static code checks (linting)
