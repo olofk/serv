@@ -133,7 +133,7 @@ module serv_decode
    wire co_sh_right   = funct3[2];
    wire co_bne_or_bge = funct3[0];
 
-   //Matches system ops except eceall/ebreak/mret
+   //Matches system ops except ecall/ebreak/mret
    wire csr_op = opcode[4] & opcode[2] & (|funct3);
 
 
