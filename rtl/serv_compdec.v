@@ -178,7 +178,7 @@ module serv_compdec
         case (i_instr[15:14])
           2'b00: begin
             // c.slli -> slli rd, rd, shamt
-            // (c.ssli hints are translated into a slli hint)
+            // (c.slli hints are translated into a slli hint)
             comp_instr = {7'b0, i_instr[6:2], i_instr[11:7], 3'b001, i_instr[11:7], {OPCODE_OP_IMM}};
           end
 
