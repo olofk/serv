@@ -1,0 +1,31 @@
+# For iceFUN board
+
+# 12 MHz clock
+set_io 	i_clk	P7
+
+# RS232
+set_io 	q 	C10
+
+#set_io --warn-no-port led1	 	C10
+#set_io --warn-no-port led2 		A10
+#set_io --warn-no-port led3 		D7
+#set_io --warn-no-port led4 		D6
+#set_io --warn-no-port led5	 	A7
+#set_io --warn-no-port led6	 	C7
+#set_io --warn-no-port led7	 	A4
+#set_io --warn-no-port led8	 	C4
+#set_io --warn-no-port lcol1		A12
+#set_io --warn-no-port lcol2	 	D10
+#set_io --warn-no-port lcol3 	A6
+#set_io --warn-no-port lcol4 	C5
+#set_io --warn-no-port spkp  	M12
+#set_io --warn-no-port spkm  	M6
+#set_io --warn-no-port key1  	C11
+#set_io --warn-no-port key2  	C6
+#set_io --warn-no-port key3  	A11
+#set_io --warn-no-port key4  	A5
+#set_io --warn-no-port red 		P14
+#set_io --warn-no-port green  	N14
+#set_io --warn-no-port blue  	L14
+#
+#set_io --warn-no-port clk12MHz	P7
