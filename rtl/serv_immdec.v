@@ -6,7 +6,7 @@
  */
 `default_nettype none
 module serv_immdec
-  #(parameter SHARED_RFADDR_IMM_REGS = 1,
+  #(parameter SHARED_RFADDR_IMM_REGS = 0,
     parameter W = 1)
   (
    input wire 	     i_clk,
