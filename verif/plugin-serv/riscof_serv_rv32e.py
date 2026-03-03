@@ -41,7 +41,7 @@ class serv_rv32e(pluginTemplate):
        # Paths are relative to CWD; riscof must be run from the repo root.
        build_serv = 'fusesoc run --target=verilator_tb\
          --build --work-root=servant_test_rv32e award-winning:serv:servant\
-         --memsize=8388608 --with_rv32e=1'
+         --memsize=16777216 --with_rv32e=1'
        utils.shellCommand(build_serv).run()
 
     def build(self, isa_yaml, platform_yaml):
@@ -76,7 +76,7 @@ class serv_rv32e(pluginTemplate):
 
           sigdump_run = [exe,
                          "+timeout=1000000000",
-                         f"+signature={test_dir}/DUT-serv.signature",
+                         f"+signature={test_dir}/DUT-serv_rv32e.signature",
                          f"+firmware={test_dir}/{file_name}.hex"]
 
           utils.shellCommand(' '.join(sigdump_run)).run()
