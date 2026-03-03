@@ -7,7 +7,7 @@
 `default_nettype none
 module serv_rf_if
   #(parameter WITH_CSR = 1,
-    parameter [0:0] WITH_RV32E = 0,
+    parameter WITH_RV32E = 0,
     parameter W = 1,
     parameter B = W-1
   )
@@ -111,7 +111,7 @@ module serv_rf_if
    // lower 2 bits of rreg1 are common to RV32I and RV32E
    wire [1:0] rreg1_lo = {1'b0,i_trap} | {i_mret,1'b0} | ({2{i_csr_en}} & i_csr_addr) | ({2{sel_rs2}} & i_rs2_raddr[1:0]);
 
-   generate if (!WITH_RV32E) begin : gen_rv32i_addr
+   if (!(|WITH_RV32E)) begin : gen_rv32i_addr
       // RV32I: 6-bit register addresses, CSR base = 32
       assign o_wreg0 = i_trap ? {6'b100011} : {1'b0, i_rd_waddr};
       assign o_wreg1 = i_trap ? {6'b100010} : {4'b1000, i_csr_addr};
@@ -123,7 +123,7 @@ module serv_rf_if
       assign o_wreg1 = i_trap ? {5'b10010} : {3'b100, i_csr_addr};
       assign o_rreg0 = {1'b0, i_rs1_raddr[3:0]};
       assign o_rreg1 = {~sel_rs2, i_rs2_raddr[3:2] & {2{sel_rs2}}, rreg1_lo};
-   end endgenerate
+   end
 
    assign o_rs1 = i_rdata0;
    assign o_rs2 = i_rdata1;

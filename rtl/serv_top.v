@@ -8,7 +8,7 @@
 
 module serv_top
   #(parameter	    WITH_CSR = 1,
-    parameter [0:0] WITH_RV32E = 0,
+    parameter WITH_RV32E = 0,
     parameter	    W = 1,
     parameter	    B = W-1,
     parameter	    PRE_REGISTER = 1,

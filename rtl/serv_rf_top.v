@@ -35,10 +35,10 @@ module serv_rf_top
     parameter RESET_STRATEGY = "MINI",
     parameter [0:0] DEBUG = 1'b0,
     parameter WITH_CSR = 1,
-    parameter [0:0] WITH_RV32E = 0,
+    parameter WITH_RV32E = 0,
     parameter W        = 1,
     parameter RF_WIDTH = W * 2,
-	parameter RF_L2D   = $clog2(((WITH_RV32E ? 16 : 32)+(WITH_CSR*4))*32/RF_WIDTH))
+	parameter RF_L2D   = $clog2((((|WITH_RV32E) ? 16 : 32)+(WITH_CSR*4))*32/RF_WIDTH))
   (
    input wire 	      clk,
    input wire 	      i_rst,
@@ -88,7 +88,7 @@ module serv_rf_top
    output wire        o_mdu_valid);
 
    localparam CSR_REGS = WITH_CSR*4;
-   localparam GPR_REGS = WITH_RV32E ? 16 : 32;
+   localparam GPR_REGS = (|WITH_RV32E) ? 16 : 32;
 
    wire 	      rf_wreq;
    wire 	      rf_rreq;
