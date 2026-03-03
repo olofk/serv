@@ -684,6 +684,7 @@ targets:
       - compressed
       - align
       - with_csr=1
+      - with_rv32e
     toplevel : servant_sim
 
   zcu106:
@@ -784,6 +785,11 @@ parameters:
   with_csr:
     datatype    : int
     description : Enable/Disable CSR support
+    paramtype   : vlogparam
+
+  with_rv32e:
+    datatype    : int
+    description : Use RV32E (16 GPRs) instead of RV32I (32 GPRs)
     paramtype   : vlogparam
 
   WITH_RESET:

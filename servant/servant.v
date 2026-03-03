@@ -12,6 +12,7 @@ module servant
    parameter sim = 0;
    parameter [0:0] debug = 1'b0;
    parameter with_csr = 1;
+   parameter with_rv32e = 0;
    parameter [0:0] compress = 0;
    parameter [0:0] align = compress;
 
@@ -24,9 +25,10 @@ module servant
 
    localparam	   aw = $clog2(memsize);
    localparam	   csr_regs = with_csr*4;
+   localparam	   gpr_regs = (|with_rv32e) ? 16 : 32;
 
    localparam	   rf_width = width * 2;
-   localparam	   rf_l2d   = $clog2((32+csr_regs)*32/rf_width);
+   localparam	   rf_l2d   = $clog2((gpr_regs+csr_regs)*32/rf_width);
 
    wire 	timer_irq;
 
@@ -124,7 +126,8 @@ module servant
 
    serv_rf_ram
      #(.width (rf_width),
-       .csr_regs (csr_regs))
+       .csr_regs (csr_regs),
+       .gpr_regs (gpr_regs))
    rf_ram
      (.i_clk    (wb_clk),
       .i_waddr  (rf_waddr),
@@ -135,12 +138,13 @@ module servant
       .o_rdata  (rf_rdata));
 
    servile
-     #(.width    (width),
-       .sim      (sim[0]),
-       .debug    (debug),
-       .with_c   (compress[0]),
-       .with_csr (with_csr[0]),
-       .with_mdu (with_mdu))
+     #(.width      (width),
+       .sim        (sim[0]),
+       .debug      (debug),
+       .with_c     (compress[0]),
+       .with_csr   (with_csr[0]),
+       .with_mdu   (with_mdu),
+       .with_rv32e (with_rv32e))
    cpu
      (
       .i_clk        (wb_clk),
