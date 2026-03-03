@@ -7,19 +7,20 @@
 `default_nettype none
 module serv_rf_if
   #(parameter WITH_CSR = 1,
+    parameter [0:0] WITH_RV32E = 0,
     parameter W = 1,
     parameter B = W-1
   )
   (//RF Interface
    input wire 		      i_cnt_en,
-   output wire [4+WITH_CSR:0] o_wreg0,
-   output wire [4+WITH_CSR:0] o_wreg1,
+   output wire [4+WITH_CSR-WITH_RV32E:0] o_wreg0,
+   output wire [4+WITH_CSR-WITH_RV32E:0] o_wreg1,
    output wire 		      o_wen0,
    output wire 		      o_wen1,
    output wire [B:0]  o_wdata0,
    output wire [B:0]  o_wdata1,
-   output wire [4+WITH_CSR:0] o_rreg0,
-   output wire [4+WITH_CSR:0] o_rreg1,
+   output wire [4+WITH_CSR-WITH_RV32E:0] o_rreg0,
+   output wire [4+WITH_CSR-WITH_RV32E:0] o_rreg1,
    input wire  [B:0] i_rdata0,
    input wire  [B:0] i_rdata1,
 
@@ -77,16 +78,12 @@ module serv_rf_if
    /* Port 0 handles writes to mtval during traps and rd otherwise
     * Port 1 handles writes to mepc during traps and csr accesses otherwise
     *
-    * GPR registers are mapped to address 0-31 (bits 0xxxxx).
-    * Following that are four CSR registers
-    * mscratch 100000
-    * mtvec    100001
-    * mepc     100010
-    * mtval    100011
+    * RV32I: GPRs at 0-31, CSRs follow at 32-35
+    *   mscratch 100000  mtvec 100001  mepc 100010  mtval 100011
+    *
+    * RV32E: GPRs at 0-15, CSRs follow at 16-19
+    *   mscratch 10000   mtvec 10001   mepc 10010   mtval 10011
     */
-
-   assign o_wreg0 = i_trap ? {6'b100011} : {1'b0,i_rd_waddr};
-   assign o_wreg1 = i_trap ? {6'b100010} : {4'b1000,i_csr_addr};
 
    assign       o_wen0 = i_cnt_en & (i_trap | rd_wen);
    assign       o_wen1 = i_cnt_en & (i_trap | i_csr_en);
@@ -98,8 +95,6 @@ module serv_rf_if
    //0 : RS1
    //1 : RS2 / CSR
 
-   assign o_rreg0 = {1'b0, i_rs1_raddr};
-
    /*
     The address of the second read port (o_rreg1) can get assigned from four
     different sources
@@ -109,20 +104,26 @@ module serv_rf_if
     trap              : MTVEC
     mret              : MEPC
 
-    Address 0-31 in the RF are assigned to the GPRs. After that follows the four
-    CSRs on addresses 32-35
-
-    32 MSCRATCH
-    33 MTVEC
-    34 MEPC
-    35 MTVAL
-
     The expression below is an optimized version of this logic
     */
    wire sel_rs2 = !(i_trap | i_mret | i_csr_en);
-   assign o_rreg1 = {~sel_rs2,
-		     i_rs2_raddr[4:2] & {3{sel_rs2}},
-		     {1'b0,i_trap} | {i_mret,1'b0} | ({2{i_csr_en}} & i_csr_addr) | ({2{sel_rs2}} & i_rs2_raddr[1:0])};
+
+   // lower 2 bits of rreg1 are common to RV32I and RV32E
+   wire [1:0] rreg1_lo = {1'b0,i_trap} | {i_mret,1'b0} | ({2{i_csr_en}} & i_csr_addr) | ({2{sel_rs2}} & i_rs2_raddr[1:0]);
+
+   generate if (!WITH_RV32E) begin : gen_rv32i_addr
+      // RV32I: 6-bit register addresses, CSR base = 32
+      assign o_wreg0 = i_trap ? {6'b100011} : {1'b0, i_rd_waddr};
+      assign o_wreg1 = i_trap ? {6'b100010} : {4'b1000, i_csr_addr};
+      assign o_rreg0 = {1'b0, i_rs1_raddr};
+      assign o_rreg1 = {~sel_rs2, i_rs2_raddr[4:2] & {3{sel_rs2}}, rreg1_lo};
+   end else begin : gen_rv32e_addr
+      // RV32E: 5-bit register addresses, CSR base = 16
+      assign o_wreg0 = i_trap ? {5'b10011} : {1'b0, i_rd_waddr[3:0]};
+      assign o_wreg1 = i_trap ? {5'b10010} : {3'b100, i_csr_addr};
+      assign o_rreg0 = {1'b0, i_rs1_raddr[3:0]};
+      assign o_rreg1 = {~sel_rs2, i_rs2_raddr[3:2] & {2{sel_rs2}}, rreg1_lo};
+   end endgenerate
 
    assign o_rs1 = i_rdata0;
    assign o_rs2 = i_rdata1;
@@ -137,8 +138,8 @@ module serv_rf_if
       assign 	     o_wdata0 = rd;
       assign	     o_wdata1 = {W{1'b0}};
 
-      assign o_wreg0 = i_rd_waddr;
-      assign o_wreg1 = 5'd0;
+      assign o_wreg0 = i_rd_waddr[4-WITH_RV32E:0];
+      assign o_wreg1 = {(5-WITH_RV32E){1'b0}};
 
       assign       o_wen0 = i_cnt_en & rd_wen;
       assign       o_wen1 = 1'b0;
@@ -147,8 +148,8 @@ module serv_rf_if
     ********** Read side ***********
     */
 
-      assign o_rreg0 = i_rs1_raddr;
-      assign o_rreg1 = i_rs2_raddr;
+      assign o_rreg0 = i_rs1_raddr[4-WITH_RV32E:0];
+      assign o_rreg1 = i_rs2_raddr[4-WITH_RV32E:0];
 
       assign o_rs1 = i_rdata0;
       assign o_rs2 = i_rdata1;

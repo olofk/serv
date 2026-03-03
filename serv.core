@@ -44,6 +44,7 @@ targets:
       - RISCV_FORMAL
       - SERV_CLEAR_RAM
       - "is_toplevel? (WITH_CSR)"
+      - "is_toplevel? (WITH_RV32E)"
       - "is_toplevel? (W)"
     toplevel : ["is_toplevel? (serv_rf_top)"]
 
@@ -91,6 +92,11 @@ parameters:
   WITH_CSR:
     datatype  : int
     paramtype : vlogparam
+
+  WITH_RV32E:
+    datatype    : int
+    description : Use RV32E (16 GPRs) instead of RV32I (32 GPRs)
+    paramtype   : vlogparam
   
   COMPRESSED:
     datatype    : int

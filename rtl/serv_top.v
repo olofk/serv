@@ -8,6 +8,7 @@
 
 module serv_top
   #(parameter	    WITH_CSR = 1,
+    parameter [0:0] WITH_RV32E = 0,
     parameter	    W = 1,
     parameter	    B = W-1,
     parameter	    PRE_REGISTER = 1,
@@ -48,14 +49,14 @@ module serv_top
    output wire 		      o_rf_rreq,
    output wire 		      o_rf_wreq,
    input wire 		      i_rf_ready,
-   output wire [4+WITH_CSR:0] o_wreg0,
-   output wire [4+WITH_CSR:0] o_wreg1,
+   output wire [4+WITH_CSR-WITH_RV32E:0] o_wreg0,
+   output wire [4+WITH_CSR-WITH_RV32E:0] o_wreg1,
    output wire 		      o_wen0,
    output wire 		      o_wen1,
    output wire [B:0] o_wdata0,
    output wire [B:0] o_wdata1,
-   output wire [4+WITH_CSR:0] o_rreg0,
-   output wire [4+WITH_CSR:0] o_rreg1,
+   output wire [4+WITH_CSR-WITH_RV32E:0] o_rreg0,
+   output wire [4+WITH_CSR-WITH_RV32E:0] o_rreg1,
    input wire  [B:0] i_rdata0,
    input wire  [B:0] i_rdata1,
 
@@ -480,7 +481,7 @@ module serv_top
       .o_rd       (alu_rd));
 
    serv_rf_if
-     #(.WITH_CSR (WITH_CSR), .W(W))
+     #(.WITH_CSR (WITH_CSR), .WITH_RV32E (WITH_RV32E), .W(W))
    rf_if
      (//RF interface
       .i_cnt_en    (cnt_en),
