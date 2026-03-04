@@ -149,6 +149,20 @@ If the [toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) is insta
 SERV is verified using RISC-V compliance tests for the base ISA (RV32I) and the implemented extensions (M, C, Zicsr). The instructions on running Compliance tests using RISCOF framework are given in [verif](/verif/) directory.
 
 
+## RV32E support
+
+SERV supports the RV32E base ISA variant via the `WITH_RV32E` parameter (default: 0). RV32E uses 16 general-purpose registers instead of 32, halving the register-file RAM depth for a small additional area saving on top of the standard RV32I footprint.
+
+To simulate with RV32E enabled:
+
+    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/hello_uart_rv32e.hex --WITH_RV32E=1
+
+To lint with RV32E enabled:
+
+    fusesoc run --target=lint serv --WITH_RV32E=1
+
+RV32E compliance is verified using the RISCOF framework against the SAIL reference model. See the [verif/](/verif/) directory for details.
+
 ## Other targets
 
 The above targets are run on the servant SoC, but there are some targets defined for the CPU itself. Verilator can be run in lint mode to check for design problems by running
