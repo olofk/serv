@@ -1,11 +1,11 @@
 hart_ids: [0]
 hart0:
-  ISA: RV32EZicsr
+  ISA: RV32ECZicsr
   physical_addr_sz: 32
   User_Spec_Version: '2.3'
   supported_xlen: [32]
   misa:
-   reset-val: 0x40000010
+   reset-val: 0x40000014
    rv32:
      accessible: true
      mxl:
@@ -23,7 +23,7 @@ hart0:
            warl:
               dependency_fields: []
               legal:
-                - extensions[25:0] bitmask [0x0000010, 0x0000000]
+                - extensions[25:0] bitmask [0x0000014, 0x0000000]
               wr_illegal:
                 - Unchanged
 

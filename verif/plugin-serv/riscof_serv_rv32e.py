@@ -41,13 +41,15 @@ class serv_rv32e(pluginTemplate):
        # Paths are relative to CWD; riscof must be run from the repo root.
        build_serv = 'fusesoc run --target=verilator_tb\
          --build --work-root=servant_test_rv32e award-winning:serv:servant\
-         --memsize=16777216 --with_rv32e=1'
+         --memsize=16777216 --with_rv32e=1 --compressed=1'
        utils.shellCommand(build_serv).run()
 
     def build(self, isa_yaml, platform_yaml):
       ispec = utils.load_yaml(isa_yaml)['hart0']
       self.xlen = '32'
       self.isa = 'rv32e'
+      if "C" in ispec["ISA"]:
+          self.isa += 'c'
       if "Zicsr" in ispec["ISA"] or "zicsr" in ispec["ISA"]:
           self.isa += '_zicsr'
       # ilp32e ABI: integer registers x0-x15 only

@@ -157,6 +157,10 @@ To simulate with RV32E enabled:
 
     fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/hello_uart_rv32e.hex --WITH_RV32E=1
 
+RV32E can be combined with the Compressed (C) extension (`--compressed=1`) for ~25% smaller code:
+
+    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/hello_uart_rv32ec.hex --WITH_RV32E=1 --compressed=1
+
 To lint with RV32E enabled:
 
     fusesoc run --target=lint serv --WITH_RV32E=1

@@ -14,6 +14,9 @@ OBJCOPY=$(TOOLCHAIN_PREFIX)objcopy
 hello_uart_rv32e.elf: hello_uart.S link.ld
 	$(CC) -nostartfiles -nostdlib -march=rv32e -mabi=ilp32e -Tlink.ld -o$@ $<
 
+hello_uart_rv32ec.elf: hello_uart.S link.ld
+	$(CC) -nostartfiles -nostdlib -march=rv32ec -mabi=ilp32e -Tlink.ld -o$@ $<
+
 trap_test_rv32e.elf: trap_test_rv32e.S link.ld
 	$(CC) -nostartfiles -nostdlib -march=rv32e_zicsr -mabi=ilp32e -Tlink.ld -o$@ $<
 
