@@ -151,15 +151,19 @@ SERV is verified using RISC-V compliance tests for the base ISA (RV32I) and the 
 
 ## RV32E support
 
-SERV supports the RV32E base ISA variant via the `WITH_RV32E` parameter (default: 0). RV32E uses 16 general-purpose registers instead of 32, halving the register-file RAM depth for a small additional area saving on top of the standard RV32I footprint.
+SERV supports the RV32E base ISA variant via the `WITH_RV32E` parameter (default: 0). RV32E uses 16 general-purpose registers instead of 32, halving the register-file RAM depth.
+
+**Area impact by target:**
+- **ASIC / DFF-based targets**: ~36% fewer cells in generic synthesis — a meaningful saving.
+- **FPGA targets**: No measurable LUT or BRAM reduction. Both RV32I and RV32E register files fit inside a single block RAM (e.g., one `SB_RAM40_4K` on iCE40 or one BSRAM on Gowin), so the BRAM count is unchanged. If fitting a small FPGA is the goal, removing optional logic (MDU, CSR) or reducing firmware size will have more impact than RV32E alone.
 
 To simulate with RV32E enabled:
 
-    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/hello_uart_rv32e.hex --WITH_RV32E=1
+    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/hello_uart_rv32e.hex --with_rv32e=1
 
-RV32E can be combined with the Compressed (C) extension (`--compressed=1`) for ~25% smaller code:
+RV32E can be combined with the Compressed (C) extension (`--compressed=1`) for ~25% smaller code size:
 
-    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/hello_uart_rv32ec.hex --WITH_RV32E=1 --compressed=1
+    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/hello_uart_rv32ec.hex --with_rv32e=1 --compressed=1
 
 To lint with RV32E enabled:
 

@@ -72,9 +72,10 @@ module serv_compdec
 
       // C1
 
-      // Register address checks for RV32E are performed in the regular instruction decoder.
-      // If this check fails, an illegal instruction exception is triggered and the controller
-      // writes the actual faulting instruction to mtval.
+      // NOTE: RV32E register address checks (x16-x31 are illegal) are NOT currently
+      // implemented in the decoder. SERV relies on the ilp32e ABI to guarantee that
+      // well-compiled code never references x16+. Accessing x16-x31 in RV32E mode
+      // silently aliases to x0-x15 instead of triggering an illegal-instruction trap.
       2'b01: begin
         case (i_instr[15:13])
           3'b000: begin
@@ -171,9 +172,7 @@ module serv_compdec
 
       // C2
 
-      // Register address checks for RV32E are performed in the regular instruction decoder.
-      // If this check fails, an illegal instruction exception is triggered and the controller
-      // writes the actual faulting instruction to mtval.
+      // Same NOTE as C1: x16-x31 access in RV32E mode is not trapped.
       2'b10: begin
         case (i_instr[15:14])
           2'b00: begin

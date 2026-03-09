@@ -35,9 +35,11 @@ module serv_rf_top
     parameter RESET_STRATEGY = "MINI",
     parameter [0:0] DEBUG = 1'b0,
     parameter WITH_CSR = 1,
-    parameter WITH_RV32E = 0,
+    parameter WITH_RV32E = 0, // valid values: 0 (RV32I) or 1 (RV32E)
     parameter W        = 1,
     parameter RF_WIDTH = W * 2,
+	// Note: RF_L2D cannot use the GPR_REGS localparam because parameter
+	// defaults cannot reference localparams. Keep in sync with GPR_REGS below.
 	parameter RF_L2D   = $clog2((((|WITH_RV32E) ? 16 : 32)+(WITH_CSR*4))*32/RF_WIDTH))
   (
    input wire 	      clk,

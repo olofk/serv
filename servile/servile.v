@@ -17,7 +17,7 @@ module servile
     parameter [0:0] with_c = 1'b0,
     parameter [0:0] with_csr = 1'b0,
     parameter [0:0] with_mdu = 1'b0,
-    parameter	    with_rv32e = 0,
+    parameter with_rv32e = 0,
     //Internally calculated. Do not touch
     parameter	    B = width-1,
     parameter	    gpr_regs = (|with_rv32e) ? 16 : 32,
