@@ -83,6 +83,11 @@ module serv_top
    wire [4:0]    rd_addr;
    wire [4:0]    rs1_addr;
    wire [4:0]    rs2_addr;
+   wire          illegal_comp;
+   wire          illegal_instr;
+   reg           illegal_reg_r;
+   reg           illegal_comp_r;
+   reg  [31:0]   instr_shift;
 
    wire [3:0] 	 immdec_ctrl;
    wire [3:0] 	immdec_en;
@@ -116,6 +121,7 @@ module serv_top
    wire 	 trap;
    wire 	 pc_rel;
    wire          iscomp;
+   wire [B:0]    mtval_instr;
 
    wire          init;
    wire          cnt_en;
@@ -222,10 +228,108 @@ module serv_top
             .i_instr(wb_ibus_rdt),
             .i_ack(wb_ibus_ack),
             .o_instr(i_wb_rdt),
-            .o_iscomp(iscomp));
+            .o_iscomp(iscomp),
+            .o_illegal(illegal_comp));
       end else begin : gen_no_compressed
          assign i_wb_rdt =  wb_ibus_rdt;
          assign iscomp   =  1'b0;
+         assign illegal_comp = 1'b0;
+      end
+   endgenerate
+
+   // RV32E illegal register detection (x16-x31 are illegal)
+   wire [4:0] opcode = i_wb_rdt[6:2];
+   wire [2:0] funct3 = i_wb_rdt[14:12];
+   reg  uses_rs1;
+   reg  uses_rs2;
+   reg  uses_rd;
+   always @(*) begin
+      uses_rs1 = 1'b0;
+      uses_rs2 = 1'b0;
+      uses_rd  = 1'b0;
+      case (opcode)
+        5'b01100: begin // OP
+          uses_rs1 = 1'b1; uses_rs2 = 1'b1; uses_rd = 1'b1;
+        end
+        5'b00100: begin // OP-IMM
+          uses_rs1 = 1'b1; uses_rd = 1'b1;
+        end
+        5'b00000: begin // LOAD
+          uses_rs1 = 1'b1; uses_rd = 1'b1;
+        end
+        5'b01000: begin // STORE
+          uses_rs1 = 1'b1; uses_rs2 = 1'b1;
+        end
+        5'b11000: begin // BRANCH
+          uses_rs1 = 1'b1; uses_rs2 = 1'b1;
+        end
+        5'b11011: begin // JAL
+          uses_rd = 1'b1;
+        end
+        5'b11001: begin // JALR
+          uses_rs1 = 1'b1; uses_rd = 1'b1;
+        end
+        5'b01101: begin // LUI
+          uses_rd = 1'b1;
+        end
+        5'b00101: begin // AUIPC
+          uses_rd = 1'b1;
+        end
+        5'b11100: begin // SYSTEM
+          if (funct3 != 3'b000) begin
+            uses_rd = 1'b1;
+            if (!funct3[2])
+              uses_rs1 = 1'b1; // CSR reg (not immediate)
+          end
+        end
+        default: begin
+          // no registers
+        end
+      endcase
+   end
+
+   wire [4:0] instr_rs1 = i_wb_rdt[19:15];
+   wire [4:0] instr_rs2 = i_wb_rdt[24:20];
+   wire [4:0] instr_rd  = i_wb_rdt[11:7];
+   wire illegal_reg_comb = (uses_rs1 & instr_rs1[4]) |
+                           (uses_rs2 & instr_rs2[4]) |
+                           (uses_rd  & instr_rd[4]);
+
+   always @(posedge clk) begin
+      if (i_rst && (RESET_STRATEGY != "NONE")) begin
+         illegal_reg_r  <= 1'b0;
+         illegal_comp_r <= 1'b0;
+      end else if (wb_ibus_ack) begin
+         illegal_reg_r  <= illegal_reg_comb;
+         illegal_comp_r <= illegal_comp;
+      end
+   end
+
+   wire illegal_instr_raw = illegal_comp | ((|WITH_RV32E) & illegal_reg_comb);
+   assign illegal_instr = PRE_REGISTER ? (illegal_comp_r | ((|WITH_RV32E) & illegal_reg_r)) :
+                         illegal_instr_raw;
+
+   // Serialize the faulting instruction for mtval on illegal-instruction traps
+   assign mtval_instr = instr_shift[B:0];
+   generate
+      if (W == 1) begin : gen_mtval_instr_w1
+         always @(posedge clk) begin
+            if (wb_ibus_ack)
+               instr_shift <= i_wb_rdt;
+            else if (cnt_en && trap && illegal_instr)
+               instr_shift <= {1'b0, instr_shift[31:1]};
+            if (i_rst && (RESET_STRATEGY != "NONE"))
+               instr_shift <= 32'b0;
+         end
+      end else if (W == 4) begin : gen_mtval_instr_w4
+         always @(posedge clk) begin
+            if (wb_ibus_ack)
+               instr_shift <= i_wb_rdt;
+            else if (cnt_en && trap && illegal_instr)
+               instr_shift <= {4'b0000, instr_shift[31:4]};
+            if (i_rst && (RESET_STRATEGY != "NONE"))
+               instr_shift <= 32'b0;
+         end
       end
    endgenerate
 
@@ -279,6 +383,8 @@ module serv_top
       .o_mdu_valid    (o_mdu_valid),
       //Extension
       .i_mdu_ready    (i_ext_ready),
+      //Illegal instruction
+      .i_illegal      (illegal_instr),
       //External
       .o_dbus_cyc     (o_dbus_cyc),
       .i_dbus_ack     (i_dbus_ack),
@@ -501,6 +607,8 @@ module serv_top
       .i_mret      (mret),
       .i_mepc      (wb_ibus_adr[B:0]),
       .i_mtval_pc  (mtval_pc),
+      .i_illegal   (illegal_instr),
+      .i_mtval_instr (mtval_instr),
       .i_bufreg_q  (bufreg_q),
       .i_bad_pc    (bad_pc),
       .o_csr_pc    (csr_pc),
@@ -571,6 +679,7 @@ module serv_top
 	    .i_mem_op     (!mtval_pc),
 	    .i_mtip       (i_timer_irq),
 	    .i_trap       (trap),
+	    .i_illegal    (illegal_instr),
 	    .o_new_irq    (new_irq),
 	    //Control
 	    .i_e_op       (e_op),

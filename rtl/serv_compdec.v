@@ -13,7 +13,8 @@ module serv_compdec
    input  wire [31:0] i_instr,
    input  wire i_ack,
    output wire [31:0] o_instr,
-   output reg o_iscomp);
+   output reg o_iscomp,
+   output wire o_illegal);
 
   localparam OPCODE_LOAD     = 7'h03;
   localparam OPCODE_OP_IMM   = 7'h13;
@@ -28,6 +29,7 @@ module serv_compdec
   reg  illegal_instr;
 
   assign o_instr = illegal_instr ? i_instr : comp_instr;
+  assign o_illegal = illegal_instr & (i_instr[1:0] != 2'b11);
 
   always @(posedge i_clk) begin
     if(i_ack)
@@ -72,10 +74,6 @@ module serv_compdec
 
       // C1
 
-      // NOTE: RV32E register address checks (x16-x31 are illegal) are NOT currently
-      // implemented in the decoder. SERV relies on the ilp32e ABI to guarantee that
-      // well-compiled code never references x16+. Accessing x16-x31 in RV32E mode
-      // silently aliases to x0-x15 instead of triggering an illegal-instruction trap.
       2'b01: begin
         case (i_instr[15:13])
           3'b000: begin
@@ -172,7 +170,6 @@ module serv_compdec
 
       // C2
 
-      // Same NOTE as C1: x16-x31 access in RV32E mode is not trapped.
       2'b10: begin
         case (i_instr[15:14])
           2'b00: begin
