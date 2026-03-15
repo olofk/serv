@@ -169,6 +169,13 @@ To lint with RV32E enabled:
 
     fusesoc run --target=lint serv --WITH_RV32E=1
 
+In RV32E mode, any access to registers x16–x31 is trapped as an illegal instruction (mcause=2, mtval=faulting instruction). This applies to both 32-bit and compressed instructions.
+
+RV32E simulation can also be run with Icarus Verilog:
+
+    fusesoc run --target=sim servant --firmware=$SERV/sw/trap_test_rv32e.hex --with_rv32e=1
+    fusesoc run --target=sim servant --firmware=$SERV/sw/trap_test_rv32ec.hex --with_rv32e=1 --compressed=1
+
 RV32E compliance is verified using the RISCOF framework against the SAIL reference model. See the [verif/](/verif/) directory for details.
 
 ## Other targets

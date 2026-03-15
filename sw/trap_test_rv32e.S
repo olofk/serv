@@ -28,6 +28,7 @@ _start:
 	sw	zero, 0(t0)
 	j	.		/* spin on real HW */
 
+	.balign 4
 trap_handler:
 	/* Advance mepc past the ecall instruction (reads/writes RF[18]) */
 	csrr	t0, mepc
