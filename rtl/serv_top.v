@@ -288,12 +288,11 @@ module serv_top
       endcase
    end
 
-   wire [4:0] instr_rs1 = i_wb_rdt[19:15];
-   wire [4:0] instr_rs2 = i_wb_rdt[24:20];
-   wire [4:0] instr_rd  = i_wb_rdt[11:7];
-   wire illegal_reg_comb = (uses_rs1 & instr_rs1[4]) |
-                           (uses_rs2 & instr_rs2[4]) |
-                           (uses_rd  & instr_rd[4]);
+   // Bit 4 of each register field indicates x16-x31 (illegal in RV32E)
+   // rs1=[19:15] rs2=[24:20] rd=[11:7] — only the MSB of each field matters
+   wire illegal_reg_comb = (uses_rs1 & i_wb_rdt[19]) |
+                           (uses_rs2 & i_wb_rdt[24]) |
+                           (uses_rd  & i_wb_rdt[11]);
 
    always @(posedge clk) begin
       if (i_rst && (RESET_STRATEGY != "NONE")) begin
