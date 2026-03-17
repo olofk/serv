@@ -122,6 +122,10 @@ module serv_rf_if
       assign o_rreg1 = {~sel_rs2, i_rs2_raddr[4:2] & {3{sel_rs2}}, rreg1_lo};
    end else begin : gen_rv32e_addr
       // RV32E: 5-bit register addresses, CSR base = 16
+      // Bit[4] of rs1/rs2 raddr is not used in the RF (only x0-x15 exist);
+      // x16-x31 illegal-register detection happens upstream in serv_top.
+      // The _unused_ prefix suppresses lint warnings across all Verilator versions.
+      wire _unused_rv32e_rs_msb = i_rs1_raddr[4] | i_rs2_raddr[4];
       assign o_wreg0 = i_trap ? {5'b10011} : {1'b0, i_rd_waddr[3:0]};
       assign o_wreg1 = i_trap ? {5'b10010} : {3'b100, i_csr_addr};
       assign o_rreg0 = {1'b0, i_rs1_raddr[3:0]};

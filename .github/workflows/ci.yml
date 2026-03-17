@@ -51,5 +51,8 @@ jobs:
     - name: Run RV32I Privilege compliance tests
       run: riscof run --config=$SERV/verif/config.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/privilege --env=riscv-arch-test/riscv-test-suite/env --no-browser
 
+    - name: Run RV32E compliance tests
+      run: riscof run --config=$SERV/verif/config_rv32e.ini --suite=riscv-arch-test/riscv-test-suite/rv32e_m/E --env=riscv-arch-test/riscv-test-suite/env --no-browser
+
     - name: Run RV32EC compliance tests
-      run: riscof run --config=$SERV/verif/config_rv32e.ini --suite=riscv-arch-test/riscv-test-suite/rv32i_m/C --env=riscv-arch-test/riscv-test-suite/env --no-browser
+      run: riscof run --config=$SERV/verif/config_rv32e.ini --suite=riscv-arch-test/riscv-test-suite/rv32e_m/C --env=riscv-arch-test/riscv-test-suite/env --no-browser
