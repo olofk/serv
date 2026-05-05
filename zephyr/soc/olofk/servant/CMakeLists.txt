@@ -4,7 +4,6 @@
 zephyr_sources(
     soc_irq.S
     vector.S
-    cpu_idle.c
     irq.c)
 
 set(SOC_LINKER_SCRIPT ${ZEPHYR_BASE}/include/zephyr/arch/riscv/common/linker.ld CACHE INTERNAL "")
