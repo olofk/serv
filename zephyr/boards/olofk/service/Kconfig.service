@@ -4,4 +4,4 @@
 
 config BOARD_SERVICE
 	bool "servant SoC for iCE40"
-	depends on SOC_RISCV32_SERVANT
+	select SOC_RISCV32_SERVANT
