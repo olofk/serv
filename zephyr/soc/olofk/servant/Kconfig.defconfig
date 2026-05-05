@@ -3,10 +3,6 @@
 
 if SOC_RISCV32_SERVANT
 
-config SOC
-	string
-	default "servant"
-
 config SYS_CLOCK_HW_CYCLES_PER_SEC
 	int
 	default 16000000
