@@ -22,9 +22,10 @@ Key facts:
 - A flop inferred by `>>1` uses a clock literally named **`clk`**. SERV's port is
   `i_clk`, so once any flop is introduced, the `\SV` must provide `wire clk = i_clk;`.
   `>>1$d` registers `$d`: result(t) = d(t-1) — matches `q <= d`.
-- SandPiper auto-inserts `` `include "serv_bufreg_gen.v" `` at the top of the
-  generated `.v` once there is real TLV content. The gen file is also listed in
-  `serv.core` before the module; defining `` `BOGUS_USE `` twice is harmless.
+- SandPiper auto-inserts `` `include "serv_bufreg_gen.v" `` inside the module
+  once there is real TLV content. The gen file is listed in `serv.core` as
+  `{is_include_file : true}` (puts its dir on the include path; not compiled
+  standalone — see the step-1 issue below).
 - `fev.sh` strips the leading `//_\` header lines (waiver line-number alignment,
   see project_specific_instructions.md). With TLV content the body shifts anyway;
   lint waivers are handled by `regress.sh`, not `fev.sh`.
