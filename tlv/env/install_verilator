@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# Install latest stable Verilator globally in Ubuntu Docker container. To be run as superuser.
+
+set -e
+cd $(dirname ${BASH_SOURCE})/..
+
+
+
+mold_exists=$(apt-cache policy mold | grep -q 'Candidate:' && echo true || echo false)
+
+apt-get update
+apt-get install -y git help2man perl python3 make autoconf g++ flex bison ccache
+apt-get install -y libgoogle-perftools-dev numactl perl-doc
+apt-get install -y libfl2  # Ubuntu only (ignore if gives error)
+apt-get install -y libfl-dev  # Ubuntu only (ignore if gives error)
+apt-get install -y zlib1g zlib1g-dev  # Ubuntu only (ignore if gives error) -- zlibc is missing on some platforms and Wilson says it's only needed for FST/GTKwave support, so removed.
+apt-get install -y ccache  # If present at build, needed for run
+if [[ "$mold_exists" == true ]]
+then
+  apt-get install -y mold  # If present at build, needed for run
+fi
+apt-get install -y libgoogle-perftools-dev numactl
+apt-get install -y git autoconf flex bison
+
+
+git clone https://github.com/verilator/verilator
+cd verilator
+git pull        # Make sure we're up-to-date
+git checkout stable      # Use most recent release
+autoconf        # Create ./configure script
+./configure
+make -j$(nproc)
+
+make install

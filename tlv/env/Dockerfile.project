@@ -1,0 +1,17 @@
+# Project-specific environment layer for SERV (RISC-V CPU) conversion.
+#
+# Adds FuseSoC, the build/test orchestration tool SERV uses for its
+# Verilator lint and simulation targets. Everything else (SandPiper,
+# Verilator, Yosys/OSS CAD Suite) is provided by the base image.
+#
+# Built on top of the base image produced by ./Dockerfile.
+# See docker-compose.yml, which builds the base first, then this layer.
+
+FROM claude-code-env:latest
+
+USER root
+
+# FuseSoC: SERV's test infrastructure (lint + verilator_tb targets).
+RUN pip3 install --no-cache-dir --break-system-packages fusesoc==2.4.6
+
+USER claude

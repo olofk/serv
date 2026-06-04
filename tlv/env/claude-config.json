@@ -1,0 +1,75 @@
+{
+  "numStartups": 1,
+  "installMethod": "docker",
+  "autoUpdates": false,
+  "theme": "light",
+  "dangerouslySkipPermissions": true,
+  "autoAcceptPermissions": true,
+  "autoTrustNewProjects": true,
+  "suppressTrustPrompts": true,
+  "suppressPermissionPrompts": true,
+  "defaultPermissionMode": "accept",
+  "customApiKeyResponses": {
+    "approved": [],
+    "rejected": []
+  },
+  "firstStartTime": "2025-08-18T19:55:22.726Z",
+  "userID": "docker-user",
+  "projects": {
+    "/workspace": {
+      "allowedTools": ["*"],
+      "permissions": {
+        "allow": [
+          "Bash(*)",
+          "Edit(*)",
+          "Read(*)", 
+          "Write(*)",
+          "List(*)",
+          "Glob(*)",
+          "Grep(*)",
+          "Task(*)",
+          "WebFetch(*)",
+          "WebSearch(*)",
+          "NotebookRead(*)",
+          "NotebookWrite(*)",
+          "mcp__*"
+        ],
+        "defaultMode": "acceptEdits",
+        "additionalDirectories": ["/workspace/proj", "/workspace/data", "/workspace/temp"]
+      },
+      "autoAcceptAllTools": true,
+      "autoAcceptMcpTools": true,
+      "history": [],
+      "mcpContextUris": [],
+      "mcpServers": {
+      },
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "hasAllToolsApproved": true,
+      "autoAcceptEdits": true,
+      "skipConfirmationDialogs": true,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": true,
+      "hasClaudeMdExternalIncludesWarningShown": true,
+      "allowWebSearch": true,
+      "allowWebFetch": true,
+      "allowFileOperations": true,
+      "allowBashExecution": true,
+      "lastTotalWebSearchRequests": 0,
+      "lastCost": 0,
+      "lastAPIDuration": 0,
+      "lastDuration": 0,
+      "lastLinesAdded": 0,
+      "lastLinesRemoved": 0,
+      "lastTotalInputTokens": 0,
+      "lastTotalOutputTokens": 0,
+      "lastTotalCacheCreationInputTokens": 0,
+      "lastTotalCacheReadInputTokens": 0,
+      "lastSessionId": "docker-session"
+    }
+  },
+  "isQualifiedForDataSharing": false,
+  "hasCompletedOnboarding": true,
+  "lastOnboardingVersion": "1.0.83"
+}

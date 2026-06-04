@@ -1,0 +1,57 @@
+# Docker Compose for the SERV TL-Verilog conversion project.
+#
+# Two images are built:
+# - claude-code-env:latest  (base, from Dockerfile): SandPiper, Verilator,
+#   OSS CAD Suite (Yosys), Claude Code.
+# - serv-conversion:latest   (from Dockerfile.project): adds FuseSoC, SERV's
+#   test infrastructure.
+#
+# Build both (base first, then the project layer):
+# > docker compose build claude-base
+# > docker compose build claude-conversion
+# Run a shell / regression:
+# > docker compose run claude-conversion bash
+#   $ /workspace/proj/tlv/regress/regress.sh
+#
+# See Dockerfile and Dockerfile.project for details.
+
+services:
+  # Base image. Built first so Dockerfile.project can FROM it.
+  claude-base:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: claude-code-env:latest
+
+  claude-conversion:
+    depends_on:
+      - claude-base
+    build:
+      context: .
+      dockerfile: Dockerfile.project
+    image: serv-conversion:latest
+    volumes:
+      - ../../..:/workspace/proj:rw  # Project root mounted as work directory
+      # Add data directory if needed:
+      # - ./workspace/data:/workspace/data:ro
+    working_dir: /workspace/proj/tlv/project_instructions
+    environment:
+      - DISPLAY=${DISPLAY:-}
+      - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN:-}
+    # Security settings matching run_claude.sh
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 100
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      #- /workspace/temp:noexec,nosuid,size=2g
+    # Use bridge network for security (not host network)
+    networks:
+      - default
+    extra_hosts:
+      - "host.docker.internal:127.0.0.1"
+
+networks:
+  default:
