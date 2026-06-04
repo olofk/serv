@@ -8,10 +8,13 @@ filesets:
   core:
     files:
       - "tool_verilator? (data/verilator_waiver.vlt)" : {file_type: vlt}
-      # TL-Verilog conversion: serv_bufreg_gen.v holds SandPiper-generated macro
-      # definitions (e.g. `BOGUS_USE) and must precede serv_bufreg.v, which uses
-      # then `undef's them. Both are symlinks into tlv/verilog/. See tlv/.
-      - rtl/serv_bufreg_gen.v
+      # TL-Verilog conversion: serv_bufreg.v is SandPiper output that
+      # `include's serv_bufreg_gen.v (macros + signal declarations). Marking the
+      # gen file is_include_file puts its directory on the include path (so the
+      # `include resolves) and keeps it out of the compile list (its body is
+      # module-scope decls, not a standalone unit). Both are symlinks into
+      # tlv/verilog/. See tlv/.
+      - rtl/serv_bufreg_gen.v : {is_include_file : true}
       - rtl/serv_bufreg.v
       - rtl/serv_bufreg2.v
       - rtl/serv_alu.v

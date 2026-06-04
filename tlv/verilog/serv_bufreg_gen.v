@@ -9,3 +9,32 @@
 
 
 
+//
+// Signals declared top-level.
+//
+
+// For $c.
+logic L0_c_a0;
+
+// For $c_r.
+logic [B:0] L0_c_r_a0;
+
+// For $carry_and_sum.
+logic [W:0] L0_carry_and_sum_a0;
+
+// For $clr_lsb.
+logic [B:0] L0_clr_lsb_a0;
+
+// For $cr_in.
+logic L0_cr_in_a0,
+      L0_cr_in_a1;
+
+// For $q.
+logic [B:0] L0_q_a0;
+
+
+
+   // Staging of $cr_in.
+   always_ff @(posedge clk) L0_cr_in_a1 <= L0_cr_in_a0;
+
+

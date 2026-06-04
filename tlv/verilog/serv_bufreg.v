@@ -35,27 +35,11 @@
       //Extension
       output wire [31:0] o_ext_rs1);
 
-      wire		      c;
       wire [B:0]	      q;
-      reg [B:0]	      c_r;
       reg [31:0]	      data;
-      wire [B:0]	      clr_lsb;
 
-      assign clr_lsb[0] = i_cnt0 & i_clr_lsb;
-
-      generate
-         if (W > 1) begin : gen_clr_lsb_w_gt_1
-            assign  clr_lsb[B:1] = {B{1'b0}};
-         end
-      endgenerate
-
-      assign {c,q} = {1'b0,(i_rs1 & {W{i_rs1_en}})} + {1'b0,(i_imm & {W{i_imm_en}} & ~clr_lsb)} + c_r;
-
-      always @(posedge i_clk) begin
-         //Make sure carry is cleared before loading new data
-         c_r    <= {W{1'b0}};
-         c_r[0] <= c & i_en;
-      end
+      // Clock for TLV-inferred flops (SandPiper uses a clock named `clk`).
+      wire		      clk = i_clk;
 
       generate
          if (W == 1) begin : gen_w_eq_1
@@ -95,9 +79,25 @@
       endgenerate
 
 
-      assign o_dbus_adr = {data[31:2], 2'b00};
-      assign o_ext_rs1  = data;
-
+`include "serv_bufreg_gen.v" //_\TLV
+   // clr_lsb: bit 0 = i_cnt0 & i_clr_lsb, upper bits 0 (explicit full width).
+   assign L0_clr_lsb_a0[B:0] = {{B{1'b0}}, i_cnt0 & i_clr_lsb};
+   // Carry/sum adder: {c,q} = rs1 + imm(masked) + c_r.
+   assign L0_carry_and_sum_a0[W:0] =
+        {1'b0,(i_rs1 & {W{i_rs1_en}})}
+      + {1'b0,(i_imm & {W{i_imm_en}} & ~L0_clr_lsb_a0)}
+      + L0_c_r_a0;
+   assign L0_c_a0 = L0_carry_and_sum_a0[W];
+   assign L0_q_a0[B:0] = L0_carry_and_sum_a0[B:0];
+   // Carry register: clear carry before loading new data, so only bit 0 holds
+   // the registered (c & i_en); upper bits are 0.
+   assign L0_cr_in_a0 = L0_c_a0 & i_en;
+   assign L0_c_r_a0[B:0] = {{B{1'b0}}, L0_cr_in_a1};
+   // Bridge q back to \SV (still consumed by the generate blocks).
+   assign q = L0_q_a0;
+   // Combinational outputs derived from the data register (still \SV).
+   assign o_dbus_adr = {data[31:2], 2'b00};
+   assign o_ext_rs1 = data;
    endmodule
 
 

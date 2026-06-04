@@ -54,9 +54,13 @@ For module `serv_<mod>`:
    source files **in order**, so the gen file must come first. (Already done for
    `serv_bufreg`.)
 
-For FEV (Yosys), read the gen file before the converted module, e.g.
-`read_verilog -sv tlv/verilog/serv_<mod>_gen.v tlv/verilog/serv_<mod>.v`, and
-compare against `tlv/serv_<mod>_golden.v`.
+For FEV, use `tlv/regress/fev.sh`: it regenerates the Verilog from the `.tlv` and
+proves Yosys sequential equivalence against `tlv/serv_<mod>_golden.v` for W=1 and
+W=4. Run it after every refactoring change (and `regress.sh` for lint+sim). See
+`tlv/tracker.md` for the conversion log, the SandPiper mechanics, and the issues
+hit (gen-file include, the `equiv_induct` recipe for the W=4 dynamic shift, the
+WIDTHEXPAND lint pattern, and why the W-parameterized `generate` datapath stays in
+`\SV`).
 
 ## Parameters / test configurations
 
