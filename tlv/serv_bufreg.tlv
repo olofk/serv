@@ -37,49 +37,8 @@
       //Extension
       output wire [31:0] o_ext_rs1);
 
-      wire [B:0]	      q;
-      reg [31:0]	      data;
-
       // Clock for TLV-inferred flops (SandPiper uses a clock named `clk`).
       wire		      clk = i_clk;
-
-      generate
-         if (W == 1) begin : gen_w_eq_1
-   	 always @(posedge i_clk) begin
-   	    if (i_en)
-   	      data[31:2] <= {i_init ? q : {W{data[31] & i_sh_signed}}, data[31:3]};
-
-   	    if (i_init ? (i_cnt0 | i_cnt1) : i_en)
-   	      data[1:0] <= {i_init ? q : data[2], data[1]};
-   	 end
-   	 assign o_lsb = (MDU & i_mdu_op) ? 2'b00 : data[1:0];
-   	 assign o_q = data[0] & {W{i_en}};
-         end else if (W == 4) begin : gen_lsb_w_4
-   	 reg [1:0] lsb;
-   	 reg [W-2:0] data_tail;
-
-   	 wire [2:0] shift_amount
-   	   = !i_shift_op ? 3'd3 :
-   	     i_right_shift_op ? (3'd3+{1'b0,i_shamt[1:0]}) :
-   	     ({1'b0,~i_shamt[1:0]});
-
-   	 always @(posedge i_clk) begin
-               if (i_en)
-                 if (i_cnt0) lsb <= q[1:0];
-   	    if (i_en)
-                 data <= {i_init ? q : {W{i_sh_signed & data[31]}}, data[31:W]};
-   	    if (i_en)
-   	      data_tail <= data[B:1] & {B{~i_cnt_done}};
-   	 end
-
-   	 wire [2*W+B-2:0] muxdata = {data[W+B-1:0],data_tail};
-   	 wire [B:0]	  muxout = muxdata[{1'b0,shift_amount}+:W];
-
-   	 assign o_lsb = (MDU & i_mdu_op) ? 2'b00 : lsb;
-   	 assign o_q = i_en ? muxout : {W{1'b0}};
-         end
-      endgenerate
-
 
 \TLV
    // clr_lsb: bit 0 = i_cnt0 & i_clr_lsb, upper bits 0 (explicit full width).
@@ -95,10 +54,60 @@
    // the registered (c & i_en); upper bits are 0.
    $cr_in = $c & *i_en;
    $c_r[B:0] = {{B{1'b0}}, >>1$cr_in};
-   // Bridge q back to \SV (still consumed by the generate blocks).
-   *q = $q;
-   // Combinational outputs derived from the data register (still \SV).
-   *o_dbus_adr = {*data[31:2], 2'b00};
-   *o_ext_rs1 = *data;
+
+   // W=1 datapath: lsb output is data[1:0]; q output is data[0] & i_en.
+   $lsb_w_eq_1[1:0] = >>1$data[1:0];
+   $qq_w_eq_1 = >>1$data[0] & *i_en;
+
+   // W=4 shift amount (combinational).
+   $shift_amount[2:0] = !*i_shift_op ? 3'd3 :
+      *i_right_shift_op ? (3'd3 + {1'b0, *i_shamt[1:0]}) :
+      {1'b0, ~*i_shamt[1:0]};
+
+   // W=4 lsb register: capture q[1:0] when i_en & i_cnt0.
+   // $carry_and_sum[1:0] == q[1:0] for W=4 (lower 2 bits of the adder).
+   $lsb[1:0] = (*i_en & *i_cnt0) ? $carry_and_sum[1:0] : >>1$lsb[1:0];
+
+   // W=4 data_tail register: data[B:1] masked by ~cnt_done, gated by i_en.
+   // Fixed indices [3:1] equal data[B:1] for W=4 (B=3); produce valid Verilog for W=1.
+   $data_tail[2:0] = *i_en ? (>>1$data[3:1] & {3{~*i_cnt_done}}) : >>1$data_tail[2:0];
+
+   // W=4 mux inputs. Fixed index 6 == W+B-1 for W=4; $muxdata is 10 bits (2*W+B-1 for W=4).
+   $muxdata[9:0] = {>>1$data[6:0], >>1$data_tail};
+   // Right-shift extracts bits [pos+B:pos] into [B:0]; equivalent to [pos+:W].
+   // (TLV does not support [{expr}+:W] subscript syntax.)
+   // The shift yields 10 bits (muxdata's width); we only want the low W. An
+   // explicit (W)'(...) size cast tells the lint pass the truncation is
+   // intentional (no WIDTHTRUNC) without materializing a wider signal whose
+   // upper bits would then lint as UNUSEDSIGNAL.
+   // (Do not begin a comment line with the word "verilator" -- it is parsed as a
+   // lint pragma; see BADVLTPRAGMA.)
+   $muxout[B:0] = (W)'($muxdata >> {1'b0, $shift_amount});
+   $qq_w_eq_4[B:0] = *i_en ? $muxout : {W{1'b0}};
+
+   // W=1 next-state for data: separate enables for data[31:2] and data[1:0].
+   // Uses $q[0] (always 1 bit) so concatenation widths are valid for all W.
+   $data_w1[31:0] =
+      {*i_en ? {*i_init ? $q[0] : *i_sh_signed & >>1$data[31], >>1$data[31:3]} : >>1$data[31:2],
+       (*i_init ? (*i_cnt0 | *i_cnt1) : *i_en) ? {*i_init ? $q[0] : >>1$data[2], >>1$data[1]} : >>1$data[1:0]};
+
+   // W=4 next-state for data: single i_en gate, shift right by W, parameter-width fill.
+   $data_w4[31:0] =
+      *i_en ? {*i_init ? $q[B:0] : {W{*i_sh_signed & >>1$data[31]}}, >>1$data[31:W]} :
+      >>1$data;
+
+   // Main data register: ternary selects the W-appropriate next-state.
+   // Dead path is eliminated by synthesis/opt before FEV.
+   $data[31:0] = (W == 1) ? $data_w1 : $data_w4;
+
+   // Output selection.
+   $o_lsb[1:0] = (*MDU & *i_mdu_op) ? 2'b00 : ((W == 1) ? $lsb_w_eq_1 : >>1$lsb);
+   $o_q[B:0] = (W == 1) ? {{B{1'b0}}, $qq_w_eq_1} : $qq_w_eq_4;
+
+   // Bridge outputs to \SV ports.
+   *o_lsb = $o_lsb;
+   *o_q = $o_q;
+   *o_dbus_adr = {>>1$data[31:2], 2'b00};
+   *o_ext_rs1 = >>1$data;
 \SV
    endmodule

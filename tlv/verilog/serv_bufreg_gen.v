@@ -29,12 +29,63 @@ logic [B:0] L0_clr_lsb_a0;
 logic L0_cr_in_a0,
       L0_cr_in_a1;
 
+// For $data.
+logic [31:0] L0_data_a0,
+             L0_data_a1;
+
+// For $data_tail.
+logic [2:0] L0_data_tail_a0,
+            L0_data_tail_a1;
+
+// For $data_w1.
+logic [31:0] L0_data_w1_a0;
+
+// For $data_w4.
+logic [31:0] L0_data_w4_a0;
+
+// For $lsb.
+logic [1:0] L0_lsb_a0,
+            L0_lsb_a1;
+
+// For $lsb_w_eq_1.
+logic [1:0] L0_lsb_w_eq_1_a0;
+
+// For $muxdata.
+logic [9:0] L0_muxdata_a0;
+
+// For $muxout.
+logic [B:0] L0_muxout_a0;
+
+// For $o_lsb.
+logic [1:0] L0_o_lsb_a0;
+
+// For $o_q.
+logic [B:0] L0_o_q_a0;
+
 // For $q.
 logic [B:0] L0_q_a0;
+
+// For $qq_w_eq_1.
+logic L0_qq_w_eq_1_a0;
+
+// For $qq_w_eq_4.
+logic [B:0] L0_qq_w_eq_4_a0;
+
+// For $shift_amount.
+logic [2:0] L0_shift_amount_a0;
 
 
 
    // Staging of $cr_in.
    always_ff @(posedge clk) L0_cr_in_a1 <= L0_cr_in_a0;
+
+   // Staging of $data.
+   always_ff @(posedge clk) L0_data_a1[31:0] <= L0_data_a0[31:0];
+
+   // Staging of $data_tail.
+   always_ff @(posedge clk) L0_data_tail_a1[2:0] <= L0_data_tail_a0[2:0];
+
+   // Staging of $lsb.
+   always_ff @(posedge clk) L0_lsb_a1[1:0] <= L0_lsb_a0[1:0];
 
 

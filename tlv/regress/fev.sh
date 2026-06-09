@@ -65,16 +65,21 @@ fev_one() {
     design -stash gold
     read_verilog -sv -I $VDIR $GATE
     hierarchy -top $MOD -chparam W $W
-    proc; opt; rename $MOD gate
+    proc; opt; opt_clean -purge; rename $MOD gate
     design -stash gate
     design -copy-from gold -as gold gold
     design -copy-from gate -as gate gate
     equiv_make gold gate equiv
+    cd equiv
+    equiv_add -try \c_r_gold \L0_c_r_a0_gate
+    equiv_add -try \c_r_gold \L0_cr_in_a1_gate
+    cd ..
     prep -top equiv
-    techmap; opt
+    techmap; opt; opt_clean -purge
     equiv_struct
     equiv_simple
-    equiv_induct equiv
+    equiv_simple
+    equiv_induct -seq 32 equiv
     equiv_status -assert equiv
   " > "$log" 2>&1
   if [ $? -eq 0 ] && grep -q 'Equivalence successfully proven!' "$log"; then
