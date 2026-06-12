@@ -1,0 +1,693 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.58+89 (git sha1 75eff54b3, clang++ 18.1.8 -fPIC -O3)
+
+-- Running command `
+    read_verilog -sv /workspace/proj/serv_project/tlv/serv_bufreg_golden.v
+    hierarchy -top serv_bufreg -chparam W 4
+    proc; opt; rename serv_bufreg gold
+    design -stash gold
+    read_verilog -sv -I /workspace/proj/serv_project/tlv/verilog /workspace/proj/serv_project/tlv/verilog/serv_bufreg.v
+    hierarchy -top serv_bufreg -chparam W 4
+    proc; opt; opt_clean -purge; rename serv_bufreg gate
+    design -stash gate
+    design -copy-from gold -as gold gold
+    design -copy-from gate -as gate gate
+    equiv_make gold gate equiv
+    cd equiv
+    equiv_add -try \c_r_gold \L0_c_r_a0_gate
+    equiv_add -try \c_r_gold \L0_cr_in_a1_gate
+    cd ..
+    prep -top equiv
+    techmap; opt; opt_clean -purge
+    equiv_struct
+    equiv_simple
+    equiv_simple
+    equiv_induct -seq 32 equiv
+    equiv_status -assert equiv
+  ' --
+
+1. Executing Verilog-2005 frontend: /workspace/proj/serv_project/tlv/serv_bufreg_golden.v
+Parsing SystemVerilog input from `/workspace/proj/serv_project/tlv/serv_bufreg_golden.v' to AST representation.
+verilog frontend filename /workspace/proj/serv_project/tlv/serv_bufreg_golden.v
+Generating RTLIL representation for module `\serv_bufreg'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+Parameter \W = 4
+
+3. Executing AST frontend in derive mode using pre-parsed AST for module `\serv_bufreg'.
+Parameter \W = 4
+Generating RTLIL representation for module `$paramod\serv_bufreg\W=32'00000000000000000000000000000100'.
+
+3.1. Analyzing design hierarchy..
+Top module:  \serv_bufreg
+
+3.2. Analyzing design hierarchy..
+Top module:  \serv_bufreg
+Removing unused module `$paramod\serv_bufreg\W=32'00000000000000000000000000000100'.
+Removed 1 unused modules.
+
+4. Executing PROC pass (convert processes to netlists).
+
+4.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+4.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 2 assignments to connections.
+
+4.4. Executing PROC_INIT pass (extract init attributes).
+
+4.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~4 debug messages>
+
+4.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:54$26'.
+Creating decoders for process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:80$33'.
+     1/3: $0\genblk2.gen_lsb_w_4.data_tail[2:0]
+     2/3: $0\genblk2.gen_lsb_w_4.lsb[1:0]
+     3/3: $0\data[31:0]
+
+4.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+4.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\serv_bufreg.\c_r' using process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:54$26'.
+  created $dff cell `$procdff$51' with positive edge clock.
+Creating register for signal `\serv_bufreg.\data' using process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:80$33'.
+  created $dff cell `$procdff$52' with positive edge clock.
+Creating register for signal `\serv_bufreg.\genblk2.gen_lsb_w_4.lsb' using process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:80$33'.
+  created $dff cell `$procdff$53' with positive edge clock.
+Creating register for signal `\serv_bufreg.\genblk2.gen_lsb_w_4.data_tail' using process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:80$33'.
+  created $dff cell `$procdff$54' with positive edge clock.
+
+4.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `serv_bufreg.$proc$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:54$26'.
+Found and cleaned up 4 empty switches in `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:80$33'.
+Removing empty process `serv_bufreg.$proc$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:80$33'.
+Cleaned up 4 empty switches.
+
+4.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_bufreg.
+<suppressed ~3 debug messages>
+
+5. Executing OPT pass (performing simple optimizations).
+
+5.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_bufreg.
+<suppressed ~1 debug messages>
+
+5.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_bufreg'.
+Removed a total of 0 cells.
+
+5.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \serv_bufreg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~13 debug messages>
+
+5.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \serv_bufreg.
+Performed a total of 0 changes.
+
+5.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_bufreg'.
+Removed a total of 0 cells.
+
+5.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$53 ($dff) from module serv_bufreg (D = $add$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:52$25_Y [1:0], Q = \genblk2.gen_lsb_w_4.lsb).
+Adding EN signal on $procdff$54 ($dff) from module serv_bufreg (D = $and$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:86$37_Y, Q = \genblk2.gen_lsb_w_4.data_tail).
+Adding EN signal on $procdff$52 ($dff) from module serv_bufreg (D = { $ternary$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:84$35_Y \data [31:4] }, Q = \data).
+Setting constant 0-bit at position 1 on $procdff$51 ($dff) from module serv_bufreg.
+Setting constant 0-bit at position 2 on $procdff$51 ($dff) from module serv_bufreg.
+Setting constant 0-bit at position 3 on $procdff$51 ($dff) from module serv_bufreg.
+
+5.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_bufreg..
+Removed 5 unused cells and 21 unused wires.
+<suppressed ~7 debug messages>
+
+5.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_bufreg.
+
+5.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \serv_bufreg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~7 debug messages>
+
+5.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \serv_bufreg.
+Performed a total of 0 changes.
+
+5.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_bufreg'.
+Removed a total of 0 cells.
+
+5.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_bufreg..
+
+5.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_bufreg.
+
+5.16. Finished fast OPT passes. (There is nothing left to do.)
+Renaming module \serv_bufreg to \gold.
+
+6. Executing Verilog-2005 frontend: /workspace/proj/serv_project/tlv/verilog/serv_bufreg.v
+Parsing SystemVerilog input from `/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v' to AST representation.
+verilog frontend filename /workspace/proj/serv_project/tlv/verilog/serv_bufreg.v
+Generating RTLIL representation for module `\serv_bufreg'.
+Successfully finished Verilog frontend.
+
+7. Executing HIERARCHY pass (managing design hierarchy).
+Parameter \W = 4
+
+8. Executing AST frontend in derive mode using pre-parsed AST for module `\serv_bufreg'.
+Parameter \W = 4
+Generating RTLIL representation for module `$paramod\serv_bufreg\W=32'00000000000000000000000000000100'.
+
+8.1. Analyzing design hierarchy..
+Top module:  \serv_bufreg
+
+8.2. Analyzing design hierarchy..
+Top module:  \serv_bufreg
+Removing unused module `$paramod\serv_bufreg\W=32'00000000000000000000000000000100'.
+Removed 1 unused modules.
+
+9. Executing PROC pass (convert processes to netlists).
+
+9.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+9.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+9.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 4 assignments to connections.
+
+9.4. Executing PROC_INIT pass (extract init attributes).
+
+9.5. Executing PROC_ARST pass (detect async resets in processes).
+
+9.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+9.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:80$98'.
+Creating decoders for process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:83$99'.
+Creating decoders for process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:86$100'.
+Creating decoders for process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:89$101'.
+
+9.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+9.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\serv_bufreg.\L0_cr_in_a1' using process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:80$98'.
+  created $dff cell `$procdff$135' with positive edge clock.
+Creating register for signal `\serv_bufreg.\L0_data_a1' using process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:83$99'.
+  created $dff cell `$procdff$136' with positive edge clock.
+Creating register for signal `\serv_bufreg.\L0_data_tail_a1' using process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:86$100'.
+  created $dff cell `$procdff$137' with positive edge clock.
+Creating register for signal `\serv_bufreg.\L0_lsb_a1' using process `\serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:89$101'.
+  created $dff cell `$procdff$138' with positive edge clock.
+
+9.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+9.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:80$98'.
+Removing empty process `serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:83$99'.
+Removing empty process `serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:86$100'.
+Removing empty process `serv_bufreg.$proc$/workspace/proj/serv_project/tlv/verilog/serv_bufreg_gen.v:89$101'.
+Cleaned up 0 empty switches.
+
+9.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_bufreg.
+<suppressed ~3 debug messages>
+
+10. Executing OPT pass (performing simple optimizations).
+
+10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_bufreg.
+
+10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_bufreg'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \serv_bufreg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:90$125.
+    dead port 2/2 on $mux $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:90$125.
+    dead port 1/2 on $mux $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:90$126.
+    dead port 2/2 on $mux $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:90$126.
+    dead port 1/2 on $mux $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:89$128.
+    dead port 2/2 on $mux $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:89$128.
+    dead port 1/2 on $mux $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:89$129.
+    dead port 2/2 on $mux $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:89$129.
+Removed 8 multiplexer ports.
+<suppressed ~14 debug messages>
+
+10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \serv_bufreg.
+Performed a total of 0 changes.
+
+10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_bufreg'.
+Removed a total of 0 cells.
+
+10.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$137 ($dff) from module serv_bufreg (D = $and$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:71$119_Y, Q = \L0_data_tail_a1).
+Adding EN signal on $procdff$138 ($dff) from module serv_bufreg (D = \L0_carry_and_sum_a0 [1:0], Q = \L0_lsb_a1).
+Adding EN signal on $procdff$136 ($dff) from module serv_bufreg (D = { $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:94$131_Y \L0_data_a1 [31:4] }, Q = \L0_data_a1).
+
+10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_bufreg..
+Removed 7 unused cells and 29 unused wires.
+<suppressed ~14 debug messages>
+
+10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_bufreg.
+
+10.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+10.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \serv_bufreg..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~7 debug messages>
+
+10.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \serv_bufreg.
+Performed a total of 0 changes.
+
+10.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_bufreg'.
+Removed a total of 0 cells.
+
+10.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+10.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_bufreg..
+
+10.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_bufreg.
+
+10.16. Finished fast OPT passes. (There is nothing left to do.)
+
+11. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_bufreg..
+Removed 0 unused cells and 11 unused wires.
+<suppressed ~11 debug messages>
+Renaming module \serv_bufreg to \gate.
+
+12. Executing EQUIV_MAKE pass (creating equiv checking module).
+Presumably equivalent wires: i_clk_gold (\i_clk_gold), i_clk_gate (\i_clk_gate) -> i_clk
+Presumably equivalent wires: i_clr_lsb_gold (\i_clr_lsb_gold), i_clr_lsb_gate (\i_clr_lsb_gate) -> i_clr_lsb
+Presumably equivalent wires: i_cnt0_gold (\i_cnt0_gold), i_cnt0_gate (\i_cnt0_gate) -> i_cnt0
+Presumably equivalent wires: i_cnt1_gold (\i_cnt1_gold), i_cnt1_gate (\i_cnt1_gate) -> i_cnt1
+Presumably equivalent wires: i_cnt_done_gold (\i_cnt_done_gold), i_cnt_done_gate (\i_cnt_done_gate) -> i_cnt_done
+Presumably equivalent wires: i_en_gold (\i_en_gold), i_en_gate (\i_en_gate) -> i_en
+Presumably equivalent wires: i_imm_gold (\i_imm_gold), i_imm_gate (\i_imm_gate) -> i_imm
+Presumably equivalent wires: i_imm_en_gold (\i_imm_en_gold), i_imm_en_gate (\i_imm_en_gate) -> i_imm_en
+Presumably equivalent wires: i_init_gold (\i_init_gold), i_init_gate (\i_init_gate) -> i_init
+Presumably equivalent wires: i_mdu_op_gold (\i_mdu_op_gold), i_mdu_op_gate (\i_mdu_op_gate) -> i_mdu_op
+Presumably equivalent wires: i_right_shift_op_gold (\i_right_shift_op_gold), i_right_shift_op_gate (\i_right_shift_op_gate) -> i_right_shift_op
+Presumably equivalent wires: i_rs1_gold (\i_rs1_gold), i_rs1_gate (\i_rs1_gate) -> i_rs1
+Presumably equivalent wires: i_rs1_en_gold (\i_rs1_en_gold), i_rs1_en_gate (\i_rs1_en_gate) -> i_rs1_en
+Presumably equivalent wires: i_sh_signed_gold (\i_sh_signed_gold), i_sh_signed_gate (\i_sh_signed_gate) -> i_sh_signed
+Presumably equivalent wires: i_shamt_gold (\i_shamt_gold), i_shamt_gate (\i_shamt_gate) -> i_shamt
+Presumably equivalent wires: i_shift_op_gold (\i_shift_op_gold), i_shift_op_gate (\i_shift_op_gate) -> i_shift_op
+Presumably equivalent wires: o_dbus_adr_gold ({ \data_gold [31:2] 2'00 }), o_dbus_adr_gate ({ \o_ext_rs1_gate [31:2] 2'00 }) -> o_dbus_adr
+Presumably equivalent wires: o_ext_rs1_gold (\data_gold), o_ext_rs1_gate (\o_ext_rs1_gate) -> o_ext_rs1
+Presumably equivalent wires: o_lsb_gold (\genblk2.gen_lsb_w_4.lsb_gold), o_lsb_gate (\o_lsb_gate) -> o_lsb
+Presumably equivalent wires: o_q_gold (\o_q_gold), o_q_gate (\o_q_gate) -> o_q
+Changing input A of cell $and$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:71$119_gate ($and): \o_ext_rs1_gate [3:1] -> \o_ext_rs1 [3:1]
+Changing input B of cell $and$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:89$127_gate ($and): \o_ext_rs1_gate [31] -> \o_ext_rs1 [31]
+Changing input D of cell $auto$ff.cc:266:slice$141_gate ($dffe): { $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:94$131_Y_gate \o_ext_rs1_gate [31:4] } -> { $ternary$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:94$131_Y_gate \o_ext_rs1 [31:4] }
+Changing input A of cell $shr$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:83$121_gate ($shr): { \o_ext_rs1_gate [6:0] \L0_data_tail_a1_gate } -> { \o_ext_rs1 [6:0] \L0_data_tail_a1_gate }
+Changing input B of cell $and$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:84$34_gold ($and): \data_gold [31] -> \o_ext_rs1 [31]
+Changing input A of cell $and$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:86$37_gold ($and): \data_gold [3:1] -> \o_ext_rs1 [3:1]
+Changing input D of cell $auto$ff.cc:266:slice$59_gold ($dffe): { $ternary$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:84$35_Y_gold \data_gold [31:4] } -> { $ternary$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:84$35_Y_gold \o_ext_rs1 [31:4] }
+Changing input A of cell $shiftx$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:90$39_gold ($shiftx): { \data_gold [6:0] \genblk2.gen_lsb_w_4.data_tail_gold } -> { \o_ext_rs1 [6:0] \genblk2.gen_lsb_w_4.data_tail_gold }
+Warning: Error in gate signal: \L0_c_r_a0_gate
+
+13. Executing PREP pass.
+
+13.1. Executing HIERARCHY pass (managing design hierarchy).
+
+13.1.1. Analyzing design hierarchy..
+Top module:  \equiv
+
+13.1.2. Analyzing design hierarchy..
+Top module:  \equiv
+Removing unused module `\gate'.
+Removing unused module `\gold'.
+Removed 2 unused modules.
+
+13.2. Executing PROC pass (convert processes to netlists).
+
+13.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+13.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+13.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+13.2.4. Executing PROC_INIT pass (extract init attributes).
+
+13.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+13.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+13.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+13.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+13.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+13.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+13.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+13.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.3. Executing FUTURE pass.
+
+13.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+
+13.6. Executing CHECK pass (checking for obvious problems).
+Checking module equiv...
+Found and reported 0 problems.
+
+13.7. Executing OPT pass (performing simple optimizations).
+
+13.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+<suppressed ~132 debug messages>
+Removed a total of 44 cells.
+
+13.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~14 debug messages>
+
+13.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv.
+Performed a total of 0 changes.
+
+13.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+<suppressed ~9 debug messages>
+Removed a total of 3 cells.
+
+13.7.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+Removed 0 unused cells and 13 unused wires.
+<suppressed ~1 debug messages>
+
+13.7.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.7.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+13.7.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~9 debug messages>
+
+13.7.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv.
+Performed a total of 0 changes.
+
+13.7.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+Removed a total of 0 cells.
+
+13.7.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+
+13.7.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.7.14. Finished fast OPT passes. (There is nothing left to do.)
+
+13.8. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 4) from port B of cell equiv.$shr$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:83$121_gate ($shr).
+Removed top 6 bits (of 10) from port Y of cell equiv.$shr$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:83$121_gate ($shr).
+Removed top 3 bits (of 4) from port B of cell equiv.$add$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:52$25_gold ($add).
+Removed top 1 bits (of 3) from port A of cell equiv.$add$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:77$29_gold ($add).
+Removed top 1 bits (of 3) from port B of cell equiv.$add$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:77$29_gold ($add).
+Removed top 28 bits (of 32) from port B of cell equiv.$shiftx$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:90$39_gold ($shiftx).
+Removed top 3 bits (of 4) from port A of cell equiv.$not$/workspace/proj/serv_project/tlv/serv_bufreg_golden.v:52$22_gold ($not).
+Removed top 1 bits (of 5) from port A of cell equiv.$add$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:46$107_gate ($add).
+Removed top 1 bits (of 5) from port B of cell equiv.$add$/workspace/proj/serv_project/tlv/verilog/serv_bufreg.v:46$107_gate ($add).
+Removed top 3 bits (of 4) from wire equiv.L0_clr_lsb_a0_gate.
+Removed top 3 bits (of 4) from wire equiv.c_r_gold.
+
+13.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+13.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+13.11. Executing OPT pass (performing simple optimizations).
+
+13.11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+Removed a total of 0 cells.
+
+13.11.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+
+13.11.4. Finished fast OPT passes.
+
+13.12. Printing statistics.
+
+=== equiv ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       92 wires
+      405 wire bits
+       77 public wires
+      364 public wire bits
+       20 ports
+       94 port bits
+       70 cells
+        3   $add
+        8   $and
+        2   $dff
+        6   $dffe
+       40   $equiv
+        5   $mux
+        3   $not
+        1   $reduce_and
+        1   $shiftx
+        1   $shr
+
+13.13. Executing CHECK pass (checking for obvious problems).
+Checking module equiv...
+Found and reported 0 problems.
+
+14. Executing TECHMAP pass (map to technology primitives).
+
+14.1. Executing Verilog-2005 frontend: /opt/oss-cad-suite/lib/../share/yosys/techmap.v
+Parsing Verilog input from `/opt/oss-cad-suite/lib/../share/yosys/techmap.v' to AST representation.
+verilog frontend filename /opt/oss-cad-suite/lib/../share/yosys/techmap.v
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `\$__div_mod_u'.
+Generating RTLIL representation for module `\$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `\$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `\$connect'.
+Generating RTLIL representation for module `\$input_port'.
+Successfully finished Verilog frontend.
+
+14.2. Continuing TECHMAP pass.
+Using template $paramod$constmap:59e0c67407529ca5eb1b32fc4f6833be97d6a085$paramod$97e1dfa920308df3bd4141ab47464ec8d7086cbd\_90_shift_ops_shr_shl_sshl_sshr for cells of type $shr.
+Using extmapper simplemap for cells of type $dff.
+Using extmapper simplemap for cells of type $and.
+Using extmapper simplemap for cells of type $dffe.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=5:B_SIGNED=0:B_WIDTH=1:Y_WIDTH=5:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=5:B_SIGNED=0:B_WIDTH=1:Y_WIDTH=5:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=5:B_SIGNED=0:B_WIDTH=1:Y_WIDTH=5:394426c56d1a028ba8fdd5469b163e04011def47.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=2:B_SIGNED=0:B_WIDTH=2:Y_WIDTH=3:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=2:B_SIGNED=0:B_WIDTH=2:Y_WIDTH=3:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=2:B_SIGNED=0:B_WIDTH=2:Y_WIDTH=3:394426c56d1a028ba8fdd5469b163e04011def47.
+Using extmapper simplemap for cells of type $not.
+Using template $paramod$constmap:ffab8d301680d96a152bb06963e07dc227d3d871$paramod$348b2eea70bee686b1357df5ffc4c214d28864eb\_90_shift_shiftx for cells of type $shiftx.
+Using extmapper simplemap for cells of type $reduce_and.
+Running "alumacc" on wrapper $extern:wrap:$add:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=5:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $extern:wrap:$add:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=5:394426c56d1a028ba8fdd5469b163e04011def47 for cells of type $extern:wrap:$add:A_SIGNED=0:A_WIDTH=4:B_SIGNED=0:B_WIDTH=4:Y_WIDTH=5:394426c56d1a028ba8fdd5469b163e04011def47.
+Using template $paramod$b85fbb3374a1d9ba7ee4f4d6323c30f939df3ada\_90_alu for cells of type $alu.
+Using template $paramod$672a140277c71df8314410f22acc08d55222c3c7\_90_alu for cells of type $alu.
+Using template $paramod$649fc39eef2451024566705288528c8671211199\_90_alu for cells of type $alu.
+Using extmapper simplemap for cells of type $xor.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000101 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000101 for cells of type $lcu.
+Using extmapper simplemap for cells of type $pos.
+Using template $paramod\_90_fa\WIDTH=32'00000000000000000000000000000011 for cells of type $fa.
+Using template $paramod\_90_lcu_brent_kung\WIDTH=32'00000000000000000000000000000011 for cells of type $lcu.
+Using extmapper simplemap for cells of type $or.
+No more expansions possible.
+<suppressed ~879 debug messages>
+
+15. Executing OPT pass (performing simple optimizations).
+
+15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+<suppressed ~124 debug messages>
+
+15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+<suppressed ~195 debug messages>
+Removed a total of 65 cells.
+
+15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv.
+Performed a total of 0 changes.
+
+15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+Removed a total of 0 cells.
+
+15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+Removed 18 unused cells and 153 unused wires.
+<suppressed ~19 debug messages>
+
+15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+<suppressed ~1 debug messages>
+
+15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv.
+Performed a total of 0 changes.
+
+15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+Removed a total of 0 cells.
+
+15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+
+15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+15.16. Finished fast OPT passes. (There is nothing left to do.)
+
+16. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+Removed 0 unused cells and 44 unused wires.
+<suppressed ~44 debug messages>
+
+17. Executing EQUIV_STRUCT pass.
+Running equiv_struct on module equiv:
+  Starting iteration 1.
+    Nothing to merge.
+
+18. Executing EQUIV_SIMPLE pass.
+Found 1 unproven $equiv cells (1 groups) in equiv:
+  Trying to prove $equiv for \o_q [3]: success!
+Proved 1 previously unproven $equiv cells.
+
+19. Executing EQUIV_SIMPLE pass.
+Proved 0 previously unproven $equiv cells.
+
+20. Executing EQUIV_INDUCT pass.
+No selected unproven $equiv cells found in equiv.
+Proved 0 previously unproven $equiv cells.
+
+21. Executing EQUIV_STATUS pass.
+Found 40 $equiv cells in equiv:
+  Of those cells 40 are proven and 0 are unproven.
+  Equivalence successfully proven!
+
+Warnings: 1 unique messages, 1 total
+End of script. Logfile hash: 9207d5fdfd, CPU: user 0.13s system 0.01s, MEM: 19.84 MB peak
+Yosys 0.58+89 (git sha1 75eff54b3, clang++ 18.1.8 -fPIC -O3)
+Time spent: 23% 25x opt_expr (0 sec), 15% 15x opt_clean (0 sec), ...

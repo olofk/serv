@@ -1,0 +1,180 @@
+version: 0.2.1
+name: award-winning_serv_servant_1.4.0
+toplevel: servant_sim
+dependencies:
+  award-winning:serv:serv:1.4.0: []
+  award-winning:serv:servile:1.4.0:
+  - award-winning:serv:serv:1.4.0
+  award-winning:serv:servant:1.4.0:
+  - award-winning:serv:servile:1.4.0
+cores:
+  award-winning:serv:serv:1.4.0:
+    core_file: ../../../../../../serv.core
+    dependencies: []
+    license: ISC
+  award-winning:serv:servile:1.4.0:
+    core_file: ../../../../../../servile.core
+    dependencies:
+    - award-winning:serv:serv:1.4.0
+    license: ISC
+  award-winning:serv:servant:1.4.0:
+    core_file: ../../../../../../servant.core
+    dependencies:
+    - award-winning:serv:servile:1.4.0
+    license: ISC
+parameters:
+  RISCV_FORMAL:
+    datatype: bool
+    paramtype: vlogdefine
+  SERV_CLEAR_RAM:
+    datatype: bool
+    paramtype: vlogdefine
+  cps:
+    datatype: bool
+    paramtype: plusarg
+    description: Write simulated cycles per second to a text file named cps
+  firmware:
+    datatype: file
+    paramtype: plusarg
+    description: Preload RAM with a hex file at runtime (overrides memfile)
+    default: /workspace/proj/sw/hello_uart.hex
+  memsize:
+    datatype: int
+    paramtype: vlogparam
+    description: Memory size in bytes for RAM (default 8kiB)
+    default: 8192
+  signature:
+    datatype: file
+    paramtype: plusarg
+  timeout:
+    datatype: int
+    paramtype: plusarg
+  trace_pc:
+    datatype: bool
+    paramtype: plusarg
+  uart_baudrate:
+    datatype: int
+    paramtype: plusarg
+    description: Treat q output as an UART with the specified baudrate (0 or omitted
+      parameter disables UART decoding)
+    default: 57600
+  vcd:
+    datatype: bool
+    paramtype: plusarg
+  vcd_start:
+    datatype: int
+    paramtype: plusarg
+    description: Delay start of VCD dumping until the specified time
+  width:
+    datatype: int
+    paramtype: vlogparam
+    description: Interal datapath width (1=SERV, 4=QERV)
+  compressed:
+    datatype: int
+    paramtype: vlogparam
+    description: Enable/Disable the Compressed extension
+  align:
+    datatype: int
+    paramtype: vlogparam
+    description: Enable/Disable the Misaligned access of instruction
+  with_csr:
+    datatype: int
+    paramtype: vlogparam
+    description: Enable/Disable CSR support
+    default: 1
+filters: []
+flow_options:
+  tool: verilator
+  verilator_options:
+  - --trace
+  - +incdir+src/award-winning_serv_serv_1.4.0/rtl
+hooks: {}
+files:
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_bufreg.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_bufreg2.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_alu.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_csr.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_ctrl.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_decode.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_immdec.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_mem_if.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: user
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_mem_if_gen.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_rf_if.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_rf_ram_if.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_rf_ram.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_state.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_debug.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_top.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_rf_top.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_aligner.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_compdec.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servile_1.4.0/servile/servile_rf_mem_if.v
+  core: award-winning:serv:servile:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servile_1.4.0/servile/servile_mux.v
+  core: award-winning:serv:servile:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servile_1.4.0/servile/servile_arbiter.v
+  core: award-winning:serv:servile:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servile_1.4.0/servile/servile.v
+  core: award-winning:serv:servile:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servant_1.4.0/servant/servant_timer.v
+  core: award-winning:serv:servant:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servant_1.4.0/servant/servant_gpio.v
+  core: award-winning:serv:servant:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servant_1.4.0/servant/servant_mux.v
+  core: award-winning:serv:servant:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servant_1.4.0/servant/servant_ram.v
+  core: award-winning:serv:servant:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servant_1.4.0/servant/servant.v
+  core: award-winning:serv:servant:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_servant_1.4.0/bench/servant_sim.v
+  core: award-winning:serv:servant:1.4.0
+- file_type: cppSource
+  name: src/award-winning_serv_servant_1.4.0/bench/servant_tb.cpp
+  core: award-winning:serv:servant:1.4.0
+vpi: []

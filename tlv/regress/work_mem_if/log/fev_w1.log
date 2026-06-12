@@ -1,0 +1,606 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2025  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.58+89 (git sha1 75eff54b3, clang++ 18.1.8 -fPIC -O3)
+
+yosys>     read_verilog -sv /workspace/proj/rtl/serv_mem_if.v
+
+1. Executing Verilog-2005 frontend: /workspace/proj/rtl/serv_mem_if.v
+Parsing SystemVerilog input from `/workspace/proj/rtl/serv_mem_if.v' to AST representation.
+verilog frontend filename /workspace/proj/rtl/serv_mem_if.v
+Generating RTLIL representation for module `\serv_mem_if'.
+Successfully finished Verilog frontend.
+
+yosys>     hierarchy -top serv_mem_if -chparam W 1
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+Parameter \W = 1
+
+3. Executing AST frontend in derive mode using pre-parsed AST for module `\serv_mem_if'.
+Parameter \W = 1
+Generating RTLIL representation for module `$paramod\serv_mem_if\W=32'00000000000000000000000000000001'.
+
+3.1. Analyzing design hierarchy..
+Top module:  \serv_mem_if
+
+3.2. Analyzing design hierarchy..
+Top module:  \serv_mem_if
+Removing unused module `$paramod\serv_mem_if\W=32'00000000000000000000000000000001'.
+Removed 1 unused modules.
+
+yosys>     proc; opt; rename serv_mem_if gold
+
+4. Executing PROC pass (convert processes to netlists).
+
+4.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+4.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+4.4. Executing PROC_INIT pass (extract init attributes).
+
+4.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~1 debug messages>
+
+4.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\serv_mem_if.$proc$/workspace/proj/rtl/serv_mem_if.v:47$47'.
+     1/1: $0\signbit[0:0]
+
+4.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+4.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\serv_mem_if.\signbit' using process `\serv_mem_if.$proc$/workspace/proj/rtl/serv_mem_if.v:47$47'.
+  created $dff cell `$procdff$55' with positive edge clock.
+
+4.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 1 empty switch in `\serv_mem_if.$proc$/workspace/proj/rtl/serv_mem_if.v:47$47'.
+Removing empty process `serv_mem_if.$proc$/workspace/proj/rtl/serv_mem_if.v:47$47'.
+Cleaned up 1 empty switch.
+
+4.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_mem_if.
+<suppressed ~3 debug messages>
+
+5. Executing OPT pass (performing simple optimizations).
+
+5.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_mem_if.
+
+5.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_mem_if'.
+Removed a total of 0 cells.
+
+5.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \serv_mem_if..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~4 debug messages>
+
+5.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \serv_mem_if.
+Performed a total of 0 changes.
+
+5.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_mem_if'.
+Removed a total of 0 cells.
+
+5.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$55 ($dff) from module serv_mem_if (D = \i_bufreg2_q, Q = \signbit).
+
+5.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_mem_if..
+Removed 1 unused cells and 11 unused wires.
+<suppressed ~2 debug messages>
+
+5.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_mem_if.
+
+5.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \serv_mem_if..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+5.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \serv_mem_if.
+Performed a total of 0 changes.
+
+5.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_mem_if'.
+Removed a total of 0 cells.
+
+5.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+5.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_mem_if..
+
+5.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_mem_if.
+
+5.16. Finished fast OPT passes. (There is nothing left to do.)
+Renaming module \serv_mem_if to \gold.
+
+yosys>     design -stash gold
+
+yosys>     read_verilog -sv -I /workspace/proj/tlv/verilog /workspace/proj/tlv/veerilog/serv_mem_if.v
+
+6. Executing Verilog-2005 frontend: /workspace/proj/tlv/verilog/serv_mem_if.v
+Parsing SystemVerilog input from `/workspace/proj/tlv/verilog/serv_mem_if.v' to AST representation.
+verilog frontend filename /workspace/proj/tlv/verilog/serv_mem_if.v
+Generating RTLIL representation for module `\serv_mem_if'.
+Successfully finished Verilog frontend.
+
+yosys>     hierarchy -top serv_mem_if -chparam W 1
+
+7. Executing HIERARCHY pass (managing design hierarchy).
+Parameter \W = 1
+
+8. Executing AST frontend in derive mode using pre-parsed AST for module `\serv_mem_if'.
+Parameter \W = 1
+Generating RTLIL representation for module `$paramod\serv_mem_if\W=32'00000000000000000000000000000001'.
+
+8.1. Analyzing design hierarchy..
+Top module:  \serv_mem_if
+
+8.2. Analyzing design hierarchy..
+Top module:  \serv_mem_if
+Removing unused module `$paramod\serv_mem_if\W=32'00000000000000000000000000000001'.
+Removed 1 unused modules.
+
+yosys>     proc; opt; opt_clean -purge; rename serv_mem_if gate
+
+9. Executing PROC pass (convert processes to netlists).
+
+9.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+9.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+9.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 1 assignment to connection.
+
+9.4. Executing PROC_INIT pass (extract init attributes).
+
+9.5. Executing PROC_ARST pass (detect async resets in processes).
+
+9.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+9.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\serv_mem_if.$proc$/workspace/proj/tlv/verilog/serv_mem_if_gen.v:40$84'.
+
+9.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+9.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\serv_mem_if.\PIPE_signbit_a1' using process `\serv_mem_if.$proc$/workspace/proj/tlv/verilog/serv_mem_if_gen.v:40$84'.
+  created $dff cell `$procdff$111' with positive edge clock.
+
+9.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+9.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `serv_mem_if.$proc$/workspace/proj/tlv/verilog/serv_mem_if_gen.v:40$84'.
+Cleaned up 0 empty switches.
+
+9.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_mem_if.
+<suppressed ~3 debug messages>
+
+10. Executing OPT pass (performing simple optimizations).
+
+10.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_mem_if.
+
+10.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_mem_if'.
+Removed a total of 0 cells.
+
+10.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \serv_mem_if..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~4 debug messages>
+
+10.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \serv_mem_if.
+Performed a total of 0 changes.
+
+10.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_mem_if'.
+Removed a total of 0 cells.
+
+10.6. Executing OPT_DFF pass (perform DFF optimizations).
+Adding EN signal on $procdff$111 ($dff) from module serv_mem_if (D = \i_bufreg2_q, Q = \PIPE_signbit_a1).
+
+10.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_mem_if..
+Removed 1 unused cells and 11 unused wires.
+<suppressed ~3 debug messages>
+
+10.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_mem_if.
+
+10.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+10.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \serv_mem_if..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+10.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \serv_mem_if.
+Performed a total of 0 changes.
+
+10.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\serv_mem_if'.
+Removed a total of 0 cells.
+
+10.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+10.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_mem_if..
+
+10.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module serv_mem_if.
+
+10.16. Finished fast OPT passes. (There is nothing left to do.)
+
+11. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \serv_mem_if..
+Removed 0 unused cells and 4 unused wires.
+<suppressed ~4 debug messages>
+Renaming module \serv_mem_if to \gate.
+
+yosys>     design -stash gate
+
+yosys>     design -copy-from gold -as gold gold
+
+yosys>     design -copy-from gate -as gate gate
+
+yosys>     equiv_make gold gate equiv
+
+12. Executing EQUIV_MAKE pass (creating equiv checking module).
+Presumably equivalent wires: i_bufreg2_q_gold (\i_bufreg2_q_gold), i_bufreg2_q_gate (\i_bufreg2_q_gate) -> i_bufreg2_q
+Presumably equivalent wires: i_bytecnt_gold (\i_bytecnt_gold), i_bytecnt_gate (\i_bytecnt_gate) -> i_bytecnt
+Presumably equivalent wires: i_clk_gold (\i_clk_gold), i_clk_gate (\i_clk_gate) -> i_clk
+Presumably equivalent wires: i_half_gold (\i_half_gold), i_half_gate (\i_half_gate) -> i_half
+Presumably equivalent wires: i_lsb_gold (\i_lsb_gold), i_lsb_gate (\i_lsb_gate) -> i_lsb
+Presumably equivalent wires: i_mdu_op_gold (\i_mdu_op_gold), i_mdu_op_gate (\i_mdu_op_gate) -> i_mdu_op
+Presumably equivalent wires: i_signed_gold (\i_signed_gold), i_signed_gate (\i_signed_gate) -> i_signed
+Presumably equivalent wires: i_word_gold (\i_word_gold), i_word_gate (\i_word_gate) -> i_word
+Presumably equivalent wires: o_misalign_gold (\o_misalign_gold), o_misalign_gate (\o_misalign_gate) -> o_misalign
+Presumably equivalent wires: o_rd_gold (\o_rd_gold), o_rd_gate (\o_rd_gate) -> o_rd
+Presumably equivalent wires: o_wb_sel_gold (\o_wb_sel_gold), o_wb_sel_gate (\o_wb_sel_gate) -> o_wb_sel
+
+yosys>     cd equiv
+
+yosys [equiv]>     equiv_add -try \signbit_gold \PIPE_signbit_a1_gate
+
+yosys [equiv]>     cd ..
+
+yosys>     prep -top equiv
+
+13. Executing PREP pass.
+
+13.1. Executing HIERARCHY pass (managing design hierarchy).
+
+13.1.1. Analyzing design hierarchy..
+Top module:  \equiv
+
+13.1.2. Analyzing design hierarchy..
+Top module:  \equiv
+Removing unused module `\gate'.
+Removing unused module `\gold'.
+Removed 2 unused modules.
+
+13.2. Executing PROC pass (convert processes to netlists).
+
+13.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+13.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed a total of 0 dead cases.
+
+13.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 0 assignments to connections.
+
+13.2.4. Executing PROC_INIT pass (extract init attributes).
+
+13.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+13.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+
+13.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+
+13.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+
+13.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+
+13.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+13.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+13.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.3. Executing FUTURE pass.
+
+13.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+
+13.6. Executing CHECK pass (checking for obvious problems).
+Checking module equiv...
+Found and reported 0 problems.
+
+13.7. Executing OPT pass (performing simple optimizations).
+
+13.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+<suppressed ~69 debug messages>
+Removed a total of 23 cells.
+
+13.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~4 debug messages>
+
+13.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv.
+Performed a total of 0 changes.
+
+13.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+<suppressed ~3 debug messages>
+Removed a total of 1 cells.
+
+13.7.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+Removed 0 unused cells and 17 unused wires.
+<suppressed ~1 debug messages>
+
+13.7.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.7.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+13.7.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~2 debug messages>
+
+13.7.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv.
+Performed a total of 0 changes.
+
+13.7.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+Removed a total of 0 cells.
+
+13.7.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+
+13.7.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.7.14. Finished fast OPT passes. (There is nothing left to do.)
+
+13.8. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 2) from port B of cell equiv.$eq$/workspace/proj/rtl/serv_mem_if.v:44$41_gold ($eq).
+
+13.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+
+13.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+13.11. Executing OPT pass (performing simple optimizations).
+
+13.11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+13.11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+Removed a total of 0 cells.
+
+13.11.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+
+13.11.4. Finished fast OPT passes.
+
+13.12. Printing statistics.
+
+=== equiv ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       55 wires
+       70 wire bits
+       37 public wires
+       52 public wire bits
+       11 ports
+       16 port bits
+       33 cells
+        6   $and
+        2   $dffe
+        3   $eq
+        7   $equiv
+        4   $logic_not
+        1   $mux
+       10   $or
+
+13.13. Executing CHECK pass (checking for obvious problems).
+Checking module equiv...
+Found and reported 0 problems.
+
+yosys>     techmap; opt; equiv_struct; equiv_simple; equiv_simple; equiv_induct --seq 32 equiv
+
+14. Executing TECHMAP pass (map to technology primitives).
+
+14.1. Executing Verilog-2005 frontend: /opt/oss-cad-suite/lib/../share/yosys/techmap.v
+Parsing Verilog input from `/opt/oss-cad-suite/lib/../share/yosys/techmap.v' to AST representation.
+verilog frontend filename /opt/oss-cad-suite/lib/../share/yosys/techmap.v
+Generating RTLIL representation for module `\_90_simplemap_bool_ops'.
+Generating RTLIL representation for module `\_90_simplemap_reduce_ops'.
+Generating RTLIL representation for module `\_90_simplemap_logic_ops'.
+Generating RTLIL representation for module `\_90_simplemap_compare_ops'.
+Generating RTLIL representation for module `\_90_simplemap_various'.
+Generating RTLIL representation for module `\_90_simplemap_registers'.
+Generating RTLIL representation for module `\_90_shift_ops_shr_shl_sshl_sshr'.
+Generating RTLIL representation for module `\_90_shift_shiftx'.
+Generating RTLIL representation for module `\_90_fa'.
+Generating RTLIL representation for module `\_90_lcu_brent_kung'.
+Generating RTLIL representation for module `\_90_alu'.
+Generating RTLIL representation for module `\_90_macc'.
+Generating RTLIL representation for module `\_90_alumacc'.
+Generating RTLIL representation for module `\$__div_mod_u'.
+Generating RTLIL representation for module `\$__div_mod_trunc'.
+Generating RTLIL representation for module `\_90_div'.
+Generating RTLIL representation for module `\_90_mod'.
+Generating RTLIL representation for module `\$__div_mod_floor'.
+Generating RTLIL representation for module `\_90_divfloor'.
+Generating RTLIL representation for module `\_90_modfloor'.
+Generating RTLIL representation for module `\_90_pow'.
+Generating RTLIL representation for module `\_90_pmux'.
+Generating RTLIL representation for module `\_90_demux'.
+Generating RTLIL representation for module `\_90_lut'.
+Generating RTLIL representation for module `\$connect'.
+Generating RTLIL representation for module `\$input_port'.
+Successfully finished Verilog frontend.
+
+14.2. Continuing TECHMAP pass.
+Using extmapper simplemap for cells of type $mux.
+Using extmapper simplemap for cells of type $eq.
+Using extmapper simplemap for cells of type $or.
+Using extmapper simplemap for cells of type $logic_not.
+Using extmapper simplemap for cells of type $dffe.
+Using extmapper simplemap for cells of type $and.
+No more expansions possible.
+<suppressed ~103 debug messages>
+
+15. Executing OPT pass (performing simple optimizations).
+
+15.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+<suppressed ~6 debug messages>
+
+15.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+<suppressed ~12 debug messages>
+Removed a total of 4 cells.
+
+15.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+15.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv.
+Performed a total of 0 changes.
+
+15.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+Removed a total of 0 cells.
+
+15.6. Executing OPT_DFF pass (perform DFF optimizations).
+
+15.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+Removed 0 unused cells and 9 unused wires.
+<suppressed ~1 debug messages>
+
+15.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+15.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+15.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \equiv..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+
+15.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \equiv.
+Performed a total of 0 changes.
+
+15.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\equiv'.
+Removed a total of 0 cells.
+
+15.13. Executing OPT_DFF pass (perform DFF optimizations).
+
+15.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \equiv..
+
+15.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module equiv.
+
+15.16. Finished fast OPT passes. (There is nothing left to do.)
+
+16. Executing EQUIV_STRUCT pass.
+Running equiv_struct on module equiv:
+  Starting iteration 1.
+    Nothing to merge.
+
+17. Executing EQUIV_SIMPLE pass.
+Proved 0 previously unproven $equiv cells.
+
+18. Executing EQUIV_SIMPLE pass.
+Proved 0 previously unproven $equiv cells.
+
+19. Executing EQUIV_INDUCT pass.
+No selected unproven $equiv cells found in equiv.
+Proved 0 previously unproven $equiv cells.
+
+yosys>     equiv_status -assert equiv
+
+20. Executing EQUIV_STATUS pass.
+Found 7 $equiv cells in equiv:
+  Of those cells 7 are proven and 0 are unproven.
+  Equivalence successfully proven!
+
+yosys> exit
+
+End of script. Logfile hash: ca31fb5864, CPU: user 0.07s system 0.01s, MEM: 16.29 MB peak
+Yosys 0.58+89 (git sha1 75eff54b3, clang++ 18.1.8 -fPIC -O3)
+Time spent: 27% 17x opt_expr (0 sec), 22% 5x read_verilog (0 sec), ...

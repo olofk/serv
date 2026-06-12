@@ -1,0 +1,37 @@
+--Mdir .
+--cc
+--trace
++incdir+src/award-winning_serv_serv_1.4.0/rtl
+src/award-winning_serv_serv_1.4.0/rtl/serv_bufreg.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_bufreg2.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_alu.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_csr.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_ctrl.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_decode.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_immdec.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_mem_if.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_rf_if.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_rf_ram_if.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_rf_ram.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_state.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_debug.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_top.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_rf_top.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_aligner.v
+src/award-winning_serv_serv_1.4.0/rtl/serv_compdec.v
+src/award-winning_serv_servile_1.4.0/servile/servile_rf_mem_if.v
+src/award-winning_serv_servile_1.4.0/servile/servile_mux.v
+src/award-winning_serv_servile_1.4.0/servile/servile_arbiter.v
+src/award-winning_serv_servile_1.4.0/servile/servile.v
+src/award-winning_serv_servant_1.4.0/servant/servant_timer.v
+src/award-winning_serv_servant_1.4.0/servant/servant_gpio.v
+src/award-winning_serv_servant_1.4.0/servant/servant_mux.v
+src/award-winning_serv_servant_1.4.0/servant/servant_ram.v
+src/award-winning_serv_servant_1.4.0/servant/servant.v
+src/award-winning_serv_servant_1.4.0/bench/servant_sim.v
+--top-module servant_sim
+
+--exe
+src/award-winning_serv_servant_1.4.0/bench/servant_tb.cpp
+-Gmemsize=8192
+-Gwith_csr=1

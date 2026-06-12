@@ -1,0 +1,15 @@
+INFORM(0) (PROD_INFO):
+	SandPiper(TM) 1.14-2022/10/10-beta-Pro from Redwood EDA, LLC
+	(DEV) Run as: "java -jar sandpiper.jar --bestsv --noline --outdir=out --nopath -i serv_mem_if.tlv -o serv_mem_if.v
+	For help, including product info, run with -h.
+
+INFORM(0) (LICENSE):
+	Licensed to "Redwood EDA, LLC" as: Full Edition.
+
+INFORM(0) (FILES):
+	Reading "serv_mem_if.tlv"
+	to produce:
+		Translated HDL File: "out/serv_mem_if.v"
+		Generated HDL File: "out/serv_mem_if_gen.v"
+
+You have agreed to our Terms of Service here: https://makerchip.com/terms.

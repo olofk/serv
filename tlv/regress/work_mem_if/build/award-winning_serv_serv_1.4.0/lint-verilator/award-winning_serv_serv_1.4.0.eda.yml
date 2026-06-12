@@ -1,0 +1,84 @@
+version: 0.2.1
+name: award-winning_serv_serv_1.4.0
+toplevel: serv_rf_top
+dependencies:
+  award-winning:serv:serv:1.4.0: []
+cores:
+  award-winning:serv:serv:1.4.0:
+    core_file: ../../../../../../serv.core
+    dependencies: []
+    license: ISC
+parameters:
+  W:
+    datatype: int
+    paramtype: vlogparam
+    description: Internal datapath width (1=SERV, 4=QERV)
+    default: 4
+tool_options:
+  verilator:
+    mode: lint-only
+    verilator_options:
+    - -Wall
+    - +incdir+src/award-winning_serv_serv_1.4.0/rtl
+filters: []
+flow_options: {}
+hooks: {}
+files:
+- file_type: vlt
+  name: src/award-winning_serv_serv_1.4.0/data/verilator_waiver.vlt
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_bufreg.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_bufreg2.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_alu.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_csr.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_ctrl.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_decode.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_immdec.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_mem_if.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: user
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_mem_if_gen.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_rf_if.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_rf_ram_if.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_rf_ram.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_state.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_debug.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_top.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_rf_top.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_aligner.v
+  core: award-winning:serv:serv:1.4.0
+- file_type: verilogSource
+  name: src/award-winning_serv_serv_1.4.0/rtl/serv_compdec.v
+  core: award-winning:serv:serv:1.4.0
+vpi: []

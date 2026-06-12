@@ -1,0 +1,12 @@
+INFO: Preparing award-winning:serv:serv:1.4.0
+INFO: Preparing award-winning:serv:servile:1.4.0
+INFO: Preparing award-winning:serv:servant:1.4.0
+make: Nothing to be done for 'all'.
+Loading RAM from /workspace/proj/serv_project/sw/hello_uart.hex
+Hi, I'm Servant!
+Test complete
+- src/award-winning_serv_servile_1.4.0/servile/servile_mux.v:87: Verilog $finish
+Entering directory '/workspace/proj/serv_project/tlv/regress/work/build/award-winning_serv_servant_1.4.0/verilator_tb'
+Leaving directory '/workspace/proj/serv_project/tlv/regress/work/build/award-winning_serv_servant_1.4.0/verilator_tb'
+Entering directory '/workspace/proj/serv_project/tlv/regress/work/build/award-winning_serv_servant_1.4.0/verilator_tb'
+Leaving directory '/workspace/proj/serv_project/tlv/regress/work/build/award-winning_serv_servant_1.4.0/verilator_tb'

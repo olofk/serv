@@ -1,0 +1,7 @@
+INFO: Preparing award-winning:serv:serv:1.4.0
+INFO: Setting up project
+WARNING: This backend is deprecated and will eventually be removed. Please migrate to the flow API instead.  See https://edalize.readthedocs.io/en/latest/ref/migrations.html#migrating-from-the-tool-api-to-the-flow-api for more details.
+INFO: Building simulation model
+INFO: Running
+Entering directory '/workspace/proj/serv_project/tlv/regress/work/build/award-winning_serv_serv_1.4.0/lint-verilator'
+Leaving directory '/workspace/proj/serv_project/tlv/regress/work/build/award-winning_serv_serv_1.4.0/lint-verilator'
