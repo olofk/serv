@@ -19,7 +19,7 @@ filesets:
       - bench/uart_decoder.v
       - bench/servant_tb.v
     file_type : verilogSource
-    depend : [vlog_tb_utils]
+    depend : [fusesoc:utils:vlog_tb_utils]
 
   service:
     files:
