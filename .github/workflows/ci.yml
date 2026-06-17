@@ -17,6 +17,7 @@ jobs:
         sudo apt-get install -y python3-setuptools verilator
         pip3 install fusesoc
         pip3 install riscof
+        pip install -U pyparsing==3.2.0
         wget -qO- https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2023.07.05/riscv64-elf-ubuntu-22.04-gcc-nightly-2023.07.05-nightly.tar.gz | tar xz
         echo $GITHUB_WORKSPACE/riscv/bin >> $GITHUB_PATH
         
