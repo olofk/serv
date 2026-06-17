@@ -224,6 +224,13 @@ filesets:
       - servant/servive_clock_gen.v : {file_type : verilogSource}
       - servant/servive.v : {file_type : verilogSource}
 
+  tang_nano_20k:
+    files:
+      - servant/tang_nano_20k_clock_gen.v: { file_type: verilogSource }
+      - servant/servant_tang_nano_20k.v: { file_type: verilogSource }
+      - data/tang_nano_20k.sdc: { file_type: SDC }
+      - data/tang_nano_20k.cst: { file_type: CST }
+
   te0802:
     files:
       - servant/servant_te0802_clock_gen.v : {file_type : verilogSource}
@@ -618,6 +625,19 @@ targets:
         family : CycloneV
         device : 5CSXFC6D6F31C6
     toplevel: servive
+
+  tang_nano_20k:
+    # Use openFPGALoader to program the project.fs file to the FPGA
+    default_tool: gowin
+    description: Sipeed Tang Nano 20K Development board
+    filesets: [mem_files, soc, tang_nano_20k]
+    flow: gowin
+    flow_options:
+      tool: gowin
+      part: GW2AR-LV18QN88C8/I7
+      gowin_options:
+        - -multi_boot 1
+    toplevel: servant_tang_nano_20k
 
   te0802:
     default_tool: vivado
