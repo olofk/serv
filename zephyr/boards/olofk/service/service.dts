@@ -9,6 +9,9 @@
 #include <serv.dtsi>
 
 / {
+	model = "Service";
+	compatible = "service";
+
 	chosen {
 		zephyr,sram = &ram;
 		zephyr,console = &uart0;
@@ -20,7 +23,7 @@
 	};
 
 	soc {
-		compatible = "olofk,serv";
+		compatible = "olofk,servant";
 		#address-cells = <1>;
 		#size-cells = <1>;
 
@@ -29,5 +32,17 @@
 			compatible = "olofk,serial";
 		};
 	};
-};
 
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu0: cpu@0 {
+			compatible = "riscv";
+			reg = <0>;
+			device_type = "cpu";
+			riscv,isa-base = "rv32i";
+			riscv,isa-extensions = "i", "zicsr", "zifencei";
+		};
+	};
+};
