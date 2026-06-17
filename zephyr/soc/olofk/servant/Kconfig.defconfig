@@ -3,10 +3,6 @@
 
 if SOC_RISCV32_SERVANT
 
-config SOC
-	string
-	default "servant"
-
 config SYS_CLOCK_HW_CYCLES_PER_SEC
 	int
 	default 16000000
@@ -22,14 +18,6 @@ config NUM_IRQS
 config SERV_TIMER
 	bool
 	default y
-
-config ARCH_HAS_CUSTOM_CPU_IDLE
-        bool
-        default y
-
-config ARCH_HAS_CUSTOM_CPU_ATOMIC_IDLE
-        bool
-        default y
 
 config RISCV_SOC_EXCEPTION_FROM_IRQ
 	bool

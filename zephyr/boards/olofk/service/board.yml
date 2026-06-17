@@ -1,0 +1,6 @@
+board:
+  name: service
+  full_name: Servant
+  vendor: olofk
+  socs:
+    - name: servant
