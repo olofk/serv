@@ -13,7 +13,8 @@ module serv_compdec
    input  wire [31:0] i_instr,
    input  wire i_ack,
    output wire [31:0] o_instr,
-   output reg o_iscomp);
+   output reg o_iscomp,
+   output wire o_illegal);
 
   localparam OPCODE_LOAD     = 7'h03;
   localparam OPCODE_OP_IMM   = 7'h13;
@@ -28,6 +29,7 @@ module serv_compdec
   reg  illegal_instr;
 
   assign o_instr = illegal_instr ? i_instr : comp_instr;
+  assign o_illegal = illegal_instr & (i_instr[1:0] != 2'b11);
 
   always @(posedge i_clk) begin
     if(i_ack)
@@ -72,9 +74,6 @@ module serv_compdec
 
       // C1
 
-      // Register address checks for RV32E are performed in the regular instruction decoder.
-      // If this check fails, an illegal instruction exception is triggered and the controller
-      // writes the actual faulting instruction to mtval.
       2'b01: begin
         case (i_instr[15:13])
           3'b000: begin
@@ -171,9 +170,6 @@ module serv_compdec
 
       // C2
 
-      // Register address checks for RV32E are performed in the regular instruction decoder.
-      // If this check fails, an illegal instruction exception is triggered and the controller
-      // writes the actual faulting instruction to mtval.
       2'b10: begin
         case (i_instr[15:14])
           2'b00: begin

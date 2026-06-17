@@ -54,6 +54,8 @@ module serv_state
    output wire 	     o_mdu_valid,
    //Extension
    input wire 	     i_mdu_ready,
+   //Illegal instruction
+   input wire 	     i_illegal,
    //External
    output wire 	     o_dbus_cyc,
    input wire 	     i_dbus_ack,
@@ -221,7 +223,7 @@ module serv_state
       end
    endgenerate
 
-   assign o_ctrl_trap = WITH_CSR & (i_e_op | i_new_irq | misalign_trap_sync);
+   assign o_ctrl_trap = WITH_CSR & (i_e_op | i_illegal | i_new_irq | misalign_trap_sync);
 
    generate
       if (WITH_CSR) begin : gen_csr

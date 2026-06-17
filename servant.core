@@ -258,7 +258,7 @@ targets:
     default_tool: vivado
     description: AC701 Evaluation Kit
     filesets : [mem_files, soc, ac701]
-    parameters : [memfile, memsize, frequency=32]
+    parameters : [memfile, memsize, frequency=32, with_rv32e]
     tools:
       vivado: {part : xc7a200t-fbg676-2}
     toplevel : servant_ac701
@@ -267,7 +267,7 @@ targets:
     default_tool: vivado
     description: Open-hardware Alchitry AU FPGA board
     filesets : [mem_files, soc, alchitry_au]
-    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET]
+    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET, with_rv32e]
     tools:
       vivado: {part : xc7a35tftg256-1}
     toplevel : servix
@@ -277,7 +277,7 @@ targets:
     description: Open-hardware iCE40HX4K FPGA board
     filesets : [mem_files, soc, service, alhambra]
     generate: [ice40pll: {freq_in : 12, freq_out : 32}]
-    parameters : [memfile, memsize, PLL=ICE40_CORE]
+    parameters : [memfile, memsize, PLL=ICE40_CORE, with_rv32e]
     tools:
       icestorm:
         nextpnr_options : [--hx8k, --package, "tq144:4k", --freq, 32]
@@ -288,7 +288,7 @@ targets:
     default_tool: vivado
     description: Digilent Arty A7-35
     filesets : [mem_files, soc, arty_a7_35t]
-    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET]
+    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET, with_rv32e]
     tools:
       vivado: {part : xc7a35ticsg324-1L}
     toplevel : servix
@@ -297,7 +297,7 @@ targets:
     default_tool: vivado
     description: Digilent Arty S7-50
     filesets : [mem_files, soc, arty_s7_50t]
-    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET]
+    parameters : [memfile, memsize, frequency=16, "mdu? (MDU=1)", WITH_RESET, with_rv32e]
     tools:
       vivado: {part : xc7s50csga324-1}
     toplevel : servix
@@ -306,7 +306,7 @@ targets:
     default_tool : ise
     description : XILINX Spartan-6 XC6SLX9 FPGA Development Board
     filesets : [mem_files, soc, ax309]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       ise:
         family  : Spartan6
@@ -319,7 +319,7 @@ targets:
     default_tool : quartus
     description : Chameleon96 (Arrow 96 CV SoC Board)
     filesets : [mem_files, soc, chameleon96]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       quartus:
         family : Cyclone V
@@ -333,14 +333,14 @@ targets:
     flow: vivado
     flow_options:
       part : xc7a35tcpg236-1
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     toplevel : servant_cmod_a7
 
   cyc1000:
     default_tool: quartus
     description: cyc1000 FPGA board
     filesets : [mem_files, soc, cyc1000]
-    parameters : [memfile, memsize=32768]
+    parameters : [memfile, memsize=32768, with_rv32e]
     tools:
       quartus:
         family : Cyclone 10 LP
@@ -351,7 +351,7 @@ targets:
     default_tool : quartus
     description: Terasic DE0 Nano
     filesets : [mem_files, soc, de0_nano]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       quartus:
         family : Cyclone IV E
@@ -362,7 +362,7 @@ targets:
     default_tool: quartus
     description: Terasic DE10 Nano Kit
     filesets : [mem_files, soc, de10_nano]
-    parameters : [memfile, memsize=32768]
+    parameters : [memfile, memsize=32768, with_rv32e]
     tools:
       quartus:
         family : Cyclone V
@@ -374,7 +374,7 @@ targets:
     default_tool : quartus
     description: DECA development kit by Arrow / Terasic
     filesets : [mem_files, soc, deca]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       quartus:
         family : MAX 10
@@ -385,7 +385,7 @@ targets:
     default_tool: vivado
     description: EBAZ4205 'Development' Board
     filesets : [mem_files, soc, ebaz4205]
-    parameters : [memfile, memsize, frequency=16]
+    parameters : [memfile, memsize, frequency=16, with_rv32e]
     tools:
       vivado: {part : xc7z010clg400-1}
     toplevel : servix_ebaz4205
@@ -394,7 +394,7 @@ targets:
     default_tool: trellis
     description : ECP5 evaluation board
     filesets : [mem_files, soc, ecp5_evn]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       trellis:
         nextpnr_options : [--package, CABGA381, --um5g-85k]
@@ -415,7 +415,7 @@ targets:
     description: 1Bit Squared iCEBreaker
     filesets : [mem_files, soc, service, icebreaker]
     generate: [ice40pll : {freq_out : 16}]
-    parameters : [memfile, memsize, PLL=ICE40_PAD]
+    parameters : [memfile, memsize, PLL=ICE40_PAD, with_rv32e]
     tools:
       icestorm:
         nextpnr_options: [--up5k, --freq, 16]
@@ -427,7 +427,7 @@ targets:
     description: Lattice iCEstick
     filesets : [mem_files, soc, service, icestick]
     generate: [ice40pll: {freq_in : 12, freq_out : 32}]
-    parameters : [memfile=blinky.hex, memsize=7168, PLL=ICE40_CORE]
+    parameters : [memfile=blinky.hex, memsize=7168, PLL=ICE40_CORE, with_rv32e]
     tools:
       icestorm:
         nextpnr_options : [--hx1k, --package, tq144, --freq, 32]
@@ -439,7 +439,7 @@ targets:
     description : iCE40UP5K Development Board by MuseLab
     filesets : [mem_files, soc, service, icesugar]
     generate: [ice40pll : {freq_in : 12, freq_out : 32}]
-    parameters : [memfile, memsize, PLL=ICE40_PAD]
+    parameters : [memfile, memsize, PLL=ICE40_PAD, with_rv32e]
     tools:
       icestorm:
         nextpnr_options: [--up5k, --package, sg48, --freq, 32]
@@ -450,7 +450,7 @@ targets:
     default_tool : icestorm
     description : iCE40LP1K Development Board by MuseLab
     filesets : [mem_files, soc, icesugar_nano]
-    parameters : [memfile=blinky.hex, memsize=7168]
+    parameters : [memfile=blinky.hex, memsize=7168, with_rv32e]
     tools:
       icestorm:
         nextpnr_options: [--lp1k, --package, cm36, --freq, 12]
@@ -462,7 +462,7 @@ targets:
     description: ICE-V Wireless
     filesets : [mem_files, soc, service, icev_wireless]
     generate: [ice40pll : {freq_out : 16}]
-    parameters : [memfile, memsize, PLL=ICE40_PAD]
+    parameters : [memfile, memsize, PLL=ICE40_PAD, with_rv32e]
     tools:
       icestorm:
         nextpnr_options: [--up5k, --freq, 16]
@@ -473,7 +473,7 @@ targets:
     default_tool: gatemate
     description: CologneChip GateMate FPGA Module
     filesets : [mem_files, soc, gmm7550]
-    parameters : [memfile=blinky.hex, memsize=8192]
+    parameters : [memfile=blinky.hex, memsize=8192, with_rv32e]
     toplevel : servant_gmm7550
     flow: gatemate
     flow_options:
@@ -485,14 +485,14 @@ targets:
     flow: lint
     flow_options:
       tool : verilator
-    parameters : [width]
+    parameters : [width, with_rv32e]
     toplevel : servant
 
   lx9_microboard:
     default_tool: ise
     description : LX9 Microboard
     filesets : [mem_files, soc, lx9_microboard]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       ise:
         family  : Spartan6
@@ -505,7 +505,7 @@ targets:
     default_tool: icestorm
     description : Machdyne Kolibri FPGA Dongle
     filesets : [mem_files, soc, machdyne_kolibri]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       icestorm:
         nextpnr_options : [--hx4k, --package, bg121, --freq, 48]
@@ -518,7 +518,7 @@ targets:
     hooks:
       post_run: [jbc]
     filesets : [mem_files, soc, max10_10m08evk]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       quartus:
         family : MAX 10
@@ -529,7 +529,7 @@ targets:
     default_tool: ise
     description: Digilent Nexys 2-500
     filesets : [mem_files, soc, nexys_2]
-    parameters : [memfile, memsize, compressed]
+    parameters : [memfile, memsize, compressed, with_rv32e]
     tools:
       ise:
         family  : Spartan3E
@@ -542,7 +542,7 @@ targets:
     default_tool: ise
     description: Digilent Nexys 2-1200
     filesets : [mem_files, soc, nexys_2]
-    parameters : [memfile, memsize, compressed]
+    parameters : [memfile, memsize, compressed, with_rv32e]
     tools:
       ise:
         family  : Spartan3E
@@ -557,14 +557,14 @@ targets:
     flow: vivado
     flow_options:
       part : xc7a100tcsg324-1
-    parameters : [memfile, memsize, frequency=32]
+    parameters : [memfile, memsize, frequency=32, with_rv32e]
     toplevel : servix
 
   orangecrab_r0.2:
     default_tool: trellis
     description : OrangeCrab R0.2
     filesets : [mem_files, soc, orangecrab]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       trellis:
         nextpnr_options : [--package, CSFBGA285, --25k]
@@ -574,7 +574,7 @@ targets:
     default_tool: ise
     description : Saanlima pipistrello
     filesets : [mem_files, soc, pipistrello]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       ise:
         family  : Spartan6
@@ -587,7 +587,7 @@ targets:
     default_tool: libero
     description : Microsemi Polarfire Splash Kit
     filesets : [mem_files, soc, polarfire_splashkit]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       libero:
         family : PolarFire
@@ -606,13 +606,15 @@ targets:
       - SERV_CLEAR_RAM=true
       - firmware
       - memsize
+      - with_rv32e
+      - compressed
     toplevel : servant_tb
 
   sockit:
     default_tool : quartus
     description: SoCKit development kit by Arrow / Terasic
     filesets : [mem_files, soc, sockit]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       quartus:
         family : CycloneV
@@ -623,7 +625,7 @@ targets:
     default_tool: vivado
     description : Trenz Electronic TE0802
     filesets : [mem_files, soc, te0802]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       vivado: {part : xczu2cg-sbva484-1-e}
     toplevel : servant_te0802
@@ -635,14 +637,14 @@ targets:
     flow_options:
       nextpnr_options : [--lp8k, --package, cm81, --freq, '32']
     generate: [ice40pll: {freq_in : 16, freq_out : 32}]
-    parameters : [memfile, memsize, PLL=ICE40_CORE]
+    parameters : [memfile, memsize, PLL=ICE40_CORE, with_rv32e]
     toplevel : service
 
   ulx3s_85:
     default_tool: diamond
     description : ULX3S 85k version
     filesets : [mem_files, soc, ulx3s]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       diamond:
         part : LFE5U-85F-6BG381C
@@ -654,7 +656,7 @@ targets:
     default_tool : icestorm
     description: Upduino2
     filesets : [mem_files, soc, upduino2]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       icestorm:
         nextpnr_options: [--package, sg48, --up5k, --freq, 24]
@@ -674,6 +676,7 @@ targets:
       - cps
       - firmware
       - memsize
+      - with_rv32e
       - signature
       - timeout
       - trace_pc
@@ -684,13 +687,14 @@ targets:
       - compressed
       - align
       - with_csr=1
+      - with_rv32e
     toplevel : servant_sim
 
   zcu106:
     default_tool: vivado
     description : Zynq UltraScale+ MPSoC ZCU106 Evaluation Kit
     filesets : [mem_files, soc, zcu106]
-    parameters : [memfile, memsize]
+    parameters : [memfile, memsize, with_rv32e]
     tools:
       vivado: {part : xczu7ev-ffvc1156-2-e}
     toplevel : servus
@@ -786,6 +790,11 @@ parameters:
     description : Enable/Disable CSR support
     paramtype   : vlogparam
 
+  with_rv32e:
+    datatype    : int
+    description : Use RV32E (16 GPRs) instead of RV32I (32 GPRs)
+    paramtype   : vlogparam
+
   WITH_RESET:
     datatype    : bool
     default     : true
@@ -799,4 +808,3 @@ generate:
 scripts:
   jbc:
     cmd : [quartus_jbcc, "-n", servant_1_2_1_pof.jam, servant_1_2_1_pof.jbc]
-

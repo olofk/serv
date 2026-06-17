@@ -1,0 +1,14 @@
+sw/*.elf
+sw/*.bin
+build/
+riscof_work/
+servant_test_rv32e/
+fusesoc.conf
+fusesoc_libraries/
+riscv-arch-test/
+verif/fusesoc.conf
+verif/fusesoc_libraries/
+verif/riscof_work/
+verif/bin/sail-riscv/
+**/__pycache__/
+*.new
