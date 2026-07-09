@@ -69,7 +69,7 @@ module servile_rf_mem_if
 	 bsel <= 2'd0;
 	 o_wb_ack <= 1'b0;
       end
-      regzero <= &i_raddr[rf_depth-1:2];
+      regzero <= !(|i_raddr[rf_depth-1:2]);
    end
 
    assign o_rdata = regzero ? 8'd0 : i_sram_rdata;
