@@ -1,0 +1,19 @@
+// Sipeed Tang Nano 9K, GW1NR-LV9QN88PC6/I5
+// Physical constraints for the Servant SoC port.
+//
+// Note on IO_TYPE: pins 15 and 16 (LED4, LED5) are in Bank 3, which is locked
+// to 1.8V by the on-chip PSRAM. Declaring anything there as LVCMOS33 fails
+// with CT1136. Only LED0 on pin 10 is used here, which avoids that bank
+// entirely. Following the Sipeed LED example, no IO_TYPE is forced on the LED.
+
+IO_LOC  "i_clk" 52;
+IO_PORT "i_clk" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+
+IO_LOC  "i_rst_n" 4;
+IO_PORT "i_rst_n" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+
+IO_LOC  "o_uart_tx" 17;
+IO_PORT "o_uart_tx" IO_TYPE=LVCMOS33 PULL_MODE=UP DRIVE=8;
+
+IO_LOC  "o_led" 10;
+IO_PORT "o_led" PULL_MODE=UP DRIVE=8;

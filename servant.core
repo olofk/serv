@@ -230,6 +230,11 @@ filesets:
       - servant/servant_te0802.v : {file_type : verilogSource}
       - data/te0802.xdc : {file_type : xdc}
 
+  tangnano9k:
+    files:
+      - servant/servant_tangnano9k.v : {file_type : verilogSource}
+      - data/tangnano9k.cst : {file_type : CST}
+
   tinyfpga_bx: {files: [data/tinyfpga_bx.pcf : {file_type : PCF}]}
 
   ulx3s:
@@ -627,6 +632,16 @@ targets:
     tools:
       vivado: {part : xczu2cg-sbva484-1-e}
     toplevel : servant_te0802
+
+  tangnano9k:
+    description: Sipeed Tang Nano 9K
+    filesets : [mem_files, soc, tangnano9k]
+    flow: gowin
+    flow_options:
+      part : GW1NR-LV9QN88PC6/I5
+      part_version : C
+    parameters : [memfile=blinky.hex, memsize]
+    toplevel : servant_tangnano9k
 
   tinyfpga_bx:
     description: TinyFPGA BX
