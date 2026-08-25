@@ -254,6 +254,28 @@ blinky.hex change A10 to V16 (led[0]) in data/pipistrello.ucf).
 
     fusesoc run --target=pipistrello servant
 
+Sipeed Tang Nano 9K
+^^^^^^^^^^^^^^^^^^^
+
+Pin 17 is used for UART output and pin 10 for LED0, both driven by the q
+output. Pin 4 (button S1) is reset.
+
+The board oscillator is 27 MHz and the core runs directly off it, with no PLL.
+Since the UART is bitbanged, this scales the line rate along with the clock:
+115200 * 27/32 = 97200 baud. Set the terminal accordingly.
+
+Exactly 32 MHz cannot be reached from 27 MHz, as 32/27 is already in lowest
+terms and the resulting divider would put the PLL phase detector at 1 MHz
+against a 3 MHz minimum. The closest legal ratio is 6/5, giving 32.4 MHz and
+116640 baud.
+
+Note that pins 15 and 16 are in an I/O bank that the on-chip PSRAM locks to
+1.8 V, so they cannot be constrained as LVCMOS33. Pin 4 is in the same bank
+and its constraint therefore carries no IO_TYPE.
+
+    fusesoc run --target=tangnano9k servant
+    openFPGALoader -b tangnano9k build/servant_1.4.0/tangnano9k-gowin/impl/pnr/servant_1.4.0.fs
+
 SoCKit development kit
 ^^^^^^^^^^^^^^^^^^^^^^
 
