@@ -98,11 +98,20 @@ module serv_ctrl
    assign pc_plus_offset_cy_r_w[0] = pc_plus_offset_cy_r;
    assign pc_plus_4_cy_r_w[0] = pc_plus_4_cy_r;
 
-   initial if (RESET_STRATEGY == "NONE") o_ibus_adr = RESET_PC;
+   initial if (RESET_STRATEGY == "NONE") begin
+      o_ibus_adr = RESET_PC;
+      pc_plus_4_cy_r = 1'b0;
+      pc_plus_offset_cy_r = 1'b0;
+   end
 
    always @(posedge clk) begin
-      pc_plus_4_cy_r <= i_pc_en & pc_plus_4_cy;
-      pc_plus_offset_cy_r <= i_pc_en & pc_plus_offset_cy;
+      if (RESET_STRATEGY != "NONE" && i_rst) begin
+         pc_plus_4_cy_r <= 1'b0;
+         pc_plus_offset_cy_r <= 1'b0;
+      end else begin
+         pc_plus_4_cy_r <= i_pc_en & pc_plus_4_cy;
+         pc_plus_offset_cy_r <= i_pc_en & pc_plus_offset_cy;
+      end
 
       if (RESET_STRATEGY == "NONE") begin
 	 if (i_pc_en)
