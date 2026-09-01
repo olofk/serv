@@ -167,6 +167,29 @@ This will synthesize for the default Vivado part. To synthesise for a specific d
 
     fusesoc run --tool=vivado serv --pnr=none --part=xc7a100tcsg324-1
 
+
+## Parameters
+
+SERV is highly configurable through parameters. One important parameter is the processing width parameter `W`.
+
+### W Parameter (Processing Width)
+
+The `W` parameter controls the processing width of the SERV CPU.
+
+** Important:** Currently, only `W=1` (bit-serial operation) is fully supported and tested.
+
+**Quick Summary:**
+-  `W=1` - Fully supported (default, recommended for all implementations)
+-  `W>1` - Not currently supported (infrastructure exists but incomplete)
+
+For detailed information about the W parameter, including testing results, known issues, resource usage comparisons, and future multi-bit support plans, please see:
+
+** [docs/W_PARAMETER.md](docs/W_PARAMETER.md)**
+
+**Reference Implementation:**  
+For a working 4-bit version, see [qerv](https://github.com/olofk/qerv) which contains fixes for wider processing widths.
+
+
 ## Zephyr support
 
 SERV, or rather the Servant SoC, can run the [Zephyr RTOS](https://www.zephyrproject.org). The Servant-specific drivers and BSP is located in the zephyr subdirectory of the SERV repository. In order to use Zephyr on Servant, a project directory structure must be set up that allows Zephyr to load the Servant-specific files as a module.
