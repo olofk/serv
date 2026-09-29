@@ -37,6 +37,7 @@ module serv_csr
    input wire [1:0] i_csr_source,
    input wire 	    i_mret,
    input wire 	    i_csr_d_sel,
+   input wire 	    i_illegal,
    //Data
    input wire 	[B:0]    i_rf_csr_out,
    output wire 	[B:0]    o_csr_in,
@@ -147,10 +148,15 @@ module serv_csr
        ctrl => 0000 (jump=0)
        */
       if (i_mcause_en & i_en & i_cnt0to3 | (i_trap & i_cnt_done)) begin
-	 mcause3_0[3] <= (i_e_op & !i_ebreak) | (!i_trap & csr_in[B]);
-	 mcause3_0[2] <= o_new_irq | i_mem_op | (!i_trap & ((W == 1) ? mcause3_0[3] : csr_in[(W == 1) ? 0 : 2]));
-	 mcause3_0[1] <= o_new_irq | i_e_op | (i_mem_op & i_mem_cmd) | (!i_trap & ((W == 1) ? mcause3_0[2] : csr_in[(W == 1) ? 0 : 1]));
-	 mcause3_0[0] <= o_new_irq | i_e_op | (!i_trap & ((W == 1) ? mcause3_0[1] : csr_in[0]));
+	 if (i_illegal & !o_new_irq) begin
+	    // Illegal instruction exception = 2
+	    mcause3_0 <= 4'b0010;
+	 end else begin
+	    mcause3_0[3] <= (i_e_op & !i_ebreak) | (!i_trap & csr_in[B]);
+	    mcause3_0[2] <= o_new_irq | i_mem_op | (!i_trap & ((W == 1) ? mcause3_0[3] : csr_in[(W == 1) ? 0 : 2]));
+	    mcause3_0[1] <= o_new_irq | i_e_op | (i_mem_op & i_mem_cmd) | (!i_trap & ((W == 1) ? mcause3_0[2] : csr_in[(W == 1) ? 0 : 1]));
+	    mcause3_0[0] <= o_new_irq | i_e_op | (!i_trap & ((W == 1) ? mcause3_0[1] : csr_in[0]));
+	 end
       end
       if (i_mcause_en & i_cnt_done | i_trap)
 	mcause31 <= i_trap ? o_new_irq : csr_in[B];

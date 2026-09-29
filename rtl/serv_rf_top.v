@@ -35,9 +35,12 @@ module serv_rf_top
     parameter RESET_STRATEGY = "MINI",
     parameter [0:0] DEBUG = 1'b0,
     parameter WITH_CSR = 1,
+    parameter WITH_RV32E = 0, // valid values: 0 (RV32I) or 1 (RV32E)
     parameter W        = 1,
     parameter RF_WIDTH = W * 2,
-	parameter RF_L2D   = $clog2((32+(WITH_CSR*4))*32/RF_WIDTH))
+	// Note: RF_L2D cannot use the GPR_REGS localparam because parameter
+	// defaults cannot reference localparams. Keep in sync with GPR_REGS below.
+	parameter RF_L2D   = $clog2((((|WITH_RV32E) ? 16 : 32)+(WITH_CSR*4))*32/RF_WIDTH))
   (
    input wire 	      clk,
    input wire 	      i_rst,
@@ -87,17 +90,18 @@ module serv_rf_top
    output wire        o_mdu_valid);
 
    localparam CSR_REGS = WITH_CSR*4;
+   localparam GPR_REGS = (|WITH_RV32E) ? 16 : 32;
 
    wire 	      rf_wreq;
    wire 	      rf_rreq;
-   wire [4+WITH_CSR:0] wreg0;
-   wire [4+WITH_CSR:0] wreg1;
+   wire [4+WITH_CSR-WITH_RV32E:0] wreg0;
+   wire [4+WITH_CSR-WITH_RV32E:0] wreg1;
    wire 	      wen0;
    wire 	      wen1;
    wire [W-1:0]	      wdata0;
    wire [W-1:0]	      wdata1;
-   wire [4+WITH_CSR:0] rreg0;
-   wire [4+WITH_CSR:0] rreg1;
+   wire [4+WITH_CSR-WITH_RV32E:0] rreg0;
+   wire [4+WITH_CSR-WITH_RV32E:0] rreg1;
    wire 	      rf_ready;
    wire [W-1:0]	      rdata0;
    wire [W-1:0]	      rdata1;
@@ -113,6 +117,7 @@ module serv_rf_top
      #(.width    (RF_WIDTH),
        .reset_strategy (RESET_STRATEGY),
        .csr_regs (CSR_REGS),
+       .gpr_regs (GPR_REGS),
        .W(W))
    rf_ram_if
      (.i_clk    (clk),
@@ -139,7 +144,8 @@ module serv_rf_top
 
    serv_rf_ram
      #(.width (RF_WIDTH),
-       .csr_regs (CSR_REGS))
+       .csr_regs (CSR_REGS),
+       .gpr_regs (GPR_REGS))
    rf_ram
      (.i_clk    (clk),
       .i_waddr (waddr),
@@ -154,6 +160,7 @@ module serv_rf_top
        .PRE_REGISTER (PRE_REGISTER),
        .RESET_STRATEGY (RESET_STRATEGY),
        .WITH_CSR (WITH_CSR),
+       .WITH_RV32E (WITH_RV32E),
        .DEBUG (DEBUG),
        .MDU(MDU),
        .COMPRESSED(COMPRESSED),

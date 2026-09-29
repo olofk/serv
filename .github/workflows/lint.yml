@@ -21,5 +21,6 @@ jobs:
       - run: pip3 install fusesoc
       - run: fusesoc library add $REPO $GITHUB_WORKSPACE/$REPO
       - run: fusesoc run --target=lint $VLNV --W=${{ matrix.width }}
+      - run: fusesoc run --target=lint $VLNV --W=${{ matrix.width }} --WITH_RV32E=1
       - run: fusesoc run --target=lint servant --width=${{ matrix.width }}
       - run: fusesoc run --target=lint serving

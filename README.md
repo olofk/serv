@@ -149,6 +149,35 @@ If the [toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) is insta
 SERV is verified using RISC-V compliance tests for the base ISA (RV32I) and the implemented extensions (M, C, Zicsr). The instructions on running Compliance tests using RISCOF framework are given in [verif](/verif/) directory.
 
 
+## RV32E support
+
+SERV supports the RV32E base ISA variant via the `WITH_RV32E` parameter (default: 0). RV32E uses 16 general-purpose registers instead of 32, halving the register-file RAM depth.
+
+**Area impact by target:**
+- **ASIC / DFF-based targets**: ~36% fewer cells in generic synthesis — a meaningful saving.
+- **FPGA targets**: No measurable LUT or BRAM reduction. Both RV32I and RV32E register files fit inside a single block RAM (e.g., one `SB_RAM40_4K` on iCE40 or one BSRAM on Gowin), so the BRAM count is unchanged. If fitting a small FPGA is the goal, removing optional logic (MDU, CSR) or reducing firmware size will have more impact than RV32E alone.
+
+To simulate with RV32E enabled:
+
+    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/hello_uart_rv32e.hex --with_rv32e=1
+
+RV32E can be combined with the Compressed (C) extension (`--compressed=1`) for ~25% smaller code size:
+
+    fusesoc run --target=verilator_tb servant --firmware=$SERV/sw/hello_uart_rv32ec.hex --with_rv32e=1 --compressed=1
+
+To lint with RV32E enabled:
+
+    fusesoc run --target=lint serv --WITH_RV32E=1
+
+In RV32E mode, any access to registers x16–x31 is trapped as an illegal instruction (mcause=2, mtval=faulting instruction). This applies to both 32-bit and compressed instructions.
+
+RV32E simulation can also be run with Icarus Verilog:
+
+    fusesoc run --target=sim servant --firmware=$SERV/sw/trap_test_rv32e.hex --with_rv32e=1
+    fusesoc run --target=sim servant --firmware=$SERV/sw/trap_test_rv32ec.hex --with_rv32e=1 --compressed=1
+
+RV32E compliance is verified using the RISCOF framework against the SAIL reference model. See the [verif/](/verif/) directory for details.
+
 ## Other targets
 
 The above targets are run on the servant SoC, but there are some targets defined for the CPU itself. Verilator can be run in lint mode to check for design problems by running

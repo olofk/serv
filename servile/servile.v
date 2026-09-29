@@ -17,9 +17,11 @@ module servile
     parameter [0:0] with_c = 1'b0,
     parameter [0:0] with_csr = 1'b0,
     parameter [0:0] with_mdu = 1'b0,
+    parameter with_rv32e = 0,
     //Internally calculated. Do not touch
     parameter	    B = width-1,
-    parameter	    regs = 32+with_csr*4,
+    parameter	    gpr_regs = (|with_rv32e) ? 16 : 32,
+    parameter	    regs = gpr_regs+with_csr*4,
     parameter	    rf_l2d = $clog2(regs*32/rf_width))
   (
    input wire		      i_clk,
@@ -154,7 +156,8 @@ module servile
      #(.width    (rf_width),
        .W        (width),
        .reset_strategy (reset_strategy),
-       .csr_regs (with_csr*4))
+       .csr_regs (with_csr*4),
+       .gpr_regs (gpr_regs))
    rf_ram_if
      (.i_clk    (i_clk),
       .i_rst    (i_rst),
@@ -200,6 +203,7 @@ module servile
    serv_top
      #(
        .WITH_CSR       (with_csr?1:0),
+       .WITH_RV32E     (with_rv32e),
        .W              (width),
        .PRE_REGISTER   (1'b1),
        .RESET_STRATEGY (reset_strategy),

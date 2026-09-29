@@ -7,7 +7,8 @@
 module serv_rf_ram
   #(parameter width=0,
     parameter csr_regs=4,
-    parameter depth=32*(32+csr_regs)/width)
+    parameter gpr_regs=32,
+    parameter depth=32*(gpr_regs+csr_regs)/width)
    (input wire i_clk,
     input wire [$clog2(depth)-1:0] i_waddr,
     input wire [width-1:0] 	   i_wdata,

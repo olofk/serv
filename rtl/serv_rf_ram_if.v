@@ -19,9 +19,12 @@ module serv_rf_ram_if
     // GPR registers in the RAM.
     parameter csr_regs=4,
 
+    //Number of GPR registers (32 for RV32I, 16 for RV32E)
+    parameter gpr_regs=32,
+
     //Internal parameters calculated from above values. Do not change
     parameter B=W-1,
-    parameter raw=$clog2(32+csr_regs), //Register address width
+    parameter raw=$clog2(gpr_regs+csr_regs), //Register address width
     parameter l2w=$clog2(width), //log2 of width
     parameter aw=5+raw-l2w) //Address width
   (

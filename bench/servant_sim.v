@@ -10,6 +10,7 @@ module servant_sim
    parameter memsize = 8192;
    parameter width = 1;
    parameter with_csr = 1;
+   parameter with_rv32e = 0;
    parameter compressed = 0;
    parameter align = compressed;
 
@@ -21,14 +22,15 @@ module servant_sim
      end
 
    servant
-     #(.memfile  (memfile),
-       .memsize  (memsize),
-       .width    (width),
-       .debug    (1'b1),
-       .sim      (1),
-       .with_csr (with_csr),
-       .compress (compressed[0:0]),
-       .align    (align[0:0]))
+     #(.memfile    (memfile),
+       .memsize    (memsize),
+       .width      (width),
+       .debug      (1'b1),
+       .sim        (1),
+       .with_csr   (with_csr),
+       .with_rv32e (with_rv32e),
+       .compress   (compressed[0:0]),
+       .align      (align[0:0]))
    dut(wb_clk, wb_rst, q);
 
    assign pc_adr = dut.wb_mem_adr;

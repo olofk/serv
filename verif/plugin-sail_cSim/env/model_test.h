@@ -15,7 +15,7 @@
 #define RVMODEL_HALT                                              \
   li x1, 1;                                                                   \
   write_tohost:                                                               \
-    sw x1, tohost, t5;                                                        \
+    sw x1, tohost, t0;                                                        \
     j write_tohost;
 
 #define RVMODEL_BOOT

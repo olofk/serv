@@ -70,3 +70,25 @@ After completing all the steps in [Getting started](/README.md) followed by the 
 > :bulb: Other optional arguments of RISCOF command can be found [here](https://riscof.readthedocs.io/en/stable/commands.html#run)
 
 When RISCOF run command successfully executed: an `html` report is generated which depicts the results of the tests. And a directory named `riscof_work` is created in the workspace which contains all the log files, signatures, executables for Reference model and/or DUT.
+
+## RV32E / RV32EC Compliance Testing
+
+SERV also supports the RV32E base ISA (16 general-purpose registers) and its combination with the Compressed (C) extension (RV32EC). A dedicated RISCOF plugin and ISA spec are provided in `plugin-serv/`:
+
+| File | Purpose |
+|------|---------|
+| `plugin-serv/riscof_serv_rv32e.py` | RISCOF DUT plugin for RV32EC |
+| `plugin-serv/serv_isa_rv32e.yaml` | ISA spec: `RV32ECZicsr` |
+| `config_rv32e.ini` | RISCOF config pointing to the RV32E plugin |
+
+The plugin automatically builds a separate RV32EC-enabled Verilator simulation (in `servant_test_rv32e/`) and compiles tests with `-march=rv32ec -mabi=ilp32e`.
+
+### Running RV32E/RV32EC compliance tests
+
+All RISCOF commands must be run from the **repo root** (not from `verif/`):
+
+    riscof run --config=verif/config_rv32e.ini \
+    --suite=riscv-arch-test/riscv-test-suite/rv32i_m/C \
+    --env=riscv-arch-test/riscv-test-suite/env
+
+Change `--suite` to point to other test directories (e.g. `I`, `privilege`) as needed. The RV32E plugin restricts register allocation to `x0–x15` via the `ilp32e` ABI and enables compressed instruction support (`--compressed=1`) in the servant build.
