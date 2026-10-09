@@ -82,6 +82,7 @@ module serv_csr
    endgenerate
 
    assign csr_out = ({W{i_mstatus_en & i_en}} & mstatus) |
+		    ({W{i_mie_en & i_en & i_cnt7}} & {mie_mtie,{B{1'b0}}}) |
 		    i_rf_csr_out |
 		    ({W{i_mcause_en & i_en}} & mcause);
 
