@@ -497,6 +497,7 @@ module serv_top
 
       //Trap interface
       .i_trap      (trap),
+      .i_new_irq   (new_irq),
       .i_mret      (mret),
       .i_mepc      (wb_ibus_adr[B:0]),
       .i_mtval_pc  (mtval_pc),
