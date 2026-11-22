@@ -25,6 +25,7 @@ module serv_rf_if
 
    //Trap interface
    input wire 		      i_trap,
+   input wire 		      i_new_irq,
    input wire 		      i_mret,
    input wire [B:0] i_mepc,
    input wire                      i_mtval_pc,
@@ -69,7 +70,7 @@ module serv_rf_if
        {W{i_rd_mem_en}} & i_mem_rd |
                        i_ctrl_rd;
 
-   wire [B:0]  mtval = i_mtval_pc ? i_bad_pc : i_bufreg_q;
+   wire [B:0]  mtval = i_new_irq ? {W{1'b0}} : i_mtval_pc ? i_bad_pc : i_bufreg_q;
 
    assign 	     o_wdata0 = i_trap ? mtval  : rd;
    assign	     o_wdata1 = i_trap ? i_mepc : i_csr;
