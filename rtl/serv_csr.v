@@ -147,7 +147,7 @@ module serv_csr
        ctrl => 0000 (jump=0)
        */
       if (i_mcause_en & i_en & i_cnt0to3 | (i_trap & i_cnt_done)) begin
-	 mcause3_0[3] <= (i_e_op & !i_ebreak) | (!i_trap & csr_in[B]);
+	 mcause3_0[3] <= (i_e_op & !i_ebreak & !o_new_irq) | (!i_trap & csr_in[B]);
 	 mcause3_0[2] <= o_new_irq | i_mem_op | (!i_trap & ((W == 1) ? mcause3_0[3] : csr_in[(W == 1) ? 0 : 2]));
 	 mcause3_0[1] <= o_new_irq | i_e_op | (i_mem_op & i_mem_cmd) | (!i_trap & ((W == 1) ? mcause3_0[2] : csr_in[(W == 1) ? 0 : 1]));
 	 mcause3_0[0] <= o_new_irq | i_e_op | (!i_trap & ((W == 1) ? mcause3_0[1] : csr_in[0]));
